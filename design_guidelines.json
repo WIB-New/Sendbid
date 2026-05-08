@@ -1,0 +1,201 @@
+{
+  "theme": "light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast - Custom Premium Finance)",
+  "instructions_to_main_agent": "Use React Native Expo. Build mobile-first. Rely on React Native StyleSheet for styling using the provided design tokens. Use expo-linear-gradient for the Floo Money Card. Implement react-native-reanimated for shimmer, progress, and success animations. Apply precise 8pt grid spacing and premium typography. ALWAYS include data-testid on all interactive elements (buttons, inputs, toggles, list items) using kebab-case role-based names (e.g., login-submit-button). Do NOT use HTML tags (use View, Text, TouchableOpacity, etc.). Do NOT use Inter or Roboto, use the provided Plus Jakarta Sans font family. Emphasize touch targets of 48px+.",
+  "tokens": {
+    "colors": {
+      "primary": {
+        "base": "#0F4C81",
+        "dark": "#0B3B60",
+        "light": "#2A6BA6"
+      },
+      "accent": {
+        "base": "#10B981",
+        "dark": "#059669",
+        "light": "#34D399",
+        "biometric": "#00C853"
+      },
+      "status": {
+        "success": "#10B981",
+        "pending": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      },
+      "neutrals": {
+        "white": "#FFFFFF",
+        "background": "#F8FAFC",
+        "surface": "#FFFFFF",
+        "border": "#E2E8F0",
+        "text_primary": "#0F172A",
+        "text_secondary": "#64748B",
+        "text_tertiary": "#94A3B8"
+      },
+      "gradients": {
+        "floo_money": ["#0F4C81", "#10B981"],
+        "premium_dark": ["#0F172A", "#1E293B"]
+      }
+    },
+    "typography": {
+      "fontFamily": {
+        "regular": "PlusJakartaSans-Regular",
+        "medium": "PlusJakartaSans-Medium",
+        "semiBold": "PlusJakartaSans-SemiBold",
+        "bold": "PlusJakartaSans-Bold"
+      },
+      "sizes": {
+        "xs": 12,
+        "sm": 14,
+        "base": 16,
+        "lg": 18,
+        "xl": 20,
+        "2xl": 24,
+        "3xl": 30,
+        "4xl": 36
+      },
+      "lineHeights": {
+        "xs": 16,
+        "sm": 20,
+        "base": 24,
+        "lg": 28,
+        "xl": 28,
+        "2xl": 32,
+        "3xl": 36,
+        "4xl": 40
+      }
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 24,
+      "2xl": 32,
+      "3xl": 48,
+      "4xl": 64
+    },
+    "borderRadius": {
+      "sm": 4,
+      "md": 8,
+      "lg": 12,
+      "xl": 16,
+      "2xl": 24,
+      "full": 9999
+    },
+    "shadows": {
+      "sm": {
+        "elevation": 2,
+        "shadowColor": "#0F172A",
+        "shadowOffset": { "width": 0, "height": 1 },
+        "shadowOpacity": 0.05,
+        "shadowRadius": 2
+      },
+      "md": {
+        "elevation": 4,
+        "shadowColor": "#0F172A",
+        "shadowOffset": { "width": 0, "height": 4 },
+        "shadowOpacity": 0.08,
+        "shadowRadius": 8
+      },
+      "lg": {
+        "elevation": 8,
+        "shadowColor": "#0F172A",
+        "shadowOffset": { "width": 0, "height": 8 },
+        "shadowOpacity": 0.12,
+        "shadowRadius": 16
+      }
+    }
+  },
+  "components": {
+    "Button": {
+      "variants": {
+        "primary": "BackgroundColor: accent.base, TextColor: white, BorderRadius: xl, Height: 56px, Justify: center, Align: center, FontWeight: bold, FontSize: base, Shadow: md",
+        "secondary": "BackgroundColor: primary.base, TextColor: white, BorderRadius: xl, Height: 56px, Justify: center, Align: center, FontWeight: bold, FontSize: base",
+        "biometric": "BackgroundColor: accent.biometric, TextColor: white, BorderRadius: xl, Height: 56px, Justify: center, Align: center, FontWeight: bold, FlexDirection: row, Gap: 8px, Shadow: lg",
+        "ghost": "BackgroundColor: transparent, TextColor: neutrals.text_secondary, BorderRadius: xl, Height: 56px, Justify: center, Align: center, FontWeight: medium"
+      },
+      "rules": "Must have min height 48px. Standardized at 56px for a premium feel. Use activeOpacity 0.8 on press."
+    },
+    "Input": {
+      "style": "BackgroundColor: neutrals.surface, BorderColor: neutrals.border, BorderWidth: 1px, BorderRadius: xl, PaddingHorizontal: 16px, Height: 56px, TextColor: neutrals.text_primary, FontFamily: regular, FontSize: base",
+      "focus": "BorderColor: primary.base",
+      "error": "BorderColor: status.error",
+      "rules": "Include inline validation icon (Check in green) on the right when input is valid."
+    },
+    "FlooMoneyCard": {
+      "style": "BorderRadius: 2xl, Overflow: hidden, Shadow: lg, Padding: 24px, Width: 100%, AspectRatio: 1.6",
+      "rules": "Use expo-linear-gradient with tokens.colors.gradients.floo_money. Include white text, chip icon/logo, and highly visible balance. Display premium bank card look."
+    },
+    "AgentBidCard": {
+      "style": "BackgroundColor: neutrals.surface, BorderRadius: xl, Padding: 16px, BorderColor: neutrals.border, BorderWidth: 1px, FlexDirection: row, AlignItems: center, JustifyContent: space-between, Shadow: sm",
+      "rules": "Show agent avatar, name, rating. Highlight the bid offer in bold text. Include a prominent green 'Accepter' CTA."
+    },
+    "OTPInput": {
+      "style": "FlexDirection: row, JustifyContent: space-between, Width: 100%",
+      "cellStyle": "Width: 48px, Height: 56px, BorderColor: neutrals.border, BorderWidth: 1px, BorderRadius: lg, TextAlign: center, FontSize: xl, FontWeight: bold, BackgroundColor: neutrals.surface, FocusBorderColor: primary.base"
+    },
+    "TransferStatusChip": {
+      "variants": {
+        "success": "BackgroundColor: #E6F8F0 (success with 10% opacity), TextColor: status.success",
+        "pending": "BackgroundColor: #FEF3C7 (pending with 10% opacity), TextColor: status.pending",
+        "error": "BackgroundColor: #FEE2E2 (error with 10% opacity), TextColor: status.error"
+      },
+      "style": "PaddingHorizontal: 12px, PaddingVertical: 4px, BorderRadius: full, FontSize: xs, FontWeight: medium, AlignSelf: flex-start, FlexDirection: row, AlignItems: center, Gap: 4px"
+    },
+    "ChatBubble": {
+      "client": "BackgroundColor: primary.base, TextColor: white, BorderTopRightRadius: 0",
+      "agent": "BackgroundColor: neutrals.surface, BorderColor: neutrals.border, BorderWidth: 1px, TextColor: neutrals.text_primary, BorderTopLeftRadius: 0",
+      "system": "BackgroundColor: transparent, TextColor: neutrals.text_secondary, TextAlign: center, FontSize: xs"
+    }
+  },
+  "screens": {
+    "Onboarding": {
+      "flow": "4 steps with visual progress indicator (dots or lines). Clean modern illustrations. Final step has 'Commencer' primary button."
+    },
+    "Authentication": {
+      "login": "Email/Phone input, Password. Prominent GREEN biometric login button explicitly placed under 'Se connecter'. Forgot password link (10 min validity text).",
+      "signup": "Email + Phone, inline verification with 3 min countdown. 6-digit OTP input. PIN creation (6 digits)."
+    },
+    "HomeDashboard": {
+      "layout": "Top header with user name, Avatar, and notifications. Prominent Floo Money Card below header. Quick services grid (Transfer, Wallet, Scan, etc.). Recent transactions list with Status chips."
+    },
+    "TransferFlow": {
+      "steps": [
+        "1. Form principal: Amount, Currency, Destination.",
+        "2. Détails: Mode (Cash/Bank/MoMo).",
+        "3. Récapitulatif: Review details and fees.",
+        "4. Success: Show generated 10-digit code and HMAC-SHA256 signed QR Code. Play success animation."
+      ]
+    },
+    "AuctionScreen": {
+      "layout": "Real-time UI for agent bids. 90-second countdown timer at top (progress circle or animated bar). List of AgentBidCard updating dynamically. WebSocket connected state indicator."
+    },
+    "Wallet": {
+      "layout": "Floo Money balance header. Large buttons for QR code top-up and withdrawal options. Section for P2P free transfers."
+    },
+    "KYC": {
+      "layout": "Tier 1 & Tier 2 limits display. Didit WebView integration entry point. Showcase user badges (Bronze/Silver/Gold/Platinum) clearly."
+    }
+  },
+  "image_urls": {
+    "agent_portraits": [
+      {
+        "url": "https://images.unsplash.com/photo-1566369322663-b0fea8c42b4f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwzfHxmcmllbmRseSUyMHByb2Zlc3Npb25hbCUyMHBvcnRyYWl0JTIwcGhvdG9ncmFwaHl8ZW58MHx8fHwxNzc3MTQ2MDMwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Agent Avatar Profile Female"
+      },
+      {
+        "url": "https://images.pexels.com/photos/36712225/pexels-photo-36712225.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Agent Avatar Profile Male"
+      }
+    ],
+    "onboarding_illustrations": [
+      {
+        "url": "https://images.unsplash.com/photo-1681826292838-c37fbd22263a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwyfHxpbnRlcm5hdGlvbmFsJTIwbW9uZXklMjB0cmFuc2ZlciUyMGFwcHxlbnwwfHx8fDE3NzcxNDYwMzV8MA&ixlib=rb-4.1.0&q=85",
+        "description": "User completing money transfer on phone"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1759978227971-70ae29f87859?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHw0fHxpbnRlcm5hdGlvbmFsJTIwbW9uZXklMjB0cmFuc2ZlciUyMGFwcHxlbnwwfHx8fDE3NzcxNDYwMzV8MA&ixlib=rb-4.1.0&q=85",
+        "description": "International digital transaction abstract"
+      }
+    ]
+  }
+}

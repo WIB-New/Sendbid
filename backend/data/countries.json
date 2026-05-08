@@ -1,0 +1,3998 @@
+[
+  {
+    "country_code": "AF",
+    "country_name": "Afghanistan",
+    "flag": "🇦🇫",
+    "currency": "AFN",
+    "fx_rate_eur": 76.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kabul",
+    "cities": [
+      "Kabul"
+    ]
+  },
+  {
+    "country_code": "ZA",
+    "country_name": "Afrique du Sud",
+    "flag": "🇿🇦",
+    "currency": "ZAR",
+    "fx_rate_eur": 20.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Pretoria",
+    "cities": [
+      "Pretoria",
+      "Le Cap",
+      "Johannesbourg",
+      "Durban"
+    ]
+  },
+  {
+    "country_code": "AX",
+    "country_name": "Ahvenanmaa",
+    "flag": "🇦🇽",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Mariehamn",
+    "cities": [
+      "Mariehamn"
+    ]
+  },
+  {
+    "country_code": "AL",
+    "country_name": "Albanie",
+    "flag": "🇦🇱",
+    "currency": "ALL",
+    "fx_rate_eur": 100.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tirana",
+    "cities": [
+      "Tirana"
+    ]
+  },
+  {
+    "country_code": "DZ",
+    "country_name": "Algérie",
+    "flag": "🇩🇿",
+    "currency": "DZD",
+    "fx_rate_eur": 145.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Algiers",
+    "cities": [
+      "Algiers",
+      "Alger",
+      "Oran",
+      "Constantine",
+      "Annaba"
+    ]
+  },
+  {
+    "country_code": "DE",
+    "country_name": "Allemagne",
+    "flag": "🇩🇪",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Berlin",
+    "cities": [
+      "Berlin",
+      "Hambourg",
+      "Munich",
+      "Cologne",
+      "Francfort"
+    ]
+  },
+  {
+    "country_code": "AD",
+    "country_name": "Andorre",
+    "flag": "🇦🇩",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Andorra la Vella",
+    "cities": [
+      "Andorra la Vella"
+    ]
+  },
+  {
+    "country_code": "AO",
+    "country_name": "Angola",
+    "flag": "🇦🇴",
+    "currency": "AOA",
+    "fx_rate_eur": 985.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Luanda",
+    "cities": [
+      "Luanda",
+      "Huambo",
+      "Lobito"
+    ]
+  },
+  {
+    "country_code": "AI",
+    "country_name": "Anguilla",
+    "flag": "🇦🇮",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "The Valley",
+    "cities": [
+      "The Valley"
+    ]
+  },
+  {
+    "country_code": "AQ",
+    "country_name": "Antarctique",
+    "flag": "🇦🇶",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Antarctique",
+    "cities": [
+      "Antarctique"
+    ]
+  },
+  {
+    "country_code": "AG",
+    "country_name": "Antigua-et-Barbuda",
+    "flag": "🇦🇬",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Saint John's",
+    "cities": [
+      "Saint John's"
+    ]
+  },
+  {
+    "country_code": "SA",
+    "country_name": "Arabie Saoudite",
+    "flag": "🇸🇦",
+    "currency": "SAR",
+    "fx_rate_eur": 4.05,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Riyadh",
+    "cities": [
+      "Riyadh",
+      "Riyad",
+      "Djeddah",
+      "La Mecque",
+      "Médine"
+    ]
+  },
+  {
+    "country_code": "AR",
+    "country_name": "Argentine",
+    "flag": "🇦🇷",
+    "currency": "ARS",
+    "fx_rate_eur": 1075.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Buenos Aires",
+    "cities": [
+      "Buenos Aires",
+      "Córdoba",
+      "Rosario",
+      "Mendoza"
+    ]
+  },
+  {
+    "country_code": "AM",
+    "country_name": "Arménie",
+    "flag": "🇦🇲",
+    "currency": "AMD",
+    "fx_rate_eur": 425.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Yerevan",
+    "cities": [
+      "Yerevan"
+    ]
+  },
+  {
+    "country_code": "AW",
+    "country_name": "Aruba",
+    "flag": "🇦🇼",
+    "currency": "AWG",
+    "fx_rate_eur": 1.94,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Oranjestad",
+    "cities": [
+      "Oranjestad"
+    ]
+  },
+  {
+    "country_code": "AU",
+    "country_name": "Australie",
+    "flag": "🇦🇺",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Canberra",
+    "cities": [
+      "Canberra",
+      "Sydney",
+      "Melbourne",
+      "Brisbane",
+      "Perth"
+    ]
+  },
+  {
+    "country_code": "AT",
+    "country_name": "Autriche",
+    "flag": "🇦🇹",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Vienna",
+    "cities": [
+      "Vienna",
+      "Vienne",
+      "Graz",
+      "Linz",
+      "Salzbourg"
+    ]
+  },
+  {
+    "country_code": "AZ",
+    "country_name": "Azerbaïdjan",
+    "flag": "🇦🇿",
+    "currency": "AZN",
+    "fx_rate_eur": 1.84,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Baku",
+    "cities": [
+      "Baku"
+    ]
+  },
+  {
+    "country_code": "BS",
+    "country_name": "Bahamas",
+    "flag": "🇧🇸",
+    "currency": "BSD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nassau",
+    "cities": [
+      "Nassau"
+    ]
+  },
+  {
+    "country_code": "BH",
+    "country_name": "Bahreïn",
+    "flag": "🇧🇭",
+    "currency": "BHD",
+    "fx_rate_eur": 0.41,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Manama",
+    "cities": [
+      "Manama"
+    ]
+  },
+  {
+    "country_code": "BD",
+    "country_name": "Bangladesh",
+    "flag": "🇧🇩",
+    "currency": "BDT",
+    "fx_rate_eur": 130.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Dhaka",
+    "cities": [
+      "Dhaka",
+      "Dacca",
+      "Chittagong",
+      "Khulna"
+    ]
+  },
+  {
+    "country_code": "BB",
+    "country_name": "Barbade",
+    "flag": "🇧🇧",
+    "currency": "BBD",
+    "fx_rate_eur": 2.16,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bridgetown",
+    "cities": [
+      "Bridgetown"
+    ]
+  },
+  {
+    "country_code": "BE",
+    "country_name": "Belgique",
+    "flag": "🇧🇪",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Brussels",
+    "cities": [
+      "Brussels",
+      "Bruxelles",
+      "Anvers",
+      "Gand",
+      "Liège",
+      "Charleroi"
+    ]
+  },
+  {
+    "country_code": "BZ",
+    "country_name": "Belize",
+    "flag": "🇧🇿",
+    "currency": "BZD",
+    "fx_rate_eur": 2.18,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Belmopan",
+    "cities": [
+      "Belmopan"
+    ]
+  },
+  {
+    "country_code": "BM",
+    "country_name": "Bermudes",
+    "flag": "🇧🇲",
+    "currency": "BMD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Hamilton",
+    "cities": [
+      "Hamilton"
+    ]
+  },
+  {
+    "country_code": "BT",
+    "country_name": "Bhoutan",
+    "flag": "🇧🇹",
+    "currency": "BTN",
+    "fx_rate_eur": 90.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Thimphu",
+    "cities": [
+      "Thimphu"
+    ]
+  },
+  {
+    "country_code": "MM",
+    "country_name": "Birmanie",
+    "flag": "🇲🇲",
+    "currency": "MMK",
+    "fx_rate_eur": 2270.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Naypyidaw",
+    "cities": [
+      "Naypyidaw"
+    ]
+  },
+  {
+    "country_code": "BY",
+    "country_name": "Biélorussie",
+    "flag": "🇧🇾",
+    "currency": "BYN",
+    "fx_rate_eur": 3.55,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Minsk",
+    "cities": [
+      "Minsk"
+    ]
+  },
+  {
+    "country_code": "BO",
+    "country_name": "Bolivie",
+    "flag": "🇧🇴",
+    "currency": "BOB",
+    "fx_rate_eur": 7.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Sucre",
+    "cities": [
+      "Sucre"
+    ]
+  },
+  {
+    "country_code": "BA",
+    "country_name": "Bosnie-Herzégovine",
+    "flag": "🇧🇦",
+    "currency": "BAM",
+    "fx_rate_eur": 1.96,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Sarajevo",
+    "cities": [
+      "Sarajevo"
+    ]
+  },
+  {
+    "country_code": "BW",
+    "country_name": "Botswana",
+    "flag": "🇧🇼",
+    "currency": "BWP",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Gaborone",
+    "cities": [
+      "Gaborone",
+      "Francistown"
+    ]
+  },
+  {
+    "country_code": "BN",
+    "country_name": "Brunei",
+    "flag": "🇧🇳",
+    "currency": "BND",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bandar Seri Begawan",
+    "cities": [
+      "Bandar Seri Begawan"
+    ]
+  },
+  {
+    "country_code": "BR",
+    "country_name": "Brésil",
+    "flag": "🇧🇷",
+    "currency": "BRL",
+    "fx_rate_eur": 5.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Brasília",
+    "cities": [
+      "Brasília",
+      "São Paulo",
+      "Rio de Janeiro",
+      "Salvador",
+      "Fortaleza"
+    ]
+  },
+  {
+    "country_code": "BG",
+    "country_name": "Bulgarie",
+    "flag": "🇧🇬",
+    "currency": "BGN",
+    "fx_rate_eur": 1.96,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Sofia",
+    "cities": [
+      "Sofia"
+    ]
+  },
+  {
+    "country_code": "BF",
+    "country_name": "Burkina Faso",
+    "flag": "🇧🇫",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ouagadougou",
+    "cities": [
+      "Ouagadougou",
+      "Bobo-Dioulasso",
+      "Koudougou"
+    ]
+  },
+  {
+    "country_code": "BI",
+    "country_name": "Burundi",
+    "flag": "🇧🇮",
+    "currency": "BIF",
+    "fx_rate_eur": 3100.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Gitega",
+    "cities": [
+      "Gitega"
+    ]
+  },
+  {
+    "country_code": "BJ",
+    "country_name": "Bénin",
+    "flag": "🇧🇯",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Porto-Novo",
+    "cities": [
+      "Porto-Novo",
+      "Cotonou",
+      "Parakou"
+    ]
+  },
+  {
+    "country_code": "KH",
+    "country_name": "Cambodge",
+    "flag": "🇰🇭",
+    "currency": "KHR",
+    "fx_rate_eur": 4400.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Phnom Penh",
+    "cities": [
+      "Phnom Penh"
+    ]
+  },
+  {
+    "country_code": "CM",
+    "country_name": "Cameroun",
+    "flag": "🇨🇲",
+    "currency": "XAF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Yaoundé",
+    "cities": [
+      "Yaoundé",
+      "Douala",
+      "Bafoussam",
+      "Garoua"
+    ]
+  },
+  {
+    "country_code": "CA",
+    "country_name": "Canada",
+    "flag": "🇨🇦",
+    "currency": "CAD",
+    "fx_rate_eur": 1.45,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ottawa",
+    "cities": [
+      "Ottawa",
+      "Toronto",
+      "Montréal",
+      "Vancouver",
+      "Calgary"
+    ]
+  },
+  {
+    "country_code": "CL",
+    "country_name": "Chili",
+    "flag": "🇨🇱",
+    "currency": "CLP",
+    "fx_rate_eur": 1050.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Santiago",
+    "cities": [
+      "Santiago",
+      "Valparaíso",
+      "Concepción"
+    ]
+  },
+  {
+    "country_code": "CN",
+    "country_name": "Chine",
+    "flag": "🇨🇳",
+    "currency": "CNY",
+    "fx_rate_eur": 7.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Beijing",
+    "cities": [
+      "Beijing",
+      "Pékin",
+      "Shanghai",
+      "Canton",
+      "Shenzhen",
+      "Chongqing"
+    ]
+  },
+  {
+    "country_code": "CY",
+    "country_name": "Chypre",
+    "flag": "🇨🇾",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nicosia",
+    "cities": [
+      "Nicosia"
+    ]
+  },
+  {
+    "country_code": "VA",
+    "country_name": "Cité du Vatican",
+    "flag": "🇻🇦",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Vatican City",
+    "cities": [
+      "Vatican City"
+    ]
+  },
+  {
+    "country_code": "CO",
+    "country_name": "Colombie",
+    "flag": "🇨🇴",
+    "currency": "COP",
+    "fx_rate_eur": 4400.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bogotá",
+    "cities": [
+      "Bogotá",
+      "Medellín",
+      "Cali",
+      "Barranquilla"
+    ]
+  },
+  {
+    "country_code": "KM",
+    "country_name": "Comores",
+    "flag": "🇰🇲",
+    "currency": "KMF",
+    "fx_rate_eur": 491.97,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Moroni",
+    "cities": [
+      "Moroni"
+    ]
+  },
+  {
+    "country_code": "CG",
+    "country_name": "Congo",
+    "flag": "🇨🇬",
+    "currency": "XAF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Brazzaville",
+    "cities": [
+      "Brazzaville",
+      "Pointe-Noire",
+      "Dolisie"
+    ]
+  },
+  {
+    "country_code": "CD",
+    "country_name": "Congo (Rép. dém.)",
+    "flag": "🇨🇩",
+    "currency": "CDF",
+    "fx_rate_eur": 2900.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kinshasa",
+    "cities": [
+      "Kinshasa",
+      "Lubumbashi",
+      "Mbuji-Mayi",
+      "Goma"
+    ]
+  },
+  {
+    "country_code": "KP",
+    "country_name": "Corée du Nord",
+    "flag": "🇰🇵",
+    "currency": "KPW",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Pyongyang",
+    "cities": [
+      "Pyongyang"
+    ]
+  },
+  {
+    "country_code": "KR",
+    "country_name": "Corée du Sud",
+    "flag": "🇰🇷",
+    "currency": "KRW",
+    "fx_rate_eur": 1500.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Seoul",
+    "cities": [
+      "Seoul",
+      "Séoul",
+      "Busan",
+      "Incheon",
+      "Daegu"
+    ]
+  },
+  {
+    "country_code": "CR",
+    "country_name": "Costa Rica",
+    "flag": "🇨🇷",
+    "currency": "CRC",
+    "fx_rate_eur": 555.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "San José",
+    "cities": [
+      "San José"
+    ]
+  },
+  {
+    "country_code": "HR",
+    "country_name": "Croatie",
+    "flag": "🇭🇷",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Zagreb",
+    "cities": [
+      "Zagreb"
+    ]
+  },
+  {
+    "country_code": "CU",
+    "country_name": "Cuba",
+    "flag": "🇨🇺",
+    "currency": "CUC",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Havana",
+    "cities": [
+      "Havana"
+    ]
+  },
+  {
+    "country_code": "CW",
+    "country_name": "Curaçao",
+    "flag": "🇨🇼",
+    "currency": "ANG",
+    "fx_rate_eur": 1.94,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Willemstad",
+    "cities": [
+      "Willemstad"
+    ]
+  },
+  {
+    "country_code": "CI",
+    "country_name": "Côte d'Ivoire",
+    "flag": "🇨🇮",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Yamoussoukro",
+    "cities": [
+      "Yamoussoukro",
+      "Abidjan",
+      "Bouaké",
+      "San-Pédro"
+    ]
+  },
+  {
+    "country_code": "DK",
+    "country_name": "Danemark",
+    "flag": "🇩🇰",
+    "currency": "DKK",
+    "fx_rate_eur": 7.45,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Copenhagen",
+    "cities": [
+      "Copenhagen"
+    ]
+  },
+  {
+    "country_code": "DJ",
+    "country_name": "Djibouti",
+    "flag": "🇩🇯",
+    "currency": "DJF",
+    "fx_rate_eur": 192.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Djibouti",
+    "cities": [
+      "Djibouti"
+    ]
+  },
+  {
+    "country_code": "DM",
+    "country_name": "Dominique",
+    "flag": "🇩🇲",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Roseau",
+    "cities": [
+      "Roseau"
+    ]
+  },
+  {
+    "country_code": "ES",
+    "country_name": "Espagne",
+    "flag": "🇪🇸",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Madrid",
+    "cities": [
+      "Madrid",
+      "Barcelone",
+      "Valence",
+      "Séville",
+      "Bilbao"
+    ]
+  },
+  {
+    "country_code": "EE",
+    "country_name": "Estonie",
+    "flag": "🇪🇪",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tallinn",
+    "cities": [
+      "Tallinn"
+    ]
+  },
+  {
+    "country_code": "FJ",
+    "country_name": "Fidji",
+    "flag": "🇫🇯",
+    "currency": "FJD",
+    "fx_rate_eur": 2.42,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Suva",
+    "cities": [
+      "Suva"
+    ]
+  },
+  {
+    "country_code": "FI",
+    "country_name": "Finlande",
+    "flag": "🇫🇮",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Helsinki",
+    "cities": [
+      "Helsinki"
+    ]
+  },
+  {
+    "country_code": "FR",
+    "country_name": "France",
+    "flag": "🇫🇷",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Paris",
+    "cities": [
+      "Paris",
+      "Marseille",
+      "Lyon",
+      "Toulouse",
+      "Nice",
+      "Bordeaux"
+    ]
+  },
+  {
+    "country_code": "GA",
+    "country_name": "Gabon",
+    "flag": "🇬🇦",
+    "currency": "XAF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Libreville",
+    "cities": [
+      "Libreville",
+      "Port-Gentil",
+      "Franceville"
+    ]
+  },
+  {
+    "country_code": "GM",
+    "country_name": "Gambie",
+    "flag": "🇬🇲",
+    "currency": "GMD",
+    "fx_rate_eur": 75.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Banjul",
+    "cities": [
+      "Banjul"
+    ]
+  },
+  {
+    "country_code": "GH",
+    "country_name": "Ghana",
+    "flag": "🇬🇭",
+    "currency": "GHS",
+    "fx_rate_eur": 17.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Accra",
+    "cities": [
+      "Accra",
+      "Kumasi",
+      "Tamale",
+      "Takoradi"
+    ]
+  },
+  {
+    "country_code": "GI",
+    "country_name": "Gibraltar",
+    "flag": "🇬🇮",
+    "currency": "GIP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Gibraltar",
+    "cities": [
+      "Gibraltar"
+    ]
+  },
+  {
+    "country_code": "GD",
+    "country_name": "Grenade",
+    "flag": "🇬🇩",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "St. George's",
+    "cities": [
+      "St. George's"
+    ]
+  },
+  {
+    "country_code": "GL",
+    "country_name": "Groenland",
+    "flag": "🇬🇱",
+    "currency": "DKK",
+    "fx_rate_eur": 7.45,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nuuk",
+    "cities": [
+      "Nuuk"
+    ]
+  },
+  {
+    "country_code": "GR",
+    "country_name": "Grèce",
+    "flag": "🇬🇷",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Athens",
+    "cities": [
+      "Athens",
+      "Athènes",
+      "Thessalonique",
+      "Patras"
+    ]
+  },
+  {
+    "country_code": "GP",
+    "country_name": "Guadeloupe",
+    "flag": "🇬🇵",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Basse-Terre",
+    "cities": [
+      "Basse-Terre"
+    ]
+  },
+  {
+    "country_code": "GU",
+    "country_name": "Guam",
+    "flag": "🇬🇺",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Hagåtña",
+    "cities": [
+      "Hagåtña"
+    ]
+  },
+  {
+    "country_code": "GT",
+    "country_name": "Guatemala",
+    "flag": "🇬🇹",
+    "currency": "GTQ",
+    "fx_rate_eur": 8.4,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Guatemala City",
+    "cities": [
+      "Guatemala City"
+    ]
+  },
+  {
+    "country_code": "GG",
+    "country_name": "Guernesey",
+    "flag": "🇬🇬",
+    "currency": "GBP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "St. Peter Port",
+    "cities": [
+      "St. Peter Port"
+    ]
+  },
+  {
+    "country_code": "GN",
+    "country_name": "Guinée",
+    "flag": "🇬🇳",
+    "currency": "GNF",
+    "fx_rate_eur": 9300.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Conakry",
+    "cities": [
+      "Conakry",
+      "Nzérékoré",
+      "Kankan"
+    ]
+  },
+  {
+    "country_code": "GQ",
+    "country_name": "Guinée équatoriale",
+    "flag": "🇬🇶",
+    "currency": "XAF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ciudad de la Paz",
+    "cities": [
+      "Ciudad de la Paz",
+      "Malabo",
+      "Bata"
+    ]
+  },
+  {
+    "country_code": "GW",
+    "country_name": "Guinée-Bissau",
+    "flag": "🇬🇼",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bissau",
+    "cities": [
+      "Bissau",
+      "Bafatá",
+      "Gabú"
+    ]
+  },
+  {
+    "country_code": "GY",
+    "country_name": "Guyana",
+    "flag": "🇬🇾",
+    "currency": "GYD",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Georgetown",
+    "cities": [
+      "Georgetown"
+    ]
+  },
+  {
+    "country_code": "GF",
+    "country_name": "Guyane",
+    "flag": "🇬🇫",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Cayenne",
+    "cities": [
+      "Cayenne"
+    ]
+  },
+  {
+    "country_code": "GE",
+    "country_name": "Géorgie",
+    "flag": "🇬🇪",
+    "currency": "GEL",
+    "fx_rate_eur": 3.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tbilisi",
+    "cities": [
+      "Tbilisi"
+    ]
+  },
+  {
+    "country_code": "GS",
+    "country_name": "Géorgie du Sud-et-les Îles Sandwich du Sud",
+    "flag": "🇬🇸",
+    "currency": "GBP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "King Edward Point",
+    "cities": [
+      "King Edward Point"
+    ]
+  },
+  {
+    "country_code": "HT",
+    "country_name": "Haïti",
+    "flag": "🇭🇹",
+    "currency": "HTG",
+    "fx_rate_eur": 142.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Port-au-Prince",
+    "cities": [
+      "Port-au-Prince"
+    ]
+  },
+  {
+    "country_code": "HN",
+    "country_name": "Honduras",
+    "flag": "🇭🇳",
+    "currency": "HNL",
+    "fx_rate_eur": 27.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tegucigalpa",
+    "cities": [
+      "Tegucigalpa"
+    ]
+  },
+  {
+    "country_code": "HK",
+    "country_name": "Hong Kong",
+    "flag": "🇭🇰",
+    "currency": "HKD",
+    "fx_rate_eur": 8.4,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "City of Victoria",
+    "cities": [
+      "City of Victoria"
+    ]
+  },
+  {
+    "country_code": "HU",
+    "country_name": "Hongrie",
+    "flag": "🇭🇺",
+    "currency": "HUF",
+    "fx_rate_eur": 395.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Budapest",
+    "cities": [
+      "Budapest"
+    ]
+  },
+  {
+    "country_code": "IN",
+    "country_name": "Inde",
+    "flag": "🇮🇳",
+    "currency": "INR",
+    "fx_rate_eur": 90.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "New Delhi",
+    "cities": [
+      "New Delhi",
+      "Mumbai",
+      "Bangalore",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad"
+    ]
+  },
+  {
+    "country_code": "ID",
+    "country_name": "Indonésie",
+    "flag": "🇮🇩",
+    "currency": "IDR",
+    "fx_rate_eur": 17500.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Jakarta",
+    "cities": [
+      "Jakarta",
+      "Surabaya",
+      "Bandung",
+      "Medan"
+    ]
+  },
+  {
+    "country_code": "IQ",
+    "country_name": "Irak",
+    "flag": "🇮🇶",
+    "currency": "IQD",
+    "fx_rate_eur": 1420.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Baghdad",
+    "cities": [
+      "Baghdad"
+    ]
+  },
+  {
+    "country_code": "IR",
+    "country_name": "Iran",
+    "flag": "🇮🇷",
+    "currency": "IRR",
+    "fx_rate_eur": 45000.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tehran",
+    "cities": [
+      "Tehran"
+    ]
+  },
+  {
+    "country_code": "IE",
+    "country_name": "Irlande",
+    "flag": "🇮🇪",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Dublin",
+    "cities": [
+      "Dublin"
+    ]
+  },
+  {
+    "country_code": "IS",
+    "country_name": "Islande",
+    "flag": "🇮🇸",
+    "currency": "ISK",
+    "fx_rate_eur": 150.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Reykjavik",
+    "cities": [
+      "Reykjavik"
+    ]
+  },
+  {
+    "country_code": "IL",
+    "country_name": "Israël",
+    "flag": "🇮🇱",
+    "currency": "ILS",
+    "fx_rate_eur": 4.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Jerusalem",
+    "cities": [
+      "Jerusalem",
+      "Jérusalem",
+      "Tel Aviv",
+      "Haïfa"
+    ]
+  },
+  {
+    "country_code": "IT",
+    "country_name": "Italie",
+    "flag": "🇮🇹",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Rome",
+    "cities": [
+      "Rome",
+      "Milan",
+      "Naples",
+      "Turin",
+      "Palerme",
+      "Florence"
+    ]
+  },
+  {
+    "country_code": "JM",
+    "country_name": "Jamaïque",
+    "flag": "🇯🇲",
+    "currency": "JMD",
+    "fx_rate_eur": 170.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kingston",
+    "cities": [
+      "Kingston"
+    ]
+  },
+  {
+    "country_code": "JP",
+    "country_name": "Japon",
+    "flag": "🇯🇵",
+    "currency": "JPY",
+    "fx_rate_eur": 165.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tokyo",
+    "cities": [
+      "Tokyo",
+      "Osaka",
+      "Kyoto",
+      "Nagoya",
+      "Sapporo"
+    ]
+  },
+  {
+    "country_code": "JE",
+    "country_name": "Jersey",
+    "flag": "🇯🇪",
+    "currency": "GBP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Saint Helier",
+    "cities": [
+      "Saint Helier"
+    ]
+  },
+  {
+    "country_code": "JO",
+    "country_name": "Jordanie",
+    "flag": "🇯🇴",
+    "currency": "JOD",
+    "fx_rate_eur": 0.77,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Amman",
+    "cities": [
+      "Amman"
+    ]
+  },
+  {
+    "country_code": "KZ",
+    "country_name": "Kazakhstan",
+    "flag": "🇰🇿",
+    "currency": "KZT",
+    "fx_rate_eur": 540.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Astana",
+    "cities": [
+      "Astana"
+    ]
+  },
+  {
+    "country_code": "KE",
+    "country_name": "Kenya",
+    "flag": "🇰🇪",
+    "currency": "KES",
+    "fx_rate_eur": 145.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nairobi",
+    "cities": [
+      "Nairobi",
+      "Mombasa",
+      "Kisumu",
+      "Nakuru"
+    ]
+  },
+  {
+    "country_code": "KG",
+    "country_name": "Kirghizistan",
+    "flag": "🇰🇬",
+    "currency": "KGS",
+    "fx_rate_eur": 95.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bishkek",
+    "cities": [
+      "Bishkek"
+    ]
+  },
+  {
+    "country_code": "KI",
+    "country_name": "Kiribati",
+    "flag": "🇰🇮",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "South Tarawa",
+    "cities": [
+      "South Tarawa"
+    ]
+  },
+  {
+    "country_code": "XK",
+    "country_name": "Kosovo",
+    "flag": "🇽🇰",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Pristina",
+    "cities": [
+      "Pristina"
+    ]
+  },
+  {
+    "country_code": "KW",
+    "country_name": "Koweït",
+    "flag": "🇰🇼",
+    "currency": "KWD",
+    "fx_rate_eur": 0.33,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kuwait City",
+    "cities": [
+      "Kuwait City"
+    ]
+  },
+  {
+    "country_code": "LA",
+    "country_name": "Laos",
+    "flag": "🇱🇦",
+    "currency": "LAK",
+    "fx_rate_eur": 23700.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Vientiane",
+    "cities": [
+      "Vientiane"
+    ]
+  },
+  {
+    "country_code": "LS",
+    "country_name": "Lesotho",
+    "flag": "🇱🇸",
+    "currency": "LSL",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Maseru",
+    "cities": [
+      "Maseru"
+    ]
+  },
+  {
+    "country_code": "LV",
+    "country_name": "Lettonie",
+    "flag": "🇱🇻",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Riga",
+    "cities": [
+      "Riga"
+    ]
+  },
+  {
+    "country_code": "LB",
+    "country_name": "Liban",
+    "flag": "🇱🇧",
+    "currency": "LBP",
+    "fx_rate_eur": 16200.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Beirut",
+    "cities": [
+      "Beirut"
+    ]
+  },
+  {
+    "country_code": "LR",
+    "country_name": "Liberia",
+    "flag": "🇱🇷",
+    "currency": "LRD",
+    "fx_rate_eur": 200.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Monrovia",
+    "cities": [
+      "Monrovia"
+    ]
+  },
+  {
+    "country_code": "LY",
+    "country_name": "Libye",
+    "flag": "🇱🇾",
+    "currency": "LYD",
+    "fx_rate_eur": 5.2,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tripoli",
+    "cities": [
+      "Tripoli",
+      "Benghazi",
+      "Misrata"
+    ]
+  },
+  {
+    "country_code": "LI",
+    "country_name": "Liechtenstein",
+    "flag": "🇱🇮",
+    "currency": "CHF",
+    "fx_rate_eur": 0.95,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Vaduz",
+    "cities": [
+      "Vaduz"
+    ]
+  },
+  {
+    "country_code": "LT",
+    "country_name": "Lituanie",
+    "flag": "🇱🇹",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Vilnius",
+    "cities": [
+      "Vilnius"
+    ]
+  },
+  {
+    "country_code": "LU",
+    "country_name": "Luxembourg",
+    "flag": "🇱🇺",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Luxembourg",
+    "cities": [
+      "Luxembourg"
+    ]
+  },
+  {
+    "country_code": "MO",
+    "country_name": "Macao",
+    "flag": "🇲🇴",
+    "currency": "MOP",
+    "fx_rate_eur": 8.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Macao",
+    "cities": [
+      "Macao"
+    ]
+  },
+  {
+    "country_code": "MK",
+    "country_name": "Macédoine du Nord",
+    "flag": "🇲🇰",
+    "currency": "MKD",
+    "fx_rate_eur": 61.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Skopje",
+    "cities": [
+      "Skopje"
+    ]
+  },
+  {
+    "country_code": "MG",
+    "country_name": "Madagascar",
+    "flag": "🇲🇬",
+    "currency": "MGA",
+    "fx_rate_eur": 4900.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Antananarivo",
+    "cities": [
+      "Antananarivo",
+      "Toamasina",
+      "Antsirabe"
+    ]
+  },
+  {
+    "country_code": "MY",
+    "country_name": "Malaisie",
+    "flag": "🇲🇾",
+    "currency": "MYR",
+    "fx_rate_eur": 4.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kuala Lumpur",
+    "cities": [
+      "Kuala Lumpur",
+      "Penang",
+      "Johor Bahru"
+    ]
+  },
+  {
+    "country_code": "MW",
+    "country_name": "Malawi",
+    "flag": "🇲🇼",
+    "currency": "MWK",
+    "fx_rate_eur": 1900.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Lilongwe",
+    "cities": [
+      "Lilongwe"
+    ]
+  },
+  {
+    "country_code": "MV",
+    "country_name": "Maldives",
+    "flag": "🇲🇻",
+    "currency": "MVR",
+    "fx_rate_eur": 16.7,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Malé",
+    "cities": [
+      "Malé"
+    ]
+  },
+  {
+    "country_code": "ML",
+    "country_name": "Mali",
+    "flag": "🇲🇱",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bamako",
+    "cities": [
+      "Bamako",
+      "Sikasso",
+      "Mopti",
+      "Ségou"
+    ]
+  },
+  {
+    "country_code": "MT",
+    "country_name": "Malte",
+    "flag": "🇲🇹",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Valletta",
+    "cities": [
+      "Valletta"
+    ]
+  },
+  {
+    "country_code": "MA",
+    "country_name": "Maroc",
+    "flag": "🇲🇦",
+    "currency": "MAD",
+    "fx_rate_eur": 10.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Rabat",
+    "cities": [
+      "Rabat",
+      "Casablanca",
+      "Marrakech",
+      "Fès",
+      "Tanger",
+      "Agadir"
+    ]
+  },
+  {
+    "country_code": "MQ",
+    "country_name": "Martinique",
+    "flag": "🇲🇶",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Fort-de-France",
+    "cities": [
+      "Fort-de-France"
+    ]
+  },
+  {
+    "country_code": "MR",
+    "country_name": "Mauritanie",
+    "flag": "🇲🇷",
+    "currency": "MRU",
+    "fx_rate_eur": 43.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nouakchott",
+    "cities": [
+      "Nouakchott",
+      "Nouadhibou",
+      "Rosso"
+    ]
+  },
+  {
+    "country_code": "YT",
+    "country_name": "Mayotte",
+    "flag": "🇾🇹",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Mamoudzou",
+    "cities": [
+      "Mamoudzou"
+    ]
+  },
+  {
+    "country_code": "MX",
+    "country_name": "Mexique",
+    "flag": "🇲🇽",
+    "currency": "MXN",
+    "fx_rate_eur": 20.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Mexico City",
+    "cities": [
+      "Mexico City",
+      "Mexico",
+      "Guadalajara",
+      "Monterrey",
+      "Puebla"
+    ]
+  },
+  {
+    "country_code": "FM",
+    "country_name": "Micronésie",
+    "flag": "🇫🇲",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Palikir",
+    "cities": [
+      "Palikir"
+    ]
+  },
+  {
+    "country_code": "MD",
+    "country_name": "Moldavie",
+    "flag": "🇲🇩",
+    "currency": "MDL",
+    "fx_rate_eur": 19.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Chișinău",
+    "cities": [
+      "Chișinău"
+    ]
+  },
+  {
+    "country_code": "MC",
+    "country_name": "Monaco",
+    "flag": "🇲🇨",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Monaco",
+    "cities": [
+      "Monaco"
+    ]
+  },
+  {
+    "country_code": "MN",
+    "country_name": "Mongolie",
+    "flag": "🇲🇳",
+    "currency": "MNT",
+    "fx_rate_eur": 3680.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ulan Bator",
+    "cities": [
+      "Ulan Bator"
+    ]
+  },
+  {
+    "country_code": "MS",
+    "country_name": "Montserrat",
+    "flag": "🇲🇸",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Plymouth",
+    "cities": [
+      "Plymouth"
+    ]
+  },
+  {
+    "country_code": "ME",
+    "country_name": "Monténégro",
+    "flag": "🇲🇪",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Podgorica",
+    "cities": [
+      "Podgorica"
+    ]
+  },
+  {
+    "country_code": "MZ",
+    "country_name": "Mozambique",
+    "flag": "🇲🇿",
+    "currency": "MZN",
+    "fx_rate_eur": 70.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Maputo",
+    "cities": [
+      "Maputo",
+      "Matola",
+      "Beira"
+    ]
+  },
+  {
+    "country_code": "NA",
+    "country_name": "Namibie",
+    "flag": "🇳🇦",
+    "currency": "NAD",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Windhoek",
+    "cities": [
+      "Windhoek",
+      "Walvis Bay",
+      "Swakopmund"
+    ]
+  },
+  {
+    "country_code": "NR",
+    "country_name": "Nauru",
+    "flag": "🇳🇷",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Yaren",
+    "cities": [
+      "Yaren"
+    ]
+  },
+  {
+    "country_code": "NI",
+    "country_name": "Nicaragua",
+    "flag": "🇳🇮",
+    "currency": "NIO",
+    "fx_rate_eur": 39.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Managua",
+    "cities": [
+      "Managua"
+    ]
+  },
+  {
+    "country_code": "NE",
+    "country_name": "Niger",
+    "flag": "🇳🇪",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Niamey",
+    "cities": [
+      "Niamey",
+      "Zinder",
+      "Maradi"
+    ]
+  },
+  {
+    "country_code": "NG",
+    "country_name": "Nigéria",
+    "flag": "🇳🇬",
+    "currency": "NGN",
+    "fx_rate_eur": 1750.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Abuja",
+    "cities": [
+      "Abuja",
+      "Lagos",
+      "Kano",
+      "Ibadan",
+      "Port Harcourt"
+    ]
+  },
+  {
+    "country_code": "NU",
+    "country_name": "Niue",
+    "flag": "🇳🇺",
+    "currency": "NZD",
+    "fx_rate_eur": 1.78,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Alofi",
+    "cities": [
+      "Alofi"
+    ]
+  },
+  {
+    "country_code": "NO",
+    "country_name": "Norvège",
+    "flag": "🇳🇴",
+    "currency": "NOK",
+    "fx_rate_eur": 11.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Oslo",
+    "cities": [
+      "Oslo"
+    ]
+  },
+  {
+    "country_code": "NC",
+    "country_name": "Nouvelle-Calédonie",
+    "flag": "🇳🇨",
+    "currency": "XPF",
+    "fx_rate_eur": 119.33,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nouméa",
+    "cities": [
+      "Nouméa"
+    ]
+  },
+  {
+    "country_code": "NZ",
+    "country_name": "Nouvelle-Zélande",
+    "flag": "🇳🇿",
+    "currency": "NZD",
+    "fx_rate_eur": 1.78,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Wellington",
+    "cities": [
+      "Wellington",
+      "Auckland",
+      "Christchurch"
+    ]
+  },
+  {
+    "country_code": "NP",
+    "country_name": "Népal",
+    "flag": "🇳🇵",
+    "currency": "NPR",
+    "fx_rate_eur": 145.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kathmandu",
+    "cities": [
+      "Kathmandu"
+    ]
+  },
+  {
+    "country_code": "OM",
+    "country_name": "Oman",
+    "flag": "🇴🇲",
+    "currency": "OMR",
+    "fx_rate_eur": 0.42,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Muscat",
+    "cities": [
+      "Muscat"
+    ]
+  },
+  {
+    "country_code": "UG",
+    "country_name": "Ouganda",
+    "flag": "🇺🇬",
+    "currency": "UGX",
+    "fx_rate_eur": 4150.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kampala",
+    "cities": [
+      "Kampala",
+      "Entebbe",
+      "Jinja"
+    ]
+  },
+  {
+    "country_code": "UZ",
+    "country_name": "Ouzbékistan",
+    "flag": "🇺🇿",
+    "currency": "UZS",
+    "fx_rate_eur": 13800.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tashkent",
+    "cities": [
+      "Tashkent"
+    ]
+  },
+  {
+    "country_code": "PK",
+    "country_name": "Pakistan",
+    "flag": "🇵🇰",
+    "currency": "PKR",
+    "fx_rate_eur": 305.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Islamabad",
+    "cities": [
+      "Islamabad",
+      "Karachi",
+      "Lahore",
+      "Peshawar"
+    ]
+  },
+  {
+    "country_code": "PW",
+    "country_name": "Palaos (Palau)",
+    "flag": "🇵🇼",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ngerulmud",
+    "cities": [
+      "Ngerulmud"
+    ]
+  },
+  {
+    "country_code": "PS",
+    "country_name": "Palestine",
+    "flag": "🇵🇸",
+    "currency": "EGP",
+    "fx_rate_eur": 53.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ramallah",
+    "cities": [
+      "Ramallah"
+    ]
+  },
+  {
+    "country_code": "PA",
+    "country_name": "Panama",
+    "flag": "🇵🇦",
+    "currency": "PAB",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Panama City",
+    "cities": [
+      "Panama City"
+    ]
+  },
+  {
+    "country_code": "PG",
+    "country_name": "Papouasie-Nouvelle-Guinée",
+    "flag": "🇵🇬",
+    "currency": "PGK",
+    "fx_rate_eur": 4.4,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Port Moresby",
+    "cities": [
+      "Port Moresby"
+    ]
+  },
+  {
+    "country_code": "PY",
+    "country_name": "Paraguay",
+    "flag": "🇵🇾",
+    "currency": "PYG",
+    "fx_rate_eur": 8500.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Asunción",
+    "cities": [
+      "Asunción"
+    ]
+  },
+  {
+    "country_code": "NL",
+    "country_name": "Pays-Bas",
+    "flag": "🇳🇱",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Amsterdam",
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "La Haye",
+      "Utrecht"
+    ]
+  },
+  {
+    "country_code": "BQ",
+    "country_name": "Pays-Bas caribéens",
+    "flag": "🇧🇶",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kralendijk",
+    "cities": [
+      "Kralendijk"
+    ]
+  },
+  {
+    "country_code": "PH",
+    "country_name": "Philippines",
+    "flag": "🇵🇭",
+    "currency": "PHP",
+    "fx_rate_eur": 62.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Manila",
+    "cities": [
+      "Manila",
+      "Manille",
+      "Quezon City",
+      "Cebu",
+      "Davao"
+    ]
+  },
+  {
+    "country_code": "PL",
+    "country_name": "Pologne",
+    "flag": "🇵🇱",
+    "currency": "PLN",
+    "fx_rate_eur": 4.3,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Warsaw",
+    "cities": [
+      "Warsaw",
+      "Varsovie",
+      "Cracovie",
+      "Łódź",
+      "Wrocław",
+      "Gdańsk"
+    ]
+  },
+  {
+    "country_code": "PF",
+    "country_name": "Polynésie française",
+    "flag": "🇵🇫",
+    "currency": "XPF",
+    "fx_rate_eur": 119.33,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Papeetē",
+    "cities": [
+      "Papeetē"
+    ]
+  },
+  {
+    "country_code": "PR",
+    "country_name": "Porto Rico",
+    "flag": "🇵🇷",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "San Juan",
+    "cities": [
+      "San Juan"
+    ]
+  },
+  {
+    "country_code": "PT",
+    "country_name": "Portugal",
+    "flag": "🇵🇹",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Lisbon",
+    "cities": [
+      "Lisbon",
+      "Lisbonne",
+      "Porto",
+      "Braga",
+      "Coimbra"
+    ]
+  },
+  {
+    "country_code": "PE",
+    "country_name": "Pérou",
+    "flag": "🇵🇪",
+    "currency": "PEN",
+    "fx_rate_eur": 4.05,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Lima",
+    "cities": [
+      "Lima",
+      "Arequipa",
+      "Trujillo"
+    ]
+  },
+  {
+    "country_code": "QA",
+    "country_name": "Qatar",
+    "flag": "🇶🇦",
+    "currency": "QAR",
+    "fx_rate_eur": 3.93,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Doha",
+    "cities": [
+      "Doha",
+      "Al Wakrah"
+    ]
+  },
+  {
+    "country_code": "RO",
+    "country_name": "Roumanie",
+    "flag": "🇷🇴",
+    "currency": "RON",
+    "fx_rate_eur": 4.97,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bucharest",
+    "cities": [
+      "Bucharest",
+      "Bucarest",
+      "Cluj-Napoca",
+      "Timișoara",
+      "Iași"
+    ]
+  },
+  {
+    "country_code": "GB",
+    "country_name": "Royaume-Uni",
+    "flag": "🇬🇧",
+    "currency": "GBP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "London",
+    "cities": [
+      "London",
+      "Londres",
+      "Manchester",
+      "Birmingham",
+      "Leeds",
+      "Glasgow"
+    ]
+  },
+  {
+    "country_code": "RU",
+    "country_name": "Russie",
+    "flag": "🇷🇺",
+    "currency": "RUB",
+    "fx_rate_eur": 100.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Moscow",
+    "cities": [
+      "Moscow",
+      "Moscou",
+      "Saint-Pétersbourg",
+      "Novossibirsk",
+      "Iekaterinbourg"
+    ]
+  },
+  {
+    "country_code": "RW",
+    "country_name": "Rwanda",
+    "flag": "🇷🇼",
+    "currency": "RWF",
+    "fx_rate_eur": 1450.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kigali",
+    "cities": [
+      "Kigali",
+      "Butare",
+      "Gisenyi"
+    ]
+  },
+  {
+    "country_code": "CF",
+    "country_name": "République centrafricaine",
+    "flag": "🇨🇫",
+    "currency": "XAF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bangui",
+    "cities": [
+      "Bangui",
+      "Bimbo",
+      "Berbérati"
+    ]
+  },
+  {
+    "country_code": "DO",
+    "country_name": "République dominicaine",
+    "flag": "🇩🇴",
+    "currency": "DOP",
+    "fx_rate_eur": 65.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Santo Domingo",
+    "cities": [
+      "Santo Domingo"
+    ]
+  },
+  {
+    "country_code": "RE",
+    "country_name": "Réunion",
+    "flag": "🇷🇪",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Saint-Denis",
+    "cities": [
+      "Saint-Denis"
+    ]
+  },
+  {
+    "country_code": "EH",
+    "country_name": "Sahara Occidental",
+    "flag": "🇪🇭",
+    "currency": "DZD",
+    "fx_rate_eur": 145.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "El Aaiún",
+    "cities": [
+      "El Aaiún"
+    ]
+  },
+  {
+    "country_code": "BL",
+    "country_name": "Saint-Barthélemy",
+    "flag": "🇧🇱",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Gustavia",
+    "cities": [
+      "Gustavia"
+    ]
+  },
+  {
+    "country_code": "KN",
+    "country_name": "Saint-Christophe-et-Niévès",
+    "flag": "🇰🇳",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Basseterre",
+    "cities": [
+      "Basseterre"
+    ]
+  },
+  {
+    "country_code": "SM",
+    "country_name": "Saint-Marin",
+    "flag": "🇸🇲",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "City of San Marino",
+    "cities": [
+      "City of San Marino"
+    ]
+  },
+  {
+    "country_code": "MF",
+    "country_name": "Saint-Martin",
+    "flag": "🇲🇫",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Marigot",
+    "cities": [
+      "Marigot"
+    ]
+  },
+  {
+    "country_code": "SX",
+    "country_name": "Saint-Martin",
+    "flag": "🇸🇽",
+    "currency": "ANG",
+    "fx_rate_eur": 1.94,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Philipsburg",
+    "cities": [
+      "Philipsburg"
+    ]
+  },
+  {
+    "country_code": "PM",
+    "country_name": "Saint-Pierre-et-Miquelon",
+    "flag": "🇵🇲",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Saint-Pierre",
+    "cities": [
+      "Saint-Pierre"
+    ]
+  },
+  {
+    "country_code": "VC",
+    "country_name": "Saint-Vincent-et-les-Grenadines",
+    "flag": "🇻🇨",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kingstown",
+    "cities": [
+      "Kingstown"
+    ]
+  },
+  {
+    "country_code": "SH",
+    "country_name": "Sainte-Hélène, Ascension et Tristan da Cunha",
+    "flag": "🇸🇭",
+    "currency": "GBP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Jamestown",
+    "cities": [
+      "Jamestown"
+    ]
+  },
+  {
+    "country_code": "LC",
+    "country_name": "Sainte-Lucie",
+    "flag": "🇱🇨",
+    "currency": "XCD",
+    "fx_rate_eur": 2.92,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Castries",
+    "cities": [
+      "Castries"
+    ]
+  },
+  {
+    "country_code": "SV",
+    "country_name": "Salvador",
+    "flag": "🇸🇻",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "San Salvador",
+    "cities": [
+      "San Salvador"
+    ]
+  },
+  {
+    "country_code": "WS",
+    "country_name": "Samoa",
+    "flag": "🇼🇸",
+    "currency": "WST",
+    "fx_rate_eur": 3.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Apia",
+    "cities": [
+      "Apia"
+    ]
+  },
+  {
+    "country_code": "AS",
+    "country_name": "Samoa américaines",
+    "flag": "🇦🇸",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Pago Pago",
+    "cities": [
+      "Pago Pago"
+    ]
+  },
+  {
+    "country_code": "RS",
+    "country_name": "Serbie",
+    "flag": "🇷🇸",
+    "currency": "RSD",
+    "fx_rate_eur": 117.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Belgrade",
+    "cities": [
+      "Belgrade"
+    ]
+  },
+  {
+    "country_code": "SC",
+    "country_name": "Seychelles",
+    "flag": "🇸🇨",
+    "currency": "SCR",
+    "fx_rate_eur": 14.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Victoria",
+    "cities": [
+      "Victoria"
+    ]
+  },
+  {
+    "country_code": "SL",
+    "country_name": "Sierra Leone",
+    "flag": "🇸🇱",
+    "currency": "SLE",
+    "fx_rate_eur": 24.8,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Freetown",
+    "cities": [
+      "Freetown"
+    ]
+  },
+  {
+    "country_code": "SG",
+    "country_name": "Singapour",
+    "flag": "🇸🇬",
+    "currency": "SGD",
+    "fx_rate_eur": 1.45,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Singapore",
+    "cities": [
+      "Singapore",
+      "Singapour"
+    ]
+  },
+  {
+    "country_code": "SK",
+    "country_name": "Slovaquie",
+    "flag": "🇸🇰",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bratislava",
+    "cities": [
+      "Bratislava"
+    ]
+  },
+  {
+    "country_code": "SI",
+    "country_name": "Slovénie",
+    "flag": "🇸🇮",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ljubljana",
+    "cities": [
+      "Ljubljana"
+    ]
+  },
+  {
+    "country_code": "SO",
+    "country_name": "Somalie",
+    "flag": "🇸🇴",
+    "currency": "SOS",
+    "fx_rate_eur": 615.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Mogadishu",
+    "cities": [
+      "Mogadishu"
+    ]
+  },
+  {
+    "country_code": "SD",
+    "country_name": "Soudan",
+    "flag": "🇸🇩",
+    "currency": "SDG",
+    "fx_rate_eur": 600.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Khartoum",
+    "cities": [
+      "Khartoum",
+      "Omdurman",
+      "Port-Soudan"
+    ]
+  },
+  {
+    "country_code": "SS",
+    "country_name": "Soudan du Sud",
+    "flag": "🇸🇸",
+    "currency": "SSP",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Juba",
+    "cities": [
+      "Juba"
+    ]
+  },
+  {
+    "country_code": "LK",
+    "country_name": "Sri Lanka",
+    "flag": "🇱🇰",
+    "currency": "LKR",
+    "fx_rate_eur": 320.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Sri Jayawardenepura Kotte",
+    "cities": [
+      "Sri Jayawardenepura Kotte"
+    ]
+  },
+  {
+    "country_code": "CH",
+    "country_name": "Suisse",
+    "flag": "🇨🇭",
+    "currency": "CHF",
+    "fx_rate_eur": 0.95,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bern",
+    "cities": [
+      "Bern",
+      "Berne",
+      "Zurich",
+      "Genève",
+      "Bâle",
+      "Lausanne"
+    ]
+  },
+  {
+    "country_code": "SR",
+    "country_name": "Surinam",
+    "flag": "🇸🇷",
+    "currency": "SRD",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Paramaribo",
+    "cities": [
+      "Paramaribo"
+    ]
+  },
+  {
+    "country_code": "SE",
+    "country_name": "Suède",
+    "flag": "🇸🇪",
+    "currency": "SEK",
+    "fx_rate_eur": 11.4,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Stockholm",
+    "cities": [
+      "Stockholm"
+    ]
+  },
+  {
+    "country_code": "SJ",
+    "country_name": "Svalbard et Jan Mayen",
+    "flag": "🇸🇯",
+    "currency": "NOK",
+    "fx_rate_eur": 11.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Longyearbyen",
+    "cities": [
+      "Longyearbyen"
+    ]
+  },
+  {
+    "country_code": "SZ",
+    "country_name": "Swaziland",
+    "flag": "🇸🇿",
+    "currency": "SZL",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Mbabane",
+    "cities": [
+      "Mbabane"
+    ]
+  },
+  {
+    "country_code": "SY",
+    "country_name": "Syrie",
+    "flag": "🇸🇾",
+    "currency": "SYP",
+    "fx_rate_eur": 14000.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Damascus",
+    "cities": [
+      "Damascus"
+    ]
+  },
+  {
+    "country_code": "ST",
+    "country_name": "São Tomé et Príncipe",
+    "flag": "🇸🇹",
+    "currency": "STN",
+    "fx_rate_eur": 24.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "São Tomé",
+    "cities": [
+      "São Tomé"
+    ]
+  },
+  {
+    "country_code": "SN",
+    "country_name": "Sénégal",
+    "flag": "🇸🇳",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Dakar",
+    "cities": [
+      "Dakar",
+      "Thiès",
+      "Saint-Louis",
+      "Touba"
+    ]
+  },
+  {
+    "country_code": "TJ",
+    "country_name": "Tadjikistan",
+    "flag": "🇹🇯",
+    "currency": "TJS",
+    "fx_rate_eur": 11.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Dushanbe",
+    "cities": [
+      "Dushanbe"
+    ]
+  },
+  {
+    "country_code": "TZ",
+    "country_name": "Tanzanie",
+    "flag": "🇹🇿",
+    "currency": "TZS",
+    "fx_rate_eur": 2900.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Dodoma",
+    "cities": [
+      "Dodoma",
+      "Dar es Salaam",
+      "Zanzibar",
+      "Arusha"
+    ]
+  },
+  {
+    "country_code": "TW",
+    "country_name": "Taïwan",
+    "flag": "🇹🇼",
+    "currency": "TWD",
+    "fx_rate_eur": 35.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Taipei",
+    "cities": [
+      "Taipei"
+    ]
+  },
+  {
+    "country_code": "TD",
+    "country_name": "Tchad",
+    "flag": "🇹🇩",
+    "currency": "XAF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "N'Djamena",
+    "cities": [
+      "N'Djamena",
+      "Moundou",
+      "Sarh"
+    ]
+  },
+  {
+    "country_code": "CZ",
+    "country_name": "Tchéquie",
+    "flag": "🇨🇿",
+    "currency": "CZK",
+    "fx_rate_eur": 25.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Prague",
+    "cities": [
+      "Prague"
+    ]
+  },
+  {
+    "country_code": "TF",
+    "country_name": "Terres australes et antarctiques françaises",
+    "flag": "🇹🇫",
+    "currency": "EUR",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Port-aux-Français",
+    "cities": [
+      "Port-aux-Français"
+    ]
+  },
+  {
+    "country_code": "IO",
+    "country_name": "Territoire britannique de l'océan Indien",
+    "flag": "🇮🇴",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Diego Garcia",
+    "cities": [
+      "Diego Garcia"
+    ]
+  },
+  {
+    "country_code": "TH",
+    "country_name": "Thaïlande",
+    "flag": "🇹🇭",
+    "currency": "THB",
+    "fx_rate_eur": 36.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Bangkok",
+    "cities": [
+      "Bangkok",
+      "Chiang Mai",
+      "Phuket",
+      "Pattaya"
+    ]
+  },
+  {
+    "country_code": "TL",
+    "country_name": "Timor oriental",
+    "flag": "🇹🇱",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Dili",
+    "cities": [
+      "Dili"
+    ]
+  },
+  {
+    "country_code": "TG",
+    "country_name": "Togo",
+    "flag": "🇹🇬",
+    "currency": "XOF",
+    "fx_rate_eur": 655.957,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Lomé",
+    "cities": [
+      "Lomé",
+      "Sokodé",
+      "Kara"
+    ]
+  },
+  {
+    "country_code": "TK",
+    "country_name": "Tokelau",
+    "flag": "🇹🇰",
+    "currency": "NZD",
+    "fx_rate_eur": 1.78,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Fakaofo",
+    "cities": [
+      "Fakaofo"
+    ]
+  },
+  {
+    "country_code": "TO",
+    "country_name": "Tonga",
+    "flag": "🇹🇴",
+    "currency": "TOP",
+    "fx_rate_eur": 2.6,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Nuku'alofa",
+    "cities": [
+      "Nuku'alofa"
+    ]
+  },
+  {
+    "country_code": "TT",
+    "country_name": "Trinité-et-Tobago",
+    "flag": "🇹🇹",
+    "currency": "TTD",
+    "fx_rate_eur": 7.3,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Port of Spain",
+    "cities": [
+      "Port of Spain"
+    ]
+  },
+  {
+    "country_code": "TN",
+    "country_name": "Tunisie",
+    "flag": "🇹🇳",
+    "currency": "TND",
+    "fx_rate_eur": 3.4,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tunis",
+    "cities": [
+      "Tunis",
+      "Sfax",
+      "Sousse",
+      "Bizerte"
+    ]
+  },
+  {
+    "country_code": "TM",
+    "country_name": "Turkménistan",
+    "flag": "🇹🇲",
+    "currency": "TMT",
+    "fx_rate_eur": 3.78,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ashgabat",
+    "cities": [
+      "Ashgabat"
+    ]
+  },
+  {
+    "country_code": "TR",
+    "country_name": "Turquie",
+    "flag": "🇹🇷",
+    "currency": "TRY",
+    "fx_rate_eur": 36.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Ankara",
+    "cities": [
+      "Ankara",
+      "Istanbul",
+      "Izmir",
+      "Bursa",
+      "Antalya"
+    ]
+  },
+  {
+    "country_code": "TV",
+    "country_name": "Tuvalu",
+    "flag": "🇹🇻",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Funafuti",
+    "cities": [
+      "Funafuti"
+    ]
+  },
+  {
+    "country_code": "UA",
+    "country_name": "Ukraine",
+    "flag": "🇺🇦",
+    "currency": "UAH",
+    "fx_rate_eur": 44.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kyiv",
+    "cities": [
+      "Kyiv"
+    ]
+  },
+  {
+    "country_code": "UY",
+    "country_name": "Uruguay",
+    "flag": "🇺🇾",
+    "currency": "UYU",
+    "fx_rate_eur": 43.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Montevideo",
+    "cities": [
+      "Montevideo"
+    ]
+  },
+  {
+    "country_code": "VU",
+    "country_name": "Vanuatu",
+    "flag": "🇻🇺",
+    "currency": "VUV",
+    "fx_rate_eur": 130.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Port Vila",
+    "cities": [
+      "Port Vila"
+    ]
+  },
+  {
+    "country_code": "VE",
+    "country_name": "Venezuela",
+    "flag": "🇻🇪",
+    "currency": "VES",
+    "fx_rate_eur": 39.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Caracas",
+    "cities": [
+      "Caracas",
+      "Maracaibo",
+      "Valencia"
+    ]
+  },
+  {
+    "country_code": "VN",
+    "country_name": "Viêt Nam",
+    "flag": "🇻🇳",
+    "currency": "VND",
+    "fx_rate_eur": 27300.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Hanoi",
+    "cities": [
+      "Hanoi",
+      "Hanoï",
+      "Hô Chi Minh-Ville",
+      "Da Nang"
+    ]
+  },
+  {
+    "country_code": "WF",
+    "country_name": "Wallis-et-Futuna",
+    "flag": "🇼🇫",
+    "currency": "XPF",
+    "fx_rate_eur": 119.33,
+    "fx_fixed": true,
+    "fx_margin_percent": 1.0,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Mata-Utu",
+    "cities": [
+      "Mata-Utu"
+    ]
+  },
+  {
+    "country_code": "YE",
+    "country_name": "Yémen",
+    "flag": "🇾🇪",
+    "currency": "YER",
+    "fx_rate_eur": 270.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Sana'a",
+    "cities": [
+      "Sana'a"
+    ]
+  },
+  {
+    "country_code": "ZM",
+    "country_name": "Zambie",
+    "flag": "🇿🇲",
+    "currency": "ZMW",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Lusaka",
+    "cities": [
+      "Lusaka",
+      "Ndola",
+      "Kitwe"
+    ]
+  },
+  {
+    "country_code": "ZW",
+    "country_name": "Zimbabwe",
+    "flag": "🇿🇼",
+    "currency": "ZWL",
+    "fx_rate_eur": 38.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Harare",
+    "cities": [
+      "Harare",
+      "Bulawayo",
+      "Chitungwiza"
+    ]
+  },
+  {
+    "country_code": "EG",
+    "country_name": "Égypte",
+    "flag": "🇪🇬",
+    "currency": "EGP",
+    "fx_rate_eur": 53.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Cairo",
+    "cities": [
+      "Cairo",
+      "Le Caire",
+      "Alexandrie",
+      "Gizeh",
+      "Charm el-Cheikh"
+    ]
+  },
+  {
+    "country_code": "AE",
+    "country_name": "Émirats arabes unis",
+    "flag": "🇦🇪",
+    "currency": "AED",
+    "fx_rate_eur": 3.97,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Abu Dhabi",
+    "cities": [
+      "Abu Dhabi",
+      "Abou Dabi",
+      "Dubaï",
+      "Charjah"
+    ]
+  },
+  {
+    "country_code": "EC",
+    "country_name": "Équateur",
+    "flag": "🇪🇨",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Quito",
+    "cities": [
+      "Quito"
+    ]
+  },
+  {
+    "country_code": "ER",
+    "country_name": "Érythrée",
+    "flag": "🇪🇷",
+    "currency": "ERN",
+    "fx_rate_eur": 16.5,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Asmara",
+    "cities": [
+      "Asmara"
+    ]
+  },
+  {
+    "country_code": "US",
+    "country_name": "États-Unis",
+    "flag": "🇺🇸",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Washington, D.C.",
+    "cities": [
+      "Washington, D.C.",
+      "Washington",
+      "New York",
+      "Los Angeles",
+      "Chicago",
+      "Houston",
+      "Miami"
+    ]
+  },
+  {
+    "country_code": "ET",
+    "country_name": "Éthiopie",
+    "flag": "🇪🇹",
+    "currency": "ETB",
+    "fx_rate_eur": 130.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Addis Ababa",
+    "cities": [
+      "Addis Ababa",
+      "Addis-Abeba",
+      "Dire Dawa",
+      "Mekelle"
+    ]
+  },
+  {
+    "country_code": "BV",
+    "country_name": "Île Bouvet",
+    "flag": "🇧🇻",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Île Bouvet",
+    "cities": [
+      "Île Bouvet"
+    ]
+  },
+  {
+    "country_code": "CX",
+    "country_name": "Île Christmas",
+    "flag": "🇨🇽",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Flying Fish Cove",
+    "cities": [
+      "Flying Fish Cove"
+    ]
+  },
+  {
+    "country_code": "MU",
+    "country_name": "Île Maurice",
+    "flag": "🇲🇺",
+    "currency": "MUR",
+    "fx_rate_eur": 50.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Port Louis",
+    "cities": [
+      "Port Louis"
+    ]
+  },
+  {
+    "country_code": "NF",
+    "country_name": "Île Norfolk",
+    "flag": "🇳🇫",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Kingston",
+    "cities": [
+      "Kingston"
+    ]
+  },
+  {
+    "country_code": "IM",
+    "country_name": "Île de Man",
+    "flag": "🇮🇲",
+    "currency": "GBP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Douglas",
+    "cities": [
+      "Douglas"
+    ]
+  },
+  {
+    "country_code": "KY",
+    "country_name": "Îles Caïmans",
+    "flag": "🇰🇾",
+    "currency": "KYD",
+    "fx_rate_eur": 0.9,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "George Town",
+    "cities": [
+      "George Town"
+    ]
+  },
+  {
+    "country_code": "CC",
+    "country_name": "Îles Cocos",
+    "flag": "🇨🇨",
+    "currency": "AUD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "West Island",
+    "cities": [
+      "West Island"
+    ]
+  },
+  {
+    "country_code": "CK",
+    "country_name": "Îles Cook",
+    "flag": "🇨🇰",
+    "currency": "CKD",
+    "fx_rate_eur": 1.65,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Avarua",
+    "cities": [
+      "Avarua"
+    ]
+  },
+  {
+    "country_code": "FO",
+    "country_name": "Îles Féroé",
+    "flag": "🇫🇴",
+    "currency": "DKK",
+    "fx_rate_eur": 7.45,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Tórshavn",
+    "cities": [
+      "Tórshavn"
+    ]
+  },
+  {
+    "country_code": "HM",
+    "country_name": "Îles Heard-et-MacDonald",
+    "flag": "🇭🇲",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Îles Heard-et-MacDonald",
+    "cities": [
+      "Îles Heard-et-MacDonald"
+    ]
+  },
+  {
+    "country_code": "FK",
+    "country_name": "Îles Malouines",
+    "flag": "🇫🇰",
+    "currency": "FKP",
+    "fx_rate_eur": 0.85,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Stanley",
+    "cities": [
+      "Stanley"
+    ]
+  },
+  {
+    "country_code": "MP",
+    "country_name": "Îles Mariannes du Nord",
+    "flag": "🇲🇵",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Saipan",
+    "cities": [
+      "Saipan"
+    ]
+  },
+  {
+    "country_code": "MH",
+    "country_name": "Îles Marshall",
+    "flag": "🇲🇭",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Majuro",
+    "cities": [
+      "Majuro"
+    ]
+  },
+  {
+    "country_code": "PN",
+    "country_name": "Îles Pitcairn",
+    "flag": "🇵🇳",
+    "currency": "NZD",
+    "fx_rate_eur": 1.78,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Adamstown",
+    "cities": [
+      "Adamstown"
+    ]
+  },
+  {
+    "country_code": "SB",
+    "country_name": "Îles Salomon",
+    "flag": "🇸🇧",
+    "currency": "SBD",
+    "fx_rate_eur": 9.1,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Honiara",
+    "cities": [
+      "Honiara"
+    ]
+  },
+  {
+    "country_code": "TC",
+    "country_name": "Îles Turques-et-Caïques",
+    "flag": "🇹🇨",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Cockburn Town",
+    "cities": [
+      "Cockburn Town"
+    ]
+  },
+  {
+    "country_code": "VG",
+    "country_name": "Îles Vierges britanniques",
+    "flag": "🇻🇬",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Road Town",
+    "cities": [
+      "Road Town"
+    ]
+  },
+  {
+    "country_code": "VI",
+    "country_name": "Îles Vierges des États-Unis",
+    "flag": "🇻🇮",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Charlotte Amalie",
+    "cities": [
+      "Charlotte Amalie"
+    ]
+  },
+  {
+    "country_code": "CV",
+    "country_name": "Îles du Cap-Vert",
+    "flag": "🇨🇻",
+    "currency": "CVE",
+    "fx_rate_eur": 1.0,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Praia",
+    "cities": [
+      "Praia"
+    ]
+  },
+  {
+    "country_code": "UM",
+    "country_name": "Îles mineures éloignées des États-Unis",
+    "flag": "🇺🇲",
+    "currency": "USD",
+    "fx_rate_eur": 1.08,
+    "fx_fixed": false,
+    "fx_margin_percent": 1.5,
+    "fee_percent_min": 1.0,
+    "fee_percent_max": 5.0,
+    "capital": "Washington DC",
+    "cities": [
+      "Washington DC"
+    ]
+  }
+]

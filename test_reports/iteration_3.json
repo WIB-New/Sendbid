@@ -1,0 +1,42 @@
+{
+  "summary": "SENDBID Phase 3 frontend testing on Expo web preview (390x844 mobile viewport). 25+ flows exercised end-to-end with the demo client (client@sendbid.app / Client@123! / PIN 123456). RESULT: ~93% of flows PASS. Boot→onboarding→welcome→login (incl. wrong-password error 'Identifiants invalides'), biometric button is GREEN (rgb(0,200,83), 56px tall, testID login-biometric), home dashboard with Aïcha, FLOO MONEY card, services, recent transfers, notifications, wallet (recharge with QR generated, withdraw screen, P2P), transfer wizard (country=SN→amount=100→cash→Mariam Diallo→fees 2%→purpose Famille→source Salaire→recap 102 EUR→PIN 123456), success screen with 10-digit withdrawal code (e.g. 4218983672) + HMAC QR, auction screen LIVE with WebSocket /api/ws/auction/{id} streaming snapshot + new_bid events (3 bids visible, 'MEILLEUR' badge, timer 87→79s, 'Accepter' buttons), transfers list with 5 status filters, beneficiaries (3 demos + add modal with ben-name/ben-phone/ben-save), KYC tiers, Loyalty (Bronze/Silver/Gold/Platinum), Referral (SB-SB100001 + 5€ reward), Support FAQ (6 questions), Settings (biométrie, push/email/sms toggles, RGPD), Profile testIDs all present. 2 BUGS FOUND.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "app/transfer/success.tsx → goNext()", "issue": "After confirming a CASH transfer, clicking 'Voir les enchères' (testID success-continue) routes the user to /transfer/new instead of /transfer/auction. Reproducible 100% of the time. Direct navigation to /transfer/auction?transfer_id={id} works perfectly (WS connects, bids stream). Suspected cause: useDraft.clear() runs in the success-screen useEffect cleanup BEFORE router.replace fires, and the auction screen (or transfer/_layout) likely contains a guard that redirects to /new when the zustand draft is empty. Fix: do not depend on draft inside auction screen — read transfer_id from useLocalSearchParams and fetch via api.get(`/transfers/${id}`); OR move clearDraft() to fire AFTER navigation.", "testID": "success-continue", "priority": "HIGH"},
+      {"component": "app/(tabs)/profile.tsx → handleLogout", "issue": "Logout button (testID profile-logout) tapped but no navigation occurs on web. Alert.alert from react-native is not interactive on Expo web preview (it logs to console but no OK/Cancel buttons appear). User stays on /profile. Fix: replace Alert.alert with a custom Modal for confirm OR detect Platform.OS === 'web' and bypass the confirm prompt (or call window.confirm).", "testID": "profile-logout", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "global", "issues": ["Many React Native Web warnings: \"shadow*\" style props are deprecated. Use \"boxShadow\". Non-blocking but should migrate the theme to use boxShadow on web."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/tmp/sb_login.png", "/tmp/sb_home.png", "/tmp/sb_wallet.png", "/tmp/sb_recharge_qr.png",
+    "/tmp/sb_t_country.png", "/tmp/sb_t_ben.png", "/tmp/sb_t_step2.png", "/tmp/sb_t_step3.png",
+    "/tmp/sb_t_pinmodal.png", "/tmp/sb_success.png", "/tmp/sb_auction_direct.png",
+    "/tmp/sb_transfers.png", "/tmp/sb_ben_modal.png", "/tmp/sb_profile.png", "/tmp/sb_logout.png"
+  ],
+  "action_items": [
+    "FIX HIGH: app/transfer/success.tsx — reorder so that router.replace runs BEFORE clearDraft, OR remove the draft dependency from /transfer/auction (read transfer_id from URL params and fetch the transfer + start WS without reading zustand draft).",
+    "FIX HIGH: app/(tabs)/profile.tsx — Alert.alert() confirmation does not work on Expo web. Replace with a cross-platform Modal-based confirm dialog (or skip confirmation on web). Currently tapping 'Se déconnecter' does nothing on web.",
+    "OPTIONAL: migrate theme styles from shadowColor/shadowOffset/shadowOpacity/shadowRadius to boxShadow on web to silence ~20 deprecation warnings.",
+    "INFO: /forgot-password route is correctly gated by (auth) group — when an authenticated user goes to /forgot-password they are redirected to home. To test forgot-password fully, logout first (which is currently broken on web — see HIGH bug above).",
+    "INFO: Recharge QR renders as a grid of <div> blocks (react-native-qrcode-svg uses Canvas/divs on web fallback) rather than a real <svg> element. Visually correct, just note for any test that asserts on document.querySelector('svg')."
+  ],
+  "critical_code_review_comments": [
+    "TestID coverage is excellent: every interactive element on the screens we exercised has a stable testID (login-*, recharge-*, withdraw-*, p2p-*, transfer-country, country-{ISO}, transfer-beneficiary, ben-{id}, transfer-next-1/2, fee-{n}, vip-toggle, purpose-*, source-*, transfer-confirm, pinpad-key-{n}, pinpad-dot-{n}, confirm-pin-submit, success-continue, copy-code, share-code, accept-bid-{id}, filter-{status}, transfer-row-{id}, ben-add/name/phone/save, ben-del-{id}, profile-* etc.)",
+    "WebSocket auction integration is rock-solid: ws://.../api/ws/auction/{transfer_id} streams 'snapshot' on connect and 'new_bid' events live. UI updates timer, bid count, agent list, MEILLEUR badge dynamically.",
+    "Transfer wizard is well-architected with 4 clean steps and a stepIndicator. PIN modal locks UX correctly until 6 digits entered then enables Valider.",
+    "Bug in success.tsx goNext() → see HIGH issue above. The pattern of `return () => clearDraft()` in useEffect combined with router.replace may unmount-then-clear in a race that breaks the next screen.",
+    "Logout flow uses Alert.alert which is a known React Native Web pitfall — it silently no-ops without a UI. Must be replaced with Modal or window.confirm for web parity."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not retested (Phase 2: 50/50 PASS)", "frontend": "~93% (2 HIGH bugs out of ~25 flows tested)"},
+  "seed_data_creation": "None. Tests reused the seeded demo client client@sendbid.app and its 3 seeded beneficiaries. Wallet balance drifted from ~826 EUR → 520 EUR through the test runs (3 successful 102 EUR transfers — confirms backend debit works).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Phase 3 frontend ~93% green. Two HIGH frontend bugs left for E1: (1) /transfer/success → 'Voir les enchères' (testID success-continue) navigates to /transfer/new instead of /transfer/auction (clearDraft race). (2) Profile 'Se déconnecter' (testID profile-logout) silently no-ops on web because Alert.alert isn't interactive there. Once these two are fixed, all 50 screens should be reachable. The auction WebSocket itself works perfectly when navigated to directly: wss://.../api/ws/auction/{id} streams snapshot+new_bid in real time. Demo credentials: client@sendbid.app / Client@123! / PIN 123456. Use mobile viewport 390x844.",
+  "rca_of_issue": "BUG #1 (success → auction routing): success.tsx has `useEffect(() => { ... ; return () => clearDraft(); }, [transfer_id, clearDraft])`. When user taps success-continue, goNext() calls router.replace('/transfer/auction'). The success screen then unmounts and the cleanup fires clearDraft(). If /transfer/auction (or its parent layout) reads the draft on mount and redirects to /transfer/new when empty, the user lands back on /new. Reproduction: log in, complete transfer flow, on success screen tap 'Voir les enchères' → URL becomes /transfer/new with empty form. Mitigation: in auction screen, never depend on draft — fetch transfer by id from URL param via GET /api/transfers/{id} and start WS regardless. Direct deep-link to /transfer/auction?transfer_id={id} ALREADY works. BUG #2 (logout): Alert.alert is documented as non-interactive on react-native-web. Replace with custom Modal or `Platform.OS === 'web' ? window.confirm(...) : Alert.alert(...)`."
+}

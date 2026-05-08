@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview-sendbid": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "APP_VARIANT": "sendbid",
+        "EXPO_PUBLIC_BACKEND_URL": "https://mobile-transfer-hub-3.preview.emergentagent.com",
+        "EXPO_PUBLIC_APP_VARIANT": "sendbid"
+      }
+    },
+    "preview-paybid": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "APP_VARIANT": "paybid",
+        "EXPO_PUBLIC_BACKEND_URL": "https://mobile-transfer-hub-3.preview.emergentagent.com",
+        "EXPO_PUBLIC_APP_VARIANT": "paybid"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "APP_VARIANT": "sendbid",
+        "EXPO_PUBLIC_BACKEND_URL": "https://mobile-transfer-hub-3.preview.emergentagent.com",
+        "EXPO_PUBLIC_APP_VARIANT": "sendbid"
+      }
+    }
+  },
+  "submit": { "production": {} }
+}
