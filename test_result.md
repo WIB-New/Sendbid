@@ -600,7 +600,7 @@ frontend_disabled:
 metadata:
   created_by: "main_agent"
   version: "1.1"
-  test_sequence: 9
+  test_sequence: 10
   run_ui: false
 
 test_plan:
@@ -608,6 +608,129 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+backend_p0p1p2p3_paypal_and_cash_qr:
+  - task: "POST /api/wallet/recharge-qr — PIN obligatoire"
+    implemented: true
+    working: true
+    file: "backend/routers/wallet.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: |
+          Tested via /app/backend_test.py against the public preview URL
+          (https://paybid-preview.preview.emergentagent.com/api). 5/5 PASS.
+          ✅ A) POST /wallet/recharge-qr {"amount":50} (no pin) → 400 detail="Code PIN à 6 chiffres requis".
+          ✅ B) POST {"amount":50,"pin":"123"} → 400 detail="Code PIN à 6 chiffres requis" (length guard).
+          ✅ C) POST {"amount":50,"pin":"999999"} → 401 detail="PIN incorrect".
+          ✅ D) POST {"amount":50,"pin":"123456"} → 200 with keys {qr_token, expires_at, amount, deposit_id}; amount=50.
+          ✅ D.2) MongoDB cash_deposits doc inserted with id=deposit_id, status="PENDING", amount=50.0.
+
+  - task: "POST /api/paypal/order — PayPal Sandbox order creation"
+    implemented: true
+    working: true
+    file: "backend/routers/paypal.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: |
+          Tested via /app/backend_test.py. 10/10 PASS (after backend restart — see note).
+          ✅ AUTH) POST /paypal/order without Bearer → 401.
+          ✅ A) amount=0 → 400 "Montant invalide". A2) amount=-10 → 400.
+          ✅ B) amount=10000 → 400 "Montant maximum: 5000 EUR".
+          ✅ C) amount=50 → 200, body has all expected keys {order_id, approve_url, amount, fee, total}.
+             - fee = 0.25 (0.5% of 50) ✓
+             - total = 50.25 ✓
+             - approve_url = "https://www.sandbox.paypal.com/checkoutnow?token=<ID>" ✓
+             - order_id = e.g. "3MT12822SG067431M" (17 alphanumeric chars) ✓
+          ✅ MongoDB paypal_orders doc persisted with status="CREATED", total=50.25.
+          ✅ ENV) PAYPAL_CLIENT_ID and PAYPAL_SECRET loaded from /app/backend/.env (len=80 each).
+          ✅ ENV.2) Sandbox OAuth2 token retrievable via client_credentials grant → 200 with access_token.
+
+          IMPORTANT NOTE for main agent: The very first run failed with HTTP 502 "Création commande PayPal échouée".
+          Backend log showed PayPal returned 400 INVALID_PARAMETER_SYNTAX on /application_context/cancel_url
+          because PUBLIC_BACKEND_URL was empty at runtime → cancel_url was "/api/paypal/cancel" (no scheme/host).
+          Root cause: the PUBLIC_BACKEND_URL env var was added to /app/backend/.env AFTER the backend process
+          had already loaded (uvicorn --reload only watches .py files, not .env). After `sudo supervisorctl restart
+          backend`, load_dotenv() picked up the new value and all subsequent calls succeeded. No code change needed —
+          just remember to restart the backend whenever .env changes.
+
+  - task: "POST /api/paypal/capture — error paths before approval"
+    implemented: true
+    working: true
+    file: "backend/routers/paypal.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: |
+          Tested via /app/backend_test.py. 5/5 PASS (E2E approval flow NOT exercised — requires manual sandbox.paypal.com nav).
+          ✅ A) POST /paypal/capture {order_id:"FAKE", pin:""} → 400 "Code PIN à 6 chiffres requis".
+          ✅ A.bis) POST without pin field → 422 (Pydantic Field required).
+          ✅ B) POST {order_id:"NONEXISTENT_ORDER_99999", pin:"123456"} → 404 "Commande PayPal introuvable".
+          ✅ C) POST {order_id:"DOESNOTEXIST_XYZ_999", pin:"999999"} → 401 "PIN incorrect" (PIN check fires before order lookup).
+          ✅ D) POST against a freshly created but NOT-approved order (still in CREATED state, no user approval) → 402
+             detail="Capture PayPal échouée — paiement non finalisé". PayPal API returns 4xx because the order is not APPROVED;
+             backend correctly maps to 402.
+
+  - task: "GET /api/paypal/return and /api/paypal/cancel — HTML pages"
+    implemented: true
+    working: true
+    file: "backend/routers/paypal.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ GET /api/paypal/return?token=TESTTOKEN&PayerID=TESTPAYER → HTTP 200,
+             content-type text/html; body contains "✓" and "Paiement approuvé".
+          ✅ GET /api/paypal/cancel → HTTP 200,
+             content-type text/html; body contains "Paiement annulé".
+
+  - task: "POST /api/wallet/withdraw — PIN regression check"
+    implemented: true
+    working: true
+    file: "backend/routers/wallet.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ POST /wallet/withdraw {amount:10, method:"bank", pin:"123456",
+             details:{iban:"FR7630006000011234567890189", holder:"Demo Client"}} → 200
+             {ok:true, tx_id:"<uuid>", payout_id:"<uuid>", eta_days:3, fee:1.0}.
+          Regression OK — PIN mandatory enforcement on /wallet/withdraw still works as in v6.4.
+
+agent_communication:
+  - agent: "testing"
+    message: |
+      P0/P1/P2/P3 BATCH — PayPal Sandbox + Cash QR PIN — tested end-to-end via
+      /app/backend_test.py against the public preview URL. 26/26 PASS.
+
+      ✅ /api/wallet/recharge-qr now requires PIN (all 4 cases A/B/C/D + Mongo cash_deposits PENDING).
+      ✅ /api/paypal/order all error paths + happy path (amount=50 → order_id 17-char, fee 0.25, total 50.25,
+         approve_url sandbox.paypal.com/checkoutnow, Mongo paypal_orders CREATED).
+      ✅ /api/paypal/capture pre-approval errors all correct (400/401/404/402 mapped properly).
+         E2E approval test deferred to manual sandbox.paypal.com nav (per review note).
+      ✅ /api/paypal/return + /api/paypal/cancel HTML pages.
+      ✅ /api/wallet/withdraw PIN regression still passes.
+
+      OPERATIONAL NOTE: PUBLIC_BACKEND_URL was added to /app/backend/.env but the running backend process
+      had not picked it up because uvicorn --reload only watches .py files. First test run failed with 502
+      from PayPal (INVALID_PARAMETER_SYNTAX on cancel_url). After `sudo supervisorctl restart backend`,
+      load_dotenv() picked up the new env var and everything worked. No code fix needed.
 
 backend_country_strict_and_retry_auction:
   - task: "Country-strict agent filter for auction bids"

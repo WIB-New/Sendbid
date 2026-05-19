@@ -205,6 +205,7 @@ export default function P2P() {
               Envoi de <TText weight="extraBold">{sendAmt.toFixed(2)} €</TText> à {recipientName || recipient}
             </TText>
             <PINPad pin={pin} onChange={setPin} />
+            {err ? <TText variant="caption" color={colors.status.error} align="center" style={{ marginTop: 8 }}>{err}</TText> : null}
             <Button title="Valider" loading={loading} disabled={pin.length !== 6} onPress={submit} style={{ marginTop: 12 }} />
             <TouchableOpacity onPress={() => { setPinModal(false); setPin(""); }} style={{ alignItems: "center", marginTop: 8 }}>
               <TText variant="caption" color={colors.neutrals.textSecondary}>Annuler</TText>

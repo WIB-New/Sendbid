@@ -10,7 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from core.config import ALLOWED_ORIGINS, IS_PROD
 from core.db import db, now_utc, iso
-from routers import auth, wallet, transfers, chat, beneficiaries, payment_methods, kyc, notifications, profile, misc, maps, payments, corridors, agent, sessions, kyc_corporate, agent_float, admin, support_chat, contacts
+from routers import auth, wallet, transfers, chat, beneficiaries, payment_methods, kyc, notifications, profile, misc, maps, payments, corridors, agent, sessions, kyc_corporate, agent_float, admin, support_chat, contacts, paypal
 from seed import seed_demo_data
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -49,6 +49,7 @@ api.include_router(agent_float.router)
 api.include_router(admin.router)
 api.include_router(support_chat.router)
 api.include_router(contacts.router)
+api.include_router(paypal.router)
 
 
 # Stripe webhook (mounted at /api/webhook/stripe per playbook conventions)

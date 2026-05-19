@@ -3,10 +3,12 @@ import { View, StyleSheet, Platform, TouchableOpacity, ActivityIndicator, Modal,
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
+import QRCode from "react-native-qrcode-svg";
 import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
+import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
@@ -18,7 +20,7 @@ const METHODS: { key: Method; label: string; icon: any; desc: string; available:
   { key: "cash", label: "Espèces", icon: "cash-outline", desc: "Dépôt en espèces chez un agent agréé. Crédit sous 5-15 minutes après confirmation par l'agent.", available: true },
   { key: "card", label: "Carte", icon: "card-outline", desc: "Visa / Mastercard / 3DS via Stripe", available: true },
   { key: "momo", label: "Mobile (Bientôt)", icon: "phone-portrait-outline", desc: "Wave, Orange Money, MTN MoMo — Intégration en cours de finalisation. Veuillez utiliser Carte ou Espèces.", available: false },
-  { key: "paypal", label: "PayPal (Bientôt)", icon: "logo-paypal", desc: "PayPal — Intégration en cours de finalisation. Veuillez utiliser Carte ou Espèces.", available: false },
+  { key: "paypal", label: "PayPal", icon: "logo-paypal", desc: "Recharge sécurisée via PayPal (Sandbox). Frais plateforme : 0.5%", available: true },
 ];
 
 const ORIGIN = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
@@ -42,8 +44,17 @@ export default function Recharge() {
   // Momo
   const [momoOp, setMomoOp] = useState("Wave");
   const [momoNumber, setMomoNumber] = useState("");
-  // PayPal
-  const [pplEmail, setPplEmail] = useState("");
+  // PayPal — vrai flow Sandbox
+  const [pplOrderId, setPplOrderId] = useState<string | null>(null);
+  const [pplApproveUrl, setPplApproveUrl] = useState<string | null>(null);
+  const [pplApproved, setPplApproved] = useState(false);
+  const [pplPin, setPplPin] = useState("");
+  const [pplPinModal, setPplPinModal] = useState(false);
+  // Cash QR — vrai flow backend
+  const [cashQrToken, setCashQrToken] = useState<string | null>(null);
+  const [cashQrExpiresAt, setCashQrExpiresAt] = useState<string | null>(null);
+  const [cashPin, setCashPin] = useState("");
+  const [cashPinModal, setCashPinModal] = useState(false);
 
   useEffect(() => {
     api.get("/payments/packages").then((r) => {
@@ -95,9 +106,50 @@ export default function Recharge() {
   const submitPaypal = async () => {
     setErr(null); setLoading(true);
     try {
-      const { data } = await api.post("/wallet/recharge-qr", { amount: parseFloat(amount) });
+      const a = parseFloat(amount.replace(",", "."));
+      if (!a || a <= 0) throw new Error("Montant invalide");
+      const { data } = await api.post("/paypal/order", { amount: a });
+      setPplOrderId(data.order_id);
+      setPplApproveUrl(data.approve_url);
+      setPplApproved(false);
+    } catch (e: any) { setErr(apiError(e)); } finally { setLoading(false); }
+  };
+
+  const onPaypalWebViewNav = (event: { url: string }) => {
+    const u = event.url || "";
+    if (u.includes("/paypal/cancel")) {
+      setPplApproveUrl(null); setPplOrderId(null); setErr("Paiement PayPal annulé");
+      return;
+    }
+    if (u.includes("/paypal/return")) {
+      setPplApproveUrl(null); setPplApproved(true); setPplPinModal(true);
+    }
+  };
+
+  const capturePaypal = async () => {
+    if (!pplOrderId) return;
+    setErr(null); setLoading(true);
+    try {
+      const { data } = await api.post("/paypal/capture", { order_id: pplOrderId, pin: pplPin });
       await refreshMe();
-      setPaid({ amount: parseFloat(amount) });
+      setPplPinModal(false); setPplPin(""); setPplApproved(false); setPplOrderId(null);
+      setPaid({ amount: data.amount });
+    } catch (e: any) { setErr(apiError(e)); } finally { setLoading(false); }
+  };
+
+  const startCashQr = async () => {
+    setCashPinModal(true);
+  };
+
+  const confirmCashQr = async () => {
+    setErr(null); setLoading(true);
+    try {
+      const a = parseFloat(amount.replace(",", "."));
+      if (!a || a <= 0) throw new Error("Montant invalide");
+      const { data } = await api.post("/wallet/recharge-qr", { amount: a, pin: cashPin });
+      setCashQrToken(data.qr_token);
+      setCashQrExpiresAt(data.expires_at);
+      setCashPinModal(false); setCashPin("");
     } catch (e: any) { setErr(apiError(e)); } finally { setLoading(false); }
   };
 
@@ -182,9 +234,11 @@ export default function Recharge() {
                 </>
               ) : method === "paypal" ? (
                 <>
-                  <Input label="Email PayPal" value={pplEmail} onChangeText={setPplEmail} icon="mail-outline" keyboardType="email-address" autoCapitalize="none" />
                   <Input label="Montant (EUR)" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
-                  <Button title="Payer avec PayPal" onPress={submitPaypal} loading={loading} disabled={!pplEmail || parseFloat(amount) <= 0} icon="logo-paypal" />
+                  <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 8, marginTop: 4 }}>
+                    Frais plateforme : 0.5% (en plus du montant)
+                  </TText>
+                  <Button testID="recharge-pay-paypal" title="Payer avec PayPal" onPress={submitPaypal} loading={loading} disabled={parseFloat(amount) <= 0} icon="logo-paypal" />
                 </>
               ) : method === "cash" ? (
                 <>
@@ -200,21 +254,31 @@ export default function Recharge() {
                     </View>
                   </View>
                   <Input label="Montant à déposer (EUR)" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
-                  <Button
-                    testID="recharge-cash-qr"
-                    title="Générer le QR de dépôt"
-                    icon="qr-code"
-                    onPress={() => {
-                      const a = parseFloat(amount.replace(",", "."));
-                      if (!a || a <= 0) { setErr("Montant invalide"); return; }
-                      // Pour démo : on simule la création d'un dépôt en attente
-                      setErr(null);
-                      setPaid({ amount: 0 } as any);
-                      if (Platform.OS === "web") (window as any).alert(`QR de dépôt généré pour ${a.toFixed(2)} €.\nPrésentez-le à un agent SENDBID. Votre solde sera crédité dès validation.`);
-                      else Alert.alert("QR généré", `Présentez-le à un agent SENDBID pour déposer ${a.toFixed(2)} €. Crédit instantané après validation.`);
-                    }}
-                    disabled={parseFloat(amount) <= 0}
-                  />
+                  {cashQrToken ? (
+                    <View style={styles.qrBox}>
+                      <QRCode value={cashQrToken} size={200} color="#022a6b" backgroundColor="white" />
+                      <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 12 }}>
+                        Présentez ce QR à un agent SENDBID
+                      </TText>
+                      <TText variant="caption" weight="bold" color={colors.status.success} align="center" style={{ marginTop: 4 }}>
+                        Montant : {parseFloat(amount).toFixed(2)} EUR
+                      </TText>
+                      {cashQrExpiresAt ? (
+                        <TText variant="label" color={colors.neutrals.textTertiary} align="center" style={{ marginTop: 2 }}>
+                          Expire : {new Date(cashQrExpiresAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        </TText>
+                      ) : null}
+                      <Button title="Générer un nouveau QR" icon="refresh" variant="outline" onPress={() => { setCashQrToken(null); setCashQrExpiresAt(null); }} style={{ marginTop: 12 }} />
+                    </View>
+                  ) : (
+                    <Button
+                      testID="recharge-cash-qr"
+                      title="Générer le QR de dépôt"
+                      icon="qr-code"
+                      onPress={startCashQr}
+                      disabled={parseFloat(amount) <= 0}
+                    />
+                  )}
                 </>
               ) : null}
               {err ? <TText variant="caption" color={colors.status.error} style={{ marginTop: 8 }}>{err}</TText> : null}
@@ -257,6 +321,68 @@ export default function Recharge() {
           )) : null}
         </View>
       </Modal>
+
+      {/* PayPal WebView */}
+      <Modal visible={!!pplApproveUrl} animationType="slide" onRequestClose={() => { setPplApproveUrl(null); setPplOrderId(null); }}>
+        <View style={{ flex: 1, backgroundColor: "white" }}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => { setPplApproveUrl(null); setPplOrderId(null); }} style={{ padding: 8 }}>
+              <Ionicons name="close" size={24} color={colors.neutrals.textPrimary} />
+            </TouchableOpacity>
+            <TText variant="subtitle" weight="bold" style={{ flex: 1, textAlign: "center" }}>PayPal (Sandbox)</TText>
+            <View style={{ width: 40 }} />
+          </View>
+          {pplApproveUrl ? (Platform.OS === "web" ? (
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
+              <Ionicons name="logo-paypal" size={48} color="#003087" />
+              <TText variant="body" align="center" style={{ marginTop: 12 }}>Ouvrez PayPal dans votre navigateur pour approuver le paiement.</TText>
+              <Button title="Ouvrir PayPal" icon="open-outline" style={{ marginTop: 16 }} onPress={() => Linking.openURL(pplApproveUrl)} />
+              <Button title="J'ai approuvé — Continuer" variant="outline" style={{ marginTop: 8 }} onPress={() => { setPplApproveUrl(null); setPplPinModal(true); }} />
+            </View>
+          ) : (
+            <WebView source={{ uri: pplApproveUrl }} onNavigationStateChange={onPaypalWebViewNav} startInLoadingState
+              renderLoading={() => (<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color="#003087" /></View>)} />
+          )) : null}
+        </View>
+      </Modal>
+
+      {/* PIN modal for PayPal capture */}
+      <Modal visible={pplPinModal} transparent animationType="slide" onRequestClose={() => setPplPinModal(false)}>
+        <View style={styles.pinSheetBg}>
+          <View style={styles.pinSheet}>
+            <Ionicons name="logo-paypal" size={32} color="#003087" style={{ alignSelf: "center" }} />
+            <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>Confirmer la recharge PayPal</TText>
+            <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4, marginBottom: spacing.md }}>
+              Saisissez votre PIN à 6 chiffres pour créditer votre wallet.
+            </TText>
+            <PINPad pin={pplPin} onChange={setPplPin} />
+            {err ? <TText variant="caption" color={colors.status.error} align="center" style={{ marginTop: 6 }}>{err}</TText> : null}
+            <Button title="Valider et créditer" loading={loading} disabled={pplPin.length !== 6} onPress={capturePaypal} style={{ marginTop: 12 }} />
+            <TouchableOpacity onPress={() => { setPplPinModal(false); setPplPin(""); }} style={{ alignItems: "center", marginTop: 8 }}>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>Annuler</TText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* PIN modal for Cash QR generation */}
+      <Modal visible={cashPinModal} transparent animationType="slide" onRequestClose={() => setCashPinModal(false)}>
+        <View style={styles.pinSheetBg}>
+          <View style={styles.pinSheet}>
+            <Ionicons name="cash" size={32} color="#10B981" style={{ alignSelf: "center" }} />
+            <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>Confirmer le dépôt en espèces</TText>
+            <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4, marginBottom: spacing.md }}>
+              Saisissez votre PIN pour générer un QR sécurisé valable 15 min.
+            </TText>
+            <PINPad pin={cashPin} onChange={setCashPin} />
+            {err ? <TText variant="caption" color={colors.status.error} align="center" style={{ marginTop: 6 }}>{err}</TText> : null}
+            <Button title="Générer le QR" loading={loading} disabled={cashPin.length !== 6} onPress={confirmCashQr} style={{ marginTop: 12 }} />
+            <TouchableOpacity onPress={() => { setCashPinModal(false); setCashPin(""); }} style={{ alignItems: "center", marginTop: 8 }}>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>Annuler</TText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 }
@@ -287,4 +413,6 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: 1, borderColor: colors.neutrals.border },
   limitsRow: { flexDirection: "row", alignItems: "center", backgroundColor: colors.overlays.primarySoft, padding: 14, borderRadius: radii.lg, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.primary.base + "33" },
   cashInfoBox: { flexDirection: "row", alignItems: "flex-start", backgroundColor: "#D1FAE5", borderWidth: 1, borderColor: "#10B981", borderRadius: radii.xl, padding: spacing.md, marginBottom: spacing.md },
+  pinSheetBg: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
+  pinSheet: { backgroundColor: "white", borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, padding: spacing.lg, paddingBottom: spacing.xl },
 });

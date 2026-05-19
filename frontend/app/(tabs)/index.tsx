@@ -67,6 +67,30 @@ export default function Home() {
   // "Recharger" multi-method modal
   const [showRecharge, setShowRecharge] = useState(false);
 
+  // === Pop-up 30s post-login : démarrage procédure de vérification email + téléphone ===
+  const [verifPopupVisible, setVerifPopupVisible] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    // Si déjà vérifié, ne rien faire
+    if (user.email_verified && user.phone_verified) return;
+    // Si déjà affiché dans cette session, ne pas redéclencher
+    try {
+      const flag = (globalThis as any).__sendbid_verifPopupShown;
+      if (flag) return;
+    } catch {}
+    const t = setTimeout(() => {
+      (globalThis as any).__sendbid_verifPopupShown = true;
+      setVerifPopupVisible(true);
+      // Auto-fermeture après 10s + redirection vers OTP
+      setTimeout(() => {
+        setVerifPopupVisible(false);
+        router.push({ pathname: "/(auth)/verify-otp" as any, params: { user_id: user.id, from_banner: "1" } });
+      }, 10000);
+    }, 30000);
+    return () => clearTimeout(t);
+  }, [user?.id, user?.email_verified, user?.phone_verified]);
+
   const load = useCallback(async () => {
     setRefreshing(true);
     await refreshMe();
@@ -405,6 +429,29 @@ export default function Home() {
             <RechargeMethod testID="rch-momo" icon="phone-portrait-outline" label="Portefeuille mobile" desc="Wave, Orange Money, MTN MoMo, etc." onPress={() => { setShowRecharge(false); router.push("/wallet/recharge"); }} />
             <RechargeMethod testID="rch-paypal" icon="logo-paypal" label="PayPal" desc="Compte PayPal" onPress={() => { setShowRecharge(false); router.push("/wallet/recharge"); }} />          </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Pop-up démarrage vérification email + téléphone (30s après login, durée 10s) */}
+      <Modal visible={verifPopupVisible} transparent animationType="fade" onRequestClose={() => setVerifPopupVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <View style={{ backgroundColor: "white", borderRadius: 24, padding: 24, maxWidth: 380, width: "100%", alignItems: "center" }}>
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: "#FEF3C7", alignItems: "center", justifyContent: "center" }}>
+              <Ionicons name="shield-checkmark" size={32} color="#D97706" />
+            </View>
+            <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 12 }}>
+              Vérification de sécurité
+            </TText>
+            <TText variant="body" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 8, lineHeight: 20 }}>
+              Nous allons maintenant vérifier votre adresse email et votre numéro de téléphone afin de sécuriser votre compte SENDBID.
+            </TText>
+            <TText variant="caption" weight="bold" color="#D97706" style={{ marginTop: 10 }}>
+              Cette procédure est obligatoire et démarre dans quelques instants…
+            </TText>
+            <View style={{ height: 4, backgroundColor: "#FEF3C7", borderRadius: 2, marginTop: 16, width: "100%", overflow: "hidden" }}>
+              <View style={{ height: 4, backgroundColor: "#D97706", width: "100%" }} />
+            </View>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
