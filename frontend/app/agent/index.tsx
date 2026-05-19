@@ -37,19 +37,19 @@ export default function AgentPanel() {
   const networkSize = (user as any)?.agents_count || 10;
 
   const CARDS = [
-    { key: "agents",    icon: "people-circle",   color: "#C17043", label: "Mon réseau d'agents", desc: `${networkSize}+ sous-agents`, route: "/admin/agents" },
-    { key: "transfers", icon: "swap-horizontal", color: "#994A26", label: "Transferts réseau",   desc: "Vue consolidée", route: "/admin/transfers" },
+    { key: "agents",    icon: "people-circle",   color: "#54280f", label: "Mon réseau d'agents", desc: `${networkSize}+ sous-agents`, route: "/admin/agents" },
+    { key: "transfers", icon: "swap-horizontal", color: "#54280f", label: "Transferts réseau",   desc: "Vue consolidée", route: "/admin/transfers" },
     { key: "float",     icon: "cash-outline",    color: "#10B981", label: "Float & trésorerie",  desc: "Déclarations consolidées", route: "/admin/reconciliation" },
     { key: "users",     icon: "people",          color: "#8B5CF6", label: "Clients servis",     desc: "Identités & KYC", route: "/admin/users" },
   ];
 
   return (
-    <LinearGradient colors={["#3F1D0F", "#66301A", "#1D0A04"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#54280f", "#54280f", "#54280f"]} style={{ flex: 1 }}>
       <Screen title="Console Super-Agent" back scroll={false}>
         <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
           <View style={styles.roleChip}>
-            <Ionicons name="people" size={14} color={"#C17043"} />
-            <TText variant="label" weight="bold" color={"#994A26"} style={{ marginLeft: 6 }}>SUPER-AGENT</TText>
+            <Ionicons name="people" size={14} color={"#54280f"} />
+            <TText variant="label" weight="bold" color={"#54280f"} style={{ marginLeft: 6 }}>SUPER-AGENT</TText>
           </View>
           <TText variant="title" weight="extraBold" color="white" style={{ marginTop: 8 }}>Bonjour {user?.full_name}</TText>
           <TText variant="caption" color="rgba(255,255,255,0.75)" style={{ marginTop: 2 }}>Réseau de {networkSize} agents sous votre responsabilité</TText>
@@ -64,7 +64,7 @@ export default function AgentPanel() {
           <TText variant="label" weight="extraBold" color="rgba(255,255,255,0.7)" style={{ letterSpacing: 1, marginTop: spacing.xl, marginBottom: 8 }}>PERFORMANCE RÉSEAU</TText>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
             <Kpi label="Agents actifs" value={kpis?.agents?.active ?? "—"} icon="people-circle" tint="#10B981" />
-            <Kpi label="Float réseau" value={kpis?.float?.total_declared?.toLocaleString("fr-FR") ?? "—"} icon="cash" tint="#C17043" />
+            <Kpi label="Float réseau" value={kpis?.float?.total_declared?.toLocaleString("fr-FR") ?? "—"} icon="cash" tint="#54280f" />
             <Kpi label="Transferts" value={kpis?.transfers?.total ?? "—"} icon="swap-horizontal" tint="#8B5CF6" />
             <Kpi label="Complétés" value={kpis?.transfers?.completed ?? "—"} icon="checkmark-done" tint="#059669" />
             <Kpi label="En cours" value={kpis?.transfers?.in_progress ?? "—"} icon="flash" tint="#F59E0B" />

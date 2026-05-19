@@ -50,7 +50,7 @@ export default function SBTagPage() {
     );
   };
 
-  const onScan = () => router.push("/scan-qr" as any);
+  const onScan = () => router.push("/verify-transfer" as any);
 
   return (
     <View style={styles.bg}>

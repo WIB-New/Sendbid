@@ -1,31 +1,32 @@
 /**
  * PAYBID Theme — Agent companion app.
- * Brand color: #994A26 (deep burnt sienna — per client brand guidelines).
- * Palette derived: shades tuned around HSL(19°, 60%, 37%).
+ * Brand color: #54280f (deep coffee brown — per client brand guidelines).
+ * Palette derived: monochromatic shades around the brand color.
  */
 export const paybidColors = {
-  primary: { base: "#994A26", dark: "#66301A", light: "#C17043" },
+  primary: { base: "#54280f", dark: "#36190a", light: "#7a3d18" },
   accent: { base: "#1B2A5B", dark: "#0F1B40", light: "#3A4D8F" }, // SENDBID blue tie-in
   status: { success: "#10B981", pending: "#F59E0B", error: "#EF4444", info: "#3B82F6" },
   neutrals: {
     white: "#FFFFFF",
-    background: "#FBF4EE",
+    background: "#F8F2EC",
     surface: "#FFFFFF",
-    border: "#EED9C7",
-    borderStrong: "#D2AE94",
+    border: "#E8D9CC",
+    borderStrong: "#C9AE96",
     textPrimary: "#1F1208",
     textSecondary: "#6B5640",
     textTertiary: "#A89177",
   },
   gradients: {
-    main: ["#994A26", "#C17043", "#66301A"] as [string, string, string],
-    earnings: ["#66301A", "#994A26"] as [string, string],
+    // Couleur unie #54280f partout (option b retenue par l'utilisateur)
+    main: ["#54280f", "#54280f", "#54280f"] as [string, string, string],
+    earnings: ["#54280f", "#54280f"] as [string, string],
     success: ["#059669", "#10B981"] as [string, string],
-    splash: ["#3F1D0F", "#66301A", "#994A26"] as [string, string, string],
-    hero: ["#3F1D0F", "#66301A", "#994A26"] as [string, string, string],
+    splash: ["#54280f", "#54280f", "#54280f"] as [string, string, string],
+    hero: ["#54280f", "#54280f", "#54280f"] as [string, string, string],
   },
   overlays: {
-    primarySoft: "#F6E1D2",
+    primarySoft: "#EFE0D2",
     accentSoft: "#E8EBF6",
     successSoft: "#E6F8F0",
     pendingSoft: "#FEF3C7",

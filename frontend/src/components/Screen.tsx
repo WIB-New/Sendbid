@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors, spacing, radii } from "../theme";
 import { TText } from "./TText";
+import { SendBidLogo } from "./Logo";
 
 type Props = {
   children: React.ReactNode;
@@ -61,7 +62,7 @@ export function Screen({
           </TText>
         ) : null}
       </View>
-      <View style={{ width: 40, alignItems: "flex-end" }}>{right}</View>
+      <View style={{ width: 40, alignItems: "flex-end" }}>{right || <SendBidLogo size={32} />}</View>
     </View>
   );
 

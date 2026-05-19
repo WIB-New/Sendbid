@@ -15,15 +15,15 @@ const BENEFITS = [
 ];
 
 const TYPES = [
-  { icon: "business", title: "Agent propre", desc: "Rattaché directement au siège SENDBID. Commissions directes et formation complète.", color: "#C17043" },
-  { icon: "briefcase", title: "Partenaire", desc: "Votre enseigne, nos services. Intégrez SENDBID à votre commerce existant.", color: "#994A26" },
-  { icon: "people", title: "Super-agent", desc: "Gérez un réseau de sous-agents sur votre zone. Marge de délégation.", color: "#66301A" },
+  { icon: "business", title: "Agent propre", desc: "Rattaché directement au siège SENDBID. Commissions directes et formation complète.", color: "#54280f" },
+  { icon: "briefcase", title: "Partenaire", desc: "Votre enseigne, nos services. Intégrez SENDBID à votre commerce existant.", color: "#54280f" },
+  { icon: "people", title: "Super-agent", desc: "Gérez un réseau de sous-agents sur votre zone. Marge de délégation.", color: "#54280f" },
 ];
 
 export default function LandingPaybid() {
   const router = useRouter();
   return (
-    <LinearGradient colors={["#3F1D0F", "#66301A", "#1D0A04"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#54280f", "#54280f", "#54280f"]} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
           {/* Nav */}
@@ -40,8 +40,8 @@ export default function LandingPaybid() {
               <TText variant="caption" weight="bold" color="white" style={{ marginLeft: 6 }}>Pour les clients</TText>
             </TouchableOpacity>
             <View style={[styles.audienceTab, styles.audienceTabActive]}>
-              <Ionicons name="briefcase" size={14} color="#3F1D0F" />
-              <TText variant="caption" weight="extraBold" color="#3F1D0F" style={{ marginLeft: 6 }}>Pour les agents PAYBID</TText>
+              <Ionicons name="briefcase" size={14} color="#54280f" />
+              <TText variant="caption" weight="extraBold" color="#54280f" style={{ marginLeft: 6 }}>Pour les agents PAYBID</TText>
             </View>
           </View>
 
@@ -98,11 +98,11 @@ export default function LandingPaybid() {
           </View>
 
           {/* CTA final */}
-          <LinearGradient colors={["#C17043", "#994A26", "#66301A"]} style={styles.ctaCard}>
+          <LinearGradient colors={["#54280f", "#54280f", "#54280f"]} style={styles.ctaCard}>
             <TText variant="title" weight="extraBold" color="white" align="center">Rejoignez 500+ agents</TText>
             <TText variant="caption" color="rgba(255,255,255,0.9)" align="center" style={{ marginTop: 4 }}>Inscription en 2 minutes. Validation sous 48h.</TText>
             <TouchableOpacity onPress={() => router.push("/paybid/signup" as any)} style={styles.ctaFinalBtn}>
-              <TText variant="body" weight="extraBold" color="#66301A">Démarrer maintenant</TText>
+              <TText variant="body" weight="extraBold" color="#54280f">Démarrer maintenant</TText>
             </TouchableOpacity>
           </LinearGradient>
         </ScrollView>
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   audienceTabActive: { backgroundColor: "white" },
   hero: { paddingHorizontal: spacing.lg, alignItems: "center", paddingTop: spacing.xl },
   heroChip: { flexDirection: "row", alignItems: "center", paddingHorizontal: 10, paddingVertical: 5, borderRadius: radii.full, backgroundColor: "rgba(251,191,36,0.15)", marginBottom: spacing.md },
-  cta: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#994A26", paddingVertical: 14, paddingHorizontal: 24, borderRadius: radii.full, marginTop: spacing.lg },
+  cta: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#54280f", paddingVertical: 14, paddingHorizontal: 24, borderRadius: radii.full, marginTop: spacing.lg },
   typeCard: { flexDirection: "row", alignItems: "center", padding: 14, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: radii.xl, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
   typeIcon: { width: 44, height: 44, borderRadius: radii.full, alignItems: "center", justifyContent: "center" },
   benefit: { width: "48%", backgroundColor: "rgba(255,255,255,0.06)", padding: 14, borderRadius: radii.xl, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },

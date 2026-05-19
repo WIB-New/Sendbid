@@ -37,7 +37,13 @@ export default function ProfileRgpd() {
       danger: true,
       onPress: async () => {
         const ok = await confirmAsync("Action irréversible. Tous les transferts en cours seront annulés. Confirmer ?");
-        if (ok) router.push("/rgpd/delete-account" as any);
+        if (!ok) return;
+        try {
+          await import("../src/api").then(({ api }) => api.post("/auth/rgpd/delete-account").catch(() => null));
+          showAlert("Votre demande de suppression a été enregistrée. Votre compte sera supprimé sous 7 jours conformément au RGPD.");
+        } catch {
+          showAlert("Une erreur est survenue. Veuillez contacter le support.");
+        }
       },
     },
   ];
