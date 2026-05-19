@@ -9,6 +9,8 @@ const MAP: Record<string, { label: string; bg: string; fg: string; icon: keyof t
   PENDING_PAYMENT: { label: "En attente de paiement", bg: colors.overlays.pendingSoft, fg: colors.status.pending, icon: "card-outline" },
   // Spec : un transfert paiement validé (en attente d'un agent) doit être affiché « Confirmé »
   BIDDING: { label: "Confirmé", bg: colors.overlays.successSoft, fg: colors.status.success, icon: "checkmark-circle" },
+  COUNTER_BIDDING: { label: "Contre-enchères", bg: colors.overlays.pendingSoft, fg: "#D97706", icon: "git-compare" },
+  ABSORBED: { label: "Pris en charge", bg: colors.overlays.infoSoft, fg: colors.status.info, icon: "shield-checkmark" },
   AGENT_ASSIGNED: { label: "Agent assigné", bg: colors.overlays.infoSoft, fg: colors.status.info, icon: "person-outline" },
   IN_DELIVERY: { label: "En remise", bg: colors.overlays.infoSoft, fg: colors.status.info, icon: "navigate-outline" },
   PROCESSING: { label: "En cours", bg: colors.overlays.infoSoft, fg: colors.status.info, icon: "sync-outline" },

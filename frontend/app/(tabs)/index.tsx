@@ -198,20 +198,9 @@ export default function Home() {
           <FlooMoneyCard balance={wallet?.balance ?? 0} currency={wallet?.currency ?? "EUR"} fullName={user.full_name} profileId={user.profile_id} compact />
         </View>
 
-        {/* Bandeau vérification email / téléphone (si non vérifié) */}
-        {(!user.email_verified || !user.phone_verified) ? (
-          <TouchableOpacity testID="verify-banner" activeOpacity={0.9} onPress={() => router.push({ pathname: "/(auth)/verify-otp" as any, params: { user_id: user.id, from_banner: "1" } })}
-            style={{ marginTop: spacing.md, backgroundColor: "#FEF3C7", borderColor: "#FCD34D", borderWidth: 1, borderRadius: 12, padding: 14, flexDirection: "row", alignItems: "center" }}>
-            <Ionicons name="warning" size={22} color="#92400E" />
-            <View style={{ flex: 1, marginLeft: 10 }}>
-              <TText weight="extraBold" color="#92400E">Vérifiez votre compte</TText>
-              <TText variant="caption" color="#92400E">
-                {!user.email_verified && !user.phone_verified ? "Email & téléphone non vérifiés" : !user.email_verified ? "Email non vérifié" : "Téléphone non vérifié"} — appuyez pour vérifier.
-              </TText>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#92400E" />
-          </TouchableOpacity>
-        ) : null}
+        {/* Item 3 — Bandeau "Vérifier votre compte" SUPPRIMÉ.
+            Le pop-up automatique 30s post-login déclenche désormais la procédure
+            de vérification email + téléphone (voir useEffect verifPopupVisible). */}
 
         {/* 3 boutons identiques à la page Portefeuille : Recharger / Retirer / Envoyer */}
         <View style={styles.walletQuickRow}>
@@ -342,18 +331,25 @@ export default function Home() {
           )}
         </View>
 
-        {/* Services — 6 mini boutons dans un conteneur bleu uni */}
+        {/* Services — Liste épurée sans cadres (Item 4) */}
         <View style={{ marginTop: spacing.xl }}>
-          <View style={[styles.servicesWrap, { backgroundColor: "#00147E" }]}>
-            <TText variant="subtitle" weight="extraBold" color="white" style={{ marginBottom: 12 }}>Services</TText>
-            <View style={styles.miniGrid}>
-              {SERVICES.map((s) => (
-                <TouchableOpacity key={s.key} testID={`home-service-${s.key}`} style={styles.miniCardLight} onPress={() => router.push(s.route as any)} activeOpacity={0.8}>
-                  <View style={styles.miniIconLight}><Ionicons name={s.icon} size={18} color="white" /></View>
-                  <TText variant="label" weight="semiBold" align="center" color="white" numberOfLines={2} style={{ marginTop: 6, lineHeight: 13 }}>{s.label}</TText>
-                </TouchableOpacity>
-              ))}
-            </View>
+          <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 10 }}>Services</TText>
+          <View style={styles.servicesListFlat}>
+            {SERVICES.map((s, i) => (
+              <TouchableOpacity
+                key={s.key}
+                testID={`home-service-${s.key}`}
+                onPress={() => router.push(s.route as any)}
+                activeOpacity={0.7}
+                style={[styles.svcRowFlat, i < SERVICES.length - 1 && styles.svcRowSep]}
+              >
+                <View style={styles.svcIconFlat}>
+                  <Ionicons name={s.icon} size={16} color={colors.primary.base} />
+                </View>
+                <TText variant="caption" weight="semiBold" style={{ flex: 1, marginLeft: 10 }}>{s.label}</TText>
+                <Ionicons name="chevron-forward" size={14} color={colors.neutrals.textTertiary} />
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -511,6 +507,10 @@ const styles = StyleSheet.create({
   txIcon: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
 
   servicesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  servicesListFlat: { backgroundColor: colors.neutrals.surface, borderRadius: radii.lg, paddingHorizontal: 12 },
+  svcRowFlat: { flexDirection: "row", alignItems: "center", paddingVertical: 10 },
+  svcRowSep: { borderBottomWidth: 1, borderBottomColor: colors.neutrals.border },
+  svcIconFlat: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
   serviceCard: { width: "48%", backgroundColor: colors.neutrals.surface, padding: spacing.lg, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.neutrals.border, alignItems: "center" },
   serviceIconLg: { width: 56, height: 56, borderRadius: radii.full, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
   miniGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10 },

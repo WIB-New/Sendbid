@@ -169,70 +169,119 @@ async def start_auction(transfer_id: str):
     transfer = await db.transfers.find_one({"id": transfer_id}, {"_id": 0})
     if not transfer:
         return
-    # STRICT — Filtrer les agents par pays destination du transfert
     target_country = (transfer.get("destination_country") or "").upper()
-    agent_query: dict = {}
-    if target_country:
-        agent_query["$or"] = [
-            {"country_code": target_country},
-            {"country": target_country},
-        ]
-    agents = await db.agents.find(agent_query, {"_id": 0}).to_list(100)
-    # Fallback si aucun agent local : on n'utilise PAS d'agents étrangers — l'enchère expirera
+    # === ÉLIGIBILITÉ AGENTS (Item 7 — spec produit) ===
+    # DOIVENT : pays compatible + Disponible + KYC tier 3 + pas suspendus + pas de transfert en retard
+    agent_query: dict = {
+        "$and": [
+            {"$or": [{"country_code": target_country}, {"country": target_country}]} if target_country else {},
+            {"$or": [{"available": True}, {"available": {"$exists": False}}]},  # default available
+            {"$or": [{"kyc_tier": {"$gte": 3}}, {"kyc_tier": {"$exists": False}}]},  # default OK for demo
+            {"suspended": {"$ne": True}},
+            {"has_overdue_transfer": {"$ne": True}},
+        ],
+    }
+    if not target_country:
+        agent_query["$and"][0] = {}
+    agents = await db.agents.find(agent_query, {"_id": 0}).to_list(200)
+    logger.info(f"[auction] {transfer_id} eligible_agents={len(agents)} country={target_country}")
     asyncio.create_task(run_auction(transfer_id, transfer, agents))
 
 
-async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
-    """5 tours × 90s × 10 agents par tour, priorisés par ville (même que le bénéficiaire) + distance + score.
+def _composite_score(a: dict, target_city: str, target_country: str) -> float:
+    """Composite scoring per Item 7 spec (lower = higher priority).
+    Weights: proximity 30% + reputation 25% + wallet 10% + cash capacity 10%
+    + claims (inverse) 10% + gamification 10% + seniority 5% = 100%.
+    """
+    # 1. Proximity (30%) — same city >> same country >> elsewhere
+    same_city = (a.get("city") or "").lower() == (target_city or "").lower()
+    same_country = (a.get("country_code") or target_country) == target_country
+    distance_km = float(a.get("_distance_km") or random.uniform(0.5, 50.0))
+    proximity = (0 if same_city else (10 if same_country else 30)) + distance_km / 5
+    # 2. Reputation (25%) — rating 0-5 → 25-0 (higher rating better)
+    rating = float(a.get("rating") or 4.0)
+    reputation = (5 - max(0, min(5, rating))) * 5  # 0..25
+    # 3. Wallet balance (10%) — higher = better; threshold 1000 EUR = 0, 0 EUR = 10
+    wallet_balance = float(a.get("wallet_balance") or a.get("balance") or 500)
+    wallet_score = max(0, 10 - wallet_balance / 100)
+    # 4. Cash capacity (10%) — declared capability
+    cash_capacity = float(a.get("cash_capacity") or 500)
+    cash_score = max(0, 10 - cash_capacity / 100)
+    # 5. Claims (10%) — fewer is better
+    claims = int(a.get("negative_claims") or 0)
+    claims_score = min(10, claims * 2)
+    # 6. Gamification (10%) — points/badges; higher = better
+    gamif_points = int(a.get("gamification_points") or 0)
+    gamif_score = max(0, 10 - gamif_points / 100)
+    # 7. Seniority (5%) — older accounts get a bonus; days_since_signup
+    days_active = int(a.get("days_active") or 30)
+    seniority_score = max(0, 5 - days_active / 60)
+    # Weighted sum — lower is higher priority
+    return (proximity * 0.30 + reputation * 0.25 + wallet_score * 0.10
+            + cash_score * 0.10 + claims_score * 0.10 + gamif_score * 0.10
+            + seniority_score * 0.05)
 
-    Procédure (selon spécifications produit) :
-    - Tour 1: 10 agents les plus proches du bénéficiaire (même ville prioritaire)
-    - Tour 2-5: 10 nouveaux agents (différents) par tour, priorisation décroissante
-    - Auto-attribution à la meilleure offre du tour si ratio fee/score gagnant
-    - L'utilisateur N'A AUCUNE action à poser : c'est le système qui choisit
+
+def _commission_breakdown(send_amount: float, fee_pct: float) -> dict:
+    """Computes the commission breakdown shown to agents.
+    company keeps 20% of the client's fee; agent gets 80% net."""
+    client_fee_amount = round(send_amount * fee_pct / 100, 2)
+    company_share = round(client_fee_amount * 0.20, 2)
+    agent_net = round(client_fee_amount - company_share, 2)
+    return {
+        "client_fee_pct": fee_pct,
+        "client_fee_amount": client_fee_amount,
+        "company_share": company_share,
+        "agent_net": agent_net,
+    }
+
+
+async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
+    """Item 7 — Algo enchères :
+    - 5 tours x 10 agents x 60s. Scoring composite (proximity 30% / reputation 25% / wallet 10% /
+      cash capacity 10% / claims 10% / gamification 10% / seniority 5%).
+    - Agents simulent : 'Accept', 'Decline', 'Bid lower' (frais < client_fee_pct).
+    - À la fin du round : si au moins un bid valide → assigne au meilleur (frais le + bas, puis rating).
+    - Si 5 rounds sans gagnant → COUNTER-BID phase : 3 sous-tours de 5 meilleurs agents,
+      autorisés à proposer des frais SUPÉRIEURS au client.
+    - Si toutes les rounds + counter-bids échouent : ABSORBED (plateforme prend en charge) ou EXPIRED.
     """
     try:
         await db.bids.delete_many({"transfer_id": transfer_id})
+        await db.counter_bids.delete_many({"transfer_id": transfer_id})
         ben = transfer.get("beneficiary") or {}
         target_city = (ben.get("city") or "").lower()
         target_country = (ben.get("country") or "").upper()
+        client_fee_pct = float(transfer.get("fee_percent") or 2.0)
+        send_amount = float(transfer.get("send_amount") or 0)
 
-        def _score(a: dict, round_idx: int) -> float:
-            # Lower score = higher priority for this round
-            same_city = (a.get("city") or "").lower() == target_city
-            same_country = (a.get("country_code") or target_country) == target_country
-            rating = float(a.get("rating") or 4.0)
-            # synthetic distance from agent.lat/lng to assumed beneficiary coord
-            distance = float(a.get("_distance_km") or random.uniform(0.5, 50.0))
-            base = (0 if same_city else (5 if same_country else 20)) + distance / 5
-            base -= rating  # higher rating boost
-            base += round_idx * 2  # later rounds: looser priority
-            return base
-
-        # Pre-rank all agents once
-        ranked = sorted(agents, key=lambda a: _score(a, 0))
+        # Pre-rank all agents by composite score
+        ranked = sorted(agents, key=lambda a: _composite_score(a, target_city, target_country))
         used_ids: set = set()
         ROUNDS = 5
         PER_ROUND = 10
-        ROUND_SECONDS = 90
+        ROUND_SECONDS = 60
 
+        # ============================== MAIN 5 ROUNDS ==============================
         for round_idx in range(ROUNDS):
             t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
             if not t or t["status"] != "BIDDING" or t.get("agent_id"):
                 return
             await db.transfers.update_one({"id": transfer_id}, {"$set": {"auction_round": round_idx + 1}})
+
+            pool = [a for a in ranked if a["id"] not in used_ids][:PER_ROUND]
+            if not pool:
+                continue
+            for a in pool:
+                used_ids.add(a["id"])
+
             await manager.broadcast(transfer_id, {
                 "event": "round_started",
                 "round": round_idx + 1, "total_rounds": ROUNDS,
                 "duration_sec": ROUND_SECONDS, "transfer_id": transfer_id,
+                "agents_in_round": len(pool),
             })
-            # Pick 10 agents not yet used, sorted by current-round score
-            pool = [a for a in ranked if a["id"] not in used_ids]
-            pool = sorted(pool, key=lambda a: _score(a, round_idx))[:PER_ROUND]
-            for a in pool:
-                used_ids.add(a["id"])
-
-            # Notify the eligible agents that they have a new auction invitation
+            # Notifications push aux agents éligibles
             try:
                 await manager.broadcast_agents({
                     "event": "auction_invite",
@@ -240,67 +289,191 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                     "round": round_idx + 1,
                     "destination_country": transfer.get("destination_country"),
                     "destination_city": transfer.get("destination_city"),
-                    "send_amount": transfer.get("send_amount"),
-                    "fee_percent": transfer.get("fee_percent"),
+                    "send_amount": send_amount,
+                    "client_fee_pct": client_fee_pct,
+                    "commission": _commission_breakdown(send_amount, client_fee_pct),
                     "delivery_mode": transfer.get("delivery_mode"),
                     "vip_delivery": transfer.get("vip_delivery"),
                     "vip_express": transfer.get("vip_express"),
                     "expires_in_sec": ROUND_SECONDS,
+                    "phase": "main",
                 }, agent_ids=[a["id"] for a in pool])
             except Exception:
                 pass
 
-            # Each agent in the round emits a bid at a random moment within ROUND_SECONDS
-            schedule = sorted([random.uniform(2, ROUND_SECONDS - 5) for _ in pool])
+            # Simulation : chaque agent répond (accept/decline/bid lower) dans la fenêtre 60s
+            schedule = sorted([random.uniform(2, ROUND_SECONDS - 3) for _ in pool])
             start_ts = asyncio.get_event_loop().time()
             for at, agent in zip(schedule, pool):
-                # wait until 'at' seconds elapsed in this round
                 wait = max(0, start_ts + at - asyncio.get_event_loop().time())
                 if wait > 0:
                     await asyncio.sleep(wait)
                 t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
                 if not t or t["status"] != "BIDDING" or t.get("agent_id"):
                     return
+                # Décision agent (60% bid lower, 25% accept au taux client, 15% decline)
+                rnd = random.random()
+                if rnd < 0.15:
+                    continue  # decline (no bid)
+                if rnd < 0.40:
+                    bid_pct = round(client_fee_pct, 2)  # accept
+                else:
+                    # bid lower — strictement INFÉRIEUR au taux client (règle stricte spec)
+                    bid_pct = round(random.uniform(max(0.5, client_fee_pct - 1.5), client_fee_pct - 0.05), 2)
                 bid = {
                     "id": gen_id(), "transfer_id": transfer_id,
-                    "round": round_idx + 1,
+                    "round": round_idx + 1, "phase": "main",
                     "agent_id": agent["id"], "agent_name": agent["full_name"],
                     "agent_avatar": agent.get("avatar_url"),
                     "agent_rating": agent.get("rating", 4.5),
                     "agent_city": agent.get("city"),
                     "same_city": (agent.get("city") or "").lower() == target_city,
                     "agent_distance_km": round(random.uniform(0.5, 12.0) if (agent.get("city") or "").lower() == target_city else random.uniform(8, 50.0), 1),
-                    "bid_fee_percent": round(random.uniform(max(0.5, transfer["fee_percent"] - 1.5), transfer["fee_percent"]), 2),
+                    "bid_fee_percent": bid_pct,
                     "eta_minutes": random.randint(10, 60),
+                    "commission": _commission_breakdown(send_amount, bid_pct),
                     "created_at": iso(now_utc()),
                 }
                 await db.bids.insert_one(dict(bid))
                 await manager.broadcast(transfer_id, {"event": "new_bid", "bid": clean_doc(dict(bid))})
 
-            # End of round — wait remaining time, then auto-pick best of round if any
+            # Attendre fin du round + sélection
             elapsed = asyncio.get_event_loop().time() - start_ts
             if elapsed < ROUND_SECONDS:
                 await asyncio.sleep(ROUND_SECONDS - elapsed)
             t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
             if not t or t.get("agent_id"):
                 return
-            # Best bid for the round: lowest fee, prefer same_city, then highest rating
-            round_bids = await db.bids.find({"transfer_id": transfer_id, "round": round_idx + 1}, {"_id": 0}).to_list(50)
+            round_bids = await db.bids.find({"transfer_id": transfer_id, "round": round_idx + 1, "phase": "main"}, {"_id": 0}).to_list(50)
             if round_bids:
-                round_bids.sort(key=lambda b: (
-                    not b.get("same_city", False),
-                    b.get("bid_fee_percent", 99),
-                    -float(b.get("agent_rating") or 0),
-                    b.get("agent_distance_km", 999),
-                ))
-                await assign_agent(transfer_id, round_bids[0]["id"], auto=True)
-                return
+                # Tri : frais le + bas (strictement < client) puis rating décroissant, puis distance
+                valid = [b for b in round_bids if b.get("bid_fee_percent", 99) <= client_fee_pct]
+                if valid:
+                    valid.sort(key=lambda b: (b["bid_fee_percent"], -float(b.get("agent_rating") or 0), b.get("agent_distance_km", 999)))
+                    await assign_agent(transfer_id, valid[0]["id"], auto=True)
+                    return
 
-        # No bids across 5 rounds — expire
-        await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "EXPIRED"}})
-        await manager.broadcast(transfer_id, {"event": "auction_expired"})
+        # ============================== COUNTER-BID PHASE ==============================
+        # Aucun gagnant après 5 rounds — relance avec 3 sous-tours de 5 meilleurs agents
+        # autorisés à proposer des frais SUPÉRIEURS au client (avec plafond +50%)
+        logger.info(f"[auction] {transfer_id} entering COUNTER-BID phase (no winner after {ROUNDS} rounds)")
+        await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "COUNTER_BIDDING"}})
+        await manager.broadcast(transfer_id, {"event": "counter_bid_phase_started"})
+        max_counter_fee = round(client_fee_pct * 1.5, 2)
+        counter_used_ids: set = set()
+
+        for cb_round in range(3):  # 3 sub-rounds of 5 best
+            t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
+            if not t or t.get("agent_id"):
+                return
+            # Top 5 not yet used in counter rounds
+            cb_pool = [a for a in ranked if a["id"] not in counter_used_ids][:5]
+            if not cb_pool:
+                break
+            for a in cb_pool:
+                counter_used_ids.add(a["id"])
+
+            await manager.broadcast(transfer_id, {
+                "event": "counter_round_started",
+                "cb_round": cb_round + 1, "duration_sec": ROUND_SECONDS,
+                "max_fee_pct": max_counter_fee,
+            })
+            try:
+                await manager.broadcast_agents({
+                    "event": "counter_invite",
+                    "transfer_id": transfer_id,
+                    "cb_round": cb_round + 1,
+                    "client_fee_pct": client_fee_pct,
+                    "max_fee_pct": max_counter_fee,
+                    "expires_in_sec": ROUND_SECONDS,
+                    "phase": "counter",
+                }, agent_ids=[a["id"] for a in cb_pool])
+            except Exception:
+                pass
+
+            # Simulation 60% participent avec frais > client (jusqu'à +50%)
+            cb_schedule = sorted([random.uniform(2, ROUND_SECONDS - 3) for _ in cb_pool])
+            cb_start = asyncio.get_event_loop().time()
+            for at, agent in zip(cb_schedule, cb_pool):
+                wait = max(0, cb_start + at - asyncio.get_event_loop().time())
+                if wait > 0:
+                    await asyncio.sleep(wait)
+                if random.random() < 0.4:
+                    continue  # 40% no-show in counter
+                counter_pct = round(random.uniform(client_fee_pct + 0.1, max_counter_fee), 2)
+                cb = {
+                    "id": gen_id(), "transfer_id": transfer_id,
+                    "cb_round": cb_round + 1, "phase": "counter",
+                    "agent_id": agent["id"], "agent_name": agent["full_name"],
+                    "agent_rating": agent.get("rating", 4.5),
+                    "bid_fee_percent": counter_pct,
+                    "eta_minutes": random.randint(20, 90),
+                    "commission": _commission_breakdown(send_amount, counter_pct),
+                    "created_at": iso(now_utc()),
+                }
+                await db.counter_bids.insert_one(dict(cb))
+                await manager.broadcast(transfer_id, {"event": "new_counter_bid", "bid": clean_doc(dict(cb))})
+            elapsed = asyncio.get_event_loop().time() - cb_start
+            if elapsed < ROUND_SECONDS:
+                await asyncio.sleep(ROUND_SECONDS - elapsed)
+
+        # Après les 3 counter rounds : assigner au meilleur (frais le + bas parmi les > client)
+        all_counters = await db.counter_bids.find({"transfer_id": transfer_id}, {"_id": 0}).to_list(50)
+        if all_counters:
+            all_counters.sort(key=lambda b: (b["bid_fee_percent"], -float(b.get("agent_rating") or 0)))
+            best = all_counters[0]
+            # Update transfer with new fee (client must be notified)
+            await db.transfers.update_one({"id": transfer_id}, {"$set": {
+                "fee_percent": best["bid_fee_percent"],
+                "fee_adjusted": True,
+                "original_fee_percent": client_fee_pct,
+            }})
+            await manager.broadcast(transfer_id, {
+                "event": "fee_adjusted",
+                "new_fee_pct": best["bid_fee_percent"],
+                "original_fee_pct": client_fee_pct,
+            })
+            # Migrate counter-bid to bids collection and assign
+            best_bid = {
+                "id": gen_id(), "transfer_id": transfer_id,
+                "round": 99, "phase": "counter_winner",
+                "agent_id": best["agent_id"], "agent_name": best["agent_name"],
+                "agent_rating": best.get("agent_rating", 4.5),
+                "bid_fee_percent": best["bid_fee_percent"],
+                "eta_minutes": best["eta_minutes"],
+                "commission": best.get("commission"),
+                "created_at": iso(now_utc()),
+            }
+            await db.bids.insert_one(dict(best_bid))
+            await assign_agent(transfer_id, best_bid["id"], auto=True)
+            return
+
+        # ============================== ULTIMATE FALLBACK ==============================
+        # Aucune contre-enchère retournée — plateforme absorbe OU expire
+        # Politique simple : si send_amount < 200 EUR → ABSORBED (plateforme prend en charge)
+        # Sinon → EXPIRED (client doit republier avec frais plus attractifs)
+        if send_amount < 200:
+            await db.transfers.update_one({"id": transfer_id}, {"$set": {
+                "status": "ABSORBED",
+                "absorbed_at": iso(now_utc()),
+                "absorption_reason": "no_agent_after_5_rounds_and_3_counter_rounds",
+            }})
+            await manager.broadcast(transfer_id, {"event": "auction_absorbed", "transfer_id": transfer_id})
+            try:
+                await create_notification(transfer["user_id"], "Transfert pris en charge",
+                                          "Aucun agent disponible — la plateforme prend en charge votre transfert directement. Délai de remise étendu.")
+            except Exception:
+                pass
+        else:
+            await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "EXPIRED"}})
+            await manager.broadcast(transfer_id, {"event": "auction_expired"})
+            try:
+                await create_notification(transfer["user_id"], "Enchère expirée",
+                                          "Aucun agent disponible pour ce transfert. Vous pouvez relancer avec des frais plus attractifs.")
+            except Exception:
+                pass
     except Exception as e:
-        logger.error(f"auction error: {e}")
+        logger.error(f"auction error: {e}", exc_info=True)
 
 
 async def assign_agent(transfer_id: str, bid_id: str, auto: bool = False):
