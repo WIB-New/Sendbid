@@ -259,7 +259,27 @@ async def place_bid(transfer_id: str, payload: BidIn, user: dict = Depends(get_c
     }
     await db.bids.insert_one(dict(bid))
     await manager.broadcast(transfer_id, {"event": "new_bid", "bid": clean_doc(dict(bid))})
-    return {"ok": True, "bid": clean_doc(dict(bid))}
+    # Calculate commission breakdown for the agent UI confirmation
+    company_commission_pct = 20.0  # company keeps 20% of agent's bid fee
+    client_fee_amount = round(transfer.get("send_amount", 0) * payload.bid_fee_percent / 100, 2)
+    company_share = round(client_fee_amount * company_commission_pct / 100, 2)
+    agent_net = round(client_fee_amount - company_share, 2)
+    return {
+        "ok": True,
+        "bid": clean_doc(dict(bid)),
+        "commission": {
+            "client_fee_pct": payload.bid_fee_percent,
+            "client_fee_amount": client_fee_amount,
+            "company_commission_pct": company_commission_pct,
+            "company_share": company_share,
+            "agent_net": agent_net,
+            "currency": "EUR",
+            "message": (
+                f"Offre acceptée — Commission de l'entreprise : {company_share:.2f}€ (20%). "
+                f"Votre gain net : {agent_net:.2f}€ si vous êtes sélectionné."
+            ),
+        },
+    }
 
 
 @router.get("/transfers")

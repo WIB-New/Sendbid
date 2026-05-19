@@ -138,14 +138,14 @@ export default function Onboarding() {
 
         <View style={styles.cta}>
           {!last ? (
-            <Button testID={`onboarding-next-${step}`} title="Suivant" onPress={next} icon="arrow-forward" />
+            <Button testID={`onboarding-next-${step}`} title="Suivant" onPress={next} icon="arrow-forward" style={styles.greenBtn} />
           ) : (
             <Button
               testID={`onboarding-next-${step}`}
               title="Ouvrir SENDBID"
               onPress={next}
               icon="rocket"
-              style={styles.finalBtn}
+              style={styles.greenBtn}
             />
           )}
           <Pressable onPress={() => setStep((s) => Math.max(0, s - 1))} style={styles.backRow} disabled={step === 0}>
@@ -197,5 +197,6 @@ const styles = StyleSheet.create({
   desc: { marginTop: spacing.sm, paddingHorizontal: spacing.md, lineHeight: 22 },
   cta: { padding: spacing.lg, paddingBottom: spacing.xl },
   finalBtn: { backgroundColor: "#10B981" },
+  greenBtn: { backgroundColor: "#10B981" },
   backRow: { marginTop: 12 },
 });

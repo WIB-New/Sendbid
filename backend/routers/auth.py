@@ -66,6 +66,22 @@ async def register(payload: RegisterIn):
     # CGU obligatoires
     if payload.accept_terms is False:
         raise HTTPException(status_code=400, detail="Vous devez accepter les CGU et la politique de confidentialité")
+    # Twilio Lookup — Valide le téléphone, détecte l'opérateur et le risque fraude
+    try:
+        from services.twilio_service import validate_phone as twilio_validate
+        lookup = await twilio_validate(phone)
+        if lookup.get("valid") is False:
+            raise HTTPException(status_code=400, detail="Numéro de téléphone invalide ou inexistant")
+        if lookup.get("fraud_risk") == "high":
+            logger.warning(f"[register] high fraud risk phone={phone} line_type={lookup.get('line_type')}")
+        carrier_name = lookup.get("carrier_name")
+        line_type = lookup.get("line_type")
+        country_lookup = lookup.get("country")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning(f"[register] Twilio lookup skipped: {e}")
+        carrier_name, line_type, country_lookup = None, None, None
     # Anti-réutilisation : vérifier email et téléphone séparément avec messages explicites
     existing = await db.users.find_one({"$or": [{"email": email}, {"phone": phone}]})
     if existing:
@@ -94,8 +110,10 @@ async def register(payload: RegisterIn):
         "loyalty_level": "Bronze", "loyalty_points": 0,
         "biometric_enabled": False, "biometric_token": None,
         "avatar_url": None, "language": "fr", "theme": "light",
-        "country": (payload.country or "").upper()[:2] or None,
+        "country": (payload.country or country_lookup or "").upper()[:2] or None,
         "city": payload.city or None,
+        "carrier_name": carrier_name,
+        "phone_line_type": line_type,
         "terms_accepted_at": iso(now_utc()) if payload.accept_terms else None,
         "notif_prefs": {"push": True, "email": True, "sms": False},
         "created_at": iso(now_utc()),
@@ -133,6 +151,23 @@ async def register(payload: RegisterIn):
     return response
 
 
+@router.post("/lookup-phone")
+async def lookup_phone(body: dict):
+    """Public endpoint — Détection opérateur + validation Twilio Lookup.
+    Utilisé par le frontend pendant la saisie (signup, ajout bénéficiaire, recharge momo).
+    Best-effort : retourne carrier/line_type/country pour affichage UX.
+    """
+    phone = (body.get("phone") or "").strip()
+    if not phone or len(phone) < 6:
+        return {"valid": False, "carrier_name": None, "country": None, "line_type": "invalid"}
+    try:
+        from services.twilio_service import validate_phone as twilio_validate
+        return await twilio_validate(phone)
+    except Exception as e:
+        logger.warning(f"[lookup-phone] {e}")
+        return {"valid": True, "carrier_name": None, "country": None, "line_type": "unknown", "fraud_risk": "unknown"}
+
+
 @router.post("/resend-otp")
 async def resend_otp(body: dict):
     user_id = body.get("user_id")
@@ -150,6 +185,14 @@ async def resend_otp(body: dict):
         upsert=True,
     )
     logger.info(f"[OTP] resend user={user_id} email={email_code} phone={phone_code}")
+    # Send SMS via Twilio (best-effort)
+    try:
+        from services.twilio_service import send_sms_otp
+        user = await db.users.find_one({"id": user_id})
+        if user and user.get("phone"):
+            await send_sms_otp(user["phone"], phone_code)
+    except Exception as e:
+        logger.warning(f"[OTP resend] sms send: {e}")
     response = {"ok": True}
     if not IS_PROD:
         response["dev_email_otp"] = email_code

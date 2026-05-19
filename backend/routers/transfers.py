@@ -232,6 +232,24 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
             for a in pool:
                 used_ids.add(a["id"])
 
+            # Notify the eligible agents that they have a new auction invitation
+            try:
+                await manager.broadcast_agents({
+                    "event": "auction_invite",
+                    "transfer_id": transfer_id,
+                    "round": round_idx + 1,
+                    "destination_country": transfer.get("destination_country"),
+                    "destination_city": transfer.get("destination_city"),
+                    "send_amount": transfer.get("send_amount"),
+                    "fee_percent": transfer.get("fee_percent"),
+                    "delivery_mode": transfer.get("delivery_mode"),
+                    "vip_delivery": transfer.get("vip_delivery"),
+                    "vip_express": transfer.get("vip_express"),
+                    "expires_in_sec": ROUND_SECONDS,
+                }, agent_ids=[a["id"] for a in pool])
+            except Exception:
+                pass
+
             # Each agent in the round emits a bid at a random moment within ROUND_SECONDS
             schedule = sorted([random.uniform(2, ROUND_SECONDS - 5) for _ in pool])
             start_ts = asyncio.get_event_loop().time()
@@ -532,3 +550,26 @@ def register_websocket(app):
             manager.disconnect(transfer_id, ws)
         except Exception:
             manager.disconnect(transfer_id, ws)
+
+    # ============================================================
+    # Agent global channel (PAYBID) — receives auction invites
+    # ============================================================
+    @app.websocket("/api/ws/agent")
+    async def ws_agent(ws: WebSocket, token: Optional[str] = Query(None)):
+        if not token:
+            await ws.close(code=4401)
+            return
+        user = await get_user_from_token(token)
+        if not user or user.get("role") != "agent":
+            await ws.close(code=4403)
+            return
+        agent_id = user["id"]
+        await manager.connect_agent(agent_id, ws)
+        try:
+            await ws.send_json({"event": "agent_connected", "agent_id": agent_id, "ts": iso(now_utc())})
+            while True:
+                await ws.receive_text()
+        except WebSocketDisconnect:
+            manager.disconnect_agent(agent_id, ws)
+        except Exception:
+            manager.disconnect_agent(agent_id, ws)

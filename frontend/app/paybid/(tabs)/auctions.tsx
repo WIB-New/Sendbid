@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
@@ -6,11 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../../src/components/TText";
 import { Input } from "../../../src/components/Input";
 import { Button } from "../../../src/components/Button";
-import { api, apiError } from "../../../src/api";
+import { api, apiError, wsUrl } from "../../../src/api";
+import { useAuth } from "../../../src/store";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii } from "../../../src/theme";
 
 export default function PaybidAuctions() {
+  const token = useAuth((s) => s.token);
   const [list, setList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<"all" | "city">("city");
@@ -18,6 +20,9 @@ export default function PaybidAuctions() {
   const [feePct, setFeePct] = useState("1.50");
   const [eta, setEta] = useState("30");
   const [err, setErr] = useState<string | null>(null);
+  const [wsAlive, setWsAlive] = useState(false);
+  const [commissionMsg, setCommissionMsg] = useState<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const load = useCallback(async () => {
     setRefreshing(true);
@@ -29,11 +34,37 @@ export default function PaybidAuctions() {
   }, [filter]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
+  // === WebSocket bidirectionnel PAYBID — invitations temps réel ===
+  useEffect(() => {
+    if (!token) return;
+    try {
+      const url = wsUrl("/api/ws/agent", token);
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
+      ws.onopen = () => setWsAlive(true);
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.event === "auction_invite" || msg.event === "new_bid" || msg.event === "agent_assigned" || msg.event === "round_started") {
+            load();
+          }
+        } catch {}
+      };
+      ws.onerror = () => setWsAlive(false);
+      ws.onclose = () => setWsAlive(false);
+      return () => { try { ws.close(); } catch {} };
+    } catch {}
+  }, [token, load]);
+
   const submitBid = async () => {
     setErr(null);
     try {
-      await api.post(`/agent/auctions/${bidOpen.id}/bid`, { transfer_id: bidOpen.id, bid_fee_percent: parseFloat(feePct), eta_minutes: parseInt(eta) });
-      Alert.alert("Offre envoyée", `Frais ${feePct}% · ETA ${eta} min`);
+      const { data } = await api.post(`/agent/auctions/${bidOpen.id}/bid`, { transfer_id: bidOpen.id, bid_fee_percent: parseFloat(feePct), eta_minutes: parseInt(eta) });
+      const c = data?.commission;
+      const msg = c
+        ? `Offre envoyée ✓\nFrais client : ${c.client_fee_amount.toFixed(2)}€ (${c.client_fee_pct}%)\nCommission entreprise (20%) : ${c.company_share.toFixed(2)}€\nVotre gain net si sélectionné : ${c.agent_net.toFixed(2)}€`
+        : `Frais ${feePct}% · ETA ${eta} min`;
+      setCommissionMsg(msg);
       setBidOpen(null); load();
     } catch (e: any) { setErr(apiError(e)); }
   };
@@ -41,8 +72,14 @@ export default function PaybidAuctions() {
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: paybidColors.neutrals.background }}>
       <View style={styles.header}>
-        <TText variant="title" weight="extraBold">Offres en direct</TText>
-        <TText variant="caption" color={paybidColors.neutrals.textSecondary}>Posez votre offre dans la fenêtre de 90s</TText>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <TText variant="title" weight="extraBold">Offres en direct</TText>
+          <View style={[styles.liveBadge, { backgroundColor: wsAlive ? "#10B981" : "#94A3B8" }]}>
+            <View style={[styles.liveDot, { backgroundColor: wsAlive ? "#FFFFFF" : "#E5E7EB" }]} />
+            <TText variant="label" weight="bold" color="white" style={{ marginLeft: 4 }}>{wsAlive ? "LIVE" : "OFFLINE"}</TText>
+          </View>
+        </View>
+        <TText variant="caption" color={paybidColors.neutrals.textSecondary}>Posez votre offre dans la fenêtre de 90s · Synchro temps réel</TText>
       </View>
       <View style={styles.tabsRow}>
         {[{k:"city",l:"Ma ville"},{k:"all",l:"Toutes"}].map((t) => (
@@ -98,12 +135,36 @@ export default function PaybidAuctions() {
           </View>
         </View>
       </Modal>
+
+      {/* Modal de confirmation de commission après dépôt d'offre */}
+      <Modal visible={!!commissionMsg} transparent animationType="fade" onRequestClose={() => setCommissionMsg(null)}>
+        <View style={styles.modalBg}>
+          <View style={[styles.sheet, { borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl }]}>
+            <View style={{ alignItems: "center", marginBottom: spacing.md }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: "#10B981", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="checkmark-circle" size={40} color="white" />
+              </View>
+              <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>Offre envoyée</TText>
+            </View>
+            <View style={{ backgroundColor: paybidColors.overlays.primarySoft, borderRadius: radii.lg, padding: spacing.md }}>
+              <TText variant="caption" weight="bold" color={paybidColors.primary.base} style={{ marginBottom: 6 }}>DÉTAIL DE LA COMMISSION</TText>
+              <TText variant="caption" color={paybidColors.neutrals.textPrimary} style={{ lineHeight: 20 }}>{commissionMsg}</TText>
+            </View>
+            <TText variant="label" color={paybidColors.neutrals.textTertiary} align="center" style={{ marginTop: 8 }}>
+              L'attribution finale a lieu à la fin du round selon les autres offres.
+            </TText>
+            <Button title="J'ai compris" onPress={() => setCommissionMsg(null)} style={{ marginTop: spacing.md, backgroundColor: paybidColors.primary.base }} />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   header: { padding: spacing.lg },
+  liveBadge: { flexDirection: "row", alignItems: "center", paddingHorizontal: 8, paddingVertical: 4, borderRadius: radii.full },
+  liveDot: { width: 6, height: 6, borderRadius: 3 },
   tabsRow: { flexDirection: "row", gap: 8, paddingHorizontal: spacing.lg, marginBottom: 8 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: radii.full, backgroundColor: paybidColors.neutrals.surface, borderWidth: 1.5, borderColor: paybidColors.neutrals.border, alignItems: "center" },
   tabActive: { backgroundColor: paybidColors.primary.base, borderColor: paybidColors.primary.base },
