@@ -1,40 +1,40 @@
 /**
- * SENDBID Theme — Imperial Edition.
- * Brand: Imperial blue #00147E + white accent + gold highlights for premium states.
+ * SENDBID Theme — Navy Trust + Emerald Action.
+ * Brand: Navy #022a6b (trust, banking) + Emerald #04d46f (CTA, success).
  * Typography: Playfair Display (titles, serif) + Montserrat (body, sans).
  */
 export const colors = {
-  primary: { base: "#00147E", dark: "#000A42", light: "#3D52D5" },
-  accent: { base: "#FFFFFF", dark: "#F5F7FF", light: "#E8ECFF", biometric: "#3D52D5" },
-  // Gold tones for premium/loyalty states (kept tight with imperial mood)
+  primary: { base: "#022a6b", dark: "#011645", light: "#052080" },
+  accent: { base: "#04d46f", dark: "#04ba28", light: "#5FE89F", biometric: "#04d46f" },
+  // Gold tones for premium/loyalty states (kept tight with navy mood)
   gold: { base: "#D4AF37", dark: "#9A7C1F", light: "#F1D86A", soft: "#FAF1D2" },
-  status: { success: "#10B981", pending: "#F59E0B", error: "#EF4444", info: "#3D52D5" },
+  status: { success: "#04d46f", pending: "#F59E0B", error: "#EF4444", info: "#052080" },
   neutrals: {
     white: "#FFFFFF",
-    background: "#F5F7FF",
+    background: "#F4F7FD",
     surface: "#FFFFFF",
-    border: "#E0E5F5",
-    borderStrong: "#C2CADD",
+    border: "#DEE5F2",
+    borderStrong: "#BAC4DA",
     textPrimary: "#0A0E2E",
     textSecondary: "#4A5478",
     textTertiary: "#8B95B5",
   },
   gradients: {
-    flooMoney: ["#00147E", "#3D52D5"] as [string, string],
-    primary: ["#000A42", "#00147E"] as [string, string],
-    success: ["#059669", "#10B981"] as [string, string],
-    premiumDark: ["#000A42", "#1A1F4E"] as [string, string],
-    splash: ["#000A42", "#00147E", "#3D52D5"] as [string, string, string],
-    imperial: ["#000A42", "#00147E", "#000A42"] as [string, string, string],
+    flooMoney: ["#022a6b", "#052080"] as [string, string],
+    primary: ["#011645", "#022a6b"] as [string, string],
+    success: ["#04ba28", "#04d46f"] as [string, string],
+    premiumDark: ["#011645", "#022a6b"] as [string, string],
+    splash: ["#011645", "#022a6b", "#052080"] as [string, string, string],
+    imperial: ["#011645", "#022a6b", "#011645"] as [string, string, string],
     gold: ["#9A7C1F", "#D4AF37", "#F1D86A"] as [string, string, string],
   },
   overlays: {
-    successSoft: "#E6F8F0",
+    successSoft: "#DCFCE7",
     pendingSoft: "#FEF3C7",
     errorSoft: "#FEE2E2",
     infoSoft: "#DBEAFE",
-    primarySoft: "#E0E5F5",
-    accentSoft: "#F5F7FF",
+    primarySoft: "#E2E8F5",
+    accentSoft: "#DCFCE7",
     goldSoft: "#FAF1D2",
   },
 };

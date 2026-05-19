@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Pressable } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -12,7 +12,6 @@ type Badge = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
-  // Position around the circle (in percentage from center)
   pos: { top?: number; left?: number; right?: number; bottom?: number };
 };
 
@@ -20,49 +19,61 @@ type Step = {
   key: string;
   title: string;
   desc: string;
-  heroIcon: keyof typeof Ionicons.glyphMap;
+  heroImage: string;
   heroGradient: [string, string, string];
   badges: Badge[];
 };
 
-// Onboarding v2 — icônes fintech premium avec palette vive et gradients attractifs
+// Onboarding v5 — Images expressives haute résolution + palette Navy/Emerald
 const STEPS: Step[] = [
   {
     key: "s1",
     title: "Envoyez partout dans le monde",
     desc: "Transférez de l'argent dans 250 pays en quelques secondes, depuis votre mobile, avec les meilleurs taux.",
-    heroIcon: "rocket",
-    heroGradient: ["#6366F1", "#8B5CF6", "#EC4899"],
+    heroImage: "https://images.pexels.com/photos/6631421/pexels-photo-6631421.jpeg",
+    heroGradient: ["#022a6b", "#052080", "#04d46f"],
     badges: [
-      { label: "250 pays", icon: "planet", color: "#06B6D4", pos: { top: 6, right: -6 } },
+      { label: "250 pays", icon: "planet", color: "#04d46f", pos: { top: 6, right: -6 } },
       { label: "Instantané", icon: "flash", color: "#F59E0B", pos: { bottom: 18, left: -10 } },
-      { label: "Meilleurs taux", icon: "trending-up", color: "#10B981", pos: { top: "46%" as any, right: -16 } },
+      { label: "Meilleurs taux", icon: "trending-up", color: "#04ba28", pos: { top: "46%" as any, right: -16 } },
     ],
   },
   {
     key: "s2",
     title: "Cash, virement ou mobile",
     desc: "Choisissez librement le mode de remise : espèces chez un agent, virement bancaire ou portefeuille mobile.",
-    heroIcon: "wallet",
-    heroGradient: ["#10B981", "#06B6D4", "#3B82F6"],
+    heroImage: "https://images.pexels.com/photos/545065/pexels-photo-545065.jpeg",
+    heroGradient: ["#04ba28", "#04d46f", "#022a6b"],
     badges: [
-      { label: "Cash", icon: "cash", color: "#22C55E", pos: { top: 10, left: -8 } },
+      { label: "Cash", icon: "cash", color: "#04d46f", pos: { top: 10, left: -8 } },
       { label: "Mobile Money", icon: "phone-portrait", color: "#F97316", pos: { top: "40%" as any, right: -14 } },
-      { label: "Virement", icon: "business", color: "#8B5CF6", pos: { bottom: 10, left: "40%" as any } },
+      { label: "Virement", icon: "business", color: "#022a6b", pos: { bottom: 10, left: "40%" as any } },
     ],
   },
   {
     key: "s3",
     title: "Votre argent est protégé",
     desc: "PIN 6 chiffres, biométrie, KYC vérifié, chiffrement AES-256 et traçabilité complète conformité AML/RGPD.",
-    heroIcon: "shield-checkmark",
-    heroGradient: ["#0EA5E9", "#6366F1", "#EC4899"],
+    heroImage: "https://images.unsplash.com/photo-1660732106134-f3009a1e90ea",
+    heroGradient: ["#011645", "#022a6b", "#052080"],
     badges: [
-      { label: "PIN", icon: "keypad", color: "#10B981", pos: { top: 8, left: -6 } },
-      { label: "KYC", icon: "ribbon", color: "#3B82F6", pos: { top: 8, right: -6 } },
+      { label: "PIN", icon: "keypad", color: "#04d46f", pos: { top: 8, left: -6 } },
+      { label: "KYC", icon: "ribbon", color: "#022a6b", pos: { top: 8, right: -6 } },
       { label: "AML", icon: "checkmark-done-circle", color: "#F59E0B", pos: { top: "50%" as any, left: -14 } },
-      { label: "RGPD", icon: "lock-closed", color: "#8B5CF6", pos: { top: "50%" as any, right: -14 } },
+      { label: "RGPD", icon: "lock-closed", color: "#04ba28", pos: { top: "50%" as any, right: -14 } },
       { label: "Biométrie", icon: "finger-print", color: "#EC4899", pos: { bottom: 12, left: "42%" as any } },
+    ],
+  },
+  {
+    key: "s4",
+    title: "Enchères agents en temps réel",
+    desc: "Recevez les meilleures offres de nos agents en moins de 5 minutes. Le client choisit toujours le meilleur taux.",
+    heroImage: "https://images.pexels.com/photos/12960362/pexels-photo-12960362.jpeg",
+    heroGradient: ["#022a6b", "#04d46f", "#04ba28"],
+    badges: [
+      { label: "5 tours", icon: "repeat", color: "#04d46f", pos: { top: 8, right: -6 } },
+      { label: "60s", icon: "timer", color: "#F59E0B", pos: { top: "50%" as any, left: -14 } },
+      { label: "Live", icon: "radio", color: "#EF4444", pos: { bottom: 14, right: -8 } },
     ],
   },
 ];
@@ -104,7 +115,11 @@ export default function Onboarding() {
               end={{ x: 1, y: 1 }}
             >
               <View style={styles.heroInner}>
-                <Ionicons name={cur.heroIcon} size={96} color="white" />
+                <Image
+                  source={{ uri: cur.heroImage }}
+                  style={styles.heroImage}
+                  resizeMode="cover"
+                />
               </View>
               {/* Decorative rings */}
               <View style={[styles.ring, styles.ringOuter]} />
@@ -164,7 +179,7 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   dots: { flexDirection: "row", gap: 6 },
   dot: { height: 8, borderRadius: radii.full, backgroundColor: "rgba(255,255,255,0.25)" },
-  dotActive: { backgroundColor: "#10B981" },
+  dotActive: { backgroundColor: "#04d46f" },
   content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.xl },
   heroWrap: {
     width: 280, height: 280,
@@ -180,7 +195,9 @@ const styles = StyleSheet.create({
     width: 140, height: 140, borderRadius: 70,
     backgroundColor: "rgba(255,255,255,0.15)",
     alignItems: "center", justifyContent: "center",
+    overflow: "hidden",
   },
+  heroImage: { width: 140, height: 140, borderRadius: 70 },
   ring: { position: "absolute", borderRadius: 999, borderWidth: 1.5 },
   ringOuter: { width: 210, height: 210, borderColor: "rgba(255,255,255,0.18)" },
   ringMid: { width: 170, height: 170, borderColor: "rgba(255,255,255,0.08)" },
