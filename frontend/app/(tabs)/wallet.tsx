@@ -12,7 +12,7 @@ import { colors, spacing, radii } from "../../src/theme";
 // Wallet tab v4.0 — "17 Wallet" : hero gradient + 4 quick actions (Recharger/Retirer/Envoyer/Historique)
 // + Opérations récentes liste cliquable vers /wallet/op/[id]
 const QUICK = [
-  { key: "recharge", icon: "add-circle" as const, label: "Recharger", color: "#10B981", route: "/wallet/recharge" },
+  { key: "recharge", icon: "add-circle" as const, label: "Ajouter de l'argent", color: "#10B981", route: "/wallet/recharge" },
   { key: "withdraw", icon: "arrow-down-circle" as const, label: "Retirer", color: "#3B82F6", route: "/wallet/withdraw" },
   { key: "send", icon: "paper-plane" as const, label: "Envoyer", color: "#F59E0B", route: "/wallet/p2p" },
   { key: "bank", icon: "business" as const, label: "Virement bancaire", color: "#8B5CF6", route: "/wallet/bank-transfer" },
@@ -188,6 +188,7 @@ export default function WalletTab() {
       <Modal visible={showMenu} transparent animationType="fade" onRequestClose={() => setShowMenu(false)}>
         <TouchableOpacity activeOpacity={1} style={styles.menuOverlay} onPress={() => setShowMenu(false)}>
           <View style={styles.menuCard}>
+            <MenuRow icon="qr-code-outline" label="Connaître mon SBTag" onPress={() => { setShowMenu(false); router.push("/sbtag" as any); }} />
             <MenuRow icon="people-circle-outline" label="Mes contacts" onPress={() => { setShowMenu(false); router.push("/contacts" as any); }} />
             <MenuRow icon="speedometer-outline" label="Mes plafonds" onPress={() => { setShowMenu(false); router.push("/payment-caps" as any); }} />
             <MenuRow icon="receipt-outline" label="Reçus PDF" onPress={() => { setShowMenu(false); router.push("/receipts" as any); }} />

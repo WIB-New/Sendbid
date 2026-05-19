@@ -153,21 +153,6 @@ export default function Login() {
             style={{ backgroundColor: "#10B981" }}
           />
 
-          <View style={styles.orRow}>
-            <View style={styles.orLine} />
-            <TText variant="label" color={colors.neutrals.textTertiary} style={{ marginHorizontal: 12 }}>OU</TText>
-            <View style={styles.orLine} />
-          </View>
-
-          <Button
-            testID="login-biometric"
-            title={bioToken ? "Connexion biométrique" : "Activer la biométrie après connexion"}
-            variant="outline"
-            icon="finger-print"
-            onPress={biometricLogin}
-            disabled={!bioToken && !bioAvailable}
-          />
-
           <View style={styles.signupRow}>
             <TText variant="caption" color={colors.neutrals.textSecondary}>
               Pas encore de compte ?{" "}

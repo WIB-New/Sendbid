@@ -195,7 +195,7 @@ export default function Home() {
             <View style={[styles.walletQuickIcon, { backgroundColor: "#10B981" }]}>
               <Ionicons name="add-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="extraBold" align="center" style={{ marginTop: 6 }}>Recharger</TText>
+            <TText variant="label" weight="extraBold" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-withdraw" onPress={() => router.push("/wallet/withdraw" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#3B82F6" }]}>
@@ -221,7 +221,7 @@ export default function Home() {
               <View style={{ marginLeft: 12, flex: 1 }}>
                 <TText weight="extraBold" color="white">Nouveau transfert</TText>
                 <TText variant="caption" color="rgba(255,255,255,0.9)">
-                  Envoyer de l'argent dans 250 pays
+                  Envoyer de l'argent dans le monde entier
                 </TText>
               </View>
             </View>

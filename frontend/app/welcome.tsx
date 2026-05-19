@@ -43,7 +43,7 @@ export default function Welcome() {
           </TText>
 
           <View style={styles.statsRow}>
-            <Stat label={t("welcome.countries")} value="100+" />
+            <Stat label={t("welcome.countries")} value="250+" />
             <View style={styles.sep} />
             <Stat label={t("welcome.agents")} value="10k+" />
             <View style={styles.sep} />

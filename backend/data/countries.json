@@ -562,9 +562,15 @@
     "fee_percent_max": 5.0,
     "capital": "Ouagadougou",
     "cities": [
-      "Ouagadougou",
       "Bobo-Dioulasso",
-      "Koudougou"
+      "Koudougou",
+      "Ouagadougou",
+      "Ouahigouya",
+      "Banfora",
+      "Kaya",
+      "Tenkodogo",
+      "Fada N'gourma",
+      "Dédougou"
     ]
   },
   {
@@ -579,7 +585,14 @@
     "fee_percent_max": 5.0,
     "capital": "Gitega",
     "cities": [
-      "Gitega"
+      "Gitega",
+      "Bujumbura",
+      "Muyinga",
+      "Ngozi",
+      "Ruyigi",
+      "Kayanza",
+      "Rumonge",
+      "Makamba"
     ]
   },
   {
@@ -594,9 +607,16 @@
     "fee_percent_max": 5.0,
     "capital": "Porto-Novo",
     "cities": [
-      "Porto-Novo",
+      "Parakou",
       "Cotonou",
-      "Parakou"
+      "Porto-Novo",
+      "Djougou",
+      "Bohicon",
+      "Abomey",
+      "Natitingou",
+      "Kandi",
+      "Lokossa",
+      "Ouidah"
     ]
   },
   {
@@ -626,10 +646,28 @@
     "fee_percent_max": 5.0,
     "capital": "Yaoundé",
     "cities": [
-      "Yaoundé",
+      "Garoua",
       "Douala",
       "Bafoussam",
-      "Garoua"
+      "Yaoundé",
+      "Maroua",
+      "Yagoua",
+      "Bamenda",
+      "Bertoua",
+      "Ngaoundéré",
+      "Ebolowa",
+      "Kribi",
+      "Limbe",
+      "Buea",
+      "Edéa",
+      "Kumba",
+      "Tiko",
+      "Kousseri",
+      "Mokolo",
+      "Foumban",
+      "Dschang",
+      "Mbouda",
+      "Nkongsamba"
     ]
   },
   {
@@ -763,9 +801,14 @@
     "fee_percent_max": 5.0,
     "capital": "Brazzaville",
     "cities": [
-      "Brazzaville",
+      "Dolisie",
       "Pointe-Noire",
-      "Dolisie"
+      "Brazzaville",
+      "Nkayi",
+      "Owando",
+      "Ouesso",
+      "Madingou",
+      "Impfondo"
     ]
   },
   {
@@ -781,9 +824,16 @@
     "capital": "Kinshasa",
     "cities": [
       "Kinshasa",
-      "Lubumbashi",
       "Mbuji-Mayi",
-      "Goma"
+      "Goma",
+      "Lubumbashi",
+      "Kananga",
+      "Kisangani",
+      "Bukavu",
+      "Matadi",
+      "Likasi",
+      "Kolwezi",
+      "Mbandaka"
     ]
   },
   {
@@ -892,10 +942,21 @@
     "fee_percent_max": 5.0,
     "capital": "Yamoussoukro",
     "cities": [
-      "Yamoussoukro",
-      "Abidjan",
       "Bouaké",
-      "San-Pédro"
+      "San-Pédro",
+      "Abidjan",
+      "Yamoussoukro",
+      "Korhogo",
+      "Daloa",
+      "Man",
+      "Gagnoa",
+      "Divo",
+      "Anyama",
+      "Abengourou",
+      "Soubré",
+      "Dimbokro",
+      "Agboville",
+      "Grand-Bassam"
     ]
   },
   {
@@ -1039,9 +1100,14 @@
     "fee_percent_max": 5.0,
     "capital": "Libreville",
     "cities": [
+      "Franceville",
       "Libreville",
       "Port-Gentil",
-      "Franceville"
+      "Oyem",
+      "Moanda",
+      "Mouila",
+      "Lambaréné",
+      "Tchibanga"
     ]
   },
   {
@@ -1071,10 +1137,18 @@
     "fee_percent_max": 5.0,
     "capital": "Accra",
     "cities": [
-      "Accra",
       "Kumasi",
+      "Accra",
+      "Takoradi",
       "Tamale",
-      "Takoradi"
+      "Sekondi-Takoradi",
+      "Sunyani",
+      "Cape Coast",
+      "Koforidua",
+      "Ho",
+      "Tema",
+      "Obuasi",
+      "Wa"
     ]
   },
   {
@@ -1212,9 +1286,16 @@
     "fee_percent_max": 5.0,
     "capital": "Conakry",
     "cities": [
-      "Conakry",
       "Nzérékoré",
-      "Kankan"
+      "Conakry",
+      "Kankan",
+      "Kindia",
+      "Boké",
+      "Labé",
+      "Mamou",
+      "Faranah",
+      "Siguiri",
+      "Coyah"
     ]
   },
   {
@@ -1907,10 +1988,17 @@
     "fee_percent_max": 5.0,
     "capital": "Bamako",
     "cities": [
+      "Ségou",
       "Bamako",
-      "Sikasso",
       "Mopti",
-      "Ségou"
+      "Sikasso",
+      "Koutiala",
+      "Kayes",
+      "Gao",
+      "Tombouctou",
+      "Kati",
+      "Kidal",
+      "Markala"
     ]
   },
   {
@@ -1941,11 +2029,21 @@
     "capital": "Rabat",
     "cities": [
       "Rabat",
-      "Casablanca",
       "Marrakech",
-      "Fès",
       "Tanger",
-      "Agadir"
+      "Casablanca",
+      "Fès",
+      "Agadir",
+      "Meknès",
+      "Oujda",
+      "Kénitra",
+      "Tétouan",
+      "Salé",
+      "Nador",
+      "Mohammédia",
+      "Béni Mellal",
+      "El Jadida",
+      "Safi"
     ]
   },
   {
@@ -1975,9 +2073,16 @@
     "fee_percent_max": 5.0,
     "capital": "Nouakchott",
     "cities": [
-      "Nouakchott",
       "Nouadhibou",
-      "Rosso"
+      "Rosso",
+      "Nouakchott",
+      "Kaédi",
+      "Zouérat",
+      "Atar",
+      "Néma",
+      "Kiffa",
+      "Tidjikja",
+      "Akjoujt"
     ]
   },
   {
@@ -2182,7 +2287,13 @@
     "cities": [
       "Niamey",
       "Zinder",
-      "Maradi"
+      "Maradi",
+      "Agadez",
+      "Tahoua",
+      "Dosso",
+      "Diffa",
+      "Tillabéri",
+      "Arlit"
     ]
   },
   {
@@ -2197,11 +2308,25 @@
     "fee_percent_max": 5.0,
     "capital": "Abuja",
     "cities": [
-      "Abuja",
+      "Port Harcourt",
       "Lagos",
-      "Kano",
       "Ibadan",
-      "Port Harcourt"
+      "Kano",
+      "Abuja",
+      "Benin City",
+      "Kaduna",
+      "Maiduguri",
+      "Enugu",
+      "Zaria",
+      "Aba",
+      "Ilorin",
+      "Owerri",
+      "Calabar",
+      "Onitsha",
+      "Warri",
+      "Akure",
+      "Sokoto",
+      "Jos"
     ]
   },
   {
@@ -2645,9 +2770,15 @@
     "fee_percent_max": 5.0,
     "capital": "Kigali",
     "cities": [
+      "Gisenyi",
       "Kigali",
       "Butare",
-      "Gisenyi"
+      "Gitarama",
+      "Ruhengeri",
+      "Byumba",
+      "Cyangugu",
+      "Kibuye",
+      "Nyanza"
     ]
   },
   {
@@ -2662,9 +2793,15 @@
     "fee_percent_max": 5.0,
     "capital": "Bangui",
     "cities": [
-      "Bangui",
+      "Berbérati",
       "Bimbo",
-      "Berbérati"
+      "Bangui",
+      "Carnot",
+      "Bambari",
+      "Bouar",
+      "Bossangoa",
+      "Kaga-Bandoro",
+      "Nola"
     ]
   },
   {
@@ -3168,9 +3305,21 @@
     "capital": "Dakar",
     "cities": [
       "Dakar",
-      "Thiès",
       "Saint-Louis",
-      "Touba"
+      "Thiès",
+      "Touba",
+      "Rufisque",
+      "Kaolack",
+      "Mbour",
+      "Ziguinchor",
+      "Diourbel",
+      "Louga",
+      "Tambacounda",
+      "Kolda",
+      "Matam",
+      "Fatick",
+      "Pikine",
+      "Guédiawaye"
     ]
   },
   {
@@ -3233,9 +3382,16 @@
     "fee_percent_max": 5.0,
     "capital": "N'Djamena",
     "cities": [
-      "N'Djamena",
       "Moundou",
-      "Sarh"
+      "N'Djamena",
+      "Sarh",
+      "Abéché",
+      "Kelo",
+      "Koumra",
+      "Doba",
+      "Pala",
+      "Am Timan",
+      "Bongor"
     ]
   },
   {
@@ -3328,9 +3484,15 @@
     "fee_percent_max": 5.0,
     "capital": "Lomé",
     "cities": [
+      "Kara",
       "Lomé",
       "Sokodé",
-      "Kara"
+      "Kpalimé",
+      "Atakpamé",
+      "Dapaong",
+      "Aného",
+      "Tsévié",
+      "Bassar"
     ]
   },
   {

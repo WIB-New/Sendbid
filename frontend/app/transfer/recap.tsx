@@ -114,14 +114,7 @@ export default function TransferStep3() {
           </TText>
         </View>
         {wallet && wallet.balance < total ? (
-          <TText variant="caption" color={colors.status.error} style={{ marginTop: 4 }}>
-            Solde insuffisant. Rechargez votre wallet.
-          </TText>
-        ) : null}
-      </View>
-
-        {wallet && wallet.balance < total ? (
-          <View style={{ marginTop: 4 }}>
+          <View style={{ marginTop: 6 }}>
             <TText variant="caption" color={colors.status.error} style={{ marginBottom: 6 }}>
               Solde insuffisant pour effectuer cette opération.
             </TText>
