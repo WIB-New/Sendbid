@@ -10,9 +10,10 @@ import { useAuth } from "../../src/store";
 import { colors, spacing } from "../../src/theme";
 
 export default function VerifyOtp() {
-  const params = useLocalSearchParams<{ user_id: string; dev_email_otp?: string; dev_phone_otp?: string }>();
+  const params = useLocalSearchParams<{ user_id: string; dev_email_otp?: string; dev_phone_otp?: string; from_banner?: string }>();
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);
+  const refreshMe = useAuth((s) => s.refreshMe);
   const [emailCode, setEmailCode] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -31,8 +32,17 @@ export default function VerifyOtp() {
     setLoading(true);
     try {
       const { data } = await api.post("/auth/verify-otp", { user_id: params.user_id, email_code: emailCode, phone_code: phoneCode });
-      await setSession(data.access_token, data.user);
-      router.replace("/(auth)/create-pin");
+      if (data.access_token && data.user) {
+        await setSession(data.access_token, data.user);
+      } else {
+        // Already authenticated (from banner) — just refresh
+        await refreshMe();
+      }
+      if (params.from_banner === "1") {
+        router.replace("/(tabs)" as any);
+      } else {
+        router.replace("/(auth)/create-pin");
+      }
     } catch (e: any) {
       setErr(apiError(e));
     } finally {

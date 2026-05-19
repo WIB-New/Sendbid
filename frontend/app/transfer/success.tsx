@@ -7,6 +7,7 @@ import * as Clipboard from "expo-clipboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
+import { StatusChip } from "../../src/components/StatusChip";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 
@@ -120,7 +121,7 @@ export default function TransferSuccess() {
               tint="#F59E0B"
             />
           ) : null}
-          <Row label="Statut" value={t.status} tint="#10B981" last />
+          <Row label="Statut" value="" tint="#10B981" last statusBadge={t.status} />
         </View>
 
         {/* Withdrawal code standout */}
@@ -182,14 +183,18 @@ export default function TransferSuccess() {
   );
 }
 
-function Row({ label, value, sub, tint, last, mono }: { label: string; value: string; sub?: string; tint?: string; last?: boolean; mono?: boolean }) {
+function Row({ label, value, sub, tint, last, mono, statusBadge }: { label: string; value: string; sub?: string; tint?: string; last?: boolean; mono?: boolean; statusBadge?: string }) {
   return (
     <View style={[styles.row, !last && styles.rowSep]}>
       <TText variant="caption" color={colors.neutrals.textSecondary}>{label}</TText>
       <View style={{ alignItems: "flex-end", maxWidth: "60%" }}>
-        <TText variant="caption" weight="extraBold" align="right" style={mono ? styles.mono : undefined} color={tint}>
-          {value}
-        </TText>
+        {statusBadge ? (
+          <StatusChip status={statusBadge} />
+        ) : (
+          <TText variant="caption" weight="extraBold" align="right" style={mono ? styles.mono : undefined} color={tint}>
+            {value}
+          </TText>
+        )}
         {sub ? (<TText variant="label" color={colors.neutrals.textTertiary}>{sub}</TText>) : null}
       </View>
     </View>

@@ -17,8 +17,8 @@ type Pkg = { id: string; amount: number; label: string };
 const METHODS: { key: Method; label: string; icon: any; desc: string; available: boolean }[] = [
   { key: "cash", label: "Espèces", icon: "cash-outline", desc: "Dépôt en espèces chez un agent agréé. Crédit sous 5-15 minutes après confirmation par l'agent.", available: true },
   { key: "card", label: "Carte", icon: "card-outline", desc: "Visa / Mastercard / 3DS via Stripe", available: true },
-  { key: "momo", label: "Mobile", icon: "phone-portrait-outline", desc: "Wave, Orange Money, MTN MoMo, Moov", available: true },
-  { key: "paypal", label: "PayPal", icon: "logo-paypal", desc: "Compte PayPal", available: true },
+  { key: "momo", label: "Mobile (Bientôt)", icon: "phone-portrait-outline", desc: "Wave, Orange Money, MTN MoMo — Intégration en cours de finalisation. Veuillez utiliser Carte ou Espèces.", available: false },
+  { key: "paypal", label: "PayPal (Bientôt)", icon: "logo-paypal", desc: "PayPal — Intégration en cours de finalisation. Veuillez utiliser Carte ou Espèces.", available: false },
 ];
 
 const ORIGIN = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");

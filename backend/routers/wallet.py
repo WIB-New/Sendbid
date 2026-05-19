@@ -25,7 +25,7 @@ class BankWithdrawIn(BaseModel):
     amount: float
     method: str = "bank"
     details: dict
-    pin: Optional[str] = None
+    pin: str
 
 
 @router.post("/withdraw")
@@ -33,7 +33,11 @@ async def wallet_withdraw(payload: BankWithdrawIn, user: dict = Depends(get_curr
     """v6 — Bank withdraw to IBAN. Used by /wallet/bank-transfer.
     Debits the wallet atomically and creates a pending payout_request doc
     that will be processed by the operations team (SEPA settlement D+1/D+3).
+    PIN obligatoire (sécurité : retrait bancaire = opération sensible).
     """
+    if not payload.pin or len(payload.pin) != 6:
+        raise HTTPException(status_code=400, detail="Code PIN à 6 chiffres requis")
+    await require_pin(user["id"], payload.pin)
     if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Montant invalide")
     if payload.method not in ("bank", "sepa"):

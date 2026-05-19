@@ -36,6 +36,8 @@ export default function TransferStep3() {
   const fee = draft.fee_percent ? (draft.send_amount * draft.fee_percent) / 100 : 0;
   const vipFee = draft.vip_express ? (draft.send_amount * 3) / 100 : draft.vip_delivery ? (draft.send_amount * 1.5) / 100 : 0;
   const total = draft.send_amount + fee + vipFee;
+  const insufficient = !!wallet && wallet.balance < total;
+  const [knowBen, setKnowBen] = useState<null | boolean>(null);
 
   const confirm = async () => {
     if (pin.length !== 6) return;
@@ -96,7 +98,7 @@ export default function TransferStep3() {
       <View style={styles.box}>
         <Row label="Montant envoyé" value={`${draft.send_amount.toFixed(2)} EUR`} />
         <Row label={`Frais (${draft.fee_percent}%)`} value={`${fee.toFixed(2)} EUR`} />
-        {draft.vip_delivery ? <Row label="Service VIP (1.5%)" value={`${vipFee.toFixed(2)} EUR`} /> : null}
+        {draft.vip_express ? <Row label="Service VIP Express (3%)" value={`${vipFee.toFixed(2)} EUR`} /> : draft.vip_delivery ? <Row label="Service VIP (1.5%)" value={`${vipFee.toFixed(2)} EUR`} /> : null}
         <View style={styles.divider} />
         <Row label="Total à débiter" value={`${total.toFixed(2)} EUR`} bold />
         <Row label="Taux de change" value={`1 EUR = ${draft.fx_rate.toFixed(2)} ${draft.destination_currency}`} />
@@ -118,12 +120,46 @@ export default function TransferStep3() {
         ) : null}
       </View>
 
+        {wallet && wallet.balance < total ? (
+          <View style={{ marginTop: 4 }}>
+            <TText variant="caption" color={colors.status.error} style={{ marginBottom: 6 }}>
+              Solde insuffisant pour effectuer cette opération.
+            </TText>
+            <Button testID="recap-recharge" title="Recharger mon portefeuille" icon="add-circle-outline" variant="outline" onPress={() => router.push("/wallet/recharge" as any)} />
+          </View>
+        ) : null}
+      </View>
+
+      {/* Disclaimer "Connaissez-vous bien cette personne ?" */}
+      <View style={[styles.box, { backgroundColor: "#FEF3C7", borderColor: "#FCD34D" }]}>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}>
+          <Ionicons name="alert-circle" size={18} color="#92400E" />
+          <TText weight="extraBold" color="#92400E" style={{ marginLeft: 6 }}>Connaissez-vous bien cette personne ?</TText>
+        </View>
+        <TText variant="caption" color="#92400E">
+          Ne transférez jamais d'argent à un inconnu vous le demandant en urgence. Une fois confirmé, le transfert ne peut pas être annulé.
+        </TText>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+          <TouchableOpacity testID="know-ben-yes" onPress={() => setKnowBen(true)} style={[{ flex: 1, paddingVertical: 10, borderRadius: 999, alignItems: "center", borderWidth: 1.5 }, knowBen === true ? { backgroundColor: "#10B981", borderColor: "#10B981" } : { borderColor: "#FCD34D", backgroundColor: "white" }]}>
+            <TText weight="extraBold" color={knowBen === true ? "white" : "#92400E"}>Oui, je la connais</TText>
+          </TouchableOpacity>
+          <TouchableOpacity testID="know-ben-no" onPress={() => setKnowBen(false)} style={[{ flex: 1, paddingVertical: 10, borderRadius: 999, alignItems: "center", borderWidth: 1.5 }, knowBen === false ? { backgroundColor: "#EF4444", borderColor: "#EF4444" } : { borderColor: "#FCD34D", backgroundColor: "white" }]}>
+            <TText weight="extraBold" color={knowBen === false ? "white" : "#92400E"}>Non</TText>
+          </TouchableOpacity>
+        </View>
+        {knowBen === false ? (
+          <TText variant="caption" color={colors.status.error} style={{ marginTop: 8 }}>
+            Pour votre sécurité, le transfert ne peut être validé. Veuillez vérifier le bénéficiaire ou annuler.
+          </TText>
+        ) : null}
+      </View>
+
       <Button
         testID="transfer-confirm"
         title="Confirmer puis payer"
         icon="lock-closed"
         onPress={() => setPinModal(true)}
-        disabled={!!wallet && wallet.balance < total}
+        disabled={insufficient || knowBen !== true}
         style={{ marginTop: spacing.lg }}
       />
 

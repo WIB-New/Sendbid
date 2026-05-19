@@ -26,6 +26,9 @@ class RegisterIn(BaseModel):
     phone: str
     password: str
     full_name: str
+    country: Optional[str] = None  # ISO 3166-1 alpha-2 (ex: "FR", "SN")
+    city: Optional[str] = None
+    accept_terms: Optional[bool] = True  # CGU acceptance
 
 
 class VerifyOtpIn(BaseModel):
@@ -60,8 +63,23 @@ class ResetPasswordIn(BaseModel):
 async def register(payload: RegisterIn):
     email = payload.email.lower().strip()
     phone = payload.phone.strip()
-    if await db.users.find_one({"$or": [{"email": email}, {"phone": phone}]}):
-        raise HTTPException(status_code=400, detail="Email ou téléphone déjà utilisé")
+    # CGU obligatoires
+    if payload.accept_terms is False:
+        raise HTTPException(status_code=400, detail="Vous devez accepter les CGU et la politique de confidentialité")
+    # Anti-réutilisation : vérifier email et téléphone séparément avec messages explicites
+    existing = await db.users.find_one({"$or": [{"email": email}, {"phone": phone}]})
+    if existing:
+        # Distinguer compte vérifié vs non finalisé
+        is_verified = existing.get("email_verified") or existing.get("phone_verified") or existing.get("pin_hash")
+        which = "email" if existing.get("email") == email else "téléphone"
+        if is_verified:
+            raise HTTPException(status_code=400, detail=f"Ce {which} est déjà associé à un compte vérifié. Connectez-vous ou utilisez 'Mot de passe oublié'.")
+        else:
+            # Compte non finalisé : autoriser la reprise en supprimant l'ancien
+            await db.users.delete_one({"id": existing["id"]})
+            await db.wallets.delete_many({"user_id": existing["id"]})
+            await db.otp_codes.delete_many({"user_id": existing["id"]})
+            logger.info(f"[register] Cleaned up unfinalized account for {which}={email if which == 'email' else phone}")
     if len(payload.password) < 8:
         raise HTTPException(status_code=400, detail="Mot de passe trop court (min 8 caractères)")
     user_id = gen_id()
@@ -76,6 +94,9 @@ async def register(payload: RegisterIn):
         "loyalty_level": "Bronze", "loyalty_points": 0,
         "biometric_enabled": False, "biometric_token": None,
         "avatar_url": None, "language": "fr", "theme": "light",
+        "country": (payload.country or "").upper()[:2] or None,
+        "city": payload.city or None,
+        "terms_accepted_at": iso(now_utc()) if payload.accept_terms else None,
         "notif_prefs": {"push": True, "email": True, "sms": False},
         "created_at": iso(now_utc()),
     }

@@ -174,6 +174,21 @@ export default function Home() {
           <FlooMoneyCard balance={wallet?.balance ?? 0} currency={wallet?.currency ?? "EUR"} fullName={user.full_name} profileId={user.profile_id} compact />
         </View>
 
+        {/* Bandeau vérification email / téléphone (si non vérifié) */}
+        {(!user.email_verified || !user.phone_verified) ? (
+          <TouchableOpacity testID="verify-banner" activeOpacity={0.9} onPress={() => router.push({ pathname: "/(auth)/verify-otp" as any, params: { user_id: user.id, from_banner: "1" } })}
+            style={{ marginTop: spacing.md, backgroundColor: "#FEF3C7", borderColor: "#FCD34D", borderWidth: 1, borderRadius: 12, padding: 14, flexDirection: "row", alignItems: "center" }}>
+            <Ionicons name="warning" size={22} color="#92400E" />
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <TText weight="extraBold" color="#92400E">Vérifiez votre compte</TText>
+              <TText variant="caption" color="#92400E">
+                {!user.email_verified && !user.phone_verified ? "Email & téléphone non vérifiés" : !user.email_verified ? "Email non vérifié" : "Téléphone non vérifié"} — appuyez pour vérifier.
+              </TText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#92400E" />
+          </TouchableOpacity>
+        ) : null}
+
         {/* 3 boutons identiques à la page Portefeuille : Recharger / Retirer / Envoyer */}
         <View style={styles.walletQuickRow}>
           <TouchableOpacity testID="home-recharge" onPress={() => router.push("/wallet/recharge" as any)} style={styles.walletQuickBtn}>
