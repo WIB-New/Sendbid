@@ -30,6 +30,16 @@ export default function TransferSuccess() {
     api.get(`/transfers/${transfer_id}`).then((r) => setT(r.data));
   }, [transfer_id]);
 
+  // Compteur 48h pour les remises cash en agence — hooks doivent être appelés AVANT tout return conditionnel
+  const createdMs = t ? new Date(t.created_at || Date.now()).getTime() : Date.now();
+  const deadlineMs = createdMs + 48 * 3600 * 1000;
+  const [remaining, setRemaining] = useState(deadlineMs - Date.now());
+  useEffect(() => {
+    if (!t || t.delivery_mode !== "cash") return;
+    const i = setInterval(() => setRemaining(deadlineMs - Date.now()), 1000);
+    return () => clearInterval(i);
+  }, [deadlineMs, t?.delivery_mode]);
+
   if (!t) return null;
 
   const copyCode = async () => {
@@ -65,15 +75,6 @@ export default function TransferSuccess() {
     }
   };
 
-  // Compteur 48h pour les remises cash en agence
-  const createdMs = new Date(t.created_at || Date.now()).getTime();
-  const deadlineMs = createdMs + 48 * 3600 * 1000;
-  const [remaining, setRemaining] = React.useState(deadlineMs - Date.now());
-  React.useEffect(() => {
-    if (t.delivery_mode !== "cash") return;
-    const i = setInterval(() => setRemaining(deadlineMs - Date.now()), 1000);
-    return () => clearInterval(i);
-  }, [deadlineMs, t.delivery_mode]);
   const fmtCountdown = (ms: number) => {
     if (ms <= 0) return "00h:00m:00s";
     const h = Math.floor(ms / 3600000);
@@ -139,7 +140,7 @@ export default function TransferSuccess() {
               tint="#F59E0B"
             />
           ) : null}
-          <Row label="Statut" value={t.status === "captured" || t.status === "in_progress" ? "Confirmé" : ""} tint="#10B981" last statusBadge={t.status === "captured" || t.status === "in_progress" ? "confirmed" : t.status} />
+          <Row label="Statut" value="Confirmé" tint="#10B981" last statusBadge={"confirmed" as any} />
         </View>
 
         {/* Withdrawal code standout */}
