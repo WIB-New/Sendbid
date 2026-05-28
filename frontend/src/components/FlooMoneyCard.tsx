@@ -82,19 +82,19 @@ export function FlooMoneyCard({ balance, currency, fullName, profileId, compact 
         end={{ x: 1, y: 1 }}
         style={[styles.cardCompact, shadows.lg]}
       >
-        {/* Ligne 1 : Logo + Portefeuille + handle (en haut à droite) */}
+        {/* Ligne 1 : Logo + Portefeuille (titre) + handle (sous-titre) */}
         <View style={styles.topRow}>
-          <View style={styles.logoBlock}>
-            <View style={styles.logoChip}>
-              <SendBidLogo size={32} />
-            </View>
+          <View style={styles.logoChip}>
+            <SendBidLogo size={32} />
+          </View>
+          <View style={{ marginLeft: spacing.sm, flex: 1 }}>
             <TText weight="extraBold" color="white" style={styles.titleText}>
               Portefeuille
             </TText>
+            <TText variant="label" color="rgba(255,255,255,0.85)" numberOfLines={1}>
+              {handle}
+            </TText>
           </View>
-          <TText variant="label" color="rgba(255,255,255,0.85)" numberOfLines={1}>
-            {handle}
-          </TText>
         </View>
 
         {/* Ligne 2 : Label "Solde disponible" + toggle œil */}

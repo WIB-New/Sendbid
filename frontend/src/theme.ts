@@ -39,7 +39,7 @@ export const colors = {
   },
 };
 
-export const spacing = { xs: 4, sm: 6, md: 10, lg: 14, xl: 20, xxl: 28, xxxl: 40 };
+export const spacing = { xs: 3, sm: 5, md: 8, lg: 12, xl: 17, xxl: 24, xxxl: 34 };
 export const radii = { sm: 4, md: 8, lg: 12, xl: 16, xxl: 22, full: 9999 };
 
 /**
@@ -62,7 +62,7 @@ export const fontFamily = {
   serifBlack: "PlayfairDisplay_900Black",
 };
 
-export const fontSize = { xs: 11, sm: 13, base: 15, lg: 17, xl: 19, xxl: 22, xxxl: 27, display: 32 };
+export const fontSize = { xs: 10, sm: 12, base: 13, lg: 15, xl: 17, xxl: 19, xxxl: 24, display: 28 };
 
 export const shadows = {
   sm: { shadowColor: "#000A42", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 2, elevation: 2 },
