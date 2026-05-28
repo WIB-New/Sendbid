@@ -179,6 +179,40 @@ async def seed_demo_data():
                 "created_at": iso(now_utc()),
             })
         await db.agents.insert_many(agents_to_seed)
+
+    # === Seed dédié agents CM (KYC tier 3, disponibles) — idempotent par profile_id ===
+    # Permet de tester la livraison cash réelle sur le corridor Cameroun.
+    for a in [
+        {
+            "id": gen_id(), "full_name": "Patrick Mbarga", "profile_id": "PB100002",
+            "country_code": "CM", "country": "CM", "city": "Douala",
+            "lat": 4.0511, "lng": 9.7679, "rating": 4.8, "transfers_count": 312,
+            "avatar_url": "https://i.pravatar.cc/150?img=21",
+            "wallet_balance": 4500.0, "cash_capacity": 2500.0,
+            "available": True, "kyc_tier": 3, "kyc_status": "verified",
+            "suspended": False, "has_overdue_transfer": False,
+            "negative_claims": 0, "gamification_points": 850, "days_active": 420,
+            "floo_balance": 3200.0, "phone": "+237699112233",
+            "agency_name": "Mbarga Cash Express",
+            "agency_address": "Avenue de la Liberté, Akwa, Douala",
+            "created_at": iso(now_utc()),
+        },
+        {
+            "id": gen_id(), "full_name": "Esther Ngassa", "profile_id": "PB100003",
+            "country_code": "CM", "country": "CM", "city": "Yaoundé",
+            "lat": 3.8480, "lng": 11.5021, "rating": 4.9, "transfers_count": 478,
+            "avatar_url": "https://i.pravatar.cc/150?img=22",
+            "wallet_balance": 6200.0, "cash_capacity": 3500.0,
+            "available": True, "kyc_tier": 3, "kyc_status": "verified",
+            "suspended": False, "has_overdue_transfer": False,
+            "negative_claims": 0, "gamification_points": 1240, "days_active": 580,
+            "floo_balance": 4900.0, "phone": "+237688445566",
+            "agency_name": "Ngassa Money Hub",
+            "agency_address": "Carrefour Bastos, Yaoundé",
+            "created_at": iso(now_utc()),
+        },
+    ]:
+        await db.agents.update_one({"profile_id": a["profile_id"]}, {"$set": a}, upsert=True)
     else:
         # Backfill lat/lng on existing agents missing them (idempotent)
         city_coords = {

@@ -532,7 +532,7 @@ export default function Home() {
         {/* Dernières opérations */}
         <View style={{ marginTop: spacing.xl }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <TText variant="subtitle" weight="bold">Mes dernières opérations</TText>
+            <TText variant="caption" weight="bold" style={{ fontSize: 12 }}>Mes dernières opérations</TText>
             <TouchableOpacity testID="home-see-all" onPress={() => router.push("/(tabs)/transfers")}>
               <TText variant="caption" weight="bold" color={colors.primary.base}>Voir plus</TText>
             </TouchableOpacity>

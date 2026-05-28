@@ -125,8 +125,8 @@ export default function WalletTab() {
 
         {/* Transactions */}
         <View style={styles.secHead}>
-          <TText variant="label" weight="extraBold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 1 }}>
-            OPÉRATIONS RÉCENTES
+          <TText variant="label" weight="bold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.3, fontSize: 11 }}>
+            Opérations récentes
           </TText>
           <TouchableOpacity onPress={load}>
             <Ionicons name="refresh" size={16} color={colors.neutrals.textSecondary} />

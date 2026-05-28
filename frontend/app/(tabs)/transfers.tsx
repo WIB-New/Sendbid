@@ -103,7 +103,7 @@ export default function Transfers() {
       <View style={styles.content}>
         {/* Titre + CTA Nouveau transfert */}
         <View style={styles.listHead}>
-          <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 1 }}>TRANSFERTS RÉCENTS</TText>
+          <TText variant="caption" weight="bold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.3, fontSize: 11 }}>Transferts récents</TText>
           <TouchableOpacity testID="transfers-new-cta" onPress={() => router.push("/transfer/new")} style={styles.newCta}>
             <Ionicons name="add-circle" size={16} color={colors.primary.base} />
             <TText variant="caption" weight="extraBold" color={colors.primary.base} style={{ marginLeft: 4 }}>Nouveau transfert</TText>
