@@ -13,13 +13,22 @@ const LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
   { code: "es", label: "Español", flag: "🇪🇸" },
   { code: "ar", label: "العربية", flag: "🇸🇦" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+  { code: "pt", label: "Português", flag: "🇵🇹" },
 ];
 const THEMES = [
   { key: "light", label: "Clair", icon: "sunny-outline" as const },
   { key: "dark", label: "Sombre", icon: "moon-outline" as const },
   { key: "system", label: "Système", icon: "phone-portrait-outline" as const },
 ];
-const CURRENCIES = ["EUR", "GBP", "XOF", "XAF", "MAD", "TND", "NGN", "GHS", "KES"];
+// Liste complète des devises supportées (EUR + 28 corridors)
+const CURRENCIES = [
+  "EUR", "USD", "GBP", "CHF", "CAD", "AUD", "JPY", "CNY",
+  "XOF", "XAF", "MAD", "TND", "DZD", "EGP", "NGN", "GHS", "KES",
+  "ZAR", "RWF", "UGX", "TZS", "ETB", "MWK", "MZN", "AOA", "CDF",
+  "SLL", "GMD", "GNF", "MGA", "MUR", "BIF",
+];
 
 export default function PreferencesScreen() {
   const locale = useLocale();

@@ -141,7 +141,7 @@ export default function Withdraw() {
 
       {qr && method === "cash" && !qr._hideQr ? (
         <View style={styles.qrBox}>
-          {Platform.OS === "web" ? <Ionicons name="qr-code" size={160} color={colors.neutrals.textPrimary} /> : <QRCode value={qr.qr_token} size={200} />}
+          {Platform.OS === "web" ? <Ionicons name="qr-code" size={200} color="#022a6b" /> : <QRCode value={qr.qr_token} size={200} color="#022a6b" backgroundColor="white" />}
           <TText variant="title" weight="extraBold" color={colors.status.error} style={{ marginTop: 12 }}>
             -{qr.amount.toFixed(2)} EUR
           </TText>

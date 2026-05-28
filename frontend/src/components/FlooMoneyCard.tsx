@@ -88,7 +88,7 @@ export function FlooMoneyCard({ balance, currency, fullName, profileId, compact 
               <SendBidLogo size={compact ? 40 : 48} />
             </View>
             <View style={{ marginLeft: spacing.sm }}>
-              <TText variant="label" weight="extraBold" color="white" style={{ letterSpacing: 1 }}>
+              <TText variant="title" weight="extraBold" color="white" style={{ letterSpacing: 1, fontSize: 22 }}>
                 PORTEFEUILLE
               </TText>
               <TText variant="label" color="rgba(255,255,255,0.85)">

@@ -11,8 +11,11 @@ import fr from "./fr";
 import en from "./en";
 import es from "./es";
 import ar from "./ar";
+import de from "./de";
+import it from "./it";
+import pt from "./pt";
 
-export const i18n = new I18n({ fr, en, es, ar });
+export const i18n = new I18n({ fr, en, es, ar, de, it, pt });
 i18n.enableFallback = true;
 i18n.defaultLocale = "fr";
 
@@ -21,6 +24,9 @@ export const SUPPORTED_LOCALES = [
   { code: "en", label: "English", flag: "🇬🇧" },
   { code: "es", label: "Español", flag: "🇪🇸" },
   { code: "ar", label: "العربية", flag: "🇸🇦", rtl: true },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+  { code: "pt", label: "Português", flag: "🇵🇹" },
 ] as const;
 
 export type LocaleCode = (typeof SUPPORTED_LOCALES)[number]["code"];

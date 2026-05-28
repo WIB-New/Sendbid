@@ -109,9 +109,14 @@ export default function Beneficiaries() {
 }
 
 function BenRow({ b, last, onSend, onFav, onDelete }: any) {
+  const router = useRouter();
   const modeIcon: any = { cash: "cash", bank: "business", momo: "phone-portrait", wallet: "wallet", card: "card" }[b.default_delivery_mode || "cash"] || "cash";
   return (
-    <View style={[styles.brow, !last && { borderBottomWidth: 1, borderBottomColor: colors.neutrals.border }]}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => router.push({ pathname: "/beneficiaries/[id]" as any, params: { id: b.id } })}
+      style={[styles.brow, !last && { borderBottomWidth: 1, borderBottomColor: colors.neutrals.border }]}
+    >
       <View style={styles.avatar}>
         <TText variant="body" weight="extraBold" color="white">{(b.full_name || "?").charAt(0).toUpperCase()}</TText>
       </View>
@@ -133,7 +138,7 @@ function BenRow({ b, last, onSend, onFav, onDelete }: any) {
       <TouchableOpacity onPress={onDelete} style={styles.roundBtn}>
         <Ionicons name="trash-outline" size={16} color="#EF4444" />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 }
 

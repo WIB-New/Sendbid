@@ -205,6 +205,7 @@ export default function Home() {
             <View style={{ flex: 1 }}>
               <TText variant="caption" color={colors.neutrals.textSecondary}>Bonjour</TText>
               <TText variant="subtitle" weight="extraBold">{user.full_name.split(" ")[0]} 👋</TText>
+              <TText variant="label" color={colors.primary.base} weight="bold" style={{ marginTop: 2 }}>@{user.profile_id}</TText>
             </View>
             <SendBidLogo size={40} />
           </View>
@@ -558,21 +559,20 @@ export default function Home() {
           )}
         </View>
 
-        {/* === Services — conteneur bleu uni (thème), sans cadres ni fond pour chaque élément === */}
-        <View style={{ marginTop: spacing.xl }}>
-          <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 10 }}>Services</TText>
-          <View style={styles.servicesContainer}>
-            {SERVICES.map((s, i) => (
+        {/* === Services — grille compacte de mini-cards arrondies, fond transparent, sans cadre === */}
+        <View style={{ marginTop: spacing.lg }}>
+          <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 8 }}>Services</TText>
+          <View style={styles.servicesGrid}>
+            {SERVICES.map((s) => (
               <TouchableOpacity
                 key={s.key}
                 testID={`home-service-${s.key}`}
                 onPress={() => router.push(s.route as any)}
                 activeOpacity={0.7}
-                style={[styles.servicesRow, i < SERVICES.length - 1 && styles.servicesRowSep]}
+                style={styles.serviceMiniCard}
               >
-                <Ionicons name={s.icon} size={20} color="white" />
-                <TText variant="body" weight="semiBold" color="white" style={{ flex: 1, marginLeft: 12 }}>{s.label}</TText>
-                <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
+                <Ionicons name={s.icon} size={22} color={colors.primary.base} />
+                <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 4 }} numberOfLines={2}>{s.label}</TText>
               </TouchableOpacity>
             ))}
           </View>
@@ -604,21 +604,47 @@ export default function Home() {
         </TouchableOpacity>
       </Modal>
 
-      {/* Pop-up vérification 30s */}
+      {/* Pop-up vérification 30s — wording amélioré + indicateur de progression */}
       <Modal visible={verifPopupVisible} transparent animationType="fade" onRequestClose={() => setVerifPopupVisible(false)}>
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <View style={{ backgroundColor: "white", borderRadius: 24, padding: 24, maxWidth: 380, width: "100%", alignItems: "center" }}>
-            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: "#FEF3C7", alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="shield-checkmark" size={32} color="#D97706" />
+          <View style={{ backgroundColor: "white", borderRadius: 24, padding: 24, maxWidth: 400, width: "100%" }}>
+            <View style={{ alignItems: "center" }}>
+              <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="shield-checkmark" size={32} color={colors.primary.base} />
+              </View>
+              <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 12 }}>
+                Vérification de sécurité
+              </TText>
+              <TText variant="body" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 8, lineHeight: 20 }}>
+                Pour protéger votre compte SENDBID, nous allons vérifier votre adresse e-mail ainsi que votre numéro de téléphone.{"\n"}
+                Cette étape est obligatoire et ne prendra que quelques instants.
+              </TText>
             </View>
-            <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 12 }}>
-              Vérification de sécurité
-            </TText>
-            <TText variant="body" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 8, lineHeight: 20 }}>
-              Nous allons maintenant vérifier votre adresse email et votre numéro de téléphone afin de sécuriser votre compte SENDBID.
-            </TText>
-            <TText variant="caption" weight="bold" color="#D97706" style={{ marginTop: 10 }}>
-              Cette procédure est obligatoire et démarre dans quelques instants…
+            {/* Mini workflow */}
+            <View style={{ marginTop: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={{ alignItems: "center", flex: 1 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary.base, alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="mail" size={18} color="white" />
+                </View>
+                <TText variant="label" weight="bold" style={{ marginTop: 4 }}>1. E-mail</TText>
+              </View>
+              <View style={{ flex: 0.4, height: 2, backgroundColor: colors.neutrals.border, marginHorizontal: 4 }} />
+              <View style={{ alignItems: "center", flex: 1 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.neutrals.border, alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="call" size={18} color={colors.neutrals.textSecondary} />
+                </View>
+                <TText variant="label" weight="bold" style={{ marginTop: 4 }}>2. Téléphone</TText>
+              </View>
+              <View style={{ flex: 0.4, height: 2, backgroundColor: colors.neutrals.border, marginHorizontal: 4 }} />
+              <View style={{ alignItems: "center", flex: 1 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.neutrals.border, alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="checkmark-done" size={18} color={colors.neutrals.textSecondary} />
+                </View>
+                <TText variant="label" weight="bold" style={{ marginTop: 4 }}>3. Confirmé</TText>
+              </View>
+            </View>
+            <TText variant="caption" weight="bold" color={colors.primary.base} align="center" style={{ marginTop: 14 }}>
+              La procédure démarre dans quelques instants…
             </TText>
           </View>
         </View>
@@ -673,10 +699,12 @@ const styles = StyleSheet.create({
   txRow: { flexDirection: "row", alignItems: "center", backgroundColor: colors.neutrals.surface, padding: 12, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.neutrals.border, marginTop: 8 },
   txIcon: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
 
-  // Services — conteneur bleu uni, items dépouillés
-  servicesContainer: { backgroundColor: "#022a6b", borderRadius: radii.xl, paddingHorizontal: 16, paddingVertical: 4 },
+  // Services — grille compacte de mini-cards transparentes sans bordure
+  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 8 },
+  serviceMiniCard: { width: "31.5%", paddingVertical: 12, paddingHorizontal: 6, borderRadius: radii.xl, backgroundColor: "transparent", alignItems: "center", minHeight: 72 },
+  servicesContainer: { backgroundColor: "transparent" },
   servicesRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14 },
-  servicesRowSep: { borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.12)" },
+  servicesRowSep: { borderBottomWidth: 0 },
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
   modalSheet: { backgroundColor: colors.neutrals.surface, borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, padding: spacing.lg, maxHeight: "75%" },

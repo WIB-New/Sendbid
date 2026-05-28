@@ -87,7 +87,7 @@ export default function WalletTab() {
           <View style={styles.heroTop}>
             <TText variant="title" weight="extraBold" color="white">Mon portefeuille</TText>
             <TouchableOpacity testID="wallet-menu-btn" onPress={() => setShowMenu(true)} style={styles.iconBtn}>
-              <Ionicons name="ellipsis-vertical" size={20} color="white" />
+              <Ionicons name="menu" size={22} color="white" />
             </TouchableOpacity>
           </View>
           <View style={styles.balanceBox}>
@@ -211,7 +211,7 @@ function MenuRow({ icon, label, onPress, last }: { icon: any; label: string; onP
 }
 
 const walletMenuStyles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", paddingVertical: 14, paddingHorizontal: 16 },
+  row: { flexDirection: "row", alignItems: "center", paddingVertical: 11, paddingHorizontal: 14 },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
 });
 
@@ -224,16 +224,16 @@ const styles = StyleSheet.create({
   walletRow: { flexDirection: "row", alignItems: "center", marginTop: 6 },
   card: { flex: 1, backgroundColor: colors.neutrals.background, borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, marginTop: -spacing.lg },
   cardInner: { padding: spacing.lg, paddingBottom: spacing.xxxl },
-  quickRow: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
-  quickBtn: { flex: 1, alignItems: "center", backgroundColor: colors.neutrals.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.neutrals.border, paddingVertical: spacing.md },
-  quickIcon: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
+  quickRow: { flexDirection: "row", justifyContent: "space-between", gap: 6 },
+  quickBtn: { flex: 1, alignItems: "center", backgroundColor: colors.neutrals.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.neutrals.border, paddingVertical: 8 },
+  quickIcon: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   secHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.lg, marginBottom: 8, marginHorizontal: 4 },
   periodRow: { flexDirection: "row", gap: 6, marginBottom: 10, paddingHorizontal: 4 },
   pChip: { flex: 1, paddingVertical: 7, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, alignItems: "center" },
   pChipActive: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
   seeAll: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 12, marginTop: 8, gap: 4 },
   menuOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "flex-end", paddingTop: 60, paddingRight: 10 },
-  menuCard: { backgroundColor: "white", borderRadius: radii.xl, minWidth: 240, overflow: "hidden", elevation: 6, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: 6 } },
+  menuCard: { backgroundColor: "white", borderRadius: radii.lg, minWidth: 200, overflow: "hidden", elevation: 6, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
   listBox: { backgroundColor: colors.neutrals.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.neutrals.border },
   tx: { flexDirection: "row", alignItems: "center", padding: spacing.md },
   txIcon: { width: 36, height: 36, borderRadius: radii.full, alignItems: "center", justifyContent: "center" },

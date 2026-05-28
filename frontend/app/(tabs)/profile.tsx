@@ -76,13 +76,12 @@ export default function Profile() {
   // Type de compte : pour afficher uniquement le bon écran KYC (personne physique vs entreprise)
   const isCorporate = (user as any)?.account_type === "corporate" || (user as any)?.is_corporate === true;
 
-  // Mes sections — chaque section = 1 ligne cliquable qui ouvre un écran dédié
+  // Mes sections — RGPD retiré (l'action "Supprimer mon compte" est déplacée dans "Mon compte")
   const SECTIONS: { title: string; subtitle: string; route: string; icon: any; tint: string }[] = [
-    { title: "Mon compte", subtitle: "Informations, KYC, notifications reçues", route: "/profile-account", icon: "person-circle", tint: "#3B82F6" },
+    { title: "Mon compte", subtitle: "Informations, KYC, suppression de compte", route: "/profile-account", icon: "person-circle", tint: "#3B82F6" },
     { title: "Paramètres", subtitle: "Sécurité, préférences, notifications", route: "/profile-settings", icon: "settings", tint: "#8B5CF6" },
     { title: "Fidélité & Récompenses", subtitle: "Parrainage, programme, évaluations", route: "/profile-loyalty", icon: "trophy", tint: "#F59E0B" },
     { title: "Aide & Support", subtitle: "Contact, FAQ, litiges, ressources", route: "/profile-help", icon: "help-circle", tint: "#10B981" },
-    { title: "RGPD", subtitle: "Export & suppression des données", route: "/profile-rgpd", icon: "shield-checkmark", tint: "#EF4444" },
   ];
 
   return (
@@ -200,7 +199,7 @@ export default function Profile() {
               </View>
             </View>
             <TText variant="caption" color="rgba(255,255,255,0.85)" style={{ marginTop: spacing.md, lineHeight: 18 }}>
-              SENDBID est une application innovante de transfert d'argent international qui connecte les expéditeurs aux agents locaux pour des remises d'argent multi-modes rapides et sécurisées.
+              Application innovante de transfert d'argent international qui met en relation les expéditeurs aux agents pour des remises d'argent multimodes, rapides et sécurisées.
             </TText>
             <View style={styles.socialRow}>
               {SOCIALS.map((s) => (
