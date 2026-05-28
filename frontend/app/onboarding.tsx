@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, TouchableOpacity, Pressable, Image as RNImage } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -84,6 +85,15 @@ export default function Onboarding() {
   const cur = STEPS[step];
   const last = step === STEPS.length - 1;
 
+  // Prefetch toutes les images dès le mount pour un affichage instantané au changement de slide
+  useEffect(() => {
+    STEPS.forEach((s) => {
+      Image.prefetch(s.heroImage).catch(() => {});
+      // Fallback RN Image cache aussi
+      try { (RNImage as any).prefetch?.(s.heroImage); } catch {}
+    });
+  }, []);
+
   const next = () => (last ? router.replace("/welcome") : setStep((s) => s + 1));
 
   return (
@@ -116,9 +126,12 @@ export default function Onboarding() {
             >
               <View style={styles.heroInner}>
                 <Image
-                  source={{ uri: cur.heroImage }}
-                  style={styles.heroImage}
-                  resizeMode="cover"
+                  source={cur.heroImage}
+                  style={styles.heroImage as any}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={150}
+                  priority="high"
                 />
               </View>
               {/* Decorative rings */}

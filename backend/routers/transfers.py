@@ -354,12 +354,25 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                     return
 
         # ============================== COUNTER-BID PHASE ==============================
-        # Aucun gagnant après 5 rounds — relance avec 3 sous-tours de 5 meilleurs agents
-        # autorisés à proposer des frais SUPÉRIEURS au client (avec plafond +50%)
-        logger.info(f"[auction] {transfer_id} entering COUNTER-BID phase (no winner after {ROUNDS} rounds)")
+        # Aucun gagnant après 5 rounds — relance avec 3 sous-tours de 5 meilleurs agents.
+        # Spec §11 : autorisée UNIQUEMENT si le client a opté pour `accepts_counter_bid_uplift=True`
+        # à la création du transfert. Sinon → bascule directe en fallback ABSORBED/EXPIRED.
+        # Plafond strict : client_fee_pct + 2.0 (en points de %) — JAMAIS au-delà.
+        logger.info(f"[auction] {transfer_id} no winner after {ROUNDS} standard rounds")
+
+        # Lire la préférence client
+        t_full = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "accepts_counter_bid_uplift": 1})
+        client_consented = bool((t_full or {}).get("accepts_counter_bid_uplift", False))
+        if not client_consented:
+            logger.info(f"[auction] {transfer_id} client did not opt-in to counter-bid uplift → skip to fallback")
+            # Bascule directe vers fallback (ABSORBED si petit montant, EXPIRED sinon — voir bloc fallback en bas)
+            return await _run_fallback(transfer_id, send_amount, client_fee_pct)
+
+        logger.info(f"[auction] {transfer_id} entering COUNTER-BID phase (client opted-in)")
         await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "COUNTER_BIDDING"}})
         await manager.broadcast(transfer_id, {"event": "counter_bid_phase_started"})
-        max_counter_fee = round(client_fee_pct * 1.5, 2)
+        # Plafond strict : +2 points de % maximum (spec §11.3 — corridor Afrique→Monde : +2% max)
+        max_counter_fee = round(min(client_fee_pct + 2.0, client_fee_pct * 1.5), 2)
         counter_used_ids: set = set()
 
         for cb_round in range(3):  # 3 sub-rounds of 5 best
@@ -474,6 +487,32 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                 pass
     except Exception as e:
         logger.error(f"auction error: {e}", exc_info=True)
+
+
+async def _run_fallback(transfer_id: str, send_amount: float, client_fee_pct: float):
+    """Fallback cascade — appelé quand la phase standard échoue et qu'aucune contre-enchère n'est autorisée
+    (ou si la contre-enchère a aussi échoué). Politique simple : si send_amount < 200 EUR → ABSORBED, sinon EXPIRED."""
+    transfer = await db.transfers.find_one({"id": transfer_id}, {"_id": 0}) or {}
+    if send_amount < 200:
+        await db.transfers.update_one({"id": transfer_id}, {"$set": {
+            "status": "ABSORBED",
+            "absorbed_at": iso(now_utc()),
+            "absorption_reason": "no_agent_after_5_rounds",
+        }})
+        await manager.broadcast(transfer_id, {"event": "auction_absorbed", "transfer_id": transfer_id})
+        try:
+            await create_notification(transfer.get("user_id"), "Transfert pris en charge",
+                                      "Aucun agent disponible — la plateforme prend en charge votre transfert directement. Délai de remise étendu.")
+        except Exception:
+            pass
+    else:
+        await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "EXPIRED"}})
+        await manager.broadcast(transfer_id, {"event": "auction_expired"})
+        try:
+            await create_notification(transfer.get("user_id"), "Enchère expirée",
+                                      "Aucun agent disponible pour ce transfert. Vous pouvez relancer avec des frais plus attractifs.")
+        except Exception:
+            pass
 
 
 async def assign_agent(transfer_id: str, bid_id: str, auto: bool = False):
