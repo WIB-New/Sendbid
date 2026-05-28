@@ -80,44 +80,41 @@ export function FlooMoneyCard({ balance, currency, fullName, profileId, compact 
         colors={colors.gradients.flooMoney}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[compact ? styles.cardCompact : styles.card, shadows.lg]}
+        style={[styles.cardCompact, shadows.lg]}
       >
+        {/* Ligne 1 : Logo + Portefeuille + handle (en haut à droite) */}
         <View style={styles.topRow}>
           <View style={styles.logoBlock}>
             <View style={styles.logoChip}>
-              <SendBidLogo size={compact ? 40 : 48} />
+              <SendBidLogo size={32} />
             </View>
-            <View style={{ marginLeft: spacing.sm }}>
-              <TText variant="title" weight="extraBold" color="white" style={{ letterSpacing: 1, fontSize: 22 }}>
-                PORTEFEUILLE
-              </TText>
-              <TText variant="label" color="rgba(255,255,255,0.85)">
-                Solde
-              </TText>
-            </View>
+            <TText weight="extraBold" color="white" style={styles.titleText}>
+              Portefeuille
+            </TText>
           </View>
-          <TText variant="label" color="rgba(255,255,255,0.85)">
+          <TText variant="label" color="rgba(255,255,255,0.85)" numberOfLines={1}>
             {handle}
           </TText>
         </View>
 
-        <View style={{ marginTop: compact ? spacing.md : spacing.md }}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TText variant="label" color="rgba(255,255,255,0.8)">
-              Solde disponible
-            </TText>
-            <TouchableOpacity testID="balance-toggle" onPress={onTogglePress} style={styles.eyeBtn}>
-              <Ionicons name={show ? "eye" : "eye-off"} size={14} color="white" />
-            </TouchableOpacity>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "baseline", marginTop: 4 }}>
-            <TText weight="extraBold" color="white" style={styles.balanceHuge}>
-              {shown}
-            </TText>
-            <TText variant="body" weight="semiBold" color="rgba(255,255,255,0.85)" style={{ marginLeft: 8 }}>
-              {currency}
-            </TText>
-          </View>
+        {/* Ligne 2 : Label "Solde disponible" + toggle œil */}
+        <View style={styles.balanceLabelRow}>
+          <TText variant="label" color="rgba(255,255,255,0.8)">
+            Solde disponible
+          </TText>
+          <TouchableOpacity testID="balance-toggle" onPress={onTogglePress} style={styles.eyeBtn}>
+            <Ionicons name={show ? "eye" : "eye-off"} size={14} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Ligne 3 : Solde principal + devise */}
+        <View style={styles.balanceRow}>
+          <TText weight="extraBold" color="white" style={styles.balanceHuge} numberOfLines={1} adjustsFontSizeToFit>
+            {shown}
+          </TText>
+          <TText variant="body" weight="semiBold" color="rgba(255,255,255,0.85)" style={{ marginLeft: 6 }}>
+            {currency}
+          </TText>
         </View>
       </LinearGradient>
 
@@ -166,22 +163,26 @@ const styles = StyleSheet.create({
   cardCompact: {
     width: "100%",
     borderRadius: radii.xxl,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     overflow: "hidden",
   },
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   logoBlock: { flexDirection: "row", alignItems: "center", flex: 1 },
   logoChip: {
-    width: 56,
-    height: 56,
-    borderRadius: radii.lg,
+    width: 40,
+    height: 40,
+    borderRadius: radii.md,
     backgroundColor: "rgba(255,255,255,0.18)",
     alignItems: "center",
     justifyContent: "center",
+    marginRight: spacing.sm,
   },
-  balanceHuge: { fontSize: 56, lineHeight: 64, includeFontPadding: false },
-  eyeBtn: { marginLeft: 8, width: 26, height: 26, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
+  titleText: { fontSize: 18, letterSpacing: 0.3 },
+  balanceLabelRow: { flexDirection: "row", alignItems: "center", marginTop: 10 },
+  balanceRow: { flexDirection: "row", alignItems: "baseline", marginTop: 2 },
+  balanceHuge: { fontSize: 34, lineHeight: 40, includeFontPadding: false },
+  eyeBtn: { marginLeft: 8, width: 22, height: 22, borderRadius: 11, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
   modal: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
   sheet: { backgroundColor: "white", borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, padding: spacing.lg, paddingBottom: spacing.xl },
   modalIcon: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primary.base, alignItems: "center", justifyContent: "center", alignSelf: "center" },

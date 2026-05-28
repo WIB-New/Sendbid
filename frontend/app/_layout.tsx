@@ -24,6 +24,7 @@ import { useAuth } from "../src/store";
 import { useLocale } from "../src/i18n";
 import { registerForPushAndSync } from "../src/push";
 import { colors } from "../src/theme";
+import { ThemeProvider } from "../src/themeContext";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -138,8 +139,10 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <Stack key={locale} screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: colors.neutrals.background } }} />
+      <ThemeProvider>
+        <StatusBar style="dark" />
+        <Stack key={locale} screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: colors.neutrals.background } }} />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

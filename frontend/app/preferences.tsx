@@ -38,6 +38,7 @@ export default function PreferencesScreen() {
   const [secondary, setSecondary] = useState<string>(((user as any)?.secondary_currency as string) || "GBP");
   const [openLang, setOpenLang] = useState(false);
   const [openTheme, setOpenTheme] = useState(false);
+  const [openCur, setOpenCur] = useState(false);
   const primary = ((user as any)?.default_currency as string) || "EUR";
 
   const saveTheme = async (k: string) => { setTheme(k); setOpenTheme(false); try { await api.put("/auth/me", { theme: k }); refreshMe(); } catch {} };
@@ -86,27 +87,38 @@ export default function PreferencesScreen() {
           <View style={styles.activePill}>
             <TText variant="label" weight="extraBold" color="white">{primary}</TText>
           </View>
-        </View>
-        <View style={styles.row}>
+        </View>        <TouchableOpacity testID="pref-cur-trigger" style={styles.dropdownRow} onPress={() => setOpenCur(true)}>
           <View style={[styles.icon, { backgroundColor: "#F59E0B1A" }]}>
             <Ionicons name="add-circle-outline" size={20} color="#F59E0B" />
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <TText variant="body" weight="semiBold">Devise secondaire</TText>
-            <TText variant="label" color={colors.neutrals.textSecondary}>Affichée au second plan ({secondary})</TText>
+            <TText variant="label" color={colors.neutrals.textSecondary}>Affichée au second plan</TText>
           </View>
-        </View>
-        <View style={styles.chipsRow}>
-          {CURRENCIES.filter((c) => c !== primary).map((c) => {
-            const active = secondary === c;
-            return (
-              <TouchableOpacity key={c} testID={`pref-cur-${c}`} onPress={() => saveCurrency(c)} style={[styles.chip, active && styles.chipActive]}>
-                <TText variant="label" weight="extraBold" color={active ? "white" : colors.neutrals.textPrimary}>{c}</TText>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+          <View style={styles.activePill}>
+            <TText variant="label" weight="extraBold" color="white">{secondary}</TText>
+          </View>
+          <Ionicons name="chevron-down" size={18} color={colors.neutrals.textSecondary} style={{ marginLeft: 6 }} />
+        </TouchableOpacity>
       </View>
+
+      {/* Modal sélection DEVISE SECONDAIRE */}
+      <Modal visible={openCur} transparent animationType="slide" onRequestClose={() => setOpenCur(false)}>
+        <TouchableOpacity activeOpacity={1} style={styles.overlay} onPress={() => setOpenCur(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.sheet}>
+            <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 12 }}>Devise secondaire</TText>
+            <ScrollView style={{ maxHeight: 400 }}>
+              {CURRENCIES.filter((c) => c !== primary).map((c) => (
+                <TouchableOpacity key={c} testID={`pref-cur-${c}`} onPress={() => { saveCurrency(c); setOpenCur(false); }} style={styles.optRow}>
+                  <Ionicons name="cash-outline" size={20} color={colors.primary.base} style={{ marginRight: 12 }} />
+                  <TText variant="body" weight={secondary === c ? "extraBold" : "semiBold"} style={{ flex: 1 }}>{c}</TText>
+                  {secondary === c ? <Ionicons name="checkmark-circle" size={22} color="#10B981" /> : null}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Modal sélection LANGUE */}
       <Modal visible={openLang} transparent animationType="slide" onRequestClose={() => setOpenLang(false)}>

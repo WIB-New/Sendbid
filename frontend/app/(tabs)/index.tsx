@@ -13,6 +13,7 @@ import { useAuth, useDraft } from "../../src/store";
 import { KycPopup } from "../../src/components/KycPopup";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
+import { useThemeTokens } from "../../src/themeContext";
 
 type Corridor = {
   country_code: string;
@@ -46,6 +47,7 @@ export default function Home() {
   const refreshMe = useAuth((s) => s.refreshMe);
   const setDraft = useDraft((s) => s.setDraft);
   const router = useRouter();
+  const { tokens } = useThemeTokens();
 
   const [operations, setOperations] = useState<any[]>([]);
   const [unread, setUnread] = useState(0);
@@ -188,7 +190,7 @@ export default function Home() {
   const filtered = corridors.filter((c) => !search || c.country_name.toLowerCase().includes(search.toLowerCase()) || c.country_code.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.neutrals.background }}>
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: tokens.neutrals.background }}>
       <KycPopup userId={user.id} kycTier={user.kyc_tier} />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
@@ -230,19 +232,19 @@ export default function Home() {
             <View style={[styles.walletQuickIcon, { backgroundColor: "#10B981" }]}>
               <Ionicons name="add-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="extraBold" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-withdraw" onPress={() => router.push("/wallet/withdraw" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#3B82F6" }]}>
               <Ionicons name="arrow-down-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="extraBold" align="center" style={{ marginTop: 6 }}>Retirer</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Retirer</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-send" onPress={() => router.push("/wallet/p2p" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#F59E0B" }]}>
               <Ionicons name="paper-plane" size={22} color="white" />
             </View>
-            <TText variant="label" weight="extraBold" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
           </TouchableOpacity>
         </View>
 
@@ -571,8 +573,8 @@ export default function Home() {
                 activeOpacity={0.7}
                 style={styles.serviceMiniCard}
               >
-                <Ionicons name={s.icon} size={22} color={colors.primary.base} />
-                <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 4 }} numberOfLines={2}>{s.label}</TText>
+                <Ionicons name={s.icon} size={20} color="white" />
+                <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 4 }} numberOfLines={2}>{s.label}</TText>
               </TouchableOpacity>
             ))}
           </View>
@@ -661,7 +663,7 @@ const styles = StyleSheet.create({
   badge: { position: "absolute", top: 6, right: 6, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 9, backgroundColor: colors.status.error, alignItems: "center", justifyContent: "center" },
 
   walletQuickRow: { flexDirection: "row", justifyContent: "space-between", gap: 8, marginTop: spacing.lg },
-  walletQuickBtn: { flex: 1, alignItems: "center", backgroundColor: colors.neutrals.surface, paddingVertical: 12, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.neutrals.border },
+  walletQuickBtn: { flex: 1, alignItems: "center", backgroundColor: "transparent", paddingVertical: 10, borderRadius: radii.lg },
   walletQuickIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
 
   // CTA Nouveau transfert
@@ -699,9 +701,9 @@ const styles = StyleSheet.create({
   txRow: { flexDirection: "row", alignItems: "center", backgroundColor: colors.neutrals.surface, padding: 12, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.neutrals.border, marginTop: 8 },
   txIcon: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
 
-  // Services — grille compacte de mini-cards transparentes sans bordure
-  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 8 },
-  serviceMiniCard: { width: "31.5%", paddingVertical: 12, paddingHorizontal: 6, borderRadius: radii.xl, backgroundColor: "transparent", alignItems: "center", minHeight: 72 },
+  // Services — grille compacte mini-cards transparentes, conteneur bleu thème + trait fin bleu nuit
+  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 4, backgroundColor: colors.primary.base, borderRadius: radii.xl, borderWidth: 1, borderColor: "#000C3A", padding: 8 },
+  serviceMiniCard: { width: "31.5%", paddingVertical: 8, paddingHorizontal: 4, backgroundColor: "transparent", alignItems: "center", minHeight: 60 },
   servicesContainer: { backgroundColor: "transparent" },
   servicesRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14 },
   servicesRowSep: { borderBottomWidth: 0 },

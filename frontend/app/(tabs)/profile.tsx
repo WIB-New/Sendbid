@@ -199,7 +199,7 @@ export default function Profile() {
               </View>
             </View>
             <TText variant="caption" color="rgba(255,255,255,0.85)" style={{ marginTop: spacing.md, lineHeight: 18 }}>
-              Application innovante de transfert d'argent international qui met en relation les expéditeurs aux agents pour des remises d'argent multimodes, rapides et sécurisées.
+              Application innovante de transfert d'argent international qui met en relation les expéditeurs avec les agents pour des remises d'argent multimodes, rapides et sécurisées.
             </TText>
             <View style={styles.socialRow}>
               {SOCIALS.map((s) => (
