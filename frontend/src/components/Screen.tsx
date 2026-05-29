@@ -1,6 +1,15 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -20,8 +29,21 @@ type Props = {
   /** Affiche un hero dégradé bleu impérial derrière le titre. */
   hero?: boolean;
   heroColors?: [string, string, ...string[]];
+  /** Désactive KeyboardAvoidingView si nécessaire (rarement utile). */
+  noKeyboardAvoid?: boolean;
+  /** Inclut l'inset bas (utile hors-tabs). Par défaut true. */
+  bottomInset?: boolean;
+  /** Permet de fermer le clavier en tapant en dehors d'un champ. */
+  dismissKeyboardOnTap?: boolean;
 };
 
+/**
+ * Écran de base SendBID / PayBID.
+ * - SafeArea (top, left, right + bottom optionnel)
+ * - KeyboardAvoidingView (iOS padding / Android height)
+ * - ScrollView avec keyboardShouldPersistTaps="handled" + dismiss on drag
+ * - Hero gradient en option, header back/title/right.
+ */
 export function Screen({
   children,
   title,
@@ -33,8 +55,21 @@ export function Screen({
   contentStyle,
   hero = false,
   heroColors,
+  noKeyboardAvoid = false,
+  bottomInset = true,
+  dismissKeyboardOnTap = true,
 }: Props) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  // Offset Android pour la status bar quand le clavier monte.
+  const kbOffset = Platform.select({ ios: 0, android: 0 }) as number;
+  const kbBehavior = Platform.OS === "ios" ? ("padding" as const) : ("height" as const);
+
+  // Padding bas dynamique : safe area + gutter raisonnable.
+  // 100px ≥ hauteur typique d'un tab bar (80) + marge respiratoire, garantissant
+  // qu'aucun contenu n'est masqué par la barre d'onglets ou la barre système.
+  const bottomPad = (bottomInset ? Math.max(insets.bottom, 8) : 0) + 100;
 
   const HeaderRow = (
     <View style={styles.header}>
@@ -66,6 +101,49 @@ export function Screen({
     </View>
   );
 
+  // Body (scroll ou static), enveloppé pour gérer clavier + tap-to-dismiss.
+  const Body = (
+    <>
+      {scroll ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            { padding: spacing.lg, paddingTop: hero ? spacing.lg : undefined, paddingBottom: bottomPad },
+            contentStyle,
+          ]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+          // @ts-ignore — disponible iOS 13+
+          automaticallyAdjustKeyboardInsets
+          contentInsetAdjustmentBehavior="automatic"
+        >
+          {children}
+        </ScrollView>
+      ) : (
+        <View style={[{ flex: 1, padding: spacing.lg, paddingBottom: bottomInset ? bottomPad : spacing.lg }, contentStyle]}>
+          {children}
+        </View>
+      )}
+    </>
+  );
+
+  const KeyboardWrapper = noKeyboardAvoid
+    ? ({ children: c }: { children: React.ReactNode }) => <View style={{ flex: 1 }}>{c}</View>
+    : ({ children: c }: { children: React.ReactNode }) => (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={kbBehavior} keyboardVerticalOffset={kbOffset}>
+          {c}
+        </KeyboardAvoidingView>
+      );
+
+  const DismissWrapper = ({ children: c }: { children: React.ReactNode }) =>
+    dismissKeyboardOnTap && Platform.OS !== "web" ? (
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={{ flex: 1 }}>{c}</View>
+      </TouchableWithoutFeedback>
+    ) : (
+      <View style={{ flex: 1 }}>{c}</View>
+    );
+
   if (hero) {
     return (
       <View style={{ flex: 1, backgroundColor: bg || colors.neutrals.background }}>
@@ -77,38 +155,22 @@ export function Screen({
         >
           <SafeAreaView edges={["top", "left", "right"]}>{HeaderRow}</SafeAreaView>
         </LinearGradient>
-        {scroll ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={[
-              { padding: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xxxl },
-              contentStyle,
-            ]}
-            keyboardShouldPersistTaps="handled"
-          >
-            {children}
-          </ScrollView>
-        ) : (
-          <View style={[{ flex: 1, padding: spacing.lg }, contentStyle]}>{children}</View>
-        )}
+        <KeyboardWrapper>
+          <DismissWrapper>{Body}</DismissWrapper>
+        </KeyboardWrapper>
       </View>
     );
   }
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor: bg || colors.neutrals.background }}>
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      style={{ flex: 1, backgroundColor: bg || colors.neutrals.background }}
+    >
       {(title || back || right) && HeaderRow}
-      {scroll ? (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[{ padding: spacing.lg, paddingBottom: spacing.xxxl }, contentStyle]}
-          keyboardShouldPersistTaps="handled"
-        >
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={[{ flex: 1, padding: spacing.lg }, contentStyle]}>{children}</View>
-      )}
+      <KeyboardWrapper>
+        <DismissWrapper>{Body}</DismissWrapper>
+      </KeyboardWrapper>
     </SafeAreaView>
   );
 }

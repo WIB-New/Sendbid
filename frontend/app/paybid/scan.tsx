@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Animated, Easing, Alert, Modal, TextInput, Platform } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Animated, Easing, Alert, Modal, TextInput, Platform, KeyboardAvoidingView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -142,7 +142,7 @@ export default function PaybidScan() {
 
       {/* Manual input */}
       <Modal visible={manualOpen} transparent animationType="slide" onRequestClose={() => setManualOpen(false)}>
-        <View style={styles.modalBg}>
+        <KeyboardAvoidingView style={styles.modalBg} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.sheet}>
             <TText variant="subtitle" weight="bold">Saisir le code de retrait</TText>
             <TText variant="caption" color={paybidColors.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>
@@ -158,7 +158,7 @@ export default function PaybidScan() {
               <TText color={paybidColors.neutrals.textSecondary}>Annuler</TText>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

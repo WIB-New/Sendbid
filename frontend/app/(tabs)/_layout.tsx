@@ -1,8 +1,12 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamily } from "../../src/theme";
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  // Tab bar : 60 (contenu) + insets.bottom (safe area) pour iPhone à encoche.
+  const tabBarHeight = 60 + Math.max(insets.bottom, 8);
   return (
     <Tabs
       screenOptions={{
@@ -12,9 +16,9 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.neutrals.surface,
           borderTopColor: colors.neutrals.border,
-          height: 76,
+          height: tabBarHeight,
           paddingTop: 8,
-          paddingBottom: 16,
+          paddingBottom: Math.max(insets.bottom, 8),
         },
         tabBarLabelStyle: { fontFamily: fontFamily.semiBold, fontSize: 11 },
       }}
@@ -44,7 +48,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profil",
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="person-circle-outline" size={size} color={color} />,
         }}
       />
     </Tabs>

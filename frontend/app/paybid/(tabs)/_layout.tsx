@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { paybidColors } from "../../../src/paybidTheme";
 
 function Icon({ name, color }: { name: any; color: string }) {
@@ -8,13 +9,21 @@ function Icon({ name, color }: { name: any; color: string }) {
 }
 
 export default function PaybidTabsLayout() {
+  const insets = useSafeAreaInsets();
+  const safeBottom = Math.max(insets.bottom, 8);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: paybidColors.primary.base,
         tabBarInactiveTintColor: paybidColors.neutrals.textTertiary,
-        tabBarStyle: { backgroundColor: paybidColors.neutrals.surface, borderTopColor: paybidColors.neutrals.border, height: 64, paddingBottom: 8 },
+        tabBarStyle: {
+          backgroundColor: paybidColors.neutrals.surface,
+          borderTopColor: paybidColors.neutrals.border,
+          height: 56 + safeBottom,
+          paddingTop: 6,
+          paddingBottom: safeBottom,
+        },
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Tableau", tabBarIcon: ({ color }) => <Icon name="home" color={color} /> }} />

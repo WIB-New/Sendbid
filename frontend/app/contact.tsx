@@ -61,7 +61,13 @@ export default function Contact() {
         </SafeAreaView>
       </LinearGradient>
 
-      <ScrollView style={styles.card} contentContainerStyle={styles.cardInner} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
+        <TouchableWithoutFeedback onPress={Platform.OS !== "web" ? Keyboard.dismiss : undefined} accessible={false}>
+          <ScrollView style={styles.card} contentContainerStyle={styles.cardInner} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}>
         <View style={styles.grid}>
           {CHANNELS.map((c) => (
             <TouchableOpacity key={c.key} testID={`ch-${c.key}`} onPress={() => tap(c)} style={[styles.chanCard, { borderColor: c.color }]}>
@@ -92,6 +98,8 @@ export default function Contact() {
           <Button testID="contact-send" title="Envoyer le message" icon="paper-plane" loading={busy} disabled={!subject.trim() || !message.trim()} onPress={send} style={{ marginTop: spacing.md, backgroundColor: "#10B981" }} />
         </View>
       </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -115,7 +123,7 @@ const styles = StyleSheet.create({
   heroTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingTop: spacing.sm },
   iconBtn: { width: 36, height: 36, borderRadius: radii.full, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
   card: { flex: 1, backgroundColor: colors.neutrals.background, borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, marginTop: -spacing.lg },
-  cardInner: { padding: spacing.lg, paddingBottom: spacing.xxxl },
+  cardInner: { padding: spacing.lg, paddingBottom: 100 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chanCard: { flex: 1, minWidth: "45%", backgroundColor: colors.neutrals.surface, borderWidth: 2, borderRadius: radii.xl, padding: spacing.md, alignItems: "center" },
   chanIcon: { width: 48, height: 48, borderRadius: radii.full, alignItems: "center", justifyContent: "center" },
