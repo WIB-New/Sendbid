@@ -39,7 +39,7 @@ export default function AgentPanel() {
   const CARDS = [
     { key: "agents",    icon: "people-circle",   color: "#54280f", label: "Mon réseau d'agents", desc: `${networkSize}+ sous-agents`, route: "/admin/agents" },
     { key: "transfers", icon: "swap-horizontal", color: "#54280f", label: "Transferts réseau",   desc: "Vue consolidée", route: "/admin/transfers" },
-    { key: "float",     icon: "cash-outline",    color: "#10B981", label: "Float & trésorerie",  desc: "Déclarations consolidées", route: "/admin/reconciliation" },
+    { key: "float",     icon: "cash-outline",    color: "#C2410C", label: "Float & trésorerie",  desc: "Déclarations consolidées", route: "/admin/reconciliation" },
     { key: "users",     icon: "people",          color: "#8B5CF6", label: "Clients servis",     desc: "Identités & KYC", route: "/admin/users" },
   ];
 
@@ -63,10 +63,10 @@ export default function AgentPanel() {
 
           <TText variant="label" weight="extraBold" color="rgba(255,255,255,0.7)" style={{ letterSpacing: 1, marginTop: spacing.xl, marginBottom: 8 }}>PERFORMANCE RÉSEAU</TText>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-            <Kpi label="Agents actifs" value={kpis?.agents?.active ?? "—"} icon="people-circle" tint="#10B981" />
+            <Kpi label="Agents actifs" value={kpis?.agents?.active ?? "—"} icon="people-circle" tint="#C2410C" />
             <Kpi label="Float réseau" value={kpis?.float?.total_declared?.toLocaleString("fr-FR") ?? "—"} icon="cash" tint="#54280f" />
             <Kpi label="Transferts" value={kpis?.transfers?.total ?? "—"} icon="swap-horizontal" tint="#8B5CF6" />
-            <Kpi label="Complétés" value={kpis?.transfers?.completed ?? "—"} icon="checkmark-done" tint="#059669" />
+            <Kpi label="Complétés" value={kpis?.transfers?.completed ?? "—"} icon="checkmark-done" tint="#9A3412" />
             <Kpi label="En cours" value={kpis?.transfers?.in_progress ?? "—"} icon="flash" tint="#F59E0B" />
             <Kpi label="Volume EUR" value={kpis?.transfers?.volume_eur?.toLocaleString("fr-FR") ?? "—"} icon="trending-up" tint="#0EA5E9" />
           </View>

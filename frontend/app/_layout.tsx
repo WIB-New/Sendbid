@@ -106,8 +106,13 @@ export default function RootLayout() {
       // Post-login routing basé sur le rôle
       const role = (user as any).role;
       if (isAgent) {
-        // Agent credentials sur build client → log them out cleanly
-        router.replace("/welcome");
+        // Sur le build web (preview/admin) : permettre aux agents de tester PAYBID.
+        // Sur le build natif SENDBID : un compte agent n'a pas sa place ici → /welcome
+        if (Platform.OS === "web") {
+          router.replace("/paybid/(tabs)" as any);
+        } else {
+          router.replace("/welcome");
+        }
       } else if (role === "admin" || role === "super_admin") {
         router.replace("/admin" as any);
       } else if (role === "partner_admin") {
@@ -119,7 +124,11 @@ export default function RootLayout() {
       }
     } else if (user && isAgent && inTabs) {
       // Agent on client build: shouldn't be here
-      router.replace("/welcome");
+      if (Platform.OS === "web") {
+        router.replace("/paybid/(tabs)" as any);
+      } else {
+        router.replace("/welcome");
+      }
     }
   }, [user, hydrated, segments, router, appVariant]);
 

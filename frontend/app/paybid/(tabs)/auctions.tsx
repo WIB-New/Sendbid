@@ -74,7 +74,7 @@ export default function PaybidAuctions() {
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <TText variant="title" weight="extraBold">Offres en direct</TText>
-          <View style={[styles.liveBadge, { backgroundColor: wsAlive ? "#10B981" : "#94A3B8" }]}>
+          <View style={[styles.liveBadge, { backgroundColor: wsAlive ? "#C2410C" : "#94A3B8" }]}>
             <View style={[styles.liveDot, { backgroundColor: wsAlive ? "#FFFFFF" : "#E5E7EB" }]} />
             <TText variant="label" weight="bold" color="white" style={{ marginLeft: 4 }}>{wsAlive ? "LIVE" : "OFFLINE"}</TText>
           </View>
@@ -141,7 +141,7 @@ export default function PaybidAuctions() {
         <View style={styles.modalBg}>
           <View style={[styles.sheet, { borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl }]}>
             <View style={{ alignItems: "center", marginBottom: spacing.md }}>
-              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: "#10B981", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: "#C2410C", alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="checkmark-circle" size={40} color="white" />
               </View>
               <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>Offre envoyée</TText>

@@ -36,7 +36,22 @@ export default function LiveAuction() {
   // === Chargement initial + WebSocket ===
   useEffect(() => {
     if (!transfer_id) return;
-    api.get(`/transfers/${transfer_id}`).then(r => setTransfer(r.data)).catch(() => {});
+    // Snapshot initial : si transfert déjà assigné/expiré, on calque le state directement
+    api.get(`/transfers/${transfer_id}`).then(r => {
+      const tr = r.data;
+      setTransfer(tr);
+      const st = String(tr?.status || "").toUpperCase();
+      if (st === "AGENT_ASSIGNED" || st === "ASSIGNED" || st === "IN_PROGRESS" || st === "DELIVERED" || st === "COMPLETED") {
+        setStatus("ASSIGNED");
+        setAssignedAgent(tr?.assigned_agent || tr?.agent || null);
+        // Si pas d'objet agent dans la réponse, on récupère via l'endpoint dédié
+        if (!(tr?.assigned_agent || tr?.agent) && tr?.agent_id) {
+          api.get(`/agents/${tr.agent_id}`).catch(() => null).then((ag) => ag && setAssignedAgent(ag.data));
+        }
+      } else if (st === "ABSORBED") setStatus("ABSORBED");
+      else if (st === "EXPIRED") setStatus("EXPIRED");
+      else if (typeof tr?.current_round === "number") setRound(tr.current_round);
+    }).catch(() => {});
     api.get(`/transfers/${transfer_id}/bids`).then(r => setBids(r.data || [])).catch(() => {});
 
     let ws: WebSocket | null = null;

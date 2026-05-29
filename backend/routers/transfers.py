@@ -324,6 +324,7 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                     "id": gen_id(), "transfer_id": transfer_id,
                     "round": round_idx + 1, "phase": "main",
                     "agent_id": agent["id"], "agent_name": agent["full_name"],
+                    "agent_profile_id": agent.get("profile_id"),
                     "agent_avatar": agent.get("avatar_url"),
                     "agent_rating": agent.get("rating", 4.5),
                     "agent_city": agent.get("city"),
@@ -652,6 +653,14 @@ async def get_transfer(transfer_id: str, user: dict = Depends(get_current_user))
     t = await db.transfers.find_one({"id": transfer_id, "user_id": user["id"]}, {"_id": 0})
     if not t:
         raise HTTPException(status_code=404, detail="Transfert introuvable")
+    # Si agent assigné, embarquer ses infos publiques (parcours live offers / receipt)
+    if t.get("agent_id"):
+        ag = await db.agents.find_one({"id": t["agent_id"]},
+            {"_id": 0, "id": 1, "full_name": 1, "profile_id": 1, "city": 1, "country_code": 1,
+             "phone": 1, "agency_name": 1, "agency_address": 1, "avatar_url": 1,
+             "rating": 1, "lat": 1, "lng": 1})
+        if ag:
+            t["assigned_agent"] = ag
     return t
 
 
