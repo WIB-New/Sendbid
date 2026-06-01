@@ -256,7 +256,7 @@ export default function Home() {
           style={{ marginTop: spacing.xl }}
         >
           <LinearGradient
-            colors={transferOpen ? [colors.primary.base, colors.primary.dark] : ["#10B981", "#04ba28"]}
+            colors={["#00147E", "#3D52D5"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.newTransferCta}
@@ -561,10 +561,15 @@ export default function Home() {
           )}
         </View>
 
-        {/* === Services — grille compacte de mini-cards arrondies, fond transparent, sans cadre === */}
+        {/* === Services — grille compacte avec dégradé bleu Portefeuille === */}
         <View style={{ marginTop: spacing.lg }}>
           <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 8 }}>Services</TText>
-          <View style={styles.servicesGrid}>
+          <LinearGradient
+            colors={["#00147E", "#3D52D5"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.servicesGrid}
+          >
             {SERVICES.map((s) => (
               <TouchableOpacity
                 key={s.key}
@@ -577,7 +582,7 @@ export default function Home() {
                 <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 4 }} numberOfLines={2}>{s.label}</TText>
               </TouchableOpacity>
             ))}
-          </View>
+          </LinearGradient>
         </View>
       </ScrollView>
 
@@ -702,7 +707,7 @@ const styles = StyleSheet.create({
   txIcon: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
 
   // Services — grille compacte mini-cards transparentes, conteneur bleu thème + trait fin bleu nuit
-  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 4, backgroundColor: colors.primary.base, borderRadius: radii.xl, borderWidth: 1, borderColor: "#000C3A", padding: 8 },
+  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 4, borderRadius: radii.xl, borderWidth: 1, borderColor: "#000C3A", padding: 8 },
   serviceMiniCard: { width: "31.5%", paddingVertical: 8, paddingHorizontal: 4, backgroundColor: "transparent", alignItems: "center", minHeight: 60 },
   servicesContainer: { backgroundColor: "transparent" },
   servicesRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14 },
