@@ -226,27 +226,32 @@ export default function Home() {
           <FlooMoneyCard balance={wallet?.balance ?? 0} currency={wallet?.currency ?? "EUR"} fullName={user.full_name} profileId={user.profile_id} compact />
         </View>
 
-        {/* 3 quick wallet actions */}
-        <View style={styles.walletQuickRow}>
+        {/* CTA Portefeuille — rangée 3 actions wallet sur dégradé bleu identique à la page Portefeuille */}
+        <LinearGradient
+          colors={["#00147E", "#3D52D5"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.walletQuickRow}
+        >
           <TouchableOpacity testID="home-recharge" onPress={() => router.push("/wallet/recharge" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#10B981" }]}>
               <Ionicons name="add-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
+            <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-withdraw" onPress={() => router.push("/wallet/withdraw" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#3B82F6" }]}>
               <Ionicons name="arrow-down-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Retirer</TText>
+            <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 6 }}>Retirer</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-send" onPress={() => router.push("/wallet/p2p" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#F59E0B" }]}>
               <Ionicons name="paper-plane" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
+            <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
 
         {/* === CTA "Nouveau transfert" — flèche ↓ qui déroule l'étape 1 inline === */}
         <TouchableOpacity
@@ -256,7 +261,7 @@ export default function Home() {
           style={{ marginTop: spacing.xl }}
         >
           <LinearGradient
-            colors={["#00147E", "#3D52D5"]}
+            colors={transferOpen ? [colors.primary.base, colors.primary.dark] : ["#10B981", "#04ba28"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.newTransferCta}
@@ -667,7 +672,7 @@ const styles = StyleSheet.create({
   notifBtn: { width: 44, height: 44, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, alignItems: "center", justifyContent: "center" },
   badge: { position: "absolute", top: 6, right: 6, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 9, backgroundColor: colors.status.error, alignItems: "center", justifyContent: "center" },
 
-  walletQuickRow: { flexDirection: "row", justifyContent: "space-between", gap: 8, marginTop: spacing.lg },
+  walletQuickRow: { flexDirection: "row", justifyContent: "space-between", marginTop: spacing.lg, borderRadius: radii.xl, paddingVertical: 12, paddingHorizontal: 8 },
   walletQuickBtn: { flex: 1, alignItems: "center", backgroundColor: "transparent", paddingVertical: 10, borderRadius: radii.lg },
   walletQuickIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
 
