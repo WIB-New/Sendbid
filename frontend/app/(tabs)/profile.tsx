@@ -50,19 +50,17 @@ export default function Profile() {
     if (busy) return;
     const exec = async () => {
       setBusy(true);
-      try { await logout(); } catch {}
+      try { await logout(); } catch (e) { console.warn("logout err", e); }
       setBusy(false);
-      // hard reset navigation: efface la pile
+      // Hard reset navigation — on web on force la racine pour purger l'historique
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        try { window.location.href = "/welcome"; return; } catch {}
+      }
       router.replace("/welcome");
     };
-    if (Platform.OS === "web") {
-      if (typeof window !== "undefined" && (window as any).confirm("Voulez-vous vraiment vous déconnecter ?")) await exec();
-      return;
-    }
-    Alert.alert("Déconnexion", "Voulez-vous vraiment vous déconnecter ?", [
-      { text: "Annuler", style: "cancel" },
-      { text: "Se déconnecter", style: "destructive", onPress: exec },
-    ]);
+    // Pas de dialog bloquant — la déconnexion est non destructive et instantanée.
+    // (le bouton "Déconnecter tous les appareils" garde sa confirmation.)
+    await exec();
   };
 
   const KYC = {
@@ -190,21 +188,21 @@ export default function Profile() {
             </View>
           </View>
 
-          {/* À propos card — gradient sombre */}
+          {/* À propos card — gradient sombre (texte compact, icônes sociaux réduites) */}
           <LinearGradient colors={["rgba(255,255,255,0.10)", "rgba(255,255,255,0.04)"]} style={styles.aboutCard}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View style={styles.aboutLogo}><SendBidLogo size={32} /></View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <TText variant="body" weight="extraBold" color="white">À propos de SENDBID</TText>
+              <View style={styles.aboutLogo}><SendBidLogo size={28} /></View>
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <TText variant="caption" weight="extraBold" color="white">À propos de SENDBID</TText>
               </View>
             </View>
-            <TText variant="caption" color="rgba(255,255,255,0.85)" style={{ marginTop: spacing.md, lineHeight: 18 }}>
+            <TText color="rgba(255,255,255,0.78)" style={{ marginTop: spacing.sm, fontSize: 11, lineHeight: 15 }}>
               Application innovante de transfert d'argent international qui met en relation les expéditeurs avec les agents pour des remises d'argent multimodes, rapides et sécurisées.
             </TText>
             <View style={styles.socialRow}>
               {SOCIALS.map((s) => (
                 <TouchableOpacity key={s.icon} onPress={() => Linking.openURL(s.url)} style={styles.socialBtn}>
-                  <Ionicons name={s.icon} size={18} color="white" />
+                  <Ionicons name={s.icon} size={14} color="white" />
                 </TouchableOpacity>
               ))}
             </View>
@@ -255,9 +253,9 @@ const styles = StyleSheet.create({
   disconnectAllRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.md, paddingVertical: 14, borderTopWidth: 1, borderTopColor: "#F1F5F9" },
   dangerZone: { padding: spacing.md, borderTopWidth: 1, borderTopColor: "#FEE2E2", backgroundColor: "#FEF2F2" },
   dangerBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 12, marginTop: 8, backgroundColor: "white", borderRadius: radii.lg, borderWidth: 1, borderColor: "#FCA5A5" },
-  aboutCard: { borderRadius: radii.xxl, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  aboutLogo: { width: 48, height: 48, borderRadius: radii.lg, backgroundColor: "rgba(255,255,255,0.12)", alignItems: "center", justifyContent: "center" },
-  socialRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: spacing.md },
-  socialBtn: { width: 38, height: 38, borderRadius: radii.full, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
+  aboutCard: { borderRadius: radii.xxl, padding: spacing.md, marginTop: spacing.md, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  aboutLogo: { width: 36, height: 36, borderRadius: radii.lg, backgroundColor: "rgba(255,255,255,0.12)", alignItems: "center", justifyContent: "center" },
+  socialRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: spacing.sm },
+  socialBtn: { width: 28, height: 28, borderRadius: radii.full, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
   logoutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#EF4444", paddingVertical: 16, borderRadius: radii.xxl, marginTop: spacing.lg },
 });

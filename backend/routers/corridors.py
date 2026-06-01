@@ -70,11 +70,13 @@ def _serialize(corridor: dict) -> dict:
 
 @router.get("/corridors")
 async def list_corridors(
-    user: dict = Depends(get_current_user),
     search: Optional[str] = Query(None, description="Filtre par nom (substring, insensible à la casse)"),
     only_receivers: bool = Query(True, description="Limiter aux pays récepteurs (par défaut true)"),
 ):
     """All countries available as a destination.
+
+    Endpoint **public** (pas d'auth requise) car la liste des pays est utilisée
+    sur l'écran d'inscription pour choisir le pays de résidence.
 
     By default returns the receiving subset (~250 — every country is a
     receiver by default unless ops disabled it). Pass `only_receivers=false`

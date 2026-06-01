@@ -99,16 +99,15 @@ export default function TransferStep1() {
           if (found) {
             setSelectedBen(found);
             const c = list.find((x) => x.country_code === found.country);
-            // Toujours fixer le pays du bénéficiaire AVANT tout fallback
+            // Fixer le pays du bénéficiaire si trouvé (sinon laisser vide — l'utilisateur choisira)
             if (c) setCountry(c);
-            else if (list.length > 0) setCountry(list[0]);
             // Mode par défaut du bénéficiaire (cash/bank/momo)
             const dm = String(found.default_delivery_mode || "cash").toLowerCase();
             if (["cash", "bank", "momo"].includes(dm)) setMode(dm);
             return;
           }
         }
-        if (list.length > 0) setCountry(list[0]);
+        // Pas de présélection automatique d'un pays — le client choisit lui-même
       })
       .catch(() => {});
   }, [params.beneficiary_id]);
@@ -167,8 +166,8 @@ export default function TransferStep1() {
         Pays du bénéficiaire
       </TText>
       <TouchableOpacity testID="transfer-country" style={styles.selector} onPress={() => setShowCountry(true)}>
-        <TText variant="body" weight="semiBold">
-          {country ? `${country.flag} ${country.country_name}` : "Sélectionner"}
+        <TText variant="body" weight="semiBold" color={country ? colors.neutrals.textPrimary : colors.neutrals.textTertiary}>
+          {country ? `${country.flag} ${country.country_name}` : "Sélectionner un pays"}
         </TText>
         <Ionicons name="chevron-down" size={18} color={colors.neutrals.textSecondary} />
       </TouchableOpacity>

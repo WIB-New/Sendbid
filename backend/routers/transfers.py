@@ -354,113 +354,15 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                     await assign_agent(transfer_id, valid[0]["id"], auto=True)
                     return
 
-        # ============================== COUNTER-BID PHASE ==============================
-        # Aucun gagnant après 5 rounds — relance avec 3 sous-tours de 5 meilleurs agents.
-        # Spec §11 : autorisée UNIQUEMENT si le client a opté pour `accepts_counter_bid_uplift=True`
-        # à la création du transfert. Sinon → bascule directe en fallback ABSORBED/EXPIRED.
-        # Plafond strict : client_fee_pct + 2.0 (en points de %) — JAMAIS au-delà.
-        logger.info(f"[auction] {transfer_id} no winner after {ROUNDS} standard rounds")
-
-        # Lire la préférence client
-        t_full = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "accepts_counter_bid_uplift": 1})
-        client_consented = bool((t_full or {}).get("accepts_counter_bid_uplift", False))
-        if not client_consented:
-            logger.info(f"[auction] {transfer_id} client did not opt-in to counter-bid uplift → skip to fallback")
-            # Bascule directe vers fallback (ABSORBED si petit montant, EXPIRED sinon — voir bloc fallback en bas)
-            return await _run_fallback(transfer_id, send_amount, client_fee_pct)
-
-        logger.info(f"[auction] {transfer_id} entering COUNTER-BID phase (client opted-in)")
-        await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "COUNTER_BIDDING"}})
-        await manager.broadcast(transfer_id, {"event": "counter_bid_phase_started"})
-        # Plafond strict : +2 points de % maximum (spec §11.3 — corridor Afrique→Monde : +2% max)
-        max_counter_fee = round(min(client_fee_pct + 2.0, client_fee_pct * 1.5), 2)
-        counter_used_ids: set = set()
-
-        for cb_round in range(3):  # 3 sub-rounds of 5 best
-            t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
-            if not t or t.get("agent_id"):
-                return
-            # Top 5 not yet used in counter rounds
-            cb_pool = [a for a in ranked if a["id"] not in counter_used_ids][:5]
-            if not cb_pool:
-                break
-            for a in cb_pool:
-                counter_used_ids.add(a["id"])
-
-            await manager.broadcast(transfer_id, {
-                "event": "counter_round_started",
-                "cb_round": cb_round + 1, "duration_sec": ROUND_SECONDS,
-                "max_fee_pct": max_counter_fee,
-            })
-            try:
-                await manager.broadcast_agents({
-                    "event": "counter_invite",
-                    "transfer_id": transfer_id,
-                    "cb_round": cb_round + 1,
-                    "client_fee_pct": client_fee_pct,
-                    "max_fee_pct": max_counter_fee,
-                    "expires_in_sec": ROUND_SECONDS,
-                    "phase": "counter",
-                }, agent_ids=[a["id"] for a in cb_pool])
-            except Exception:
-                pass
-
-            # Simulation 60% participent avec frais > client (jusqu'à +50%)
-            cb_schedule = sorted([random.uniform(2, ROUND_SECONDS - 3) for _ in cb_pool])
-            cb_start = asyncio.get_event_loop().time()
-            for at, agent in zip(cb_schedule, cb_pool):
-                wait = max(0, cb_start + at - asyncio.get_event_loop().time())
-                if wait > 0:
-                    await asyncio.sleep(wait)
-                if random.random() < 0.4:
-                    continue  # 40% no-show in counter
-                counter_pct = round(random.uniform(client_fee_pct + 0.1, max_counter_fee), 2)
-                cb = {
-                    "id": gen_id(), "transfer_id": transfer_id,
-                    "cb_round": cb_round + 1, "phase": "counter",
-                    "agent_id": agent["id"], "agent_name": agent["full_name"],
-                    "agent_rating": agent.get("rating", 4.5),
-                    "bid_fee_percent": counter_pct,
-                    "eta_minutes": random.randint(20, 90),
-                    "commission": _commission_breakdown(send_amount, counter_pct),
-                    "created_at": iso(now_utc()),
-                }
-                await db.counter_bids.insert_one(dict(cb))
-                await manager.broadcast(transfer_id, {"event": "new_counter_bid", "bid": clean_doc(dict(cb))})
-            elapsed = asyncio.get_event_loop().time() - cb_start
-            if elapsed < ROUND_SECONDS:
-                await asyncio.sleep(ROUND_SECONDS - elapsed)
-
-        # Après les 3 counter rounds : assigner au meilleur (frais le + bas parmi les > client)
-        all_counters = await db.counter_bids.find({"transfer_id": transfer_id}, {"_id": 0}).to_list(50)
-        if all_counters:
-            all_counters.sort(key=lambda b: (b["bid_fee_percent"], -float(b.get("agent_rating") or 0)))
-            best = all_counters[0]
-            # Update transfer with new fee (client must be notified)
-            await db.transfers.update_one({"id": transfer_id}, {"$set": {
-                "fee_percent": best["bid_fee_percent"],
-                "fee_adjusted": True,
-                "original_fee_percent": client_fee_pct,
-            }})
-            await manager.broadcast(transfer_id, {
-                "event": "fee_adjusted",
-                "new_fee_pct": best["bid_fee_percent"],
-                "original_fee_pct": client_fee_pct,
-            })
-            # Migrate counter-bid to bids collection and assign
-            best_bid = {
-                "id": gen_id(), "transfer_id": transfer_id,
-                "round": 99, "phase": "counter_winner",
-                "agent_id": best["agent_id"], "agent_name": best["agent_name"],
-                "agent_rating": best.get("agent_rating", 4.5),
-                "bid_fee_percent": best["bid_fee_percent"],
-                "eta_minutes": best["eta_minutes"],
-                "commission": best.get("commission"),
-                "created_at": iso(now_utc()),
-            }
-            await db.bids.insert_one(dict(best_bid))
-            await assign_agent(transfer_id, best_bid["id"], auto=True)
-            return
+        # ============================== AUCUN GAGNANT — FALLBACK DIRECT ==============================
+        # RÈGLE PRODUIT (déc 2026) : Les frais d'un agent NE PEUVENT JAMAIS être supérieurs
+        # aux frais souhaités par le client. La phase de "counter-bid uplift" qui permettait
+        # à un agent de soumettre des frais > client_fee_pct est désormais DÉSACTIVÉE.
+        #
+        # Si aucun agent n'a accepté dans les 5 tours standards (frais ≤ client_fee_pct),
+        # on bascule directement vers le fallback (ABSORBED ou EXPIRED).
+        logger.info(f"[auction] {transfer_id} no winner after {ROUNDS} standard rounds → fallback (counter-bid désactivé)")
+        return await _run_fallback(transfer_id, send_amount, client_fee_pct)
 
         # ============================== ULTIMATE FALLBACK ==============================
         # Aucune contre-enchère retournée — plateforme absorbe OU expire

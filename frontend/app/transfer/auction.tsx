@@ -153,7 +153,7 @@ export default function LiveAuction() {
               <View style={[styles.cursorTrackInner, { width: `${pct}%` }]} />
             </View>
 
-            {/* Zone de défilement HORIZONTAL des offres reçues */}
+            {/* Zone de défilement HORIZONTAL des offres reçues (résumé compact) */}
             {bids.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14, paddingRight: 8, gap: 8 }}>
                 {bids.map((b) => (
@@ -161,13 +161,50 @@ export default function LiveAuction() {
                     <View style={styles.bidChipDot} />
                     <View style={{ marginLeft: 8 }}>
                       <TText variant="label" weight="extraBold" color="white">@{b.agent_profile_id || "agent"}</TText>
-                      <TText variant="caption" weight="extraBold" color="#10B981" style={{ marginTop: 2 }}>{Number(b.bid_fee_percent).toFixed(2)}%</TText>
+                      <TText variant="caption" weight="extraBold" color="#FCD34D" style={{ marginTop: 2 }}>{Number(b.bid_fee_percent).toFixed(2)}%</TText>
                     </View>
                   </View>
                 ))}
               </ScrollView>
             ) : null}
           </LinearGradient>
+        ) : null}
+
+        {/* ======================= CARTES AGENT DÉTAILLÉES (sous le bandeau) ======================= */}
+        {status === "BIDDING" ? (
+          bids.length === 0 ? (
+            <View style={styles.emptyBidsCard}>
+              <Ionicons name="hourglass-outline" size={36} color={colors.neutrals.textTertiary} style={{ alignSelf: "center" }} />
+              <TText variant="body" weight="extraBold" align="center" style={{ marginTop: spacing.sm }}>
+                Aucune offre reçue pour le moment
+              </TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4, lineHeight: 16 }}>
+                Les agents disponibles dans le pays du bénéficiaire reçoivent votre demande.
+                {"\n"}Vous pouvez relancer le tour pour étendre la portée.
+              </TText>
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    await api.post(`/transfers/${transfer.id}/next-round`).catch(() => {});
+                    Alert.alert("Tour relancé", "D'autres agents à proximité sont contactés.");
+                  } catch { /* noop */ }
+                }}
+                style={styles.forceRoundBtn}
+              >
+                <Ionicons name="megaphone" size={16} color="white" />
+                <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Contacter d'autres agents à proximité</TText>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={{ marginTop: spacing.md }}>
+              <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 8, letterSpacing: 1 }}>
+                OFFRES REÇUES — TRIÉES PAR LES FRAIS LES PLUS BAS
+              </TText>
+              {[...bids].sort((a, b) => a.bid_fee_percent - b.bid_fee_percent).map((b, idx) => (
+                <AgentBidCard key={b.id} bid={b} transfer={transfer} isBest={idx === 0} />
+              ))}
+            </View>
+          )
         ) : null}
 
         {/* ======================= BLOC RÉSULTAT FINAL D'ASSIGNATION ======================= */}
@@ -313,6 +350,87 @@ function Row({ label, value, tint, icon, last }: any) {
   );
 }
 
+// === Carte agent détaillée — affichée pendant la phase BIDDING pour chaque offre reçue ===
+function AgentBidCard({ bid, transfer, isBest }: any) {
+  const fxRate = bid?.fx_rate || transfer?.fx_rate || 1;
+  const receiveAmount = Number(transfer?.send_amount || 0) * fxRate;
+  const feeAmount = (Number(transfer?.send_amount || 0) * Number(bid?.bid_fee_percent || 0)) / 100;
+  const rating = Number(bid?.agent_rating || 4.5);
+  const completed = Number(bid?.agent_completed_transfers || bid?.completed_count || 0);
+  const distanceKm = bid?.agent_distance_km;
+  const etaMin = Number(bid?.eta_minutes || bid?.travel_minutes || 0);
+  const deliveryMode = transfer?.delivery_mode || "cash";
+  const modeLabel: Record<string, string> = { cash: "Cash", bank: "Banque", momo: "Mobile Money" };
+  const stars = Array.from({ length: 5 }).map((_, i) => i < Math.round(rating));
+
+  return (
+    <View style={[styles.agentCard, isBest && styles.agentCardBest]}>
+      {isBest ? (
+        <View style={styles.bestBadge}>
+          <Ionicons name="trophy" size={11} color="white" />
+          <TText variant="label" weight="extraBold" color="white" style={{ marginLeft: 4, fontSize: 10, letterSpacing: 0.8 }}>MEILLEURE OFFRE</TText>
+        </View>
+      ) : null}
+      {/* En-tête : pseudo + profile id + score */}
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={styles.agentAvatar}>
+          <Ionicons name="person" size={20} color={colors.primary.base} />
+        </View>
+        <View style={{ flex: 1, marginLeft: 10 }}>
+          <TText variant="body" weight="extraBold" color={colors.neutrals.textPrimary} numberOfLines={1}>
+            @{bid?.agent_pseudonym || bid?.agent_name || "Agent"}
+          </TText>
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+            <TText variant="caption" color={colors.neutrals.textSecondary}>{bid?.agent_profile_id || `PB${(bid?.agent_id || "").slice(0, 6).toUpperCase()}`}</TText>
+            <TText variant="caption" color={colors.neutrals.textTertiary} style={{ marginHorizontal: 6 }}>•</TText>
+            <View style={{ flexDirection: "row" }}>
+              {stars.map((on, i) => (
+                <Ionicons key={i} name={on ? "star" : "star-outline"} size={11} color="#F59E0B" />
+              ))}
+            </View>
+            <TText variant="caption" weight="bold" color={colors.neutrals.textSecondary} style={{ marginLeft: 4 }}>{rating.toFixed(1)}</TText>
+          </View>
+          <TText variant="label" color={colors.neutrals.textTertiary} style={{ marginTop: 2 }}>
+            {completed} transferts complétés
+          </TText>
+        </View>
+        <View style={styles.feeBadge}>
+          <TText variant="caption" color={colors.neutrals.textSecondary} style={{ fontSize: 10 }}>Frais</TText>
+          <TText variant="subtitle" weight="extraBold" color={colors.primary.base}>{Number(bid.bid_fee_percent).toFixed(2)}%</TText>
+        </View>
+      </View>
+
+      {/* Grille détails : taux, montant reçu, frais, délai, méthode */}
+      <View style={styles.detailGrid}>
+        <DetailCell label="Taux de change" value={`1 EUR = ${fxRate.toFixed(2)}`} icon="trending-up" />
+        <DetailCell label="Montant reçu" value={`${receiveAmount.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} ${transfer?.destination_currency || ""}`} icon="cash" highlight />
+        <DetailCell label="Frais agent" value={`${feeAmount.toFixed(2)} EUR`} icon="card" />
+        <DetailCell label="Délai remise" value={etaMin > 0 ? `~${etaMin} min` : "—"} icon="time" />
+        <DetailCell label="Mode" value={modeLabel[deliveryMode] || deliveryMode} icon="briefcase" />
+        <DetailCell
+          label="Proximité"
+          value={distanceKm != null ? `${Number(distanceKm).toFixed(1)} km` : "—"}
+          sublabel={etaMin > 0 ? `Itinéraire ${Math.round(etaMin / 2)} min` : undefined}
+          icon="location"
+        />
+      </View>
+    </View>
+  );
+}
+
+function DetailCell({ label, value, sublabel, icon, highlight }: any) {
+  return (
+    <View style={[styles.detailCell, highlight && styles.detailCellHighlight]}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name={icon} size={11} color={colors.neutrals.textSecondary} />
+        <TText variant="label" color={colors.neutrals.textSecondary} style={{ marginLeft: 4, fontSize: 10 }}>{label}</TText>
+      </View>
+      <TText variant="caption" weight="extraBold" color={highlight ? colors.primary.base : colors.neutrals.textPrimary} style={{ marginTop: 2 }}>{value}</TText>
+      {sublabel ? <TText variant="label" color={colors.neutrals.textTertiary} style={{ fontSize: 9, marginTop: 1 }}>{sublabel}</TText> : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   banner: { borderRadius: radii.xxl, padding: spacing.lg, marginTop: spacing.sm, overflow: "hidden", shadowColor: "#022a6b", shadowOpacity: 0.3, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
   bannerHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
@@ -337,4 +455,18 @@ const styles = StyleSheet.create({
 
   actions: { marginTop: spacing.xl, gap: 10 },
   linkRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 8 },
+
+  // === Aucune offre reçue ===
+  emptyBidsCard: { backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, borderRadius: radii.xxl, padding: spacing.lg, marginTop: spacing.md },
+  forceRoundBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary.base, paddingVertical: 12, borderRadius: radii.lg, marginTop: spacing.md },
+
+  // === Carte agent détaillée ===
+  agentCard: { backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, borderRadius: radii.xxl, padding: spacing.md, marginBottom: 10, position: "relative" },
+  agentCardBest: { borderColor: colors.primary.base, borderWidth: 2, shadowColor: colors.primary.base, shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
+  bestBadge: { position: "absolute", top: -10, left: 12, flexDirection: "row", alignItems: "center", backgroundColor: colors.primary.base, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+  agentAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
+  feeBadge: { alignItems: "flex-end", paddingLeft: 6 },
+  detailGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 10, marginHorizontal: -3 },
+  detailCell: { width: "33.33%", paddingHorizontal: 3, paddingVertical: 4 },
+  detailCellHighlight: { /* mise en relief subtile */ },
 });

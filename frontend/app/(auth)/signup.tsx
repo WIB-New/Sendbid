@@ -32,7 +32,13 @@ export default function SignUp() {
   const [countrySearch, setCountrySearch] = useState("");
 
   useEffect(() => {
-    api.get("/corridors").then((r) => setCountries(r.data || [])).catch(() => {});
+    api.get("/corridors").then((r) => {
+      // L'API renvoie { corridors: [...], count: N } — on extrait le tableau.
+      const list: Country[] = Array.isArray(r.data) ? r.data : (r.data?.corridors || []);
+      setCountries(list);
+    }).catch((e) => {
+      console.warn("[signup] corridors load failed", e?.message);
+    });
   }, []);
 
   const filteredCountries = useMemo(() => {
