@@ -40,14 +40,15 @@ async def seed_demo_data():
             "role": "admin", "created_at": iso(now_utc()),
         })
 
-    # Extra admin roles (super_admin, partner_admin, agent_admin)
+    # Extra admin roles (super_admin, partner_admin, super_agent)
     extra_admins = [
         {"email": "superadmin@sendbid.app", "pwd": "SuperAdmin@123!", "role": "super_admin", "name": "Super-Admin SENDBID", "pid": "SBSUPER"},
         {"email": "partner@sendbid.app",    "pwd": "Partner@123!",    "role": "partner_admin", "name": "Partenaire Demo",    "pid": "SBPART"},
-        {"email": "superagent@sendbid.app", "pwd": "SuperAgent@123!", "role": "agent_admin",  "name": "Super-Agent Demo",    "pid": "SBSAGT"},
+        {"email": "superagent@sendbid.app", "pwd": "Super@123!",      "role": "super_agent",   "name": "Super-Agent Demo",   "pid": "SBSAGT"},
     ]
     for a in extra_admins:
-        if not await db.users.find_one({"email": a["email"]}):
+        existing = await db.users.find_one({"email": a["email"]})
+        if not existing:
             await db.users.insert_one({
                 "id": gen_id(), "profile_id": a["pid"], "email": a["email"], "phone": "+33000000001",
                 "full_name": a["name"], "password_hash": hash_password(a["pwd"]),
@@ -59,6 +60,12 @@ async def seed_demo_data():
                 "notif_prefs": {"push": True, "email": True, "sms": False},
                 "role": a["role"], "created_at": iso(now_utc()),
             })
+        else:
+            # Force role + password alignment (idempotent, in case of legacy values)
+            await db.users.update_one(
+                {"email": a["email"]},
+                {"$set": {"role": a["role"], "password_hash": hash_password(a["pwd"])}},
+            )
 
     # Demo client
     if not await db.users.find_one({"email": DEMO_CLIENT_EMAIL}):

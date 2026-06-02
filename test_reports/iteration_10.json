@@ -1,0 +1,42 @@
+{
+  "summary": "Re-ran /app/backend/tests/test_web_panels_and_marketing.py after iteration-9 fixes. ALL 43 TESTS PASS (100%). Both critical bugs are confirmed fixed: (1) Superagent login at POST /api/web/superagent/login now returns 303 with cookie 'sb_web_session_superagent' using credentials superagent@sendbid.app / Super@123!; dashboard + all 4 superagent sections (/, /agents, /transfers, /earnings) render with 'Mon réseau' and 'Override commission'. (2) GET /api/web/admin/users now returns 200 with 'Tous les utilisateurs' — datetime serialization fix verified. Regression: 7 marketing pages OK, admin/agent/superagent login+dashboard+logout OK, 7 admin sections OK, 5 agent sections OK, 4 superagent sections OK, PUT /api/auth/me theme OK, /api/auth/login + /api/auth/me + /api/corridors + /api/wallet/transactions OK. No regressions. Only test-file change: SUPERAGENT_PASSWORD updated from 'SuperAgent@123!' to 'Super@123!'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/app/memory/test_credentials.md",
+        "issue": "File still only documents admin + client. Should be updated to also list agent (agent@paybid.app / Agent@123!) and superagent (superagent@sendbid.app / Super@123!) so future testing agents don't have to grep seed.py."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_web_panels_and_marketing.py",
+    "/app/test_reports/pytest/web_panels_results.xml"
+  ],
+  "action_items": [
+    "Update /app/memory/test_credentials.md to include agent + superagent rows so future agents have a single source of truth (minor housekeeping).",
+    "Consider extracting role tokens ('admin', 'agent', 'super_agent') into a shared constants module to prevent the seed-vs-router drift class of bug that caused iteration-9 Bug A."
+  ],
+  "critical_code_review_comments": [
+    "Both fixes are correctly scoped and minimally invasive — seed.py now uses role='super_agent' + password='Super@123!' and is idempotent (UPDATE-on-exists), and web_panels.admin_users coerces created_at to ISO string before template render.",
+    "Newly registered Jinja filter `safe_date` is unused so far — recommend applying it to other date columns in templates (admin/agents/transfers/audit) to harden against the same datetime-vs-string class of bug."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_web_panels_and_marketing.py (SUPERAGENT_PASSWORD constant updated to 'Super@123!')"
+  ],
+  "success_rate": {
+    "backend": "100% (43/43 passed, 0 failed, 0 skipped)",
+    "frontend": "N/A — not tested per request (backend only)"
+  },
+  "seed_data_creation": "None. Used pre-seeded accounts after backend restart applied the idempotent seed update.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Both iteration-9 bugs are fully fixed. test_web_panels_and_marketing.py is the canonical regression suite for marketing + panels + core auth. Superagent password is now 'Super@123!' (NOT 'SuperAgent@123!'). To rerun: `pytest /app/backend/tests/test_web_panels_and_marketing.py -v --tb=short --junitxml=/app/test_reports/pytest/web_panels_results.xml` from /app/backend.",
+  "rca_of_issue": "N/A — retest run; both iteration-9 RCAs (role-token mismatch & datetime not subscriptable) are confirmed resolved by the patches described in the review_request."
+}

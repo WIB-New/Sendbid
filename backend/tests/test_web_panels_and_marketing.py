@@ -21,9 +21,8 @@ AGENT_EMAIL = "agent@paybid.app"
 AGENT_PASSWORD = "Agent@123!"
 
 SUPERAGENT_EMAIL = "superagent@sendbid.app"
-# NOTE: review_request says "Super@123!" but seed.py creates "SuperAgent@123!"
-# We use the actual seeded password. Role mismatch (agent_admin vs super_agent) is a separate bug.
-SUPERAGENT_PASSWORD = "SuperAgent@123!"
+# After iteration-9 fix: seed.py now uses role='super_agent' and password 'Super@123!'.
+SUPERAGENT_PASSWORD = "Super@123!"
 
 
 @pytest.fixture(scope="session")

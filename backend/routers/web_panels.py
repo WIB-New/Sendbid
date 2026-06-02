@@ -32,6 +32,20 @@ _TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
 templates = Jinja2Templates(directory=str(_TEMPLATE_DIR))
 
 
+def _safe_date(value, length: int = 10) -> str:
+    """Jinja2 filter: rend une date (str ISO ou datetime ou None) en cha\u00eene tronqu\u00e9e."""
+    if value is None or value == "":
+        return ""
+    if isinstance(value, _dt.datetime):
+        return value.isoformat()[:length]
+    if isinstance(value, str):
+        return value[:length]
+    return str(value)[:length]
+
+
+templates.env.filters["safe_date"] = _safe_date
+
+
 def _current_year() -> int:
     return _dt.datetime.utcnow().year
 
@@ -260,6 +274,11 @@ async def admin_users(request: Request):
     if not user:
         return _login_page(request, "admin")
     users = await db.users.find({}, {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0}).sort("created_at", -1).to_list(200)
+    # Coerce datetime fields to ISO string for the template
+    for u in users:
+        ca = u.get("created_at")
+        if isinstance(ca, _dt.datetime):
+            u["created_at"] = ca.isoformat()
     ctx = _panel_base_ctx(request, "admin", user, section="users", section_title="Utilisateurs", users=users)
     return templates.TemplateResponse("panels/admin.html", ctx)
 
