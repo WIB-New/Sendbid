@@ -101,7 +101,7 @@ export default function PaybidDashboard() {
             </View>
             {/* Toggle dispo */}
             <TouchableOpacity onPress={toggleAvail} style={[styles.statusPill, { backgroundColor: available ? "rgba(194,65,12,0.32)" : "rgba(255,255,255,0.18)" }]}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: available ? "#C2410C" : "#9CA3AF", marginRight: 6 }} />
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: available ? "#FFA500" : "#9CA3AF", marginRight: 6 }} />
               <TText variant="label" weight="extraBold" color="white">{available ? "EN LIGNE" : "HORS LIGNE"}</TText>
             </TouchableOpacity>
           </View>
@@ -142,7 +142,7 @@ export default function PaybidDashboard() {
 
         {/* ===== 4 quick actions transparentes (parité SendBID) ===== */}
         <View style={styles.quickRow}>
-          <QuickAction icon="qr-code" color="#C2410C" label="Scanner" onPress={() => router.push("/paybid/scan" as any)} />
+          <QuickAction icon="qr-code" color="#FFA500" label="Scanner" onPress={() => router.push("/paybid/scan" as any)} />
           <QuickAction icon="cash" color="#3B82F6" label="Déposer" onPress={() => router.push("/paybid/float" as any)} />
           <QuickAction icon="arrow-up-circle" color="#F59E0B" label="Verser au siège" onPress={() => router.push("/paybid/float" as any)} />
           <QuickAction icon="trophy" color="#EA580C" label="Gains" onPress={() => router.push("/paybid/(tabs)/earnings" as any)} />
@@ -151,7 +151,7 @@ export default function PaybidDashboard() {
         {/* ===== CTA "Offres en temps réel" (parité Nouveau transfert) ===== */}
         <TouchableOpacity activeOpacity={0.85} onPress={() => router.push("/paybid/(tabs)/auctions" as any)} style={{ marginTop: spacing.xl }}>
           <LinearGradient
-            colors={hasLiveBids ? ["#C2410C", "#9A3412"] : [paybidColors.primary.base, paybidColors.primary.dark]}
+            colors={hasLiveBids ? ["#FFA500", "#CC7A00"] : [paybidColors.primary.base, paybidColors.primary.dark]}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
             style={styles.liveCta}
           >

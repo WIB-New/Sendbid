@@ -66,10 +66,11 @@ export function Screen({
   const kbOffset = Platform.select({ ios: 0, android: 0 }) as number;
   const kbBehavior = Platform.OS === "ios" ? ("padding" as const) : ("height" as const);
 
-  // Padding bas dynamique : safe area + gutter raisonnable.
-  // 100px ≥ hauteur typique d'un tab bar (80) + marge respiratoire, garantissant
-  // qu'aucun contenu n'est masqué par la barre d'onglets ou la barre système.
-  const bottomPad = (bottomInset ? Math.max(insets.bottom, 8) : 0) + 100;
+  // Padding bas dynamique : safe area + gutter modéré.
+  // 60px ≥ hauteur typique d'un tab bar (≈ 56) + petite marge respiratoire,
+  // tout en préservant un espace raisonnable (l'utilisateur a explicitement demandé
+  // un espace plus court qu'avant — réduction de 100 → 60 le 03/06).
+  const bottomPad = (bottomInset ? Math.max(insets.bottom, 8) : 0) + 60;
 
   const HeaderRow = (
     <View style={styles.header}>

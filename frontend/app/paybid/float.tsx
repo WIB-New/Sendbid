@@ -73,7 +73,7 @@ export default function AgentFloat() {
       default: return "swap-horizontal-outline" as const;
     }
   };
-  const tint = (type: string) => type === "declare" || type === "cashin" ? "#C2410C" : type === "settlement" || type === "payout" ? "#EF4444" : pc.primary.base;
+  const tint = (type: string) => type === "declare" || type === "cashin" ? "#FFA500" : type === "settlement" || type === "payout" ? "#EF4444" : pc.primary.base;
   const label = (type: string) => ({
     declare: "Déclaration", payout: "Paiement bénéficiaire",
     cashin: "Encaissement client", settlement: "Versement au siège",
@@ -137,7 +137,7 @@ export default function AgentFloat() {
                 <TText variant="label" color="#A89078">{new Date(m.created_at).toLocaleString("fr-FR")}</TText>
               </View>
               <View style={{ alignItems: "flex-end" }}>
-                <TText weight="bold" color={m.amount_signed >= 0 ? "#C2410C" : "#EF4444"}>
+                <TText weight="bold" color={m.amount_signed >= 0 ? "#FFA500" : "#EF4444"}>
                   {m.amount_signed >= 0 ? "+" : ""}{m.amount_signed.toLocaleString("fr-FR")}
                 </TText>
                 <TText variant="label" color="#A89078">{m.balance_after?.toLocaleString("fr-FR")} {m.currency}</TText>
