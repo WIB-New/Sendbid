@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -104,47 +102,40 @@ export function Screen({
   );
 
   // Body (scroll ou static), enveloppé pour gérer clavier + tap-to-dismiss.
-  const Body = (
-    <>
-      {scroll ? (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            { padding: spacing.lg, paddingTop: hero ? spacing.lg : undefined, paddingBottom: bottomPad },
-            contentStyle,
-          ]}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
-          // @ts-ignore — disponible iOS 13+
-          automaticallyAdjustKeyboardInsets
-          contentInsetAdjustmentBehavior="automatic"
-        >
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={[{ flex: 1, padding: spacing.lg, paddingBottom: bottomInset ? bottomPad : spacing.lg }, contentStyle]}>
-          {children}
-        </View>
-      )}
-    </>
+  const Body = scroll ? (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={[
+        { padding: spacing.lg, paddingTop: hero ? spacing.lg : undefined, paddingBottom: bottomPad },
+        contentStyle,
+      ]}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+      // @ts-ignore — disponible iOS 13+
+      automaticallyAdjustKeyboardInsets
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      {children}
+    </ScrollView>
+  ) : (
+    <View style={[{ flex: 1, padding: spacing.lg, paddingBottom: bottomInset ? bottomPad : spacing.lg }, contentStyle]}>
+      {children}
+    </View>
   );
 
-  const KeyboardWrapper = noKeyboardAvoid
-    ? ({ children: c }: { children: React.ReactNode }) => <View style={{ flex: 1 }}>{c}</View>
-    : ({ children: c }: { children: React.ReactNode }) => (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={kbBehavior} keyboardVerticalOffset={kbOffset}>
-          {c}
-        </KeyboardAvoidingView>
-      );
-
-  const DismissWrapper = ({ children: c }: { children: React.ReactNode }) =>
-    dismissKeyboardOnTap && Platform.OS !== "web" ? (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={{ flex: 1 }}>{c}</View>
-      </TouchableWithoutFeedback>
-    ) : (
-      <View style={{ flex: 1 }}>{c}</View>
-    );
+  // FIX CRITIQUE : on N'utilise PAS de wrappers fonctionnels redéfinis à chaque render
+  // (cela ré-créait la hiérarchie et faisait disparaître le clavier à chaque frappe).
+  // À la place, on inline directement les wrappers conditionnellement.
+  // Ne plus inclure TouchableWithoutFeedback : laisser ScrollView gérer dismiss naturellement
+  // via keyboardDismissMode="on-drag"/"interactive" — ce qui est l'UX standard et n'interfère
+  // pas avec le focus du TextInput.
+  const WrappedBody = noKeyboardAvoid ? (
+    Body
+  ) : (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={kbBehavior} keyboardVerticalOffset={kbOffset}>
+      {Body}
+    </KeyboardAvoidingView>
+  );
 
   if (hero) {
     return (
@@ -157,9 +148,7 @@ export function Screen({
         >
           <SafeAreaView edges={["top", "left", "right"]}>{HeaderRow}</SafeAreaView>
         </LinearGradient>
-        <KeyboardWrapper>
-          <DismissWrapper>{Body}</DismissWrapper>
-        </KeyboardWrapper>
+        {WrappedBody}
       </View>
     );
   }
@@ -170,9 +159,7 @@ export function Screen({
       style={{ flex: 1, backgroundColor: bg || tokens.neutrals.background }}
     >
       {(title || back || right) && HeaderRow}
-      <KeyboardWrapper>
-        <DismissWrapper>{Body}</DismissWrapper>
-      </KeyboardWrapper>
+      {WrappedBody}
     </SafeAreaView>
   );
 }
