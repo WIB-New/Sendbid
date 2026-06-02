@@ -88,3 +88,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useThemeTokens() {
   return useContext(ThemeCtx);
 }
+
+/**
+ * Drop-in replacement pour `import { colors } from "./theme"`.
+ *
+ * Migration ultra-rapide d'un écran vers le dark mode :
+ *   AVANT :  import { colors } from "../../src/theme";
+ *   APRÈS :  const colors = useThemedColors();   // dans le composant
+ *
+ * Retourne directement les tokens (mêmes clés que `theme.colors`).
+ */
+export function useThemedColors() {
+  return useContext(ThemeCtx).tokens;
+}
