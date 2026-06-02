@@ -74,6 +74,11 @@ export default function LiveAuction() {
             if (typeof msg.round === "number") setRound(msg.round);
             setSecondsLeft(msg.duration_sec || ROUND_DURATION);
             setRoundEndedNoOffer(false);
+          } else if (msg.event === "round_forced") {
+            // Le serveur a interrompu le tour actuel suite à la demande "Contacter d'autres agents"
+            if (typeof msg.next_round === "number") setRound(msg.next_round);
+            setSecondsLeft(ROUND_DURATION);
+            setRoundEndedNoOffer(false);
           } else if (msg.event === "round_ended" || msg.event === "round_completed") {
             // Fin de tour : si toujours aucune offre, on autorise le bouton "Contacter d'autres agents"
             setBids(prev => {

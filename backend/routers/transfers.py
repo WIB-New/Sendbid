@@ -338,10 +338,29 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                 await db.bids.insert_one(dict(bid))
                 await manager.broadcast(transfer_id, {"event": "new_bid", "bid": clean_doc(dict(bid))})
 
-            # Attendre fin du round + sélection
+            # Attendre fin du round + sélection (sortie anticipée si round_forced)
             elapsed = asyncio.get_event_loop().time() - start_ts
-            if elapsed < ROUND_SECONDS:
-                await asyncio.sleep(ROUND_SECONDS - elapsed)
+            remaining = ROUND_SECONDS - elapsed
+            # Vérifie toutes les 0.5s si le client a demandé "Contacter d'autres agents"
+            waited = 0.0
+            while waited < remaining:
+                await asyncio.sleep(min(0.5, remaining - waited))
+                waited += 0.5
+                t_chk = await db.transfers.find_one(
+                    {"id": transfer_id},
+                    {"_id": 0, "agent_id": 1, "auction_round_force_next": 1},
+                )
+                if not t_chk:
+                    return
+                if t_chk.get("agent_id"):
+                    return
+                if t_chk.get("auction_round_force_next"):
+                    logger.info(f"[auction] {transfer_id} round {round_idx+1} interrupted by client force-next request")
+                    await db.transfers.update_one(
+                        {"id": transfer_id},
+                        {"$unset": {"auction_round_force_next": "", "auction_round_force_next_at": ""}},
+                    )
+                    break
             t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
             if not t or t.get("agent_id"):
                 return
@@ -475,6 +494,42 @@ async def retry_auction(transfer_id: str, user: dict = Depends(get_current_user)
     await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "BIDDING", "auction_round": 0}})
     await start_auction(transfer_id)
     return {"ok": True}
+
+
+@router.post("/{transfer_id}/next-round")
+async def force_next_round(transfer_id: str, user: dict = Depends(get_current_user)):
+    """
+    Force le passage au tour SUIVANT de l'enchère en cours, élargissant le périmètre
+    d'agents contactés (corridors voisins, agents moins prioritaires).
+
+    Déclenché depuis l'écran "Offres en temps réel" lorsqu'aucune offre n'a été reçue
+    au terme d'un tour. Idempotent : si l'enchère est déjà terminée ou si un agent
+    est assigné, l'appel est ignoré (200 OK avec `skipped`).
+    """
+    transfer = await db.transfers.find_one({"id": transfer_id, "user_id": user["id"]}, {"_id": 0})
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Transfert introuvable")
+    if transfer.get("agent_id"):
+        return {"ok": True, "skipped": True, "reason": "Agent déjà assigné"}
+    if transfer.get("status") not in ("BIDDING",):
+        return {"ok": True, "skipped": True, "reason": f"Statut {transfer.get('status')} non éligible"}
+    current_round = int(transfer.get("auction_round") or 1)
+    if current_round >= 5:
+        return {"ok": True, "skipped": True, "reason": "Tour maximum atteint"}
+    # Notifie l'écran client que le tour est forcé (le worker en cours détecte la nouvelle ronde)
+    await db.transfers.update_one(
+        {"id": transfer_id},
+        {"$set": {"auction_round_force_next": True, "auction_round_force_next_at": iso(now_utc())}},
+    )
+    # Broadcast immédiat : le client peut réinitialiser le compteur localement
+    await manager.broadcast(transfer_id, {
+        "event": "round_forced",
+        "from_round": current_round,
+        "next_round": current_round + 1,
+        "reason": "force_user_request",
+    })
+    logger.info(f"[auction] {transfer_id} client requested force-next-round (was round {current_round})")
+    return {"ok": True, "next_round": current_round + 1}
 
 
 @router.post("/{transfer_id}/complete-mock")
