@@ -8,7 +8,7 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 function luhnOK(num: string) {
   const s = num.replace(/\s+/g, "");
   if (!/^\d{12,19}$/.test(s)) return false;
@@ -23,6 +23,7 @@ function luhnOK(num: string) {
 }
 
 export default function AddCard() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [number, setNumber] = useState("");
   const [holder, setHolder] = useState("");

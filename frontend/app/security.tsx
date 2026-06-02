@@ -9,7 +9,7 @@ import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 const BIO_TOKEN_KEY = "sb_biometric_token";
 const isWeb = Platform.OS === "web";
 const secureSet = async (k: string, v: string) =>
@@ -21,6 +21,7 @@ const secureGet = async (k: string) =>
 
 // Sécurité — activation directe de la biométrie + accès rapide aux changements PIN/MDP/Sessions
 export default function SecurityScreen() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [bioEnabled, setBioEnabled] = useState(false);
   const [bioSupported, setBioSupported] = useState(false);

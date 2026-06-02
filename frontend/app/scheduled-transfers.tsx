@@ -8,11 +8,12 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Transferts programmés v4.0 — "33 Programmés" : header navy + liste calendaires + badge fréquence
 const FREQ_LABEL: any = { weekly: "Hebdomadaire", monthly: "Mensuel", biweekly: "Bi-mensuel", once: "Une fois" };
 
 export default function Scheduled() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
 

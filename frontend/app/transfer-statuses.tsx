@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // 13 statuts de transfert — Annexe B du Document Maître v5.0
 const STATUSES = [
   { id: "DRAFT", label: "Brouillon", icon: "create-outline", color: colors.neutrals.textTertiary, group: "Initial",
@@ -38,6 +38,7 @@ const STATUSES = [
 const GROUPS = ["Initial", "Cash", "Bank", "MoMo", "VIP", "Final"];
 
 export default function TransferStatuses() {
+  const colors = useThemedColors();
   return (
     <Screen title="Statuts de transfert" back hero scroll={false}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: spacing.xxxl }}>

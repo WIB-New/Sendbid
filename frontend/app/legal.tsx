@@ -5,7 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 const DOCS: Record<string, { title: string; body: string[] }> = {
   cgu: {
     title: "Conditions Générales d'Utilisation",
@@ -165,6 +165,7 @@ const LIST = [
 ];
 
 export default function Legal() {
+  const colors = useThemedColors();
   const params = useLocalSearchParams<{ doc?: string }>();
   const [openKey, setOpenKey] = useState<string | null>(params.doc || null);
 

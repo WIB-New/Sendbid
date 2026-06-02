@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../src/components/TText";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Support / FAQ v4.0 — "40 Support FAQ" : 3 quick buttons + filters + accordion + search
 const FAQ = [
   { cat: "Transferts", q: "Combien de temps dure un transfert ?", a: "Classique : jusqu'à 48h. VIP : livraison en 1-3h à domicile." },
@@ -20,6 +20,7 @@ const FAQ = [
 const CATS = ["Tous", "Transferts", "Paiement", "Compte"];
 
 export default function Support() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [cat, setCat] = useState("Tous");
   const [query, setQuery] = useState("");

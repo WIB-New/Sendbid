@@ -9,7 +9,7 @@ import { Button } from "../../src/components/Button";
 import { useAuth } from "../../src/store";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 // KYC Status v4.0 — "38 KYC Status" : hero gold + progress Tier 1→2→3 + checklist verified
 const TIERS = [
   { tier: 0, name: "Basique", limits: "200 €/mois", icon: "person-circle-outline" as const },
@@ -19,6 +19,7 @@ const TIERS = [
 ];
 
 export default function KycHome() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const [kyc, setKyc] = useState<any>({ tier: 0, status: "none" });

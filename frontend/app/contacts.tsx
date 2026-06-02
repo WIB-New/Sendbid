@@ -8,7 +8,7 @@ import { Input } from "../src/components/Input";
 import { Button } from "../src/components/Button";
 import { api, apiError } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 type Contact = { id: string; full_name: string; profile_id?: string; email?: string; phone?: string };
 
 // Cross-platform helpers (Alert.alert ne fonctionne pas sur web)
@@ -40,6 +40,7 @@ const promptAsync = (title: string, defaultValue?: string): Promise<string | nul
  * - Supprimer → DELETE /contacts/{id}
  */
 export default function Contacts() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [items, setItems] = useState<Contact[]>([]);
   const [q, setQ] = useState("");

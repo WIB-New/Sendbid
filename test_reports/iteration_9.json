@@ -1,0 +1,61 @@
+{
+  "summary": "Backend-only testing of SendFloo marketing website + Jinja2 web panels (admin/agent/superagent) + theme PUT + core regression. Built /app/backend/tests/test_web_panels_and_marketing.py with 43 pytest cases. Final: 35 passed, 2 failed, 6 skipped (skips are downstream of the superagent login failure). All 7 marketing pages render correctly with expected French content. Admin/Agent login + dashboards + logout work. Theme PUT works. Core auth/corridors/wallet regression all pass. TWO REAL BACKEND BUGS FOUND: (1) Superagent panel login always returns 401 due to role mismatch — seed creates role='agent_admin' but ALLOWED_ROLES_BY_PANEL['superagent']={'super_agent'}; (2) GET /api/web/admin/users crashes with 500 because the Jinja template slices created_at as a string but some users have datetime objects.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/web/superagent/login",
+        "issue": "Always returns 401 with valid seeded credentials. Root cause: backend/seed.py:47 creates the superagent user with role='agent_admin', but backend/routers/web_panels.py ALLOWED_ROLES_BY_PANEL['superagent']={'super_agent'} (with underscore). The seeded user is unable to access ANY panel. Also note: review_request and templates/panels/_base.html:123 advertise password 'Super@123!' but seed actually uses 'SuperAgent@123!' — inconsistent. Fix: either (a) change seed.py role to 'super_agent', or (b) add 'agent_admin' to ALLOWED_ROLES_BY_PANEL['superagent'], AND align the documented password.",
+        "priority": "CRITICAL"
+      },
+      {
+        "endpoint": "GET /api/web/admin/users",
+        "issue": "500 Internal Server Error. TypeError: 'datetime.datetime' object is not subscriptable at templates/panels/admin.html:78 — `{{ (u.created_at or '')[:10] }}`. Some user docs in MongoDB store created_at as a real datetime (BSON Date), not an ISO string, so string slicing [:10] fails. Fix: in routers/web_panels.py admin_users (line 262) coerce created_at to ISO string before passing to template, OR change template to `{{ (u.created_at|string)[:10] if u.created_at else '—' }}`.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "POST /api/auth/login",
+        "issue": "Schema expects {identifier, password}, not {email, password} — review_request example uses 'email' which would 422. Already handled in test."
+      },
+      {
+        "endpoint": "GET /api/auth/me",
+        "issue": "Response shape is {user:{...}, wallet:{...}} (wrapped), not flat user object. Frontend callers must read .user."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_web_panels_and_marketing.py",
+    "/app/test_reports/pytest/web_panels_results.xml"
+  ],
+  "action_items": [
+    "FIX (web_panels.py or seed.py): align superagent role — set seed role to 'super_agent' (recommended) OR add 'agent_admin' to ALLOWED_ROLES_BY_PANEL['superagent']. Without this fix all /api/web/superagent/* endpoints are unreachable.",
+    "FIX (templates/panels/admin.html line 78 OR routers/web_panels.py admin_users line 262): coerce created_at to string before template slicing. The admin Users page is completely broken right now.",
+    "ALIGN documented credentials: review_request, templates/panels/_base.html:123 and /app/memory/test_credentials.md all say 'Super@123!' but seed.py:47 uses 'SuperAgent@123!'. Pick one and apply everywhere.",
+    "UPDATE /app/memory/test_credentials.md to also list agent (agent@paybid.app / Agent@123!) and superagent (after password fix) — currently only admin/client are documented."
+  ],
+  "critical_code_review_comments": [
+    "web_panels.py is 589 lines — close to the 700-line soft limit; if more panel features are added, split into per-role routers.",
+    "ALLOWED_ROLES_BY_PANEL uses string roles, but seed.py uses different role tokens for the same conceptual user (agent_admin vs super_agent). A shared constants module would prevent this class of bug.",
+    "Template renders {{ (u.created_at or '')[:10] }} assuming string — fragile. Either standardize created_at as ISO string at DB write time or add a Jinja filter `to_iso_date`.",
+    "Marketing pages route /api/web (no slash) returns 200 OK (good) — confirmed via redirect_slashes behavior in FastAPI."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_web_panels_and_marketing.py (new)"
+  ],
+  "success_rate": {
+    "backend": "81% (35/43 incl. skipped, 35/37 = 94.6% excl. skips). Marketing 7/7, Admin login+sections 7/8 (users broken), Agent 5/5, Superagent 0/5 (blocked), Logout admin+agent OK, Theme PUT OK, Regression 4/4.",
+    "frontend": "N/A — not tested per request"
+  },
+  "seed_data_creation": "None. Used pre-seeded accounts from backend/seed.py.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "After fixes, re-run `pytest /app/backend/tests/test_web_panels_and_marketing.py -v`. Pay special attention to the 6 currently-skipped superagent tests (test_panel_dashboard_with_cookie[superagent], test_superagent_sections[*], test_panel_logout[superagent]) and the admin/users 500. If seed password is changed away from 'SuperAgent@123!', update SUPERAGENT_PASSWORD constant in the test file.",
+  "rca_of_issue": "Bug A (superagent 401): web_panels.py defines ALLOWED_ROLES_BY_PANEL = {'admin': {...}, 'agent': {...}, 'superagent': {'super_agent'}}. seed.py:47 inserts the superagent user with role='agent_admin'. _resolve_session/login_handler rejects the user because their role is not in the allowed set. Reproduction: `curl -X POST http://localhost:8001/api/web/superagent/login -d 'email=superagent@sendbid.app&password=SuperAgent@123!' -H 'Content-Type: application/x-www-form-urlencoded'` returns 401. Note: same user logs in fine to /api/auth/login (mobile JWT). Mitigation: align role tokens (recommended: change seed to role='super_agent'). Bug B (admin/users 500): MongoDB has a mix of created_at types — some users created via the auth signup path store created_at as a true Mongo Date (deserialized as datetime), while seeded users store it via iso(now_utc()) as a string. Template `(u.created_at or '')[:10]` only works for strings. Reproduction: log in to admin panel and GET /api/web/admin/users. Mitigation: normalize before rendering, e.g. `users = [{**u, 'created_at': u['created_at'].isoformat() if hasattr(u.get('created_at'), 'isoformat') else (u.get('created_at') or '')} for u in users]` in admin_users()."
+}

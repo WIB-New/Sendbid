@@ -317,6 +317,7 @@ class UpdateMeIn(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     language: Optional[str] = None
+    theme: Optional[str] = None  # "light" | "dark" | "system"
 
 
 @router.put("/me")

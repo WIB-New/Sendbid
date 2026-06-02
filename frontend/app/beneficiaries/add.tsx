@@ -8,7 +8,7 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 // v6.4 — Bénéficiaire enrichi : Country/City autocomplete (pas de texte libre),
 // IBAN/RIB pour Bank, Opérateur+Téléphone pour MoMo, boutons Relation compacts.
 const RELATIONS = ["Famille", "Ami", "Conjoint", "Enfant", "Parent", "Collègue", "Autre"];
@@ -38,6 +38,7 @@ type Corridor = {
 };
 
 export default function AddBeneficiary() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [corridors, setCorridors] = useState<Corridor[]>([]);
   const [firstName, setFirstName] = useState("");

@@ -8,10 +8,12 @@ import { Input } from "../../../src/components/Input";
 import { Button } from "../../../src/components/Button";
 import { api, apiError, wsUrl } from "../../../src/api";
 import { useAuth } from "../../../src/store";
+import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii } from "../../../src/theme";
 
 export default function PaybidAuctions() {
+  const paybidColors = useThemedPaybidColors();
   const token = useAuth((s) => s.token);
   const [list, setList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);

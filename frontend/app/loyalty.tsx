@@ -8,7 +8,7 @@ import { TText } from "../src/components/TText";
 import { useAuth } from "../src/store";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Fidélité v4.0 — "42 Fidélité" : hero gold + grille bénéfices + historique points
 const LEVEL_STYLE: any = {
   Bronze: { g: ["#92400E", "#D97706"], icon: "ribbon" },
@@ -27,6 +27,7 @@ const PERKS = [
 ];
 
 export default function Loyalty() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const [history, setHistory] = useState<any[]>([]);

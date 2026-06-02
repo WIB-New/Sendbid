@@ -10,7 +10,7 @@ import { Card } from "../../src/components/Card";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 type Session = {
   session_id: string;
   verification_url: string;
@@ -19,6 +19,7 @@ type Session = {
 };
 
 export default function KycTier2() {
+  const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);
   const [session, setSession] = useState<Session | null>(null);

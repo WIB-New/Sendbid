@@ -8,7 +8,7 @@ import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * /agent — Panel unique pour les Agents et Super-Agents.
  * Le super-agent gère un réseau de 10 agents minimum. Les agents standards sont
@@ -16,6 +16,7 @@ import { colors, spacing, radii } from "../../src/theme";
  * Ce panel est réservé au rôle agent_admin (super-agent).
  */
 export default function AgentPanel() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);

@@ -8,8 +8,9 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function BeneficiaryDetail() {
+  const colors = useThemedColors();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [b, setB] = useState<any>(null);

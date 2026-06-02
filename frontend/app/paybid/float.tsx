@@ -8,7 +8,8 @@ import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
-import { paybidColors as pc } from "../../src/paybidTheme";
+import { useThemedPaybidColors } from "../../src/themeContext";
+import { paybidColors } from "../../src/paybidTheme";
 import { spacing, radii } from "../../src/theme";
 
 /**
@@ -21,6 +22,7 @@ import { spacing, radii } from "../../src/theme";
  * - Solde insuffisant = impossible de compléter un transfert.
  */
 export default function AgentFloat() {
+  const pc = useThemedPaybidColors();
   const router = useRouter();
   const [floats, setFloats] = useState<any[]>([]);
   const [moves, setMoves] = useState<any[]>([]);

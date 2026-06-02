@@ -1,0 +1,88 @@
+{% extends 'partials/base.html' %}
+{% block title %}À propos — SendFloo{% endblock %}
+{% block extra_css %}
+  .page-hero { padding: 80px 24px 40px; background: radial-gradient(ellipse at top, rgba(4,212,111,0.15), transparent 60%), var(--bg); text-align: center; }
+  .story-block { max-width: 760px; margin: 0 auto; }
+  .story-block p { font-size: 17px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.8; }
+  .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 880px) { .values { grid-template-columns: 1fr; } }
+  .value-card { background: var(--surface); padding: 32px; border-radius: 18px; border: 1px solid var(--border); }
+  .value-icon { font-size: 32px; margin-bottom: 14px; }
+  .team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  @media (max-width: 880px) { .team-grid { grid-template-columns: 1fr 1fr; } }
+  .team-card { text-align: center; }
+  .team-avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--navy-light), var(--emerald)); margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; font-family: 'Playfair Display'; }
+  .team-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .team-card p { color: var(--text-dim); font-size: 13px; }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; background: var(--surface); padding: 40px; border-radius: 24px; border: 1px solid var(--border); }
+  @media (max-width: 880px) { .contact-grid { grid-template-columns: 1fr; } }
+  .contact-item { display: flex; gap: 16px; align-items: flex-start; }
+  .contact-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(4,212,111,0.15); color: var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .contact-item h4 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
+  .contact-item p, .contact-item a { color: var(--text-muted); font-size: 14px; }
+{% endblock %}
+{% block body %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">À propos</span>
+    <h1 class="serif">Rendre le transfert d'argent juste, partout.</h1>
+    <p class="lead" style="margin-top:16px">Notre mission : utiliser la technologie pour faire baisser les frais et redonner du pouvoir aux expéditeurs.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="story-block">
+      <h2 class="serif center" style="margin-bottom:32px">Notre histoire</h2>
+      <p>SendFloo est né d'une frustration partagée par des millions d'expéditeurs : payer 6 à 8% de frais pour envoyer 100€ à ses proches, c'est absurde. En 2024, deux ingénieurs franco-camerounais ont décidé de construire la première plateforme de transfert par enchère inverse en temps réel.</p>
+      <p>L'idée était simple : si on met les agents en concurrence directe, les frais baissent. Aujourd'hui, des milliers d'agents sont connectés en permanence, prets à bidder sur chaque demande. Résultat : nos utilisateurs économisent en moyenne 35% par rapport aux acteurs traditionnels.</p>
+      <p>Au-delà du prix, nous voulons construire un réseau de confiance : agents notés, KYC pro, biométrie native, support 24/7. SendFloo, c'est la fintech qui marche pour ceux qui en ont vraiment besoin.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="center" style="margin-bottom:48px">
+      <span class="eyebrow">Nos valeurs</span>
+      <h2 class="serif">Ce qui nous guide</h2>
+    </div>
+    <div class="values">
+      <div class="value-card"><div class="value-icon">🔍</div><h3>Transparence radicale</h3><p>Aucun frais caché, aucun taux de change masqué. Vous voyez tout avant de payer.</p></div>
+      <div class="value-card"><div class="value-icon">⚡</div><h3>Innovation utile</h3><p>L'enchère inverse n'est pas un gadget : c'est l'outil qui fait réellement baisser les coûts.</p></div>
+      <div class="value-card"><div class="value-icon">🤝</div><h3>Confiance partagée</h3><p>Notes mutuelles agents ↔ clients, support humain, garanties claires.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="team">
+  <div class="container">
+    <div class="center" style="margin-bottom:48px">
+      <span class="eyebrow">L'équipe</span>
+      <h2 class="serif">Composée de passionnés</h2>
+    </div>
+    <div class="team-grid">
+      <div class="team-card"><div class="team-avatar">SF</div><h4>Severin F.</h4><p>CEO & Co-fondateur</p></div>
+      <div class="team-card"><div class="team-avatar">JM</div><h4>Jules M.</h4><p>CTO & Co-fondateur</p></div>
+      <div class="team-card"><div class="team-avatar">AK</div><h4>Anne K.</h4><p>Head of Operations</p></div>
+      <div class="team-card"><div class="team-avatar">MD</div><h4>Marc D.</h4><p>Head of Compliance</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="container">
+    <div class="center" style="margin-bottom:32px">
+      <span class="eyebrow">Contact</span>
+      <h2 class="serif">Une question ?</h2>
+      <p class="lead">On vous répond en moins de 24h.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-item"><div class="contact-icon">✉️</div><div><h4>Email</h4><a href="mailto:contact@sendbid.app">contact@sendbid.app</a><p style="margin-top:4px">Réponse sous 24h ouvrées</p></div></div>
+      <div class="contact-item"><div class="contact-icon">💬</div><div><h4>Chat 24/7</h4><a href="/api/web/download">Via l'app SendBID</a><p style="margin-top:4px">Support humain instantané</p></div></div>
+      <div class="contact-item"><div class="contact-icon">📞</div><div><h4>Téléphone (pro)</h4><a href="tel:+33000000000">+33 (0) 00 00 00 00</a><p style="margin-top:4px">Du lundi au vendredi, 9h-18h</p></div></div>
+      <div class="contact-item"><div class="contact-icon">📍</div><div><h4>Bureau</h4><p>Paris, France</p><p style="margin-top:4px">Sur rendez-vous uniquement</p></div></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

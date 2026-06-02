@@ -10,7 +10,7 @@ import { Button } from "../../src/components/Button";
 import { StatusChip } from "../../src/components/StatusChip";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * Transfer Success v4.0 — matches the "22 Transfer Success" wireframe:
  * - Dark navy hero + big green checkmark
@@ -21,6 +21,7 @@ import { colors, spacing, radii } from "../../src/theme";
  * - Two CTAs: "Suivre mon transfert" (navy) + "Nouveau transfert" (teal)
  */
 export default function TransferSuccess() {
+  const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
   const [t, setT] = useState<any>(null);

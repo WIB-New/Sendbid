@@ -8,8 +8,9 @@ import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function CreatePin() {
+  const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);
   const [pin, setPin] = useState("");

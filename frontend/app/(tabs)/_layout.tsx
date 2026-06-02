@@ -2,8 +2,9 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamily } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function TabsLayout() {
+  const colors = useThemedColors();
   const insets = useSafeAreaInsets();
   // Tab bar : 60 (contenu) + insets.bottom (safe area) pour iPhone à encoche.
   const tabBarHeight = 60 + Math.max(insets.bottom, 8);

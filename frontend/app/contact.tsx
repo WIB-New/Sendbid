@@ -8,7 +8,7 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { Input } from "../src/components/Input";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Nous contacter v4.0 — "41 Nous contacter" : grille 4 canaux + formulaire contact
 const CHANNELS = [
   { key: "chat", label: "Chat en direct", sub: "En ligne", color: "#10B981", icon: "chatbubbles" as const, action: "chat" },
@@ -18,6 +18,7 @@ const CHANNELS = [
 ];
 
 export default function Contact() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");

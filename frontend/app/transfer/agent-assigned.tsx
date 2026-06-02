@@ -8,7 +8,7 @@ import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 type Bid = {
   id: string;
   agent_id: string;
@@ -30,6 +30,7 @@ type Bid = {
  * - "Suivre en direct" CTA
  */
 export default function AgentAssigned() {
+  const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
   const [t, setT] = useState<any>(null);

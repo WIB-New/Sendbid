@@ -10,7 +10,7 @@ import { StepIndicator } from "../../src/components/StepIndicator";
 import { api, apiError } from "../../src/api";
 import { useDraft } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 // v6 — TOUS les modes sont toujours activés (le bug v5 désactivait bank/momo selon corridor)
 const MODES = [
   { key: "cash", label: "Espèces", icon: "cash-outline" as const, desc: "Retrait en agence avec code", corridorScoped: false },
@@ -35,6 +35,7 @@ type Corridor = {
 };
 
 export default function TransferStep1() {
+  const colors = useThemedColors();
   const router = useRouter();
   const params = useLocalSearchParams<{ beneficiary_id?: string }>();
   const setDraft = useDraft((s) => s.setDraft);

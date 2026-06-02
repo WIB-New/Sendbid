@@ -12,13 +12,14 @@ import { SendBidLogo } from "../../src/components/Logo";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * Login v4.0 — Dark navy gradient header with logo + "Bon retour parmi nous",
  * white card with rounded corners holding form, teal "Se connecter",
  * separator "OU", biometric option, forgot password link, signup link.
  */
 export default function Login() {
+  const colors = useThemedColors();
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);
   const getBio = useAuth((s) => s.getBiometricToken);

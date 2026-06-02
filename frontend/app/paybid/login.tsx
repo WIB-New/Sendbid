@@ -11,10 +11,12 @@ import { Button } from "../../src/components/Button";
 import { SendBidLogo } from "../../src/components/Logo";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
+import { useThemedPaybidColors } from "../../src/themeContext";
 import { paybidColors } from "../../src/paybidTheme";
 import { spacing, radii } from "../../src/theme";
 
 export default function PaybidLogin() {
+  const paybidColors = useThemedPaybidColors();
   const router = useRouter();
   const setUser = useAuth((s) => s.setUser);
   const setWallet = useAuth((s) => s.setWallet);

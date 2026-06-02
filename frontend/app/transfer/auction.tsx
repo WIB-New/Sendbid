@@ -19,10 +19,11 @@ import { Button } from "../../src/components/Button";
 import { api, wsUrl } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const ROUND_DURATION = 30; // Spec : 30s par tour (corrige le 60s précédent)
 
 export default function LiveAuction() {
+  const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
   const user = useAuth((s) => s.user);

@@ -1,0 +1,151 @@
+{% extends 'panels/_base.html' %}
+{% block page_title %}{{ section_title or 'Mon espace agent' }}{% endblock %}
+{% block page_subtitle %}Vos enchères, vos gains, votre float.{% endblock %}
+
+{% block sidebar_nav %}
+  <a href="/api/web/agent" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
+  <a href="/api/web/agent/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
+  <a href="/api/web/agent/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Mes transferts</a>
+  <a href="/api/web/agent/float" class="{% if section == 'float' %}active{% endif %}"><span class="nav-icon">💰</span>Float multi-devises</a>
+  <a href="/api/web/agent/earnings" class="{% if section == 'earnings' %}active{% endif %}"><span class="nav-icon">📈</span>Gains</a>
+{% endblock %}
+
+{% block content %}
+  {% if section == 'dashboard' or not section %}
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Statut</div><div class="stat-value" style="font-size:22px">{% if agent.available %}🟢 En ligne{% else %}🔴 Hors ligne{% endif %}</div><div class="stat-sub">{{ agent.status or 'N/A' }}</div></div>
+      <div class="stat"><div class="stat-label">Aujourd'hui</div><div class="stat-value">{{ stats.today_completed }}</div><div class="stat-sub">transferts complétés</div></div>
+      <div class="stat"><div class="stat-label">Semaine</div><div class="stat-value">{{ stats.week_completed }}</div><div class="stat-sub">7 derniers jours</div></div>
+      <div class="stat"><div class="stat-label">Gains cumulés</div><div class="stat-value">{{ '{:,.2f}'.format(stats.total_earnings_eur or 0).replace(',', ' ') }} €</div><div class="stat-sub up">+{{ '{:,.2f}'.format(stats.week_earnings_eur or 0).replace(',', ' ') }} € cette semaine</div></div>
+      <div class="stat"><div class="stat-label">Note moyenne</div><div class="stat-value">{{ '{:.1f}'.format(stats.rating or 0) }} ★</div><div class="stat-sub">tier {{ agent.tier or 'silver' }}</div></div>
+      <div class="stat"><div class="stat-label">Enchères live</div><div class="stat-value">{{ stats.pending_auctions }}</div><div class="stat-sub">{{ stats.same_city_auctions }} dans votre ville</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>⚡ Enchères à ne pas manquer</h2><a href="/api/web/agent/auctions" class="btn btn-ghost">Tout voir →</a></div>
+      {% if auctions_preview %}
+        <table>
+          <thead><tr><th>ID</th><th>Montant</th><th>Destination</th><th>Bids reçus</th><th>Début</th></tr></thead>
+          <tbody>
+            {% for a in auctions_preview %}
+              <tr>
+                <td><code style="font-size:12px">{{ a.id[:8] if a.id else '—' }}</code></td>
+                <td><b>{{ '{:,.2f}'.format(a.send_amount or 0).replace(',', ' ') }} €</b></td>
+                <td>{{ a.destination_country or '—' }} · {{ a.destination_city or '' }}</td>
+                <td>{{ (a.bids or [])|length }}</td>
+                <td style="color:var(--text-muted); font-size:13px">{{ (a.created_at or '')[:16].replace('T', ' ') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p style="margin-top:16px; color:var(--text-muted); font-size:13px;">ℹ️ Pour bidder, ouvrez l'app PayBID sur votre mobile.</p>
+      {% else %}
+        <div class="empty"><div class="emoji">💤</div>Pas d'enchère live dans votre zone.<br><small>Activez votre disponibilité sur PayBID.</small></div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>💸 Transferts en cours</h2></div>
+      {% if active_transfers %}
+        <table>
+          <thead><tr><th>ID</th><th>Montant</th><th>Destination</th><th>Statut</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for t in active_transfers %}
+              <tr>
+                <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+                <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+                <td>{{ t.destination_country or '—' }} · {{ t.destination_city or '' }}</td>
+                <td><span class="pill pill-{{ t.status }}">{{ t.status or 'N/A' }}</span></td>
+                <td style="color:var(--text-muted); font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty"><div class="emoji">✅</div>Tous vos transferts sont à jour.</div>
+      {% endif %}
+    </div>
+  {% elif section == 'auctions' %}
+    <div class="card">
+      <div class="card-header"><h2>Toutes les enchères live ({{ auctions|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Montant</th><th>Destination</th><th>Frais souhaité max</th><th>Bids reçus</th><th>Début</th></tr></thead>
+        <tbody>
+          {% for a in auctions %}
+            <tr>
+              <td><code style="font-size:12px">{{ a.id[:8] if a.id else '—' }}</code></td>
+              <td><b>{{ '{:,.2f}'.format(a.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td>{{ a.destination_country or '—' }} · {{ a.destination_city or '' }}</td>
+              <td>{{ '{:.2f}'.format(a.client_fee_percent or 0) }}%</td>
+              <td>{{ (a.bids or [])|length }}</td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (a.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">💤</div>Pas d'enchère live.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'transfers' %}
+    <div class="card">
+      <div class="card-header"><h2>Mes transferts ({{ transfers|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Bénéficiaire</th><th>Montant</th><th>Statut</th><th>Commission</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for t in transfers %}
+            <tr>
+              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td>{{ (t.beneficiary or {}).full_name or (t.beneficiary or {}).name or '—' }}</td>
+              <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td><span class="pill pill-{{ t.status }}">{{ t.status }}</span></td>
+              <td><b style="color:#04ba28">+{{ '{:,.2f}'.format(t.commission_eur or 0).replace(',', ' ') }} €</b></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">📜</div>Aucun transfert.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'float' %}
+    <div class="stats">
+      {% for f in floats %}
+        <div class="stat"><div class="stat-label">{{ f.currency }}</div><div class="stat-value">{{ '{:,.2f}'.format(f.balance or 0).replace(',', ' ') }}</div><div class="stat-sub">{{ f.declared_at[:10] if f.declared_at else 'jamais déclaré' }}</div></div>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>💰 Détail du float multi-devises</h2></div>
+      <table>
+        <thead><tr><th>Devise</th><th>Balance</th><th>Mouvements (30j)</th><th>Dernière déclaration</th></tr></thead>
+        <tbody>
+          {% for f in floats %}
+            <tr><td><b>{{ f.currency }}</b></td><td>{{ '{:,.2f}'.format(f.balance or 0).replace(',', ' ') }}</td><td>{{ f.movements_count or 0 }}</td><td style="color:var(--text-muted); font-size:13px">{{ (f.declared_at or '')[:10] or '—' }}</td></tr>
+          {% else %}
+            <tr><td colspan="4"><div class="empty"><div class="emoji">💰</div>Pas de float déclaré.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p style="margin-top:16px; color:var(--text-muted); font-size:13px;">ℹ️ Pour déclarer/réajuster votre float, utilisez l'app PayBID.</p>
+    </div>
+  {% elif section == 'earnings' %}
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Aujourd'hui</div><div class="stat-value">{{ '{:,.2f}'.format(earnings.today or 0).replace(',', ' ') }} €</div></div>
+      <div class="stat"><div class="stat-label">Cette semaine</div><div class="stat-value">{{ '{:,.2f}'.format(earnings.week or 0).replace(',', ' ') }} €</div></div>
+      <div class="stat"><div class="stat-label">Ce mois</div><div class="stat-value">{{ '{:,.2f}'.format(earnings.month or 0).replace(',', ' ') }} €</div></div>
+      <div class="stat"><div class="stat-label">Total cumulé</div><div class="stat-value">{{ '{:,.2f}'.format(earnings.total or 0).replace(',', ' ') }} €</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>📈 Détail des commissions (30 derniers transferts)</h2></div>
+      <table>
+        <thead><tr><th>Date</th><th>Transfert</th><th>Montant</th><th>% frais</th><th>Commission</th></tr></thead>
+        <tbody>
+          {% for e in earnings_list %}
+            <tr><td style="color:var(--text-muted); font-size:13px">{{ (e.completed_at or e.created_at or '')[:10] }}</td><td><code style="font-size:12px">{{ e.id[:8] if e.id else '—' }}</code></td><td>{{ '{:,.2f}'.format(e.send_amount or 0).replace(',', ' ') }} €</td><td>{{ '{:.2f}'.format(e.fee_percent or 0) }}%</td><td><b style="color:#04ba28">+{{ '{:,.2f}'.format(e.commission or 0).replace(',', ' ') }} €</b></td></tr>
+          {% else %}
+            <tr><td colspan="5"><div class="empty"><div class="emoji">💰</div>Pas encore de gains.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

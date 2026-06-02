@@ -5,8 +5,9 @@ import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function AdminUsers() {
+  const colors = useThemedColors();
   const [items, setItems] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);

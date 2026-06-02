@@ -7,10 +7,12 @@ import { TText } from "../../../src/components/TText";
 import { Button } from "../../../src/components/Button";
 import { api } from "../../../src/api";
 import { useAuth } from "../../../src/store";
+import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii } from "../../../src/theme";
 
 export default function PaybidProfile() {
+  const paybidColors = useThemedPaybidColors();
   const router = useRouter();
   const logoutStore = useAuth((s) => s.logout);
   const [me, setMe] = useState<any>(null);

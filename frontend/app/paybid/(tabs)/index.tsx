@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../../src/components/TText";
 import { SendBidLogo } from "../../../src/components/Logo";
 import { api } from "../../../src/api";
+import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii, shadows } from "../../../src/theme";
 
@@ -20,6 +21,7 @@ const SERVICES = [
 ];
 
 export default function PaybidDashboard() {
+  const paybidColors = useThemedPaybidColors();
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [float, setFloat] = useState<{ balance: number; currency: string } | null>(null);

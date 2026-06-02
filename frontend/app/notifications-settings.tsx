@@ -6,7 +6,7 @@ import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Réglage des notifications — toggles inline (push, email, sms)
 // "Marketing & promotions" SUPPRIMÉ selon spécification
 type Pref = { key: string; label: string; description: string; icon: any; tint: string };
@@ -17,6 +17,7 @@ const PREFS: Pref[] = [
 ];
 
 export default function NotificationsSettings() {
+  const colors = useThemedColors();
   const [vals, setVals] = useState<Record<string, boolean>>({ push: true, email: true, sms: true });
   const [busy, setBusy] = useState<string | null>(null);
 

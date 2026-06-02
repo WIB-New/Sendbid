@@ -1,0 +1,104 @@
+{% extends 'partials/base.html' %}
+{% block title %}Fonctionnalités — SendFloo{% endblock %}
+{% block extra_css %}
+  .page-hero { padding: 80px 24px 40px; background: radial-gradient(ellipse at top, rgba(4,212,111,0.15), transparent 60%), var(--bg); text-align: center; }
+  .feat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; padding: 60px 0; border-bottom: 1px solid var(--border); }
+  .feat-row:last-child { border-bottom: 0; }
+  .feat-row.reverse { direction: rtl; }
+  .feat-row.reverse > * { direction: ltr; }
+  @media (max-width: 880px) { .feat-row, .feat-row.reverse { grid-template-columns: 1fr; direction: ltr; padding: 40px 0; } }
+  .feat-visual { background: linear-gradient(135deg, var(--surface), var(--surface-2)); border-radius: 24px; padding: 40px; min-height: 320px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 84px; }
+  .feat-content .eyebrow { margin-bottom: 12px; }
+  .feat-content h2 { font-size: 32px; margin-bottom: 14px; }
+  .feat-content p { font-size: 17px; color: var(--text-muted); margin-bottom: 16px; }
+  .feat-list li { padding: 6px 0; color: var(--text-muted); font-size: 15px; list-style: none; padding-left: 26px; position: relative; }
+  .feat-list li::before { content: '✓'; position: absolute; left: 0; color: var(--emerald); font-weight: 800; }
+{% endblock %}
+{% block body %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Fonctionnalités</span>
+    <h1 class="serif">Tout ce dont vous avez besoin pour transférer en confiance</h1>
+    <p class="lead" style="margin-top:16px">SendFloo combine technologie fintech, biométrie, multi-devises et réseau d'agents pour une expérience unique.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="feat-row">
+      <div class="feat-content">
+        <span class="eyebrow">⚡ Innovation</span>
+        <h2 class="serif">Enchère inverse 30 secondes</h2>
+        <p>Notre algorithme exclusif diffuse votre demande à tous les agents disponibles dans le corridor concerné. Pendant 30 secondes, ils biddènt sur leurs frais. Le meilleur prix gagne.</p>
+        <ul class="feat-list">
+          <li>WebSocket temps réel (latence < 200ms)</li>
+          <li>Visibilité totale sur tous les bids</li>
+          <li>Règles équitables : frais agent < frais client</li>
+          <li>Possibilité de « next round » si vous voulez relancer</li>
+        </ul>
+      </div>
+      <div class="feat-visual">⏱️</div>
+    </div>
+
+    <div class="feat-row reverse">
+      <div class="feat-content">
+        <span class="eyebrow">🔒 Sécurité</span>
+        <h2 class="serif">Biométrie native + KYC 3 niveaux</h2>
+        <p>Face ID, Touch ID, PIN, OTP : chaque transaction sensible est verrouillée. Le KYC est gradué selon le volume : plus vous envoyez, plus la validation est forte.</p>
+        <ul class="feat-list">
+          <li>Authentification biométrique iOS/Android native</li>
+          <li>KYC Tier 1 (basique), 2 (ID), 3 (justificatifs corp.)</li>
+          <li>Chiffrement E2E des données sensibles</li>
+          <li>Audit logs complets et réconciliation automatique</li>
+        </ul>
+      </div>
+      <div class="feat-visual">👁️</div>
+    </div>
+
+    <div class="feat-row">
+      <div class="feat-content">
+        <span class="eyebrow">💳 Paiements</span>
+        <h2 class="serif">Stripe + PayPal + Mobile Money</h2>
+        <p>Rechargez votre wallet FlooMoney depuis la méthode de votre choix. 100% in-app grâce à notre WebBrowser embarqué — jamais de redirection externe.</p>
+        <ul class="feat-list">
+          <li>Stripe (carte bancaire mondiale)</li>
+          <li>PayPal (compte ou carte)</li>
+          <li>Mobile Money : MTN, Orange, Wave, Moov</li>
+          <li>Wallet multi-devises EUR / USD / XAF / XOF</li>
+        </ul>
+      </div>
+      <div class="feat-visual">💳</div>
+    </div>
+
+    <div class="feat-row reverse">
+      <div class="feat-content">
+        <span class="eyebrow">🌍 International</span>
+        <h2 class="serif">250+ pays, 7 langues, RTL inclus</h2>
+        <p>SendFloo est disponible en français, anglais, espagnol, allemand, italien, portugais et arabe (avec support RTL natif). Le mode sombre est inclus partout.</p>
+        <ul class="feat-list">
+          <li>i18n complet sur toute l'app</li>
+          <li>Support RTL pour l'arabe natif</li>
+          <li>Dark mode global synchronisé OS</li>
+          <li>Conversion multi-devises temps réel</li>
+        </ul>
+      </div>
+      <div class="feat-visual">🌍</div>
+    </div>
+
+    <div class="feat-row">
+      <div class="feat-content">
+        <span class="eyebrow">👥 Écosystème agent</span>
+        <h2 class="serif">PayBID : l'app métier des pros</h2>
+        <p>Les agents disposent d'une app spécialement conçue : float multi-devises, comptabilité automatique, programme fidélité, panel web compagnon.</p>
+        <ul class="feat-list">
+          <li>Niveaux Silver → Gold → Platinum</li>
+          <li>Float par devise avec mouvements tracés</li>
+          <li>QR code de retrait sécurisé</li>
+          <li>Super-Agent : gestion d'un réseau d'agents</li>
+        </ul>
+      </div>
+      <div class="feat-visual">👥</div>
+    </div>
+  </div>
+</section>
+{% endblock %}

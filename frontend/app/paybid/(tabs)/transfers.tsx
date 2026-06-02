@@ -5,6 +5,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../../src/components/TText";
 import { api } from "../../../src/api";
+import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii } from "../../../src/theme";
 
@@ -15,6 +16,7 @@ const CATS = [
 ];
 
 export default function PaybidTransfers() {
+  const paybidColors = useThemedPaybidColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
   const [cat, setCat] = useState("active");

@@ -7,12 +7,13 @@ import { TText } from "../src/components/TText";
 import { StatusChip } from "../src/components/StatusChip";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 /**
  * Reçus — Tous les transferts (correspond exactement à toute la liste).
  * Aperçu compact + bouton "Reçu PDF" / "Partager".
  */
 export default function Receipts() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);

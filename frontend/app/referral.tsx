@@ -10,7 +10,7 @@ import { Button } from "../src/components/Button";
 import { useAuth } from "../src/store";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Parrainage v4.0 — "39 Referral" : code géant + copier/partager + progress palier + steps
 const STEPS = [
   { n: 1, title: "Partagez votre code", desc: "Envoyez-le à vos proches", icon: "share-social-outline" },
@@ -20,6 +20,7 @@ const STEPS = [
 ];
 
 export default function Referral() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const [stats, setStats] = useState<any>({ invited: 0, earned: 0, bonuses: 0 });

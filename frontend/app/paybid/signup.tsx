@@ -8,11 +8,13 @@ import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
+import { useThemedPaybidColors } from "../../src/themeContext";
 import { paybidColors } from "../../src/paybidTheme";
 import { spacing, radii } from "../../src/theme";
 
 /** PAYBID agent signup — creates a role=agent account. */
 export default function PaybidSignup() {
+  const paybidColors = useThemedPaybidColors();
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

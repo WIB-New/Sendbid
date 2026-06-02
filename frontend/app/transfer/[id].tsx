@@ -11,7 +11,7 @@ import { VerticalProgress, type ProgressStep } from "../../src/components/Vertic
 import { api } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * Détail Transfert v6.4 — Timelines conditionnelles selon delivery_mode
  *  - CASH (Espèces) : 1) Créé 2) Fonds débités 3) Confié à un agent 4) Fonds disponibles (48h) 5) Bénéficiaire notifié 6) Terminé
@@ -146,6 +146,7 @@ function formatRemaining(ms: number): string {
 }
 
 export default function TransferDetail() {
+  const colors = useThemedColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const token = useAuth((s) => s.token);

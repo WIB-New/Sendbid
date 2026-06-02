@@ -8,6 +8,7 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { SendBidLogo } from "../src/components/Logo";
 import { colors, spacing, radii } from "../src/theme";
+import { useThemedColors } from "../src/themeContext";
 import { t, setLocale, SUPPORTED_LOCALES, i18n } from "../src/i18n";
 
 /**
@@ -16,6 +17,7 @@ import { t, setLocale, SUPPORTED_LOCALES, i18n } from "../src/i18n";
  * (agent access lives in its own APK).
  */
 export default function Welcome() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [, force] = useState(0);
 

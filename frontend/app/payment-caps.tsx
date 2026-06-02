@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 type Cap = { method: string; label: string; icon: any; perTx: number; daily: number; currency: string; note?: string };
 
 const CAPS: Cap[] = [
@@ -14,6 +14,7 @@ const CAPS: Cap[] = [
 ];
 
 export default function PaymentCaps() {
+  const colors = useThemedColors();
   return (
     <Screen title="Plafonds de paiement" back hero>
       <View style={styles.banner}>

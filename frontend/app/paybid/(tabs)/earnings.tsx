@@ -6,10 +6,12 @@ import { useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../../src/components/TText";
 import { api } from "../../../src/api";
+import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii, shadows } from "../../../src/theme";
 
 export default function PaybidEarnings() {
+  const paybidColors = useThemedPaybidColors();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 

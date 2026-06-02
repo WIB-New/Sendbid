@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TText } from "../../src/components/TText";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * B6 — UI d'appel sortant vers l'agent payeur.
  * - Sur mobile (iOS/Android) : tentative d'appel natif via tel:
@@ -14,6 +14,7 @@ import { colors, spacing, radii } from "../../src/theme";
  * - UI inspirée des apps d'appel natives (avatar, gradient sombre, boutons actions)
  */
 export default function Call() {
+  const colors = useThemedColors();
   const router = useRouter();
   const { transfer_id, phone, name } = useLocalSearchParams<{ transfer_id: string; phone?: string; name?: string }>();
   const [status, setStatus] = useState<"dialing" | "ringing" | "in_call" | "ended">("dialing");

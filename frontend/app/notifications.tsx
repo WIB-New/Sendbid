@@ -6,7 +6,7 @@ import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 const TYPE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   info: "information-circle-outline",
   success: "checkmark-circle-outline",
@@ -18,6 +18,7 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function Notifications() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);

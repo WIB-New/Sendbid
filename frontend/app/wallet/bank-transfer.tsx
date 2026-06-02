@@ -10,8 +10,9 @@ import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function BankTransfer() {
+  const colors = useThemedColors();
   const router = useRouter();
   const params = useLocalSearchParams<{ contact_name?: string; iban?: string; bank_name?: string; bic_swift?: string }>();
   const refreshMe = useAuth((s) => s.refreshMe);

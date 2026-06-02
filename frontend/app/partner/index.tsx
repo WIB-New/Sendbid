@@ -8,13 +8,14 @@ import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * /partner — Panel unique pour les Partenaires (responsables de zone).
  * Ils gèrent tous les acteurs de la distribution et du commercial dans leur zone.
  * Back-office orienté : agents de la zone, transferts de la zone, commissions, règlements.
  */
 export default function PartnerPanel() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);

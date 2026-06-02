@@ -8,7 +8,7 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const REASONS = [
   { key: "not_received", label: "Fonds non reçus" },
   { key: "wrong_amount", label: "Montant incorrect" },
@@ -19,6 +19,7 @@ const REASONS = [
 ];
 
 export default function NewDispute() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [transfers, setTransfers] = useState<any[]>([]);
   const [transferId, setTransferId] = useState<string>("");

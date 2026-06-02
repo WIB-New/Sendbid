@@ -9,11 +9,12 @@ import { Button } from "../../src/components/Button";
 import { StepIndicator } from "../../src/components/StepIndicator";
 import { useDraft } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const PURPOSES = ["Aide familiale", "Épargne", "Éducation", "Investissement", "Autres"];
 const SOURCES = ["Salaire", "Autres revenus", "Économies", "Investissements", "Emprunts et découverts bancaires", "Autre"];
 
 export default function TransferStep2() {
+  const colors = useThemedColors();
   const router = useRouter();
   const draft = useDraft((s) => s.draft);
   const patchDraft = useDraft((s) => s.patchDraft);

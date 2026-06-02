@@ -8,8 +8,9 @@ import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function VerifyOtp() {
+  const colors = useThemedColors();
   const params = useLocalSearchParams<{ user_id: string; dev_email_otp?: string; dev_phone_otp?: string; from_banner?: string }>();
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);

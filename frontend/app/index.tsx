@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { TText } from "../src/components/TText";
 import { SendBidLogo } from "../src/components/Logo";
 import { colors, spacing } from "../src/theme";
+import { useThemedColors } from "../src/themeContext";
 import { useAuth } from "../src/store";
 
 /**
@@ -12,6 +13,7 @@ import { useAuth } from "../src/store";
  * slogan italique "Transférez. Simplement." + 3 dots animés + progress bar.
  */
 export default function Splash() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const hydrated = useAuth((s) => s.hydrated);

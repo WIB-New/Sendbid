@@ -9,7 +9,7 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * KYC Personnes morales — Wizard 3 niveaux.
  * Niveau 1 : infos de base — Niveau 2 : docs légaux — Niveau 3 : représentant légal.
@@ -17,6 +17,7 @@ import { colors, spacing, radii } from "../../src/theme";
 const ENTITY_TYPES = ["SAS", "SA", "SARL", "EURL", "SASU", "SCI", "Association", "ONG", "Auto-entrepreneur", "Autre"];
 
 export default function KycCorporate() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [status, setStatus] = useState<any>(null);
   const [step, setStep] = useState<1 | 2 | 3>(1);

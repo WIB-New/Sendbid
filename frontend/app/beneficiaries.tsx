@@ -8,9 +8,10 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Bénéficiaires v4.0 — "25 Bénéficiaires" : header navy + search + filtres pays + favoris en haut + liste cartes
 export default function Beneficiaries() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
   const [query, setQuery] = useState("");

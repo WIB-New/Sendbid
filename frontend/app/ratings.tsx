@@ -5,12 +5,13 @@ import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 /**
  * Évaluations — liste des agents ayant servi le client + notes/commentaires.
  * Données mockées si l'endpoint n'est pas déployé (MOCKED fallback).
  */
 export default function Ratings() {
+  const colors = useThemedColors();
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 

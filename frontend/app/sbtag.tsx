@@ -10,8 +10,9 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { useAuth } from "../src/store";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 export default function SBTagPage() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const [showInfo, setShowInfo] = useState(false);

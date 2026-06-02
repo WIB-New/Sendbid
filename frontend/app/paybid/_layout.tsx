@@ -1,8 +1,9 @@
 import React from "react";
 import { Stack } from "expo-router";
+import { useThemedPaybidColors } from "../../src/themeContext";
 import { paybidColors } from "../../src/paybidTheme";
-
 export default function PaybidRootLayout() {
+  const paybidColors = useThemedPaybidColors();
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: paybidColors.neutrals.background } }}>
       <Stack.Screen name="login" />

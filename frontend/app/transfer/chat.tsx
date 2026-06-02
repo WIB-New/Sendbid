@@ -6,7 +6,7 @@ import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
 import { colors, spacing, radii, fontFamily } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const ROLE_LABELS: Record<string, { name: string; color: string }> = {
   sender: { name: "Vous", color: colors.primary.base },
   agent: { name: "Agent", color: colors.accent.base },
@@ -15,6 +15,7 @@ const ROLE_LABELS: Record<string, { name: string; color: string }> = {
 };
 
 export default function Chat() {
+  const colors = useThemedColors();
   const router = useRouter();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const [messages, setMessages] = useState<any[]>([]);

@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 type Badge = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
@@ -80,6 +80,7 @@ const STEPS: Step[] = [
 ];
 
 export default function Onboarding() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const cur = STEPS[step];

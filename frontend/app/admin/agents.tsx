@@ -6,8 +6,9 @@ import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function AdminAgents() {
+  const colors = useThemedColors();
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");

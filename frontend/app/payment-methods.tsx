@@ -8,7 +8,7 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Moyens de paiement v6.4 — Refonte design moderne, regroupement par type :
 //   1. Carte bancaire (Visa/Mastercard)
 //   2. Mobile Money (Orange/Wave/MTN/Moov)
@@ -40,6 +40,7 @@ const promptAsync = (msg: string): Promise<string | null> =>
   });
 
 export default function PaymentMethods() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [methods, setMethods] = useState<any[]>([]);
 

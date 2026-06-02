@@ -7,8 +7,9 @@ import { TText } from "../src/components/TText";
 import { api, apiError } from "../src/api";
 import { useAuth } from "../src/store";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 export default function Sessions() {
+  const colors = useThemedColors();
   const router = useRouter();
   const logout = useAuth((s) => s.logout);
   const [sessions, setSessions] = useState<any[]>([]);

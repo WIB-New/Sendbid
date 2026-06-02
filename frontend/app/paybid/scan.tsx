@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
+import { useThemedPaybidColors } from "../../src/themeContext";
 import { paybidColors } from "../../src/paybidTheme";
 import { spacing, radii } from "../../src/theme";
 
@@ -18,6 +19,7 @@ import { spacing, radii } from "../../src/theme";
  *    POST /api/agent/transfers/{id}/complete and credits commission.
  */
 export default function PaybidScan() {
+  const paybidColors = useThemedPaybidColors();
   const router = useRouter();
   const [manualOpen, setManualOpen] = useState(false);
   const [code, setCode] = useState("");

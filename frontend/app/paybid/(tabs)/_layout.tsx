@@ -2,13 +2,14 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
-
 function Icon({ name, color }: { name: any; color: string }) {
   return <Ionicons name={name} size={22} color={color} />;
 }
 
 export default function PaybidTabsLayout() {
+  const paybidColors = useThemedPaybidColors();
   const insets = useSafeAreaInsets();
   const safeBottom = Math.max(insets.bottom, 8);
   return (

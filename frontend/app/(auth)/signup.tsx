@@ -9,11 +9,13 @@ import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
+import { useThemedColors } from "../../src/themeContext";
 import { dialToCountry, countryToDial, flagEmoji } from "../../src/utils/dialCodes";
 
 type Country = { country_code: string; country_name: string; flag?: string; currency?: string; cities?: string[]; capital?: string };
 
 export default function SignUp() {
+  const colors = useThemedColors();
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);
   const [firstName, setFirstName] = useState("");

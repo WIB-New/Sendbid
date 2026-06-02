@@ -1,0 +1,73 @@
+{% extends 'partials/base.html' %}
+{% block title %}Télécharger — SendFloo{% endblock %}
+{% block extra_css %}
+  .dl-hero { padding: 80px 24px 40px; background: radial-gradient(ellipse at top, rgba(4,212,111,0.2), transparent 60%), var(--bg); text-align: center; }
+  .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px; }
+  @media (max-width: 880px) { .dl-grid { grid-template-columns: 1fr; } }
+  .dl-card { background: var(--surface); padding: 48px 40px; border-radius: 24px; border: 1px solid var(--border); text-align: center; }
+  .dl-icon-wrap { width: 88px; height: 88px; border-radius: 22px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 44px; }
+  .dl-icon-sendbid { background: linear-gradient(135deg, #011645, #052080); }
+  .dl-icon-paybid { background: linear-gradient(135deg, #CC7A00, #FFA500); }
+  .dl-card h2 { font-size: 28px; margin-bottom: 8px; }
+  .dl-card p { color: var(--text-muted); margin-bottom: 28px; }
+  .store-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .store-btn { display: flex; align-items: center; gap: 10px; padding: 14px 22px; background: #0a0a0a; color: white; border-radius: 12px; font-size: 14px; transition: transform 0.2s; }
+  .store-btn:hover { transform: translateY(-2px); }
+  .store-btn .small { font-size: 10px; opacity: 0.7; display: block; }
+  .store-btn .big { font-weight: 700; font-size: 16px; }
+  .qr-section { text-align: center; margin-top: 64px; }
+  .qr-box { display: inline-block; padding: 20px; background: white; border-radius: 16px; margin: 16px 0; }
+  .qr-box img { width: 180px; height: 180px; }
+{% endblock %}
+{% block body %}
+<section class="dl-hero">
+  <div class="container">
+    <span class="eyebrow">Télécharger</span>
+    <h1 class="serif">L'app, partout où vous êtes</h1>
+    <p class="lead" style="margin-top:16px">SendFloo est disponible sur iOS et Android. Choisissez votre app selon votre profil.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="dl-grid">
+      <div class="dl-card">
+        <div class="dl-icon-wrap dl-icon-sendbid">💸</div>
+        <h2 class="serif">SendBID</h2>
+        <p>Pour les expéditeurs.<br>Envoyez de l'argent au meilleur taux.</p>
+        <div class="store-btns">
+          <a href="#" class="store-btn"><span style="font-size:24px"></span><div><span class="small">Télécharger sur</span><span class="big">App Store</span></div></a>
+          <a href="#" class="store-btn"><span style="font-size:24px">▶</span><div><span class="small">DISPONIBLE SUR</span><span class="big">Google Play</span></div></a>
+        </div>
+        <p style="margin-top:24px; font-size:13px; color:var(--text-dim)">Gratuit · 4,8/5 sur 12k+ avis</p>
+      </div>
+
+      <div class="dl-card" style="border-color:rgba(255,165,0,0.3)">
+        <div class="dl-icon-wrap dl-icon-paybid">💼</div>
+        <h2 class="serif">PayBID</h2>
+        <p>Pour les agents pro.<br>Gérez vos enchères et votre float.</p>
+        <div class="store-btns">
+          <a href="#" class="store-btn"><span style="font-size:24px"></span><div><span class="small">Télécharger sur</span><span class="big">App Store</span></div></a>
+          <a href="#" class="store-btn"><span style="font-size:24px">▶</span><div><span class="small">DISPONIBLE SUR</span><span class="big">Google Play</span></div></a>
+        </div>
+        <p style="margin-top:24px; font-size:13px; color:var(--text-dim)">9,90€/mois après essai gratuit 7 jours</p>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <h3 class="serif" style="font-family: 'Playfair Display'; font-size: 26px; margin-bottom: 8px">Scannez pour télécharger</h3>
+      <p class="lead">Ouvrez l'appareil photo de votre smartphone</p>
+      <div style="display:flex; gap:32px; justify-content:center; flex-wrap:wrap">
+        <div>
+          <div class="qr-box"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://sendbid.app/download/sendbid" alt="QR SendBID"></div>
+          <div style="font-weight:700">SendBID (Client)</div>
+        </div>
+        <div>
+          <div class="qr-box"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://sendbid.app/download/paybid" alt="QR PayBID"></div>
+          <div style="font-weight:700; color:var(--orange)">PayBID (Agent)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -7,9 +7,10 @@ import { Input } from "../src/components/Input";
 import { Button } from "../src/components/Button";
 import { api } from "../src/api";
 import { colors, spacing } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Vérifier un transfert — Le client peut entrer une référence pour suivre/vérifier l'état d'un transfert.
 export default function VerifyTransfer() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [ref, setRef] = useState("");
   const [busy, setBusy] = useState(false);

@@ -10,10 +10,11 @@ import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 type Method = "cash" | "bank" | "momo" | "paypal";
 
 export default function Withdraw() {
+  const colors = useThemedColors();
   const wallet = useAuth((s) => s.wallet);
   const refreshMe = useAuth((s) => s.refreshMe);
   const [method, setMethod] = useState<Method>("cash");

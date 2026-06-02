@@ -5,7 +5,7 @@ import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { Card } from "../src/components/Card";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 const DOCS = [
   { name: "Conditions générales", icon: "document-text-outline" },
   { name: "Politique de confidentialité", icon: "shield-checkmark-outline" },
@@ -15,6 +15,7 @@ const DOCS = [
 ];
 
 export default function Documents() {
+  const colors = useThemedColors();
   return (
     <Screen title="Documents" back>
       <Card>

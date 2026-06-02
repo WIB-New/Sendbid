@@ -13,7 +13,7 @@ import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 type Method = "cash" | "card" | "momo" | "paypal";
 type Pkg = { id: string; amount: number; label: string };
 
@@ -27,6 +27,7 @@ const METHODS: { key: Method; label: string; icon: any; desc: string; available:
 const ORIGIN = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 
 export default function Recharge() {
+  const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);
   const [method, setMethod] = useState<Method>("card");

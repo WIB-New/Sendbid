@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TText } from "../src/components/TText";
 import { SendBidLogo } from "../src/components/Logo";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 /**
  * SENDBID Landing page — Site promotionnel public.
  * Accessible sans authentification via /landing.
@@ -38,6 +38,7 @@ const STATS = [
 ];
 
 export default function Landing() {
+  const colors = useThemedColors();
   const router = useRouter();
   return (
     <LinearGradient colors={["#070C24", "#0A1338", "#0F1B40"]} style={{ flex: 1 }}>

@@ -17,6 +17,8 @@ import { Appearance } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors as lightColors } from "./theme";
 import { darkColors } from "./darkTheme";
+import { paybidColors } from "./paybidTheme";
+import { paybidDarkColors } from "./paybidDarkTheme";
 import { useAuth } from "./store";
 import { api } from "./api";
 
@@ -100,4 +102,16 @@ export function useThemeTokens() {
  */
 export function useThemedColors() {
   return useContext(ThemeCtx).tokens;
+}
+
+/**
+ * PayBID equivalent: returns paybidColors (light) or paybidDarkColors (dark)
+ * depending on the global theme mode.
+ *
+ * Usage in PayBID screens:
+ *   const paybidColors = useThemedPaybidColors();
+ */
+export function useThemedPaybidColors() {
+  const { isDark } = useContext(ThemeCtx);
+  return (isDark ? paybidDarkColors : paybidColors) as typeof paybidColors;
 }

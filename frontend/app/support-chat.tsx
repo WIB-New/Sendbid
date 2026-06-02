@@ -5,10 +5,11 @@ import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
 import { api, apiError } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 type Msg = { id: string; sender: "user" | "bot" | "agent"; text: string; created_at: string };
 
 export default function SupportChat() {
+  const colors = useThemedColors();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);

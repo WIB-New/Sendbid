@@ -1,3 +1,6 @@
 import { Stack } from "expo-router";
-import { colors } from "../../src/theme";
-export default function KycLayout() { return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.neutrals.background } }} />; }
+import { useThemedColors } from "../../src/themeContext";
+export default function KycLayout() {
+  const colors = useThemedColors();
+  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.neutrals.background } }} />;
+}

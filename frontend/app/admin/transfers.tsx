@@ -6,7 +6,7 @@ import { TText } from "../../src/components/TText";
 import { StatusChip } from "../../src/components/StatusChip";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const STATUSES = [
   { k: "all", l: "Tous" },
   { k: "BIDDING", l: "Offre" },
@@ -17,6 +17,7 @@ const STATUSES = [
 ];
 
 export default function AdminTransfers() {
+  const colors = useThemedColors();
   const [items, setItems] = useState<any[]>([]);
   const [status, setStatus] = useState("all");
   const [refreshing, setRefreshing] = useState(false);

@@ -8,6 +8,7 @@ import { Card } from "../src/components/Card";
 import { api, apiError } from "../src/api";
 import { useAuth } from "../src/store";
 import { colors, spacing, radii } from "../src/theme";
+import { useThemedColors } from "../src/themeContext";
 import { i18n, setLocale, SUPPORTED_LOCALES } from "../src/i18n";
 
 const THEMES = [
@@ -26,6 +27,7 @@ const CURRENCIES = [
 ];
 
 export default function Settings() {
+  const colors = useThemedColors();
   const user = useAuth((s) => s.user);
   const refreshMe = useAuth((s) => s.refreshMe);
   const saveBio = useAuth((s) => s.saveBiometricToken);

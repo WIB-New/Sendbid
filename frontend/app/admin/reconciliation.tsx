@@ -5,7 +5,7 @@ import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const TYPE_LABEL: Record<string, string> = {
   declare: "Déclarations float",
   cashin: "Encaissements",
@@ -22,6 +22,7 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function AdminReco() {
+  const colors = useThemedColors();
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [kpis, setKpis] = useState<any>(null);

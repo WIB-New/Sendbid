@@ -1,0 +1,100 @@
+{% extends 'panels/_base.html' %}
+{% block page_title %}{{ section_title or 'Super-Agent' }}{% endblock %}
+{% block page_subtitle %}Gérez votre réseau d'agents et suivez les performances consolidées.{% endblock %}
+
+{% block sidebar_nav %}
+  <a href="/api/web/superagent" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
+  <a href="/api/web/superagent/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👥</span>Mon réseau</a>
+  <a href="/api/web/superagent/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts réseau</a>
+  <a href="/api/web/superagent/earnings" class="{% if section == 'earnings' %}active{% endif %}"><span class="nav-icon">📈</span>Override commission</a>
+{% endblock %}
+
+{% block content %}
+  {% if section == 'dashboard' or not section %}
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Réseau</div><div class="stat-value">{{ network.total_agents }}</div><div class="stat-sub">{{ network.active_agents }} actifs</div></div>
+      <div class="stat"><div class="stat-label">Transferts (réseau)</div><div class="stat-value">{{ network.total_transfers }}</div><div class="stat-sub up">{{ network.completed_transfers }} complétés</div></div>
+      <div class="stat"><div class="stat-label">Volume réseau</div><div class="stat-value">{{ '{:,.0f}'.format(network.volume_eur or 0).replace(',', ' ') }} €</div><div class="stat-sub">cumulé</div></div>
+      <div class="stat"><div class="stat-label">Override commission</div><div class="stat-value">{{ '{:,.2f}'.format(network.override_eur or 0).replace(',', ' ') }} €</div><div class="stat-sub up">votre part</div></div>
+      <div class="stat"><div class="stat-label">Note moyenne réseau</div><div class="stat-value">{{ '{:.1f}'.format(network.avg_rating or 0) }} ★</div></div>
+      <div class="stat"><div class="stat-label">Float réseau</div><div class="stat-value">{{ '{:,.0f}'.format(network.total_float or 0).replace(',', ' ') }}</div><div class="stat-sub">multi-devises EUR equiv.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>👥 Top agents de votre réseau</h2><a href="/api/web/superagent/agents" class="btn btn-ghost">Voir tout →</a></div>
+      <table>
+        <thead><tr><th>Agent</th><th>Ville</th><th>Statut</th><th>Note</th><th>Transferts</th><th>Volume €</th></tr></thead>
+        <tbody>
+          {% for a in top_agents %}
+            <tr>
+              <td><b>{{ a.full_name or '—' }}</b></td>
+              <td>{{ a.city or '—' }}</td>
+              <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
+              <td>{{ '{:.1f}'.format(a.rating or 0) }} ★</td>
+              <td>{{ a.transfers_count or 0 }}</td>
+              <td><b>{{ '{:,.0f}'.format(a.volume_eur or 0).replace(',', ' ') }} €</b></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">👥</div>Pas d'agent dans votre réseau.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'agents' %}
+    <div class="card">
+      <div class="card-header"><h2>Mon réseau d'agents ({{ agents|length }})</h2></div>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Ville</th><th>Statut</th><th>Tier</th><th>Note</th><th>Transferts</th></tr></thead>
+        <tbody>
+          {% for a in agents %}
+            <tr>
+              <td><b>{{ a.full_name or '—' }}</b></td>
+              <td>{{ a.email or '—' }}</td>
+              <td>{{ a.city or '—' }}</td>
+              <td><span class="pill pill-{{ a.status }}">{{ a.status }}</span></td>
+              <td>{{ a.tier or 'silver' }}</td>
+              <td>{{ '{:.1f}'.format(a.rating or 0) }} ★</td>
+              <td>{{ a.transfers_count or 0 }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7"><div class="empty"><div class="emoji">👥</div>Réseau vide.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'transfers' %}
+    <div class="card">
+      <div class="card-header"><h2>Transferts du réseau ({{ transfers|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Agent</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for t in transfers %}
+            <tr>
+              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td>{{ t.agent_name or '—' }}</td>
+              <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td><span class="pill pill-{{ t.status }}">{{ t.status }}</span></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5"><div class="empty"><div class="emoji">💸</div>Aucun transfert.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'earnings' %}
+    <div class="card">
+      <div class="card-header"><h2>📈 Override commission par agent</h2></div>
+      <table>
+        <thead><tr><th>Agent</th><th>Transferts complétés</th><th>Volume</th><th>Override (10%)</th></tr></thead>
+        <tbody>
+          {% for e in overrides %}
+            <tr><td><b>{{ e.agent_name }}</b></td><td>{{ e.completed }}</td><td>{{ '{:,.2f}'.format(e.volume or 0).replace(',', ' ') }} €</td><td><b style="color:#04ba28">+{{ '{:,.2f}'.format(e.override or 0).replace(',', ' ') }} €</b></td></tr>
+          {% else %}
+            <tr><td colspan="4"><div class="empty"><div class="emoji">💰</div>Pas encore de commission override.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

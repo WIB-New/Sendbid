@@ -7,7 +7,7 @@ import { Card } from "../src/components/Card";
 import { useAuth } from "../src/store";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 const TIERS = [
   {
     tier: 0, label: "Non vérifié", color: colors.neutrals.textSecondary, icon: "person-outline" as const,
@@ -27,6 +27,7 @@ const TIERS = [
 ];
 
 export default function Limits() {
+  const colors = useThemedColors();
   const user = useAuth((s) => s.user);
   const currentTier = user?.kyc_tier ?? 0;
 

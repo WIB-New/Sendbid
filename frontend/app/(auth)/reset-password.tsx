@@ -7,8 +7,9 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function ResetPassword() {
+  const colors = useThemedColors();
   const { token } = useLocalSearchParams<{ token: string }>();
   const router = useRouter();
   const [pwd, setPwd] = useState("");

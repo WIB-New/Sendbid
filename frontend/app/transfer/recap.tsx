@@ -10,8 +10,9 @@ import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth, useDraft } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function TransferStep3() {
+  const colors = useThemedColors();
   const router = useRouter();
   const draft = useDraft((s) => s.draft);
   const patchDraft = useDraft((s) => s.patchDraft);

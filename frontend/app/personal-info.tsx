@@ -8,7 +8,7 @@ import { Button } from "../src/components/Button";
 import { api, apiError } from "../src/api";
 import { useAuth } from "../src/store";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // PROFIL.2 v6.4 — Email & téléphone modifiables avec procédure de vérification dédiée :
 // Le bouton "Changer d'adresse email" est supprimé. Une icône "Modifier" devant
 // l'email et le téléphone ouvre une procédure dédiée :
@@ -16,6 +16,7 @@ import { colors, spacing, radii } from "../src/theme";
 //   2) Envoi OTP / lien de confirmation
 //   3) Saisie OTP pour valider
 export default function PersonalInfo() {
+  const colors = useThemedColors();
   const user = useAuth((s) => s.user);
   const refreshMe = useAuth((s) => s.refreshMe);
   const [firstName, setFirstName] = useState("");

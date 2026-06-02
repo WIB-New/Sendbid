@@ -8,7 +8,7 @@ import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 const MODES: { key: string; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: "drive", label: "Voiture", icon: "car-outline" },
   { key: "walk", label: "À pied", icon: "walk-outline" },
@@ -31,6 +31,7 @@ type RouteData = {
 };
 
 export default function MapScreen() {
+  const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const [t, setT] = useState<any>(null);
   const [mode, setMode] = useState("drive");

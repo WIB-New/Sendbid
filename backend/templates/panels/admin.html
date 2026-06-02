@@ -1,0 +1,186 @@
+{% extends 'panels/_base.html' %}
+{% block page_title %}{{ section_title or 'Tableau de bord' }}{% endblock %}
+{% block page_subtitle %}Données en temps réel de la plateforme SendFloo.{% endblock %}
+
+{% block sidebar_nav %}
+  <a href="/api/web/admin" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
+  <a href="/api/web/admin/users" class="{% if section == 'users' %}active{% endif %}"><span class="nav-icon">👥</span>Utilisateurs</a>
+  <a href="/api/web/admin/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👨‍💼</span>Agents</a>
+  <a href="/api/web/admin/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts</a>
+  <a href="/api/web/admin/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
+  <a href="/api/web/admin/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon">💳</span>Wallets</a>
+  <a href="/api/web/admin/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon">📜</span>Audit logs</a>
+{% endblock %}
+
+{% block content %}
+  {% if section == 'dashboard' or not section %}
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Utilisateurs</div><div class="stat-value">{{ kpis.users.total }}</div><div class="stat-sub up">↗ +{{ kpis.users.new_30d or 0 }} sur 30j</div></div>
+      <div class="stat"><div class="stat-label">Agents actifs</div><div class="stat-value">{{ kpis.agents.active }}</div><div class="stat-sub">{{ kpis.agents.pending }} en attente</div></div>
+      <div class="stat"><div class="stat-label">Transferts totaux</div><div class="stat-value">{{ kpis.transfers.total }}</div><div class="stat-sub up">{{ kpis.transfers.completed }} complétés</div></div>
+      <div class="stat"><div class="stat-label">En cours</div><div class="stat-value">{{ kpis.transfers.in_progress }}</div><div class="stat-sub">temps moyen 3min</div></div>
+      <div class="stat"><div class="stat-label">Volume €</div><div class="stat-value">{{ '{:,.0f}'.format(kpis.transfers.volume_eur).replace(',', ' ') }} €</div><div class="stat-sub">cumulé</div></div>
+      <div class="stat"><div class="stat-label">Float déclaré</div><div class="stat-value">{{ '{:,.0f}'.format(kpis.float.total_declared).replace(',', ' ') }}</div><div class="stat-sub">multi-devises EUR equiv.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Derniers transferts</h2><a href="/api/web/admin/transfers" class="btn btn-ghost">Voir tout →</a></div>
+      {% if recent_transfers %}
+        <table>
+          <thead><tr><th>ID</th><th>Expéditeur</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for t in recent_transfers %}
+              <tr>
+                <td><code style="font-size:12px; color:var(--text-muted)">{{ t.id[:8] if t.id else '—' }}</code></td>
+                <td>{{ t.sender_name or t.user_id[:8] if t.user_id else '—' }}</td>
+                <td>{{ t.destination_country or '—' }} · {{ t.destination_city or '' }}</td>
+                <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+                <td><span class="pill pill-{{ t.status }}">{{ t.status or 'N/A' }}</span></td>
+                <td style="color:var(--text-muted); font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty"><div class="emoji">📥</div>Aucun transfert pour le moment.</div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Agents récents</h2><a href="/api/web/admin/agents" class="btn btn-ghost">Gérer →</a></div>
+      {% if recent_agents %}
+        <table>
+          <thead><tr><th>Nom</th><th>Pays / Ville</th><th>Statut</th><th>KYC</th><th>Note</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for a in recent_agents %}
+              <tr>
+                <td><b>{{ a.full_name or a.email or '—' }}</b></td>
+                <td>{{ a.country or '—' }} · {{ a.city or '—' }}</td>
+                <td><span class="pill pill-{{ a.status }}">{{ a.status or 'N/A' }}</span></td>
+                <td>{{ a.kyc_tier or 'T0' }}</td>
+                <td>{{ '{:.1f}'.format(a.rating or 0) }} ★</td>
+                <td style="color:var(--text-muted); font-size:13px">{{ (a.created_at or '')[:10] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty"><div class="emoji">👥</div>Aucun agent enregistré.</div>
+      {% endif %}
+    </div>
+  {% elif section == 'users' %}
+    <div class="card">
+      <div class="card-header"><h2>Tous les utilisateurs ({{ users|length }})</h2></div>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Rôle</th><th>KYC</th><th>Créé</th></tr></thead>
+        <tbody>
+          {% for u in users %}
+            <tr><td><b>{{ u.full_name or '—' }}</b></td><td>{{ u.email or '—' }}</td><td>{{ u.phone or '—' }}</td><td><span class="pill pill-neutral">{{ u.role or 'user' }}</span></td><td>{{ u.kyc_tier or 'T0' }}</td><td style="color:var(--text-muted); font-size:13px">{{ (u.created_at or '')[:10] }}</td></tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">👥</div>Aucun utilisateur.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'agents' %}
+    <div class="card">
+      <div class="card-header"><h2>Tous les agents ({{ agents|length }})</h2></div>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Pays / Ville</th><th>Statut</th><th>Tier</th><th>Note</th><th>Transferts</th><th>Disponible</th></tr></thead>
+        <tbody>
+          {% for a in agents %}
+            <tr>
+              <td><b>{{ a.full_name or '—' }}</b></td>
+              <td>{{ a.email or '—' }}</td>
+              <td>{{ a.country or '—' }} · {{ a.city or '—' }}</td>
+              <td><span class="pill pill-{{ a.status }}">{{ a.status or 'N/A' }}</span></td>
+              <td>{{ a.tier or 'silver' }}</td>
+              <td>{{ '{:.1f}'.format(a.rating or 0) }} ★</td>
+              <td>{{ a.transfers_count or 0 }}</td>
+              <td>{% if a.available %}🟢 En ligne{% else %}🔴 Hors ligne{% endif %}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="8"><div class="empty"><div class="emoji">👨‍💼</div>Aucun agent.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'transfers' %}
+    <div class="card">
+      <div class="card-header"><h2>Tous les transferts ({{ transfers|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Expéditeur</th><th>Bénéficiaire</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for t in transfers %}
+            <tr>
+              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td>{{ t.sender_name or '—' }}</td>
+              <td>{{ (t.beneficiary or {}).full_name or (t.beneficiary or {}).name or '—' }}</td>
+              <td>{{ t.destination_country or '—' }} · {{ t.destination_city or '' }}</td>
+              <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td><span class="pill pill-{{ t.status }}">{{ t.status or 'N/A' }}</span></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (t.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7"><div class="empty"><div class="emoji">💸</div>Aucun transfert.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'auctions' %}
+    <div class="card">
+      <div class="card-header"><h2>⚡ Enchères en cours ({{ auctions|length }})</h2></div>
+      <table>
+        <thead><tr><th>Transfert</th><th>Montant</th><th>Destination</th><th>Bids reçus</th><th>Meilleur frais</th><th>Début</th></tr></thead>
+        <tbody>
+          {% for a in auctions %}
+            <tr>
+              <td><code style="font-size:12px">{{ a.id[:8] if a.id else '—' }}</code></td>
+              <td><b>{{ '{:,.2f}'.format(a.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td>{{ a.destination_country or '—' }} · {{ a.destination_city or '' }}</td>
+              <td>{{ (a.bids or [])|length }}</td>
+              <td>{% if a.bids %}{{ '{:.2f}'.format((a.bids|min(attribute='bid_fee_percent')).bid_fee_percent if a.bids else 0) }}%{% else %}—{% endif %}</td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (a.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">⚡</div>Aucune enchère live actuellement.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'wallets' %}
+    <div class="card">
+      <div class="card-header"><h2>Wallets ({{ wallets|length }})</h2></div>
+      <table>
+        <thead><tr><th>Utilisateur</th><th>Email</th><th>Balance EUR</th><th>Devises</th><th>Dernière activité</th></tr></thead>
+        <tbody>
+          {% for w in wallets %}
+            <tr>
+              <td><b>{{ w.user_name or '—' }}</b></td>
+              <td>{{ w.user_email or '—' }}</td>
+              <td><b>{{ '{:,.2f}'.format(w.balance or 0).replace(',', ' ') }} €</b></td>
+              <td>{{ (w.currencies or ['EUR'])|join(', ') }}</td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (w.updated_at or '')[:10] }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5"><div class="empty"><div class="emoji">💳</div>Aucun wallet.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif section == 'audit' %}
+    <div class="card">
+      <div class="card-header"><h2>📜 Mouvements de fonds (reconciliation)</h2></div>
+      <table>
+        <thead><tr><th>Type</th><th>Devise</th><th>Total</th><th>Occurrences</th></tr></thead>
+        <tbody>
+          {% for m in movements %}
+            <tr><td><span class="pill pill-neutral">{{ m.type }}</span></td><td>{{ m.currency }}</td><td><b>{{ '{:,.2f}'.format(m.total or 0).replace(',', ' ') }}</b></td><td>{{ m.count }}</td></tr>
+          {% else %}
+            <tr><td colspan="4"><div class="empty"><div class="emoji">📜</div>Aucun mouvement enregistré.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

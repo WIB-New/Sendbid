@@ -7,9 +7,10 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
-import { spacing, colors } from "../../src/theme";
-
+import { colors, spacing } from "../../src/theme";
+import { useThemedColors } from "../../src/themeContext";
 export default function KycTier1() {
+  const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);
   const user = useAuth((s) => s.user);

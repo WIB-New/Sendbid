@@ -6,9 +6,10 @@ import { TText } from "../src/components/TText";
 import { Input } from "../src/components/Input";
 import { Button } from "../src/components/Button";
 import { api, apiError } from "../src/api";
-import { spacing, colors } from "../src/theme";
-
+import { colors, spacing } from "../src/theme";
+import { useThemedColors } from "../src/themeContext";
 export default function ChangePin() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");

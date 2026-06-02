@@ -23,10 +23,11 @@ import {
 import { useAuth } from "../src/store";
 import { useLocale } from "../src/i18n";
 import { registerForPushAndSync } from "../src/push";
-import { colors } from "../src/theme";
+import { useThemedColors } from "../src/themeContext";
 import { ThemeProvider } from "../src/themeContext";
 
 export default function RootLayout() {
+  const colors = useThemedColors();
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
     Montserrat_500Medium,

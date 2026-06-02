@@ -10,10 +10,11 @@ import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 // Virement P2P gratuit v6.4 — refonte design lisible (hero gradient + cards séparées,
 // solde en évidence, contrastes corrects, layout aéré).
 export default function P2P() {
+  const colors = useThemedColors();
   const wallet = useAuth((s) => s.wallet);
   const user = useAuth((s) => s.user);
   const refreshMe = useAuth((s) => s.refreshMe);

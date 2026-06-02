@@ -8,13 +8,14 @@ import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * Admin Dashboard — panel web RÉSERVÉ aux rôles `admin` et `super_admin`.
  * Les partner_admin sont redirigés vers /partner, les agent_admin vers /agent.
  * Le super-admin a les mêmes modules que l'admin + indicateur de niveau supérieur.
  */
 export default function AdminDashboard() {
+  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);

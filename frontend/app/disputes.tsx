@@ -8,7 +8,7 @@ import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
-
+import { useThemedColors } from "../src/themeContext";
 // Litiges v4.0 — "34 Litiges" : 3 counters (Ouverts / En cours / Résolus) + accordion liste
 const STATUS_COLOR: any = {
   open: { c: "#EF4444", bg: "#FEE2E2", label: "Ouvert" },
@@ -18,6 +18,7 @@ const STATUS_COLOR: any = {
 };
 
 export default function Disputes() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
   const [open, setOpen] = useState<string | null>(null);

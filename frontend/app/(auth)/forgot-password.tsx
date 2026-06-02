@@ -7,8 +7,9 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { colors, spacing } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 export default function ForgotPassword() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);

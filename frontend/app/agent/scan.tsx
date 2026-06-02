@@ -7,7 +7,7 @@ import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * AGENT QR SCAN — preview view (PAYBID wireframe).
  * Lets a payer-agent scan a client's signed QR token to validate a withdrawal.
@@ -17,6 +17,7 @@ import { colors, spacing, radii } from "../../src/theme";
  * the SENDBID client preview build.
  */
 export default function AgentScan() {
+  const colors = useThemedColors();
   const router = useRouter();
   const [manualOpen, setManualOpen] = useState(false);
   const [code, setCode] = useState("");

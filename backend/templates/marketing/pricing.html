@@ -1,0 +1,110 @@
+{% extends 'partials/base.html' %}
+{% block title %}Tarifs — SendFloo{% endblock %}
+{% block extra_css %}
+  .page-hero { padding: 80px 24px 40px; background: radial-gradient(ellipse at top, rgba(4,212,111,0.15), transparent 60%), var(--bg); text-align: center; }
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+  @media (max-width: 880px) { .plans { grid-template-columns: 1fr; } }
+  .plan { background: var(--surface); padding: 40px 32px; border-radius: 22px; border: 1px solid var(--border); position: relative; }
+  .plan.featured { border-color: var(--emerald); background: linear-gradient(180deg, rgba(4,212,111,0.08), var(--surface)); transform: scale(1.04); }
+  .plan-tag { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--emerald); color: #001a0a; padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+  .plan h3 { font-size: 20px; margin-bottom: 8px; font-family: 'Inter'; }
+  .plan-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+  .plan-price { font-family: 'Playfair Display'; font-size: 48px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+  .plan-price small { font-size: 16px; font-weight: 500; color: var(--text-muted); }
+  .plan ul { list-style: none; padding: 0; margin-top: 24px; }
+  .plan li { padding: 10px 0; padding-left: 26px; position: relative; color: var(--text-muted); font-size: 14px; border-top: 1px solid var(--border); }
+  .plan li::before { content: '✓'; position: absolute; left: 0; top: 11px; color: var(--emerald); font-weight: 800; }
+  .plan li.disabled { color: var(--text-dim); }
+  .plan li.disabled::before { content: '—'; color: var(--text-dim); }
+  .plan .btn { width: 100%; margin-top: 24px; }
+
+  /* Fee table */
+  .fee-table { background: var(--surface); border-radius: 16px; overflow: hidden; margin-top: 40px; border: 1px solid var(--border); }
+  .fee-table table { width: 100%; border-collapse: collapse; }
+  .fee-table th { padding: 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); background: rgba(255,255,255,0.03); }
+  .fee-table td { padding: 18px 16px; font-size: 15px; border-top: 1px solid var(--border); }
+  .fee-table tr:hover td { background: rgba(255,255,255,0.02); }
+{% endblock %}
+{% block body %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Tarifs</span>
+    <h1 class="serif">Transparent, simple, compétitif</h1>
+    <p class="lead" style="margin-top:16px">Pas d'abonnement. Vous payez uniquement quand vous transférez — et toujours au meilleur taux grâce à l'enchère.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="plans">
+      <div class="plan">
+        <h3>SendBID Free</h3>
+        <p class="plan-desc">L'app cliente pour envoyer de l'argent au meilleur prix.</p>
+        <div class="plan-price">0€<small> / mois</small></div>
+        <ul>
+          <li>Enchère inverse illimitée</li>
+          <li>Wallet FlooMoney offert</li>
+          <li>Frais par transfert (voir tableau)</li>
+          <li>Support 24/7 par chat</li>
+          <li>250+ pays couverts</li>
+          <li class="disabled">Frais agent fixe</li>
+        </ul>
+        <a href="/api/web/download" class="btn btn-outline">Télécharger</a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-tag">✨ Populaire</div>
+        <h3>PayBID Agent</h3>
+        <p class="plan-desc">Pour les professionnels du transfert : optimisez vos commissions.</p>
+        <div class="plan-price">9,90€<small> / mois</small></div>
+        <ul>
+          <li>Accès aux enchères live illimitées</li>
+          <li>Float multi-devises (4 devises)</li>
+          <li>Comptabilité et exports automatiques</li>
+          <li>Programme fidélité Silver → Platinum</li>
+          <li>Panel web compagnon</li>
+          <li>Frais de commission 1,5%-3% du montant</li>
+        </ul>
+        <a href="/api/web/agent" class="btn btn-primary">Devenir agent</a>
+      </div>
+
+      <div class="plan">
+        <h3>Super-Agent</h3>
+        <p class="plan-desc">Gérez un réseau d'agents et touchez une commission.</p>
+        <div class="plan-price">49€<small> / mois</small></div>
+        <ul>
+          <li>Tout PayBID Agent inclus</li>
+          <li>Réseau jusqu'à 50 agents</li>
+          <li>Reporting consolidé multi-réseau</li>
+          <li>Commission override sur vos agents</li>
+          <li>Panel Super-Agent dédié</li>
+          <li>Support pro prioritaire</li>
+        </ul>
+        <a href="/api/web/superagent" class="btn btn-outline">Devenir super-agent</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="center">
+      <span class="eyebrow">Tableau des frais</span>
+      <h2 class="serif">Frais de transfert par corridor</h2>
+      <p class="lead">Les frais finaux sont ceux gagnés par l'enchère. Les valeurs ci-dessous sont les fourchettes typiques.</p>
+    </div>
+    <div class="fee-table">
+      <table>
+        <tr><th>Corridor</th><th>Frais moyen enchère</th><th>Frais classique (concurrents)</th><th>Vous économisez</th></tr>
+        <tr><td>🇫🇷 France → 🇨🇲 Cameroun</td><td><strong style="color:var(--emerald)">1,8–3,2%</strong></td><td>5–7%</td><td>€35 – 50 / mois</td></tr>
+        <tr><td>🇫🇷 France → 🇸🇳 Sénégal</td><td><strong style="color:var(--emerald)">1,5–2,8%</strong></td><td>4,5–6%</td><td>€28 – 45 / mois</td></tr>
+        <tr><td>🇫🇷 France → 🇨🇮 Côte d'Ivoire</td><td><strong style="color:var(--emerald)">1,9–3,1%</strong></td><td>5–7%</td><td>€32 – 48 / mois</td></tr>
+        <tr><td>🇬🇧 UK → 🇳🇬 Nigéria</td><td><strong style="color:var(--emerald)">2,1–3,5%</strong></td><td>6–8%</td><td>€40 – 60 / mois</td></tr>
+        <tr><td>🇺🇸 USA → 🇲🇽 Mexique</td><td><strong style="color:var(--emerald)">1,2–2,5%</strong></td><td>3,5–5%</td><td>€20 – 35 / mois</td></tr>
+        <tr><td>🇫🇷 France → 🇲🇦 Maroc</td><td><strong style="color:var(--emerald)">1,4–2,6%</strong></td><td>4–6%</td><td>€25 – 40 / mois</td></tr>
+      </table>
+    </div>
+    <p style="text-align:center; margin-top:24px; color:var(--text-dim); font-size:14px">* Les taux varient selon l'heure, le volume et la disponibilité des agents. Aucun frais caché, jamais.</p>
+  </div>
+</section>
+{% endblock %}

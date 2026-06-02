@@ -10,7 +10,7 @@ import { Button } from "../../src/components/Button";
 import { SendBidLogo } from "../../src/components/Logo";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
-
+import { useThemedColors } from "../../src/themeContext";
 /**
  * Official Receipt v4.0 — matches "29 Reçu de transfert":
  * - Dark hero "Reçu officiel" + SENDBID logo
@@ -20,6 +20,7 @@ import { colors, spacing, radii } from "../../src/theme";
  * - Actions: "Partager" + "PDF"
  */
 export default function OfficialReceipt() {
+  const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
   const [t, setT] = useState<any>(null);
