@@ -204,20 +204,16 @@ export default function Recharge() {
             <View style={{ marginTop: spacing.lg }}>
               {method === "card" ? (
                 <>
-                  <TText variant="caption" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 8 }}>Forfaits</TText>
-                  <View style={styles.pkgGrid}>
-                    {packages.map((p) => (
-                      <TouchableOpacity key={p.id} testID={`recharge-pkg-${p.id}`} onPress={() => setSelectedPkg(p.id)} style={[styles.pkgCard, selectedPkg === p.id && styles.pkgCardActive]}>
-                        <TText variant="title" weight="extraBold" color={selectedPkg === p.id ? "white" : colors.neutrals.textPrimary}>{p.amount.toFixed(0)} €</TText>
-                        <TText variant="caption" color={selectedPkg === p.id ? "white" : colors.neutrals.textSecondary}>{p.label}</TText>
-                      </TouchableOpacity>
-                    ))}
-                    <TouchableOpacity testID="recharge-pkg-custom" onPress={() => setSelectedPkg("custom")} style={[styles.pkgCard, selectedPkg === "custom" && styles.pkgCardActive]}>
-                      <Ionicons name="create-outline" size={22} color={selectedPkg === "custom" ? "white" : colors.primary.base} />
-                      <TText variant="caption" weight="bold" color={selectedPkg === "custom" ? "white" : colors.neutrals.textPrimary} style={{ marginTop: 4 }}>Personnalisé</TText>
-                    </TouchableOpacity>
-                  </View>
-                  {selectedPkg === "custom" ? <Input label="Montant 5–500 €" value={customAmount} onChangeText={setCustomAmount} keyboardType="decimal-pad" icon="cash-outline" /> : null}
+                  <Input
+                    testID="recharge-card-amount"
+                    label="Montant à débiter (EUR)"
+                    value={customAmount}
+                    onChangeText={(v) => { setCustomAmount(v); setSelectedPkg("custom"); }}
+                    keyboardType="decimal-pad"
+                    icon="cash-outline"
+                    placeholder="Ex : 50.00"
+                    hint="Montant compris entre 5 € et 500 €"
+                  />
                   <Button testID="recharge-pay-card" title={polling ? "Vérification…" : "Payer par carte"} onPress={startCard} loading={loading || polling} icon="card" />
                 </>
               ) : method === "momo" ? (

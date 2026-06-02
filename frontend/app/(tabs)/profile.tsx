@@ -221,7 +221,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   iconBtn: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
-  scrollInner: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: 110 },
+  scrollInner: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: 30 },
   userCard: { backgroundColor: "white", borderRadius: radii.xxl, padding: spacing.lg },
   userHero: { borderRadius: radii.xxl, padding: spacing.xl, marginTop: spacing.sm },
   avatarWrapBig: { position: "relative" },

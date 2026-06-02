@@ -70,7 +70,7 @@ export function Screen({
   // 60px ≥ hauteur typique d'un tab bar (≈ 56) + petite marge respiratoire,
   // tout en préservant un espace raisonnable (l'utilisateur a explicitement demandé
   // un espace plus court qu'avant — réduction de 100 → 60 le 03/06).
-  const bottomPad = (bottomInset ? Math.max(insets.bottom, 8) : 0) + 60;
+  const bottomPad = (bottomInset ? Math.max(insets.bottom, 4) : 0) + 20;
 
   const HeaderRow = (
     <View style={styles.header}>

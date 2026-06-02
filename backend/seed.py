@@ -98,6 +98,32 @@ async def seed_demo_data():
             {"id": gen_id(), "user_id": demo_id, "title": "Recharge réussie", "body": "+500 EUR sur votre wallet Floo Money", "type": "success", "read": True, "created_at": iso(now_utc() - timedelta(days=3))},
         ])
 
+    # === COMPTES WEB PANELS — Admin / Agent / Superagent ===
+    # Comptes seedés pour accéder aux panels web /admin, /agent, /superagent
+    # Mots de passe forts par défaut — à changer en production
+    for cfg in [
+        {"email": "admin@sendfloo.sendbid.app", "password": "Admin@SendFloo2026!", "role": "super_admin", "name": "Admin SendFloo", "profile_id": "ADM-001"},
+        {"email": "agent@sendfloo.sendbid.app", "password": "Agent@SendFloo2026!", "role": "agent", "name": "Agent SendFloo", "profile_id": "AGT-001"},
+        {"email": "superagent@sendfloo.sendbid.app", "password": "SuperAgent@SendFloo2026!", "role": "super_agent", "name": "Superagent SendFloo", "profile_id": "SAG-001"},
+    ]:
+        if not await db.users.find_one({"email": cfg["email"]}):
+            await db.users.insert_one({
+                "id": gen_id(), "profile_id": cfg["profile_id"], "email": cfg["email"],
+                "phone": "+33700000000", "full_name": cfg["name"],
+                "password_hash": hash_password(cfg["password"]),
+                "pin_hash": hash_password("000000"),
+                "pin_attempts": 0, "pin_locked_until": None,
+                "email_verified": True, "phone_verified": True,
+                "kyc_tier": 3, "kyc_status": "verified",
+                "role": cfg["role"], "is_admin": cfg["role"] in ("super_admin", "admin"),
+                "biometric_enabled": False, "biometric_token": None,
+                "country": "FR", "city": "Paris",
+                "default_currency": "EUR", "secondary_currency": "USD",
+                "language": "fr", "theme": "light",
+                "created_at": now_utc(), "updated_at": now_utc(),
+            })
+            logger.info(f"[seed] Web panel account created: {cfg['email']} ({cfg['role']})")
+
     # Demo PAYBID agent (linked user + agent profile)
     if not await db.users.find_one({"email": "agent@paybid.app"}):
         agent_user_id = gen_id()
