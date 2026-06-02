@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors, spacing, radii } from "../theme";
+import { useThemeTokens } from "../themeContext";
 import { TText } from "./TText";
 import { SendBidLogo } from "./Logo";
 
@@ -61,6 +62,7 @@ export function Screen({
 }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { tokens, isDark } = useThemeTokens();
 
   // Offset Android pour la status bar quand le clavier monte.
   const kbOffset = Platform.select({ ios: 0, android: 0 }) as number;
@@ -81,13 +83,13 @@ export function Screen({
             hitSlop={10}
             style={[styles.backBtn, hero && styles.backBtnHero]}
           >
-            <Ionicons name="chevron-back" size={24} color={hero ? "white" : colors.neutrals.textPrimary} />
+            <Ionicons name="chevron-back" size={24} color={hero ? "white" : tokens.neutrals.textPrimary} />
           </TouchableOpacity>
         )}
       </View>
       <View style={{ flex: 1, alignItems: "center" }}>
         {title ? (
-          <TText variant="subtitle" weight="bold" align="center" color={hero ? "white" : colors.neutrals.textPrimary}>
+          <TText variant="subtitle" weight="bold" align="center" color={hero ? "white" : tokens.neutrals.textPrimary}>
             {title}
           </TText>
         ) : null}
@@ -146,9 +148,9 @@ export function Screen({
 
   if (hero) {
     return (
-      <View style={{ flex: 1, backgroundColor: bg || colors.neutrals.background }}>
+      <View style={{ flex: 1, backgroundColor: bg || tokens.neutrals.background }}>
         <LinearGradient
-          colors={heroColors || (colors.gradients.imperial as any)}
+          colors={heroColors || (tokens.gradients.imperial as any)}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroBand}
@@ -165,7 +167,7 @@ export function Screen({
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
-      style={{ flex: 1, backgroundColor: bg || colors.neutrals.background }}
+      style={{ flex: 1, backgroundColor: bg || tokens.neutrals.background }}
     >
       {(title || back || right) && HeaderRow}
       <KeyboardWrapper>

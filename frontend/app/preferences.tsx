@@ -7,6 +7,7 @@ import { useLocale, setLocale } from "../src/i18n";
 import { useAuth } from "../src/store";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
+import { useThemeTokens, ThemeMode } from "../src/themeContext";
 
 const LANGUAGES = [
   { code: "fr", label: "Français", flag: "🇫🇷" },
@@ -34,14 +35,21 @@ export default function PreferencesScreen() {
   const locale = useLocale();
   const user = useAuth((s) => s.user);
   const refreshMe = useAuth((s) => s.refreshMe);
-  const [theme, setTheme] = useState<string>(((user as any)?.theme as string) || "system");
+  const themeCtx = useThemeTokens();
+  const [theme, setTheme] = useState<string>(themeCtx.mode);
   const [secondary, setSecondary] = useState<string>(((user as any)?.secondary_currency as string) || "GBP");
   const [openLang, setOpenLang] = useState(false);
   const [openTheme, setOpenTheme] = useState(false);
   const [openCur, setOpenCur] = useState(false);
   const primary = ((user as any)?.default_currency as string) || "EUR";
 
-  const saveTheme = async (k: string) => { setTheme(k); setOpenTheme(false); try { await api.put("/auth/me", { theme: k }); refreshMe(); } catch {} };
+  const saveTheme = async (k: string) => {
+    setTheme(k);
+    setOpenTheme(false);
+    // Application IMMÉDIATE via le context (AsyncStorage + sync backend)
+    await themeCtx.setMode(k as ThemeMode);
+    try { refreshMe(); } catch {}
+  };
   const saveCurrency = async (c: string) => { setSecondary(c); try { await api.put("/auth/me", { secondary_currency: c }); refreshMe(); } catch {} };
   const saveLang = async (l: string) => { setLocale(l); setOpenLang(false); try { await api.put("/auth/me", { language: l }); refreshMe(); } catch {} };
 
