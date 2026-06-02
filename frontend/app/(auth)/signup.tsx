@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, TouchableOpacity, Modal, FlatList, TextInput } from "react-native";
+import { View, TouchableOpacity, Modal, FlatList, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Screen } from "../../src/components/Screen";
@@ -9,6 +9,7 @@ import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
+import { dialToCountry, countryToDial, flagEmoji } from "../../src/utils/dialCodes";
 
 type Country = { country_code: string; country_name: string; flag?: string; currency?: string; cities?: string[]; capital?: string };
 
@@ -18,14 +19,24 @@ export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // Téléphone splitté en 2 champs : indicatif + numéro
+  const [dialCode, setDialCode] = useState("+");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [country, setCountry] = useState<Country | null>(null);
+  const [countryAutoDetected, setCountryAutoDetected] = useState(false);
   const [city, setCity] = useState("");
   const [terms, setTerms] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Téléphone E.164 combiné (pour envoi backend)
+  const phone = useMemo(() => {
+    const cleanedNum = phoneNumber.replace(/[^0-9]/g, "");
+    const cleanedDial = "+" + dialCode.replace(/[^0-9]/g, "");
+    return cleanedDial + cleanedNum;
+  }, [dialCode, phoneNumber]);
 
   const [showCountry, setShowCountry] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
@@ -40,6 +51,22 @@ export default function SignUp() {
       console.warn("[signup] corridors load failed", e?.message);
     });
   }, []);
+
+  // === Auto-détection du pays de résidence selon l'indicatif téléphonique ===
+  // Tant que l'utilisateur n'a pas manuellement choisi un pays différent,
+  // l'indicatif tapé met à jour automatiquement le pays.
+  useEffect(() => {
+    const cc = dialToCountry(dialCode);
+    if (!cc) return;
+    // Si le pays auto-détecté = pays déjà sélectionné → rien à faire
+    if (country?.country_code === cc) return;
+    // Cherche le pays correspondant dans la liste chargée
+    const match = countries.find((c) => c.country_code === cc);
+    if (match) {
+      setCountry(match);
+      setCountryAutoDetected(true);
+    }
+  }, [dialCode, countries]);
 
   const filteredCountries = useMemo(() => {
     const q = countrySearch.toLowerCase().trim();
@@ -135,7 +162,46 @@ export default function SignUp() {
       </View>
 
       <Input testID="signup-email" label="Email" value={email} onChangeText={setEmail} icon="mail-outline" keyboardType="email-address" autoCapitalize="none" />
-      <Input testID="signup-phone" label="Téléphone (avec indicatif)" value={phone} onChangeText={setPhone} icon="call-outline" keyboardType="phone-pad" placeholder="+33..." />
+
+      {/* === Téléphone : indicatif + numéro (2 champs côte à côte) === */}
+      <TText variant="label" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginTop: 4, marginBottom: 6 }}>
+        Téléphone
+      </TText>
+      <View style={styles.phoneRow}>
+        <View style={styles.dialField}>
+          <Ionicons name="call-outline" size={16} color={colors.neutrals.textSecondary} />
+          <TextInput
+            testID="signup-dial"
+            value={dialCode}
+            onChangeText={(v) => {
+              // Toujours commencer par "+" — l'utilisateur ne tape que des chiffres ensuite
+              const digits = v.replace(/[^0-9]/g, "");
+              setDialCode("+" + digits);
+            }}
+            keyboardType="phone-pad"
+            placeholder="+237"
+            placeholderTextColor={colors.neutrals.textTertiary}
+            style={styles.dialInput}
+            maxLength={5}
+          />
+        </View>
+        <View style={styles.numField}>
+          <TextInput
+            testID="signup-phone"
+            value={phoneNumber}
+            onChangeText={(v) => setPhoneNumber(v.replace(/[^0-9]/g, ""))}
+            keyboardType="phone-pad"
+            placeholder="6 12 34 56 78"
+            placeholderTextColor={colors.neutrals.textTertiary}
+            style={styles.numInput}
+          />
+        </View>
+      </View>
+      {countryAutoDetected && country ? (
+        <TText variant="label" color={colors.status.success} style={{ marginTop: -8, marginBottom: spacing.md, marginLeft: 4 }}>
+          {flagEmoji(country.country_code)} Pays détecté : {country.country_name}
+        </TText>
+      ) : null}
 
       {/* Pays de résidence */}
       <TouchableOpacity testID="signup-country" onPress={() => setShowCountry(true)} activeOpacity={0.8}
@@ -209,7 +275,7 @@ export default function SignUp() {
             data={filteredCountries}
             keyExtractor={(c) => c.country_code}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => { setCountry(item); setShowCountry(false); setCountrySearch(""); }}
+              <TouchableOpacity onPress={() => { setCountry(item); setShowCountry(false); setCountrySearch(""); setCountryAutoDetected(false); }}
                 style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.neutrals.border, flexDirection: "row", alignItems: "center" }}>
                 <TText style={{ fontSize: 22 }}>{item.flag || "🌍"}</TText>
                 <View style={{ marginLeft: 12, flex: 1 }}>
@@ -224,3 +290,51 @@ export default function SignUp() {
     </Screen>
   );
 }
+
+// Manual handling of country pick (overrides auto-detect)
+function pickCountry(setCountry: any, setShow: any, setSearch: any, setAuto: any) {
+  return (item: any) => {
+    setCountry(item);
+    setShow(false);
+    setSearch("");
+    setAuto(false);
+  };
+}
+
+const styles = StyleSheet.create({
+  phoneRow: { flexDirection: "row", marginBottom: spacing.md, gap: 8 },
+  dialField: {
+    width: 100,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.neutrals.border,
+    borderRadius: radii.lg,
+    backgroundColor: colors.neutrals.surface,
+  },
+  dialInput: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingLeft: 6,
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.neutrals.textPrimary,
+  },
+  numField: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: colors.neutrals.border,
+    borderRadius: radii.lg,
+    backgroundColor: colors.neutrals.surface,
+  },
+  numInput: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: colors.neutrals.textPrimary,
+  },
+});

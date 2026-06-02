@@ -112,8 +112,8 @@ export default function LiveAuction() {
   const isVip = transfer.vip_delivery || transfer.service_level === "vip" || transfer.service_level === "vip_express";
 
   return (
-    <Screen title="Offres en temps réel de nos meilleurs agents" back scroll={false}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }} keyboardShouldPersistTaps="handled">
+    <Screen title="Offres en temps réel de nos meilleurs agents" back scroll={false} contentStyle={{ padding: 0 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 10, paddingTop: 8 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* ======================= BANNIÈRE LIVE (CTA principal) ======================= */}
         {status === "BIDDING" ? (
           <LinearGradient colors={["#01155F", "#022a6b", "#3D52D5"]} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.banner}>

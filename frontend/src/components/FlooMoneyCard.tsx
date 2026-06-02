@@ -77,7 +77,7 @@ export function FlooMoneyCard({ balance, currency, fullName, profileId, compact 
   return (
     <>
       <LinearGradient
-        colors={colors.gradients.flooMoney}
+        colors={["#00147E", "#3D52D5"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.cardCompact, shadows.lg]}

@@ -48,19 +48,16 @@ export default function Profile() {
 
   const onLogout = async () => {
     if (busy) return;
-    const exec = async () => {
-      setBusy(true);
-      try { await logout(); } catch (e) { console.warn("logout err", e); }
-      setBusy(false);
-      // Hard reset navigation — on web on force la racine pour purger l'historique
-      if (Platform.OS === "web" && typeof window !== "undefined") {
-        try { window.location.href = "/welcome"; return; } catch {}
-      }
+    setBusy(true);
+    // 1) On navigue IMMÉDIATEMENT vers /welcome — pas d'attente, pas de flash 401 sur l'écran profil.
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      try { window.location.replace("/welcome"); } catch { router.replace("/welcome"); }
+    } else {
       router.replace("/welcome");
-    };
-    // Pas de dialog bloquant — la déconnexion est non destructive et instantanée.
-    // (le bouton "Déconnecter tous les appareils" garde sa confirmation.)
-    await exec();
+    }
+    // 2) Le nettoyage du token et du state arrive ENSUITE en arrière-plan.
+    try { await logout(); } catch (e) { console.warn("logout err", e); }
+    setBusy(false);
   };
 
   const KYC = {

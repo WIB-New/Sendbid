@@ -133,7 +133,7 @@ export default function Home() {
     api.get("/corridors").then((r) => {
       const list: Corridor[] = r.data?.corridors || [];
       setCorridors(list);
-      if (list.length > 0 && !country) setCountry(list.find((c) => c.country_code === "SN") || list[0]);
+      // Pas de pays présélectionné — le client choisit librement le pays du bénéficiaire
     }).catch(() => {});
     api.get("/beneficiaries").then((r) => setBeneficiaries(r.data || [])).catch(() => {});
   }, []);
@@ -226,32 +226,27 @@ export default function Home() {
           <FlooMoneyCard balance={wallet?.balance ?? 0} currency={wallet?.currency ?? "EUR"} fullName={user.full_name} profileId={user.profile_id} compact />
         </View>
 
-        {/* CTA Portefeuille — rangée 3 actions wallet sur dégradé bleu identique à la page Portefeuille */}
-        <LinearGradient
-          colors={["#00147E", "#3D52D5"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.walletQuickRow}
-        >
+        {/* 3 quick wallet actions */}
+        <View style={styles.walletQuickRow}>
           <TouchableOpacity testID="home-recharge" onPress={() => router.push("/wallet/recharge" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#10B981" }]}>
               <Ionicons name="add-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-withdraw" onPress={() => router.push("/wallet/withdraw" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#3B82F6" }]}>
               <Ionicons name="arrow-down-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 6 }}>Retirer</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Retirer</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-send" onPress={() => router.push("/wallet/p2p" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#F59E0B" }]}>
               <Ionicons name="paper-plane" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
           </TouchableOpacity>
-        </LinearGradient>
+        </View>
 
         {/* === CTA "Nouveau transfert" — flèche ↓ qui déroule l'étape 1 inline === */}
         <TouchableOpacity
