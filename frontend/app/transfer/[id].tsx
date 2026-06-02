@@ -54,16 +54,15 @@ function buildCashStandard(t: any, deadlineCountdown?: string): ProgressStep[] {
   const fundsDesc = deadlineCountdown ? `Prêts pour le retrait auprès de l'agent (${deadlineCountdown})` : "Prêts pour le retrait auprès de l'agent";
 
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}\n${fmt(t.created_at) || ""}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
     { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
-    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc}` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(t.assigned_at) },
+    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(t.assigned_at) },
     { key: "funds", label: "Fonds disponibles", description: fundsDesc, state: s(3, cur, status), timestamp: fmt(t.assigned_at) },
-    { key: "notif", label: "Bénéficiaire notifié", description: "Email et QR code envoyés.\nQR code et code de retrait à présenter à l'agent.", state: s(4, cur, status), timestamp: fmt(t.notified_at) },
-    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Fonds remis à ${benName}\n${fmt(t.completed_at) || ""}` : "—", state: s(5, cur, status), timestamp: fmt(t.completed_at) },
+    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(t.completed_at) },
   ];
 }
 
-// Cas 2 — Espèces VIP / VIP EXPRESS (6 étapes — agent en chemin)
+// Cas 2 — Espèces VIP / VIP EXPRESS (5 étapes — agent en chemin)
 function buildCashVip(t: any): ProgressStep[] {
   const status = t.status as string;
   let cur = 0;
@@ -80,12 +79,11 @@ function buildCashVip(t: any): ProgressStep[] {
   const benName = t.beneficiary?.full_name || "—";
 
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}\n${fmt(t.created_at) || ""}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
     { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
-    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc}` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(t.assigned_at) },
-    { key: "notif", label: "Bénéficiaire notifié", description: "Email et QR code envoyés.\nQR code et code de retrait à présenter à l'agent.", state: s(3, cur, status), timestamp: fmt(t.notified_at) },
-    { key: "delivery", label: "Fonds en cours de remise", description: "L'agent est en chemin vers le bénéficiaire", state: s(4, cur, status), timestamp: fmt(t.processing_at) },
-    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Fonds remis à ${benName}\n${fmt(t.completed_at) || ""}` : "—", state: s(5, cur, status), timestamp: fmt(t.completed_at) },
+    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(t.assigned_at) },
+    { key: "delivery", label: "Fonds en cours de remise", description: cur >= 4 ? `${agentId} est en chemin vers ${benName}` : "L'agent se prépare", state: s(4, cur, status), timestamp: fmt(t.processing_at) },
+    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(t.completed_at) },
   ];
 }
 
@@ -100,7 +98,7 @@ function buildBank(t: any): ProgressStep[] {
   const ref = (t.reference || t.id || "").slice(-8).toUpperCase();
   const sentDate = t.processing_at || t.assigned_at || t.completed_at;
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}\n${fmt(t.created_at) || ""}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
     { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
     { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: `${fmt(sentDate) || "—"}\nUn délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.`, state: s(2, cur, status), timestamp: fmt(sentDate) },
   ];
@@ -117,7 +115,7 @@ function buildMomo(t: any): ProgressStep[] {
   const ref = (t.reference || t.id || "").slice(-8).toUpperCase();
   const sentDate = t.processing_at || t.assigned_at || t.completed_at;
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}\n${fmt(t.created_at) || ""}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
     { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
     { key: "sent", label: "Envoyé sur le téléphone du bénéficiaire", description: `${fmt(sentDate) || "—"}\nUn délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.`, state: s(2, cur, status), timestamp: fmt(sentDate) },
   ];

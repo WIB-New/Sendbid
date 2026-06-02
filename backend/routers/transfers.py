@@ -260,7 +260,7 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
         used_ids: set = set()
         ROUNDS = 5
         PER_ROUND = 10
-        ROUND_SECONDS = 60
+        ROUND_SECONDS = 30
 
         # ============================== MAIN 5 ROUNDS ==============================
         for round_idx in range(ROUNDS):

@@ -17,16 +17,19 @@ import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { Button } from "../../src/components/Button";
 import { api, wsUrl } from "../../src/api";
+import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 
-const ROUND_DURATION = 60; // Spec §10.2 : 60s par tour (corrige le 90s précédent)
+const ROUND_DURATION = 30; // Spec : 30s par tour (corrige le 60s précédent)
 
 export default function LiveAuction() {
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
+  const user = useAuth((s) => s.user);
   const [bids, setBids] = useState<any[]>([]);
   const [secondsLeft, setSecondsLeft] = useState(ROUND_DURATION);
   const [round, setRound] = useState(1);
+  const [roundEndedNoOffer, setRoundEndedNoOffer] = useState(false);
   const [status, setStatus] = useState("BIDDING");
   const [transfer, setTransfer] = useState<any>(null);
   const [assignedAgent, setAssignedAgent] = useState<any>(null);
@@ -63,10 +66,20 @@ export default function LiveAuction() {
         try {
           const msg = JSON.parse(ev.data);
           if (msg.event === "snapshot") setBids(msg.bids || []);
-          else if (msg.event === "new_bid") setBids(prev => [...prev.filter(b => b.id !== msg.bid.id), msg.bid].sort((a, b) => a.bid_fee_percent - b.bid_fee_percent));
+          else if (msg.event === "new_bid") {
+            setBids(prev => [...prev.filter(b => b.id !== msg.bid.id), msg.bid].sort((a, b) => a.bid_fee_percent - b.bid_fee_percent));
+            setRoundEndedNoOffer(false); // dès qu'une offre arrive, on masque l'état "fin de tour sans offre"
+          }
           else if (msg.event === "round_started") {
             if (typeof msg.round === "number") setRound(msg.round);
             setSecondsLeft(msg.duration_sec || ROUND_DURATION);
+            setRoundEndedNoOffer(false);
+          } else if (msg.event === "round_ended" || msg.event === "round_completed") {
+            // Fin de tour : si toujours aucune offre, on autorise le bouton "Contacter d'autres agents"
+            setBids(prev => {
+              if (prev.length === 0) setRoundEndedNoOffer(true);
+              return prev;
+            });
           } else if (msg.event === "agent_assigned") {
             setStatus("ASSIGNED");
             api.get(`/transfers/${transfer_id}`).then(r => {
@@ -170,30 +183,72 @@ export default function LiveAuction() {
           </LinearGradient>
         ) : null}
 
+        {/* ======================= BLOC DU MILIEU — INFOS CLIENT ======================= */}
+        {status === "BIDDING" && transfer ? (
+          <View style={styles.clientInfoCard}>
+            <View style={styles.clientInfoHeader}>
+              <View style={styles.clientAvatar}>
+                <Ionicons name="person" size={18} color="white" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <TText variant="label" color="rgba(255,255,255,0.78)" style={{ fontSize: 10, letterSpacing: 1 }}>CLIENT</TText>
+                <TText variant="body" weight="extraBold" color="white" numberOfLines={1}>
+                  {user?.first_name || ""} {user?.last_name || user?.full_name || ""}
+                </TText>
+              </View>
+            </View>
+            <View style={styles.clientInfoGrid}>
+              <View style={styles.clientInfoCell}>
+                <TText variant="label" color="rgba(255,255,255,0.7)" style={{ fontSize: 10 }}>Montant envoyé</TText>
+                <TText variant="body" weight="extraBold" color="white" style={{ marginTop: 2 }}>
+                  {Number(transfer.send_amount || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} EUR
+                </TText>
+              </View>
+              <View style={styles.clientInfoCell}>
+                <TText variant="label" color="rgba(255,255,255,0.7)" style={{ fontSize: 10 }}>Frais souhaités</TText>
+                <TText variant="body" weight="extraBold" color="#FCD34D" style={{ marginTop: 2 }}>
+                  {Number(transfer.fee_percent || 0).toFixed(2)} %
+                </TText>
+              </View>
+              <View style={styles.clientInfoCell}>
+                <TText variant="label" color="rgba(255,255,255,0.7)" style={{ fontSize: 10 }}>Frais (montant)</TText>
+                <TText variant="body" weight="extraBold" color="#FCD34D" style={{ marginTop: 2 }}>
+                  {((Number(transfer.send_amount || 0) * Number(transfer.fee_percent || 0)) / 100).toFixed(2)} EUR
+                </TText>
+              </View>
+            </View>
+          </View>
+        ) : null}
+
         {/* ======================= CARTES AGENT DÉTAILLÉES (sous le bandeau) ======================= */}
         {status === "BIDDING" ? (
           bids.length === 0 ? (
             <View style={styles.emptyBidsCard}>
               <Ionicons name="hourglass-outline" size={36} color={colors.neutrals.textTertiary} style={{ alignSelf: "center" }} />
               <TText variant="body" weight="extraBold" align="center" style={{ marginTop: spacing.sm }}>
-                Aucune offre reçue pour le moment
+                {roundEndedNoOffer ? `Tour ${round - 1}/5 terminé sans offre` : "En attente des offres…"}
               </TText>
               <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4, lineHeight: 16 }}>
-                Les agents disponibles dans le pays du bénéficiaire reçoivent votre demande.
-                {"\n"}Vous pouvez relancer le tour pour étendre la portée.
+                {roundEndedNoOffer
+                  ? "Aucun agent n'a soumis d'offre pendant ce tour.\nVous pouvez forcer l'ouverture du tour suivant à d'autres agents à proximité."
+                  : "Les agents disponibles dans le pays du bénéficiaire reçoivent votre demande."}
               </TText>
-              <TouchableOpacity
-                onPress={async () => {
-                  try {
-                    await api.post(`/transfers/${transfer.id}/next-round`).catch(() => {});
-                    Alert.alert("Tour relancé", "D'autres agents à proximité sont contactés.");
-                  } catch { /* noop */ }
-                }}
-                style={styles.forceRoundBtn}
-              >
-                <Ionicons name="megaphone" size={16} color="white" />
-                <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Contacter d'autres agents à proximité</TText>
-              </TouchableOpacity>
+              {/* Bouton "Contacter d'autres agents" UNIQUEMENT à la fin d'un tour sans offre */}
+              {roundEndedNoOffer ? (
+                <TouchableOpacity
+                  onPress={async () => {
+                    try {
+                      await api.post(`/transfers/${transfer.id}/next-round`).catch(() => {});
+                      setRoundEndedNoOffer(false);
+                      Alert.alert("Tour relancé", "D'autres agents à proximité sont contactés.");
+                    } catch { /* noop */ }
+                  }}
+                  style={styles.forceRoundBtn}
+                >
+                  <Ionicons name="megaphone" size={16} color="white" />
+                  <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Contacter d'autres agents à proximité</TText>
+                </TouchableOpacity>
+              ) : null}
             </View>
           ) : (
             <View style={{ marginTop: spacing.md }}>
@@ -400,11 +455,11 @@ function AgentBidCard({ bid, transfer, isBest }: any) {
         </View>
       </View>
 
-      {/* Grille détails : taux, montant reçu, frais, délai, méthode */}
+      {/* Grille détails : taux, montant reçu, frais agent (% + montant), délai, méthode, proximité */}
       <View style={styles.detailGrid}>
         <DetailCell label="Taux de change" value={`1 EUR = ${fxRate.toFixed(2)}`} icon="trending-up" />
         <DetailCell label="Montant reçu" value={`${receiveAmount.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} ${transfer?.destination_currency || ""}`} icon="cash" highlight />
-        <DetailCell label="Frais agent" value={`${feeAmount.toFixed(2)} EUR`} icon="card" />
+        <DetailCell label="Frais (montant)" value={`${(feeAmount * fxRate).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} ${transfer?.destination_currency || ""}`} icon="card" />
         <DetailCell label="Délai remise" value={etaMin > 0 ? `~${etaMin} min` : "—"} icon="time" />
         <DetailCell label="Mode" value={modeLabel[deliveryMode] || deliveryMode} icon="briefcase" />
         <DetailCell
@@ -459,6 +514,20 @@ const styles = StyleSheet.create({
   // === Aucune offre reçue ===
   emptyBidsCard: { backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, borderRadius: radii.xxl, padding: spacing.lg, marginTop: spacing.md },
   forceRoundBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary.base, paddingVertical: 12, borderRadius: radii.lg, marginTop: spacing.md },
+
+  // === Bloc Milieu — Infos Client (entre bannière et cartes agent) ===
+  clientInfoCard: {
+    backgroundColor: "#0F1F4E",
+    borderRadius: radii.xxl,
+    padding: spacing.md,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: "rgba(61,82,213,0.45)",
+  },
+  clientInfoHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  clientAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: "#3D52D5", alignItems: "center", justifyContent: "center" },
+  clientInfoGrid: { flexDirection: "row", borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.12)", paddingTop: 10 },
+  clientInfoCell: { flex: 1, alignItems: "flex-start", paddingHorizontal: 4 },
 
   // === Carte agent détaillée ===
   agentCard: { backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, borderRadius: radii.xxl, padding: spacing.md, marginBottom: 10, position: "relative" },
