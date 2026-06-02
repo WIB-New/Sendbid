@@ -3,10 +3,21 @@ import { View, StyleSheet, TouchableOpacity, Switch, Platform, Alert } from "rea
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Screen } from "../src/components/Screen";
 import { TText } from "../src/components/TText";
+import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
+
+const BIO_TOKEN_KEY = "sb_biometric_token";
+const isWeb = Platform.OS === "web";
+const secureSet = async (k: string, v: string) =>
+  isWeb ? AsyncStorage.setItem(k, v) : SecureStore.setItemAsync(k, v);
+const secureDel = async (k: string) =>
+  isWeb ? AsyncStorage.removeItem(k) : SecureStore.deleteItemAsync(k);
+const secureGet = async (k: string) =>
+  isWeb ? AsyncStorage.getItem(k) : SecureStore.getItemAsync(k);
 
 // Sécurité — activation directe de la biométrie + accès rapide aux changements PIN/MDP/Sessions
 export default function SecurityScreen() {
@@ -21,9 +32,10 @@ export default function SecurityScreen() {
         const has = await LocalAuthentication.hasHardwareAsync();
         const enrolled = await LocalAuthentication.isEnrolledAsync();
         setBioSupported(has && enrolled);
-        const saved = await AsyncStorage.getItem("biometric_enabled");
-        setBioEnabled(saved === "true");
-      } catch { setBioSupported(Platform.OS === "web" ? false : false); }
+        // Source de vérité : présence du token biométrique dans SecureStore
+        const saved = await secureGet(BIO_TOKEN_KEY);
+        setBioEnabled(!!saved);
+      } catch { setBioSupported(false); }
     })();
   }, []);
 
@@ -32,15 +44,31 @@ export default function SecurityScreen() {
     setBusy(true);
     try {
       if (next) {
-        // Demander l'authentification biométrique pour activer
-        const r = await LocalAuthentication.authenticateAsync({ promptMessage: "Activer la connexion biométrique" });
+        // Étape 1 : authentification biométrique locale pour confirmer
+        const r = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Activer la connexion biométrique",
+          fallbackLabel: "Utiliser le mot de passe",
+        });
         if (!r.success) { setBusy(false); return; }
+        // Étape 2 : appel backend pour récupérer un biometric_token signé
+        const resp = await api.post("/auth/biometric-enable");
+        const bioToken: string | undefined = resp.data?.biometric_token;
+        if (!bioToken) throw new Error("Token biométrique manquant côté serveur");
+        // Étape 3 : sauvegarde sécurisée (SecureStore sur natif, AsyncStorage sur web)
+        await secureSet(BIO_TOKEN_KEY, bioToken);
+        await AsyncStorage.setItem("biometric_enabled", "true");
+        setBioEnabled(true);
+        if (!isWeb) Alert.alert("Activée", "Connexion biométrique activée. Vous pourrez vous connecter d'un simple toucher.");
+      } else {
+        // Désactivation : on supprime le token local + serveur
+        try { await api.post("/auth/biometric-disable"); } catch {}
+        await secureDel(BIO_TOKEN_KEY);
+        await AsyncStorage.setItem("biometric_enabled", "false");
+        setBioEnabled(false);
       }
-      await AsyncStorage.setItem("biometric_enabled", next ? "true" : "false");
-      setBioEnabled(next);
     } catch (e: any) {
-      if (Platform.OS === "web") (window as any).alert("Biométrie indisponible sur navigateur web.");
-      else Alert.alert("Erreur", "Activation biométrique impossible.");
+      if (isWeb) (window as any).alert(e?.message || "Biométrie indisponible.");
+      else Alert.alert("Erreur", e?.message || "Activation biométrique impossible.");
     } finally { setBusy(false); }
   };
 

@@ -153,6 +153,21 @@ export default function Login() {
             style={{ backgroundColor: "#10B981" }}
           />
 
+          {/* Connexion biométrique — affichée si l'utilisateur a activé Face ID / empreinte */}
+          {bioAvailable && bioToken ? (
+            <TouchableOpacity
+              testID="login-biometric"
+              onPress={biometricLogin}
+              style={styles.bioBtn}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="finger-print" size={22} color={colors.primary.base} />
+              <TText variant="body" weight="extraBold" color={colors.primary.base} style={{ marginLeft: 10 }}>
+                Connexion biométrique
+              </TText>
+            </TouchableOpacity>
+          ) : null}
+
           <View style={styles.signupRow}>
             <TText variant="caption" color={colors.neutrals.textSecondary}>
               Pas encore de compte ?{" "}
@@ -196,4 +211,15 @@ const styles = StyleSheet.create({
   orRow: { flexDirection: "row", alignItems: "center", marginVertical: spacing.lg },
   orLine: { flex: 1, height: 1, backgroundColor: colors.neutrals.border },
   signupRow: { flexDirection: "row", justifyContent: "center", marginTop: spacing.xl },
+  bioBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    marginTop: spacing.md,
+    borderRadius: radii.lg,
+    borderWidth: 1.5,
+    borderColor: colors.primary.base,
+    backgroundColor: colors.overlays.primarySoft,
+  },
 });
