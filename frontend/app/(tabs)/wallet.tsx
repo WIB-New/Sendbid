@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   balanceBox: { marginTop: spacing.lg },
   walletRow: { flexDirection: "row", alignItems: "center", marginTop: 6 },
   card: { flex: 1, backgroundColor: colors.neutrals.background, borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, marginTop: -spacing.lg },
-  cardInner: { padding: spacing.lg, paddingBottom: spacing.xxxl },
+  cardInner: { padding: spacing.lg, paddingBottom: 110 },
   quickRow: { flexDirection: "row", justifyContent: "space-between", gap: 4 },
   quickBtn: { flex: 1, alignItems: "center", backgroundColor: "transparent", paddingVertical: 8 },
   quickIcon: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },

@@ -24,7 +24,7 @@ export default function PaybidEarnings() {
 
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: paybidColors.neutrals.background }}>
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={paybidColors.primary.base} />} contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}>
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={paybidColors.primary.base} />} contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}>
         <LinearGradient colors={paybidColors.gradients.earnings} start={{x:0,y:0}} end={{x:1,y:1}} style={[styles.hero, shadows.lg]}>
           <Ionicons name="trending-up" size={28} color="white" />
           <TText variant="caption" color="rgba(255,255,255,0.85)" style={{ marginTop: 8 }}>Vos gains des {data.period_days} derniers jours</TText>

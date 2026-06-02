@@ -123,7 +123,7 @@ export default function Transfers() {
           data={filtered.slice(0, showAll ? filtered.length : 5)}
           keyExtractor={(i) => i.id}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.primary.base} />}
-          contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+          contentContainerStyle={{ paddingBottom: 110 }}
           ListFooterComponent={
             filtered.length > 5 && !showAll ? (
               <TouchableOpacity testID="transfers-show-more" onPress={() => setShowAll(true)} style={styles.showMore}>

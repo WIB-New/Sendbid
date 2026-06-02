@@ -69,7 +69,7 @@ export default function PaybidDashboard() {
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: paybidColors.neutrals.background }}>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={paybidColors.primary.base} />}
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}
         showsVerticalScrollIndicator={false}
       >
         {/* ===== Header (parité SendBID) ===== */}

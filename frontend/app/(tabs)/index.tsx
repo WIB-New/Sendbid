@@ -193,7 +193,7 @@ export default function Home() {
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: tokens.neutrals.background }}>
       <KycPopup userId={user.id} kycTier={user.kyc_tier} />
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.primary.base} />}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"

@@ -32,7 +32,7 @@ export default function PaybidProfile() {
   const { user, agent, wallet } = me;
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: paybidColors.neutrals.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}>
         <View style={styles.head}>
           <Image source={{ uri: agent.avatar_url }} style={styles.avatar} />
           <TText variant="title" weight="extraBold">{agent.full_name}</TText>

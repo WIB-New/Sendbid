@@ -51,7 +51,7 @@ export default function PaybidTransfers() {
       <FlatList
         data={filtered}
         keyExtractor={(i) => i.id}
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={paybidColors.primary.base} />}
         ListEmptyComponent={<View style={styles.empty}><Ionicons name="paper-plane-outline" size={36} color={paybidColors.neutrals.textTertiary} /><TText color={paybidColors.neutrals.textSecondary} style={{ marginTop: 8 }}>Aucun transfert</TText></View>}
         renderItem={({ item }) => (
