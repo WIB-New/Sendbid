@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Platform, TouchableOpacity, ActivityIndicator, Modal, Linking, KeyboardAvoidingView, ScrollView, Alert } from "react-native";
+import { View, StyleSheet, Platform, TouchableOpacity, ActivityIndicator, Modal, KeyboardAvoidingView, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
+import * as WebBrowser from "expo-web-browser";
 import QRCode from "react-native-qrcode-svg";
 import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
@@ -313,8 +314,25 @@ export default function Recharge() {
           {checkoutUrl ? (Platform.OS === "web" ? (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
               <Ionicons name="card" size={48} color={colors.primary.base} />
-              <TText variant="body" align="center" style={{ marginTop: 12 }}>Ouvrez Stripe dans votre navigateur pour finaliser le paiement.</TText>
-              <Button title="Ouvrir Stripe" icon="open-outline" style={{ marginTop: 16 }} onPress={() => Linking.openURL(checkoutUrl)} />
+              <TText variant="body" align="center" style={{ marginTop: 12 }}>Paiement Stripe sécurisé in-app</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
+                La fenêtre se fermera automatiquement après le paiement.
+              </TText>
+              <Button
+                title="Continuer vers Stripe"
+                icon="lock-closed"
+                style={{ marginTop: 16 }}
+                onPress={async () => {
+                  try {
+                    // Session navigateur in-app (modal sécurisé sur natif, popup avec auto-close sur web)
+                    const r = await WebBrowser.openAuthSessionAsync(checkoutUrl, `${ORIGIN}/api/payments/return`);
+                    if (r.type === "success" || r.type === "dismiss") {
+                      setCheckoutUrl(null);
+                      try { refreshMe(); } catch {}
+                    }
+                  } catch (e) { console.warn("stripe browser err", e); }
+                }}
+              />
             </View>
           ) : (
             <WebView source={{ uri: checkoutUrl }} onNavigationStateChange={onWebViewNavChange} startInLoadingState renderLoading={() => (<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}><ActivityIndicator color={colors.primary.base} /></View>)} />
@@ -335,8 +353,24 @@ export default function Recharge() {
           {pplApproveUrl ? (Platform.OS === "web" ? (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
               <Ionicons name="logo-paypal" size={48} color="#003087" />
-              <TText variant="body" align="center" style={{ marginTop: 12 }}>Ouvrez PayPal dans votre navigateur pour approuver le paiement.</TText>
-              <Button title="Ouvrir PayPal" icon="open-outline" style={{ marginTop: 16 }} onPress={() => Linking.openURL(pplApproveUrl)} />
+              <TText variant="body" align="center" style={{ marginTop: 12 }}>Paiement PayPal sécurisé in-app</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
+                La fenêtre se fermera automatiquement après l'approbation.
+              </TText>
+              <Button
+                title="Continuer vers PayPal"
+                icon="lock-closed"
+                style={{ marginTop: 16 }}
+                onPress={async () => {
+                  try {
+                    const r = await WebBrowser.openAuthSessionAsync(pplApproveUrl, `${ORIGIN}/api/paypal/return`);
+                    if (r.type === "success" || r.type === "dismiss") {
+                      setPplApproveUrl(null);
+                      setPplPinModal(true);
+                    }
+                  } catch (e) { console.warn("paypal browser err", e); }
+                }}
+              />
               <Button title="J'ai approuvé — Continuer" variant="outline" style={{ marginTop: 8 }} onPress={() => { setPplApproveUrl(null); setPplPinModal(true); }} />
             </View>
           ) : (
