@@ -50,9 +50,7 @@ api.include_router(admin.router)
 api.include_router(support_chat.router)
 api.include_router(contacts.router)
 api.include_router(paypal.router)
-
-# Web panels (HTML pages) — NOT under /api prefix (mounted on root app)
-app.include_router(web_panels.router)
+api.include_router(web_panels.router)  # Panels web HTML — sous /api/web/* pour passer par l'ingress Kubernetes
 
 
 # Stripe webhook (mounted at /api/webhook/stripe per playbook conventions)

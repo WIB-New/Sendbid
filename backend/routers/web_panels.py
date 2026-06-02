@@ -230,7 +230,6 @@ async def web_superagent():
 @router.get("/web/", response_class=HTMLResponse)
 @router.get("/web", response_class=HTMLResponse)
 async def web_landing():
-    """Landing marketing simple SendFloo."""
     return HTMLResponse("""<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SendFloo — Le transfert d'argent réinventé</title>
 <style>* { margin:0; padding:0; box-sizing:border-box; } body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#0A0E2E; color:white; line-height:1.6; }
 .hero { background:linear-gradient(135deg,#00147E 0%,#3D52D5 100%); padding:80px 24px; text-align:center; }
