@@ -157,21 +157,29 @@ async function loadStats() {{
   const stats = document.getElementById('stats');
   stats.innerHTML = '<div class="stat"><div class="stat-label">Chargement…</div></div>';
   try {{
-    const endpoint = {{ admin: '/admin/metrics', agent: '/agent/dashboard', superagent: '/agent/dashboard' }}[ROLE];
+    const endpoint = {{ admin: '/admin/kpis', agent: '/agent/dashboard', superagent: '/agent/dashboard' }}[ROLE];
     const res = await fetch(API_BASE + endpoint, {{ headers }});
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Erreur');
     const items = [];
     if (ROLE === 'admin') {{
-      items.push({{ label: 'Utilisateurs', value: d.users_count || '—' }});
-      items.push({{ label: 'Transferts (24h)', value: d.transfers_24h || '—' }});
-      items.push({{ label: 'Volume EUR (24h)', value: (d.volume_24h_eur || 0).toLocaleString('fr-FR') }});
-      items.push({{ label: 'Agents actifs', value: d.active_agents || '—' }});
+      items.push({{ label: 'Utilisateurs', value: (d.users || {{}}).total || '—' }});
+      items.push({{ label: 'Transferts totaux', value: (d.transfers || {{}}).total || '—' }});
+      items.push({{ label: 'Complétés', value: (d.transfers || {{}}).completed || '—' }});
+      items.push({{ label: 'En cours', value: (d.transfers || {{}}).in_progress || '—' }});
+      items.push({{ label: 'Volume EUR', value: ((d.transfers || {{}}).volume_eur || 0).toLocaleString('fr-FR') + ' €' }});
+      items.push({{ label: 'Agents actifs', value: (d.agents || {{}}).active || '—' }});
+      items.push({{ label: 'Agents en attente', value: (d.agents || {{}}).pending || '—' }});
+      items.push({{ label: 'Float déclaré', value: ((d.float || {{}}).total_declared || 0).toLocaleString('fr-FR') + ' EUR' }});
     }} else {{
-      items.push({{ label: 'Mes transferts', value: d.transfers_count || '—' }});
-      items.push({{ label: 'Gains du jour', value: ((d.today_earnings || 0)).toFixed(2) + ' EUR' }});
-      items.push({{ label: 'Note moyenne', value: (d.rating || 0).toFixed(1) + ' ★' }});
-      items.push({{ label: 'Float disponible', value: ((d.float_eur || 0)).toFixed(2) + ' EUR' }});
+      const agent = d.agent || {{}};
+      const stats = d.stats || {{}};
+      items.push({{ label: 'Statut', value: agent.status || 'N/A' }});
+      items.push({{ label: 'Transferts complétés', value: stats.completed || '—' }});
+      items.push({{ label: 'Gains cumulés EUR', value: ((stats.earnings_eur || 0)).toFixed(2) + ' €' }});
+      items.push({{ label: 'Note moyenne', value: (agent.rating || 0).toFixed(1) + ' ★' }});
+      items.push({{ label: 'Disponibilité', value: agent.available ? '🟢 En ligne' : '🔴 Hors ligne' }});
+      items.push({{ label: 'KYC tier', value: agent.kyc_tier || '—' }});
     }}
     stats.innerHTML = items.map(it => `<div class="stat"><div class="stat-label">${{it.label}}</div><div class="stat-value">${{it.value}}</div></div>`).join('');
   }} catch (e) {{
