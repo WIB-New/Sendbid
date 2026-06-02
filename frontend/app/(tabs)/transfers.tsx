@@ -8,6 +8,7 @@ import { TText } from "../../src/components/TText";
 import { StatusChip } from "../../src/components/StatusChip";
 import { api } from "../../src/api";
 import { colors, spacing, radii, shadows } from "../../src/theme";
+import { useThemedColors } from "../../src/themeContext";
 
 const CATEGORIES = [
   { key: "all", label: "Tous" },

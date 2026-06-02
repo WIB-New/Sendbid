@@ -8,6 +8,7 @@ import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
+import { useThemedColors } from "../../src/themeContext";
 
 // Wallet tab v4.0 — "17 Wallet" : hero gradient + 4 quick actions (Recharger/Retirer/Envoyer/Historique)
 // + Opérations récentes liste cliquable vers /wallet/op/[id]

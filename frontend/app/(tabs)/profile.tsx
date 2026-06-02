@@ -8,6 +8,7 @@ import { TText } from "../../src/components/TText";
 import { SendBidLogo } from "../../src/components/Logo";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
+import { useThemedColors } from "../../src/themeContext";
 
 /**
  * Profil v6.0 — Pure Fintech Design (Revolut/Wise/N26 inspired)
