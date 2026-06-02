@@ -1,7 +1,8 @@
 import React from "react";
 import { TouchableOpacity, ActivityIndicator, View, StyleSheet, ViewStyle, TextStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, radii, shadows, spacing, fontSize } from "../theme";
+import { radii, shadows, spacing, fontSize } from "../theme";
+import { useThemeTokens } from "../themeContext";
 import { TText } from "./TText";
 
 type Variant = "primary" | "secondary" | "biometric" | "ghost" | "danger" | "outline";
@@ -20,36 +21,37 @@ type Props = {
 };
 
 /**
- * Button — palette fintech cohérente.
+ * Button — palette fintech cohérente, theme-aware.
  * - primary  → CTA principal (bleu impérial, texte blanc)
- * - secondary→ CTA sur fond sombre (blanc, texte bleu impérial)
- * - biometric→ variante biométrie (bleu accent, texte blanc)
+ * - secondary→ CTA sur fond sombre (accent vert, texte sombre)
+ * - biometric→ variante biométrie (vert accent)
  * - danger   → rouge
- * - outline  → bordure bleue, fond blanc, texte bleu
+ * - outline  → bordure bleue, fond surface, texte bleu
  * - ghost    → transparent, texte secondaire
  */
 export function Button({ title, onPress, variant = "primary", icon, loading, disabled, style, textStyle, testID, fullWidth = true }: Props) {
+  const { tokens } = useThemeTokens();
   const bg =
     variant === "primary"
-      ? colors.primary.base
+      ? tokens.primary.base
       : variant === "secondary"
-      ? colors.accent.base
+      ? tokens.accent.base
       : variant === "biometric"
-      ? colors.accent.biometric
+      ? tokens.accent.biometric
       : variant === "danger"
-      ? colors.status.error
+      ? tokens.status.error
       : variant === "outline"
-      ? colors.neutrals.white
+      ? tokens.neutrals.surface
       : "transparent";
   const fg =
     variant === "secondary"
-      ? colors.primary.base
+      ? tokens.primary.base
       : variant === "outline"
-      ? colors.primary.base
+      ? tokens.primary.base
       : variant === "ghost"
-      ? colors.neutrals.textSecondary
-      : colors.neutrals.white;
-  const borderColor = variant === "outline" ? colors.primary.base : "transparent";
+      ? tokens.neutrals.textSecondary
+      : tokens.neutrals.white;
+  const borderColor = variant === "outline" ? tokens.primary.base : "transparent";
   const finalFg = (textStyle as any)?.color || fg;
   return (
     <TouchableOpacity

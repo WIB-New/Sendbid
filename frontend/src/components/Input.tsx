@@ -1,7 +1,8 @@
 import React, { forwardRef, useState } from "react";
 import { TextInput, View, StyleSheet, TextInputProps, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, radii, spacing, fontFamily, fontSize } from "../theme";
+import { radii, spacing, fontFamily, fontSize } from "../theme";
+import { useThemeTokens } from "../themeContext";
 import { TText } from "./TText";
 
 type Props = TextInputProps & {
@@ -19,26 +20,30 @@ export const Input = forwardRef<TextInput, Props>(function Input(
   { label, error, icon, rightIcon, onRightPress, passwordToggle, hint, secureTextEntry, testID, style, ...rest },
   ref,
 ) {
+  const { tokens } = useThemeTokens();
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secureTextEntry);
   return (
     <View style={{ width: "100%", marginBottom: spacing.md }}>
       {label ? (
-        <TText variant="caption" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 6 }}>
+        <TText variant="caption" weight="semiBold" color={tokens.neutrals.textSecondary} style={{ marginBottom: 6 }}>
           {label}
         </TText>
       ) : null}
       <View
         style={[
           styles.box,
-          { borderColor: error ? colors.status.error : focused ? colors.primary.base : colors.neutrals.border },
+          {
+            backgroundColor: tokens.neutrals.surface,
+            borderColor: error ? tokens.status.error : focused ? tokens.primary.base : tokens.neutrals.border,
+          },
         ]}
       >
-        {icon ? <Ionicons name={icon} size={18} color={colors.neutrals.textSecondary} style={{ marginRight: 8 }} /> : null}
+        {icon ? <Ionicons name={icon} size={18} color={tokens.neutrals.textSecondary} style={{ marginRight: 8 }} /> : null}
         <TextInput
           ref={ref}
           testID={testID}
-          placeholderTextColor={colors.neutrals.textTertiary}
+          placeholderTextColor={tokens.neutrals.textTertiary}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           secureTextEntry={passwordToggle ? hidden : secureTextEntry}
@@ -47,7 +52,7 @@ export const Input = forwardRef<TextInput, Props>(function Input(
               flex: 1,
               fontFamily: fontFamily.regular,
               fontSize: fontSize.base,
-              color: colors.neutrals.textPrimary,
+              color: tokens.neutrals.textPrimary,
               paddingVertical: 0,
               // Désactive l'outline noir par défaut du navigateur en RN Web
               ...(Platform.OS === "web" ? { outlineStyle: "none", outlineWidth: 0 } : {}),
@@ -58,20 +63,20 @@ export const Input = forwardRef<TextInput, Props>(function Input(
         />
         {passwordToggle ? (
           <TouchableOpacity onPress={() => setHidden((p) => !p)} hitSlop={10}>
-            <Ionicons name={hidden ? "eye-outline" : "eye-off-outline"} size={20} color={colors.neutrals.textSecondary} />
+            <Ionicons name={hidden ? "eye-outline" : "eye-off-outline"} size={20} color={tokens.neutrals.textSecondary} />
           </TouchableOpacity>
         ) : rightIcon ? (
           <TouchableOpacity onPress={onRightPress} hitSlop={10}>
-            <Ionicons name={rightIcon} size={20} color={colors.neutrals.textSecondary} />
+            <Ionicons name={rightIcon} size={20} color={tokens.neutrals.textSecondary} />
           </TouchableOpacity>
         ) : null}
       </View>
       {error ? (
-        <TText variant="caption" color={colors.status.error} style={{ marginTop: 4 }}>
+        <TText variant="caption" color={tokens.status.error} style={{ marginTop: 4 }}>
           {error}
         </TText>
       ) : hint ? (
-        <TText variant="caption" color={colors.neutrals.textTertiary} style={{ marginTop: 4 }}>
+        <TText variant="caption" color={tokens.neutrals.textTertiary} style={{ marginTop: 4 }}>
           {hint}
         </TText>
       ) : null}
@@ -83,7 +88,6 @@ const styles = StyleSheet.create({
   box: {
     height: 56,
     borderRadius: radii.xl,
-    backgroundColor: colors.neutrals.surface,
     borderWidth: 1,
     paddingHorizontal: spacing.lg,
     flexDirection: "row",

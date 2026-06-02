@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, TextProps } from "react-native";
-import { colors, fontFamily, fontSize } from "../theme";
+import { fontFamily, fontSize } from "../theme";
+import { useThemeTokens } from "../themeContext";
 
 type Variant = "display" | "title" | "subtitle" | "body" | "caption" | "label";
 type Weight = "regular" | "medium" | "semiBold" | "bold" | "extraBold";
@@ -36,10 +37,10 @@ function pickFamily(variant: Variant, weight: Weight, serif?: boolean): string {
 }
 
 export function TText({ variant = "body", weight, color, align, style, serif, children, ...rest }: Props) {
+  const { tokens } = useThemeTokens();
   const fw: Weight =
     weight || (variant === "display" || variant === "title" ? "bold" : variant === "subtitle" ? "semiBold" : "regular");
   const ff = pickFamily(variant, fw, serif);
-  // Slight letter-spacing tweaks: tight on serif headlines, normal on body
   const isHeadline = serif === true || variant === "display" || variant === "title";
   return (
     <Text
@@ -47,7 +48,7 @@ export function TText({ variant = "body", weight, color, align, style, serif, ch
         {
           fontFamily: ff,
           fontSize: sizeMap[variant],
-          color: color || colors.neutrals.textPrimary,
+          color: color || tokens.neutrals.textPrimary,
           textAlign: align || "left",
           letterSpacing: isHeadline ? 0.2 : 0,
         },
