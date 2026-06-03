@@ -95,9 +95,11 @@ ALLOWED_ROLES_BY_PANEL = {
     "superagent": {"super_agent"},
 }
 ROLE_COLORS = {
-    "admin": ("#DC2626", "#991B1B"),       # rouge admin
+    "admin": ("#1E3A8A", "#0F1F4E"),       # bleu marine profond
     "agent": ("#FFA500", "#CC7A00"),       # orange paybid
-    "superagent": ("#7C3AED", "#5B21B6"),  # violet super-agent
+    "superagent": ("#7C3AED", "#5B21B6"),  # violet \u00e9lectrique
+    "partner": ("#047857", "#064E3B"),     # vert pin
+    "superadmin": ("#C9A227", "#8B6914"),  # moutarde dor\u00e9e
 }
 ROLE_DISPLAY = {"admin": "Administrateur", "agent": "Agent", "superagent": "Super-Agent"}
 
