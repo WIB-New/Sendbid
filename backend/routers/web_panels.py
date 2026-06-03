@@ -202,7 +202,7 @@ async def panel_login(role: str, request: Request, email: str = Form(...), passw
         max_age=12 * 3600,
         httponly=True,
         samesite="lax",
-        path="/api/web",
+        path="/",
     )
     return resp
 
@@ -212,7 +212,7 @@ async def panel_logout(role: str):
     if role not in ALLOWED_ROLES_BY_PANEL:
         raise HTTPException(404)
     resp = RedirectResponse(url=f"/api/web/{role}", status_code=303)
-    resp.delete_cookie(COOKIE_PREFIX + role, path="/api/web")
+    resp.delete_cookie(COOKIE_PREFIX + role, path="/")
     return resp
 
 
