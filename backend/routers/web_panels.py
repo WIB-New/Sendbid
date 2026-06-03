@@ -90,7 +90,9 @@ def _marketing_ctx(request: Request, active: str = "", extra: Optional[dict] = N
 # ============================================================================
 COOKIE_PREFIX = "sb_web_session_"
 ALLOWED_ROLES_BY_PANEL = {
-    "admin": {"super_admin", "admin", "partner_admin"},
+    "admin": {"admin", "super_admin"},
+    "superadmin": {"super_admin"},
+    "partner": {"partner_admin", "super_admin"},
     "agent": {"agent", "super_agent"},
     "superagent": {"super_agent"},
 }
@@ -101,7 +103,13 @@ ROLE_COLORS = {
     "partner": ("#047857", "#064E3B"),     # vert pin
     "superadmin": ("#C9A227", "#8B6914"),  # moutarde dor\u00e9e
 }
-ROLE_DISPLAY = {"admin": "Administrateur", "agent": "Agent", "superagent": "Super-Agent"}
+ROLE_DISPLAY = {
+    "admin": "Administrateur",
+    "superadmin": "Super-Administrateur",
+    "partner": "Partenaire",
+    "agent": "Agent",
+    "superagent": "Super-Agent",
+}
 
 
 async def _resolve_session(role: str, request: Request) -> Optional[dict]:
@@ -245,7 +253,11 @@ async def panel_logout(role: str, request: Request):
 
 
 def _login_page(request: Request, role: str) -> HTMLResponse:
-    return templates.TemplateResponse(f"panels/{role}.html", _panel_base_ctx(request, role, user=None))
+    # superadmin/partner réutilisent le template admin.html (mêmes UI)
+    template_role = role
+    if role in ("superadmin", "partner"):
+        template_role = "admin"
+    return templates.TemplateResponse(f"panels/{template_role}.html", _panel_base_ctx(request, role, user=None))
 
 
 # -------------------- ADMIN PANEL --------------------
@@ -281,6 +293,44 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
         "transfers": {"total": total_transfers, "completed": completed, "in_progress": in_progress, "volume_eur": round(vol, 2)},
         "float": {"total_declared": round(total_float, 2)},
     }
+
+
+
+# ====================================================================
+# SUPERADMIN panel — alias d'Admin avec rôle super_admin uniquement
+# ====================================================================
+@router.get("/web/superadmin", response_class=HTMLResponse)
+async def superadmin_dashboard(request: Request):
+    user = await _resolve_session("superadmin", request)
+    if not user:
+        return _login_page(request, "superadmin")
+    kpis = await _admin_kpis()
+    recent_transfers = await db.transfers.find({}, {"_id": 0}).sort("created_at", -1).to_list(10)
+    recent_agents = await db.agents.find({}, {"_id": 0}).sort("created_at", -1).to_list(8)
+    # Réutilise le template admin.html mais avec couleurs superadmin (moutarde)
+    ctx = _panel_base_ctx(request, "superadmin", user, section="dashboard",
+                          kpis=kpis, recent_transfers=recent_transfers, recent_agents=recent_agents)
+    # Surcharge le template pour pointer vers /admin/* dans la sidebar
+    ctx["sidebar_role_path"] = "superadmin"
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+# ====================================================================
+# PARTNER panel — variante restreinte d'Admin
+# ====================================================================
+@router.get("/web/partner", response_class=HTMLResponse)
+async def partner_dashboard(request: Request):
+    user = await _resolve_session("partner", request)
+    if not user:
+        return _login_page(request, "partner")
+    # KPIs limités au périmètre partenaire (V1 : mêmes KPIs)
+    kpis = await _admin_kpis()
+    recent_transfers = await db.transfers.find({}, {"_id": 0}).sort("created_at", -1).to_list(10)
+    recent_agents = await db.agents.find({}, {"_id": 0}).sort("created_at", -1).to_list(8)
+    ctx = _panel_base_ctx(request, "partner", user, section="dashboard",
+                          kpis=kpis, recent_transfers=recent_transfers, recent_agents=recent_agents)
+    ctx["sidebar_role_path"] = "partner"
+    return templates.TemplateResponse("panels/admin.html", ctx)
 
 
 @router.get("/web/admin", response_class=HTMLResponse)
