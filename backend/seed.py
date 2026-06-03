@@ -1,5 +1,6 @@
 """Database seed: admin, demo client, agents. Idempotent."""
 import logging
+import os
 import random
 from datetime import timedelta
 from pathlib import Path
@@ -12,6 +13,10 @@ from core.db import db, now_utc, iso
 from core.security import gen_id, hash_password
 
 logger = logging.getLogger("sendbid.seed")
+
+# En production, ne JAMAIS r\u00e9\u00e9crire les passwords/wallets des comptes existants
+# (\u00e9vite de remettre les credentials seed apr\u00e8s chaque restart).
+IS_PROD = os.environ.get("ENVIRONMENT", "development").lower() == "production"
 
 
 async def seed_demo_data():
@@ -61,10 +66,13 @@ async def seed_demo_data():
                 "role": a["role"], "created_at": iso(now_utc()),
             })
         else:
-            # Force role + password alignment (idempotent, in case of legacy values)
+            # Force role alignment (always safe). Password ONLY in dev to allow rotation in prod.
+            update_set = {"role": a["role"]}
+            if not IS_PROD:
+                update_set["password_hash"] = hash_password(a["pwd"])
             await db.users.update_one(
                 {"email": a["email"]},
-                {"$set": {"role": a["role"], "password_hash": hash_password(a["pwd"])}},
+                {"$set": update_set},
             )
 
     # Demo client
@@ -340,8 +348,9 @@ async def seed_demo_data():
     # IDEMPOTENT DEMO RESET — runs every startup so E2E tests are repeatable.
     # Resets the demo client's wallet balance and PIN to known values regardless
     # of what previous test runs may have done.
+    # ⚠️ DISABLED IN PRODUCTION — would otherwise reset client@sendbid.app password.
     demo_user = await db.users.find_one({"email": DEMO_CLIENT_EMAIL}, {"id": 1})
-    if demo_user:
+    if demo_user and not IS_PROD:
         await db.wallets.update_one(
             {"user_id": demo_user["id"]},
             {"$set": {"balance": 1250.50, "currency": "EUR"}},
