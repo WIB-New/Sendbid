@@ -50,12 +50,35 @@ def _current_year() -> int:
     return _dt.datetime.utcnow().year
 
 
+def _url_prefix(request: Request) -> str:
+    """
+    Retourne le pr\u00e9fixe d'URL \u00e0 utiliser pour les liens internes :
+    - Sur sendfloo.sendbid.app    -> '' (URLs propres : /pricing, /admin, ...)
+    - Sur sendbid.app/api/web/... -> '/api/web' (URLs internes Emergent)
+
+    D\u00e9tection via le header Host. Le sous-domaine d\u00e9di\u00e9 (sendfloo.*) signifie
+    que nginx fait d\u00e9j\u00e0 le rewrite vers /api/web/, donc on doit produire
+    des liens sans pr\u00e9fixe pour l'utilisateur.
+    """
+    host = (request.headers.get("host") or "").lower()
+    # Sous-domaine d\u00e9di\u00e9 : URLs propres
+    if host.startswith("sendfloo.") or host.startswith("panel.") or host.startswith("admin."):
+        return ""
+    return "/api/web"
+
+
+def _u(request: Request, path: str) -> str:
+    """Helper : pr\u00e9fixe `path` (commen\u00e7ant par '/') avec le bon pr\u00e9fixe."""
+    return _url_prefix(request) + path
+
+
 # Default context for marketing pages
 def _marketing_ctx(request: Request, active: str = "", extra: Optional[dict] = None) -> dict:
     ctx = {
         "request": request,
         "active": active,
         "current_year": _current_year(),
+        "url_prefix": _url_prefix(request),
     }
     if extra:
         ctx.update(extra)
@@ -112,6 +135,7 @@ def _panel_base_ctx(request: Request, role: str, user: Optional[dict] = None, **
         "role_color_dark": color_dark,
         "user": user,
         "current_year": _current_year(),
+        "url_prefix": _url_prefix(request),
     }
     ctx.update(extra)
     return ctx
@@ -195,7 +219,8 @@ async def panel_login(role: str, request: Request, email: str = Form(...), passw
     if (user.get("role") or "user") not in allowed:
         return err_resp("Acc\u00e8s refus\u00e9 : compte non autoris\u00e9 pour ce panel")
     token = create_access_token(user["id"])
-    resp = RedirectResponse(url=f"/api/web/{role}", status_code=303)
+    prefix = _url_prefix(request)
+    resp = RedirectResponse(url=f"{prefix}/{role}", status_code=303)
     resp.set_cookie(
         key=COOKIE_PREFIX + role,
         value=token,
@@ -208,10 +233,11 @@ async def panel_login(role: str, request: Request, email: str = Form(...), passw
 
 
 @router.post("/web/{role}/logout")
-async def panel_logout(role: str):
+async def panel_logout(role: str, request: Request):
     if role not in ALLOWED_ROLES_BY_PANEL:
         raise HTTPException(404)
-    resp = RedirectResponse(url=f"/api/web/{role}", status_code=303)
+    prefix = _url_prefix(request)
+    resp = RedirectResponse(url=f"{prefix}/{role}" or f"/{role}", status_code=303)
     resp.delete_cookie(COOKIE_PREFIX + role, path="/")
     return resp
 

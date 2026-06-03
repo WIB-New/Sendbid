@@ -103,18 +103,18 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="/api/web/" class="logo">
+    <a href="{{ url_prefix }}/" class="logo">
       <div class="logo-mark">💸</div>
       SendFloo
     </a>
     <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
     <div class="nav-links" id="navLinks">
-      <a href="/api/web/" class="{% if active == 'home' %}active{% endif %}">Accueil</a>
-      <a href="/api/web/features" class="{% if active == 'features' %}active{% endif %}">Fonctionnalités</a>
-      <a href="/api/web/pricing" class="{% if active == 'pricing' %}active{% endif %}">Tarifs</a>
-      <a href="/api/web/about" class="{% if active == 'about' %}active{% endif %}">À propos</a>
-      <a href="/api/web/faq" class="{% if active == 'faq' %}active{% endif %}">FAQ</a>
-      <a href="/api/web/download" class="nav-cta">📱 Télécharger</a>
+      <a href="{{ url_prefix }}/" class="{% if active == 'home' %}active{% endif %}">Accueil</a>
+      <a href="{{ url_prefix }}/features" class="{% if active == 'features' %}active{% endif %}">Fonctionnalités</a>
+      <a href="{{ url_prefix }}/pricing" class="{% if active == 'pricing' %}active{% endif %}">Tarifs</a>
+      <a href="{{ url_prefix }}/about" class="{% if active == 'about' %}active{% endif %}">À propos</a>
+      <a href="{{ url_prefix }}/faq" class="{% if active == 'faq' %}active{% endif %}">FAQ</a>
+      <a href="{{ url_prefix }}/download" class="nav-cta">📱 Télécharger</a>
     </div>
   </div>
 </nav>
@@ -130,23 +130,23 @@
       </div>
       <div class="footer-col">
         <h4>Produit</h4>
-        <a href="/api/web/features">Fonctionnalités</a>
-        <a href="/api/web/pricing">Tarifs</a>
-        <a href="/api/web/download">Télécharger</a>
-        <a href="/api/web/faq">FAQ</a>
+        <a href="{{ url_prefix }}/features">Fonctionnalités</a>
+        <a href="{{ url_prefix }}/pricing">Tarifs</a>
+        <a href="{{ url_prefix }}/download">Télécharger</a>
+        <a href="{{ url_prefix }}/faq">FAQ</a>
       </div>
       <div class="footer-col">
         <h4>Entreprise</h4>
-        <a href="/api/web/about">À propos</a>
-        <a href="/api/web/about#contact">Contact</a>
-        <a href="/api/web/about#careers">Carrières</a>
-        <a href="/api/web/about#press">Presse</a>
+        <a href="{{ url_prefix }}/about">À propos</a>
+        <a href="{{ url_prefix }}/about#contact">Contact</a>
+        <a href="{{ url_prefix }}/about#careers">Carrières</a>
+        <a href="{{ url_prefix }}/about#press">Presse</a>
       </div>
       <div class="footer-col">
         <h4>Espaces pro</h4>
-        <a href="/api/web/admin">🛡️ Admin</a>
-        <a href="/api/web/agent">👤 Agent</a>
-        <a href="/api/web/superagent">⭐ Super-Agent</a>
+        <a href="{{ url_prefix }}/admin">🛡️ Admin</a>
+        <a href="{{ url_prefix }}/agent">👤 Agent</a>
+        <a href="{{ url_prefix }}/superagent">⭐ Super-Agent</a>
       </div>
     </div>
     <div class="footer-bottom">

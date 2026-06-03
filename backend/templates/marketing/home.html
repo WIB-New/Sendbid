@@ -74,8 +74,8 @@
       <h1 class="serif">Envoyez de l'argent, <span class="accent">les agents se battent</span> pour vos frais.</h1>
       <p class="hero-sub">SendFloo est la première plateforme de transfert d'argent par enchère inverse en temps réel. Les agents biddènt sur vos frais pendant 30 secondes — vous gagnez toujours le meilleur prix.</p>
       <div class="hero-ctas">
-        <a href="/api/web/download" class="btn btn-primary btn-lg">📱 Télécharger SendBID</a>
-        <a href="/api/web/features" class="btn btn-outline btn-lg">Découvrir</a>
+        <a href="{{ url_prefix }}/download" class="btn btn-primary btn-lg">📱 Télécharger SendBID</a>
+        <a href="{{ url_prefix }}/features" class="btn btn-outline btn-lg">Découvrir</a>
       </div>
       <div class="hero-stats">
         <div><div class="stat-num">{{ stats.transfers }}+</div><div class="stat-lbl">Transferts réussis</div></div>
@@ -137,7 +137,7 @@
           <li>Suivi temps réel jusqu'à la remise</li>
           <li>Biométrie + KYC 3 niveaux</li>
         </ul>
-        <a href="/api/web/download" class="btn btn-primary" style="margin-top:24px">Télécharger SendBID</a>
+        <a href="{{ url_prefix }}/download" class="btn btn-primary" style="margin-top:24px">Télécharger SendBID</a>
       </div>
       <div class="product-card product-paybid">
         <span class="product-tag">Pour les agents</span>
@@ -151,7 +151,7 @@
           <li>Programme fidélité Silver → Platinum</li>
           <li>Panel web compagnon</li>
         </ul>
-        <a href="/api/web/agent" class="btn" style="background:white; color:var(--orange-dark); margin-top:24px">Espace Agent</a>
+        <a href="{{ url_prefix }}/agent" class="btn" style="background:white; color:var(--orange-dark); margin-top:24px">Espace Agent</a>
       </div>
     </div>
   </div>
@@ -199,8 +199,8 @@
       <h2 class="serif">Prêt à envoyer moins cher ?</h2>
       <p>Rejoignez {{ stats.users }}+ utilisateurs qui économisent en moyenne 35% sur leurs transferts grâce à l'enchère inverse.</p>
       <div class="hero-ctas" style="justify-content:center">
-        <a href="/api/web/download" class="btn btn-lg" style="background:white; color:var(--navy)">Télécharger l'app</a>
-        <a href="/api/web/pricing" class="btn btn-outline btn-lg">Voir les tarifs</a>
+        <a href="{{ url_prefix }}/download" class="btn btn-lg" style="background:white; color:var(--navy)">Télécharger l'app</a>
+        <a href="{{ url_prefix }}/pricing" class="btn btn-outline btn-lg">Voir les tarifs</a>
       </div>
     </div>
   </div>

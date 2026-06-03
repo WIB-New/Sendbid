@@ -3,13 +3,13 @@
 {% block page_subtitle %}Données en temps réel de la plateforme SendFloo.{% endblock %}
 
 {% block sidebar_nav %}
-  <a href="/api/web/admin" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
-  <a href="/api/web/admin/users" class="{% if section == 'users' %}active{% endif %}"><span class="nav-icon">👥</span>Utilisateurs</a>
-  <a href="/api/web/admin/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👨‍💼</span>Agents</a>
-  <a href="/api/web/admin/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts</a>
-  <a href="/api/web/admin/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
-  <a href="/api/web/admin/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon">💳</span>Wallets</a>
-  <a href="/api/web/admin/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon">📜</span>Audit logs</a>
+  <a href="{{ url_prefix }}/admin" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
+  <a href="{{ url_prefix }}/admin/users" class="{% if section == 'users' %}active{% endif %}"><span class="nav-icon">👥</span>Utilisateurs</a>
+  <a href="{{ url_prefix }}/admin/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👨‍💼</span>Agents</a>
+  <a href="{{ url_prefix }}/admin/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts</a>
+  <a href="{{ url_prefix }}/admin/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
+  <a href="{{ url_prefix }}/admin/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon">💳</span>Wallets</a>
+  <a href="{{ url_prefix }}/admin/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon">📜</span>Audit logs</a>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +24,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h2>Derniers transferts</h2><a href="/api/web/admin/transfers" class="btn btn-ghost">Voir tout →</a></div>
+      <div class="card-header"><h2>Derniers transferts</h2><a href="{{ url_prefix }}/admin/transfers" class="btn btn-ghost">Voir tout →</a></div>
       {% if recent_transfers %}
         <table>
           <thead><tr><th>ID</th><th>Expéditeur</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h2>Agents récents</h2><a href="/api/web/admin/agents" class="btn btn-ghost">Gérer →</a></div>
+      <div class="card-header"><h2>Agents récents</h2><a href="{{ url_prefix }}/admin/agents" class="btn btn-ghost">Gérer →</a></div>
       {% if recent_agents %}
         <table>
           <thead><tr><th>Nom</th><th>Pays / Ville</th><th>Statut</th><th>KYC</th><th>Note</th><th>Date</th></tr></thead>

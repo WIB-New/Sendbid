@@ -3,11 +3,11 @@
 {% block page_subtitle %}Vos enchères, vos gains, votre float.{% endblock %}
 
 {% block sidebar_nav %}
-  <a href="/api/web/agent" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
-  <a href="/api/web/agent/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
-  <a href="/api/web/agent/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Mes transferts</a>
-  <a href="/api/web/agent/float" class="{% if section == 'float' %}active{% endif %}"><span class="nav-icon">💰</span>Float multi-devises</a>
-  <a href="/api/web/agent/earnings" class="{% if section == 'earnings' %}active{% endif %}"><span class="nav-icon">📈</span>Gains</a>
+  <a href="{{ url_prefix }}/agent" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
+  <a href="{{ url_prefix }}/agent/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
+  <a href="{{ url_prefix }}/agent/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Mes transferts</a>
+  <a href="{{ url_prefix }}/agent/float" class="{% if section == 'float' %}active{% endif %}"><span class="nav-icon">💰</span>Float multi-devises</a>
+  <a href="{{ url_prefix }}/agent/earnings" class="{% if section == 'earnings' %}active{% endif %}"><span class="nav-icon">📈</span>Gains</a>
 {% endblock %}
 
 {% block content %}
@@ -22,7 +22,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h2>⚡ Enchères à ne pas manquer</h2><a href="/api/web/agent/auctions" class="btn btn-ghost">Tout voir →</a></div>
+      <div class="card-header"><h2>⚡ Enchères à ne pas manquer</h2><a href="{{ url_prefix }}/agent/auctions" class="btn btn-ghost">Tout voir →</a></div>
       {% if auctions_preview %}
         <table>
           <thead><tr><th>ID</th><th>Montant</th><th>Destination</th><th>Bids reçus</th><th>Début</th></tr></thead>

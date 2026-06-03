@@ -113,7 +113,7 @@
       <h1>Panel {{ role_display }}</h1>
       <p class="subtitle">Accédez à votre espace de gestion.</p>
       {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
-      <form method="POST" action="/api/web/{{ role }}/login">
+      <form method="POST" action="{{ url_prefix }}/{{ role }}/login">
         <div class="form-group"><label>Email</label><input type="email" name="email" required autocomplete="email" value="{{ email_prefill or '' }}"></div>
         <div class="form-group"><label>Mot de passe</label><input type="password" name="password" required autocomplete="current-password"></div>
         <button type="submit" class="login-btn">Se connecter</button>
@@ -135,7 +135,7 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="sidebar-user"><b>{{ user.full_name or user.email }}</b>{{ user.role or 'user' }}</div>
-        <form method="POST" action="/api/web/{{ role }}/logout" style="display:inline"><button type="submit" class="logout-btn">↪ Se déconnecter</button></form>
+        <form method="POST" action="{{ url_prefix }}/{{ role }}/logout" style="display:inline"><button type="submit" class="logout-btn">↪ Se déconnecter</button></form>
       </div>
     </aside>
     <main class="main">

@@ -3,10 +3,10 @@
 {% block page_subtitle %}Gérez votre réseau d'agents et suivez les performances consolidées.{% endblock %}
 
 {% block sidebar_nav %}
-  <a href="/api/web/superagent" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
-  <a href="/api/web/superagent/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👥</span>Mon réseau</a>
-  <a href="/api/web/superagent/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts réseau</a>
-  <a href="/api/web/superagent/earnings" class="{% if section == 'earnings' %}active{% endif %}"><span class="nav-icon">📈</span>Override commission</a>
+  <a href="{{ url_prefix }}/superagent" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
+  <a href="{{ url_prefix }}/superagent/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👥</span>Mon réseau</a>
+  <a href="{{ url_prefix }}/superagent/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts réseau</a>
+  <a href="{{ url_prefix }}/superagent/earnings" class="{% if section == 'earnings' %}active{% endif %}"><span class="nav-icon">📈</span>Override commission</a>
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h2>👥 Top agents de votre réseau</h2><a href="/api/web/superagent/agents" class="btn btn-ghost">Voir tout →</a></div>
+      <div class="card-header"><h2>👥 Top agents de votre réseau</h2><a href="{{ url_prefix }}/superagent/agents" class="btn btn-ghost">Voir tout →</a></div>
       <table>
         <thead><tr><th>Agent</th><th>Ville</th><th>Statut</th><th>Note</th><th>Transferts</th><th>Volume €</th></tr></thead>
         <tbody>

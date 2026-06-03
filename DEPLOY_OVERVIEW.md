@@ -1,233 +1,80 @@
-# 🌐 SendFloo / SendBID — Cartographie des URLs & Plan de Déploiement VPS
+# 🚀 État du déploiement VPS — SendFloo / SendBID
 
-> **Document maître** récapitulant : (1) liens publics/privés avec credentials, (2) plan de déploiement VPS LWS, (3) configuration spécifique du sous-domaine `sendfloo.sendbid.app`.
-
----
-
-## 1. 🔗 Cartographie complète des URLs
-
-### A. Site marketing (public — aucun login requis)
-
-| Page | URL en local | URL prod (à déployer) |
-|------|-------------|-----------------------|
-| 🏠 Accueil | `http://localhost:8001/api/web/` | `https://sendfloo.sendbid.app/` |
-| ⚡ Fonctionnalités | `/api/web/features` | `https://sendfloo.sendbid.app/features` |
-| 💰 Tarifs | `/api/web/pricing` | `https://sendfloo.sendbid.app/pricing` |
-| ❓ FAQ | `/api/web/faq` | `https://sendfloo.sendbid.app/faq` |
-| ℹ️ À propos | `/api/web/about` | `https://sendfloo.sendbid.app/about` |
-| 📱 Téléchargement | `/api/web/download` | `https://sendfloo.sendbid.app/download` |
-
-### B. Panneaux web professionnels (authentification requise)
-
-| Panel | URL prod | Email | Mot de passe | Rôle DB |
-|-------|---------|-------|--------------|---------|
-| 🛡️ **Admin** (rouge) | `https://sendfloo.sendbid.app/admin` | `admin@sendbid.app` | `Admin@123!` | `admin` |
-| 🛡️ Super-Admin | `https://sendfloo.sendbid.app/admin` | `superadmin@sendbid.app` | `SuperAdmin@123!` | `super_admin` |
-| 🛡️ Partner-Admin | `https://sendfloo.sendbid.app/admin` | `partner@sendbid.app` | `Partner@123!` | `partner_admin` |
-| 👤 **Agent** (orange) | `https://sendfloo.sendbid.app/agent` | `agent@paybid.app` | `Agent@123!` | `agent` |
-| ⭐ **Super-Agent** (violet) | `https://sendfloo.sendbid.app/superagent` | `superagent@sendbid.app` | `Super@123!` | `super_agent` |
-
-#### Sections accessibles par panel
-- **Admin** : Dashboard, Utilisateurs, Agents, Transferts, Enchères live, Wallets, Audit
-- **Agent** : Dashboard, Enchères live, Mes transferts, Float multi-devises, Mes gains
-- **Super-Agent** : Dashboard, Mon réseau, Transferts réseau, Override commission
-
-### C. Application mobile (SendBID — clients)
-
-| Action | URL/Compte |
-|--------|-----------|
-| App mobile (PWA / Expo Go) | `https://sendbid.app/` (Expo web build statique) |
-| Login client démo | `client@sendbid.app` / `Client@123!` / PIN: `123456` |
-| API publique | `https://sendbid.app/api/*` (FastAPI proxy) |
-
-### D. Application agent (PayBID)
-
-| Action | URL/Compte |
-|--------|-----------|
-| App mobile PayBID | Même domaine `sendbid.app` (route `/paybid/...`) |
-| Login agent démo | `agent@paybid.app` / `Agent@123!` |
-
-> ⚠️ Tous ces credentials sont **seed** (créés au démarrage du backend). En production, changez-les via l'API `PUT /api/auth/me` ou directement en base.
+> Document de suivi du déploiement sur VPS LWS `vps121136.serveur-vps.net` (`195.110.35.155`).
+> Dernière mise à jour : déploiement initial terminé, en attente de la mise à jour DNS.
 
 ---
 
-## 2. 🚀 Plan de déploiement complet sur VPS LWS
+## ✅ Étapes réalisées
 
-### 2.1. Architecture cible
+| Étape | Statut | Détails |
+|-------|--------|---------|
+| Connexion SSH | ✅ | Debian 13 (trixie), 4 vCPU, 8 GB RAM, 147 GB disque |
+| Désactivation Apache | ✅ | `systemctl stop & disable apache2` |
+| Nginx | ✅ | Installé + actif sur port 80 |
+| Node.js 20.20.2 | ✅ | Via NodeSource |
+| Yarn 1.22 + pm2 7.0.1 | ✅ | Globaux |
+| MongoDB 8.0.23 | ✅ | Service actif, bind `localhost:27017` |
+| Code transféré | ✅ | Via tar.gz scp → `/var/www/sendbid/` |
+| Python venv + deps | ✅ | Python 3.13.5, 100+ packages installés (FastAPI, emergentintegrations 0.1.1, etc.) |
+| Backend `.env` | ✅ | JWT/QR_HMAC générés, clés Stripe LIVE, PayPal LIVE, Twilio, SendGrid configurées |
+| Backend lancé via pm2 | ✅ | `sendbid-backend` running, listen 0.0.0.0:8001 |
+| Seed DB | ✅ | Admin, agent, superagent, client + extras créés en base `sendbid_prod` |
+| Frontend Expo build | ✅ | `npx expo export --platform web --output-dir dist` (134 routes générées) |
+| Nginx config | ✅ | 3 server blocks : sendbid.app → 301 redir, sendfloo.* → marketing+panels, default_server → 444 |
+| URL prefix dynamique | ✅ | Sur `sendfloo.*` les liens sont propres (`/pricing`), sur `/api/web/*` ils gardent le préfixe |
+| Firewall ufw | ✅ | OpenSSH + Nginx Full autorisés |
+| pm2 startup | ✅ | Auto-restart au boot configuré (`pm2 save`) |
 
+### Test interne (curl avec Host header)
 ```
-                          ┌───────────────────┐
-              Internet ──→│  Nginx (80/443)   │
-                          │  Let's Encrypt    │
-                          └────────┬──────────┘
-                                   │
-        ┌──────────────────────────┼──────────────────────────┐
-        │                          │                          │
-        ▼                          ▼                          ▼
-  sendbid.app/             sendfloo.sendbid.app/      api.sendbid.app/
-  (Expo Web statique       (FastAPI /api/web/         (FastAPI /api/*)
-   pour SendBID PWA)        marketing + panels)        (réservé futur)
-        │                          │                          │
-        └──────────────────────────┴──────────────────────────┘
-                                   │
-                                   ▼
-                          ┌───────────────────┐
-                          │ FastAPI (8001)    │
-                          │ pm2 / supervisor  │
-                          └────────┬──────────┘
-                                   │
-                                   ▼
-                          ┌───────────────────┐
-                          │ MongoDB (27017)   │
-                          │ systemd (mongod)  │
-                          └───────────────────┘
+✅ Host: sendfloo.sendbid.app → / → HTTP 200 (landing 23 KB, "SendFloo" inside)
+✅ Host: sendfloo.sendbid.app → /pricing → HTTP 200 (URLs propres /features /admin /agent)
+✅ Host: sendfloo.sendbid.app → /admin → HTTP 200 (formulaire login)
+✅ Host: sendbid.app → / → HTTP 301 Location: https://sendfloo.sendbid.app/
+✅ Externe : curl -H "Host: sendfloo.sendbid.app" http://195.110.35.155/ → HTTP 200 OK
 ```
 
-### 2.2. Pré-requis VPS LWS
+---
 
-| Élément | Recommandé |
-|---------|-----------|
-| OS | Ubuntu 22.04 LTS ou Debian 12 |
-| CPU / RAM | 2 vCPU minimum / 4 Go RAM minimum (8 Go conseillé) |
-| Disque | 40 Go SSD minimum |
-| Accès | SSH root + IPv4 publique fixe |
-| Domaine | `sendbid.app` géré chez LWS |
+## ⚠️ Action utilisateur requise — Mise à jour DNS
 
-### 2.3. DNS — à configurer dans le panel LWS
+Le DNS actuel pointe vers **`149.202.61.20`** (ancien hébergeur). Pour que le déploiement soit effectif et que SSL Let's Encrypt fonctionne, **mettez à jour les A records chez LWS** :
 
-```
-Type   Nom        Valeur          TTL
-A      @          <IP_VPS>        3600    ← sendbid.app
-A      www        <IP_VPS>        3600    ← www.sendbid.app
-A      sendfloo   <IP_VPS>        3600    ← sendfloo.sendbid.app (panels + marketing)
-A      api        <IP_VPS>        3600    ← api.sendbid.app (réservé futur)
-```
+### Configuration DNS à appliquer dans le panneau LWS
 
-### 2.4. Étapes (résumé — voir `/app/DEPLOY_VPS.md` pour les commandes complètes)
+| Type | Nom | Valeur | TTL |
+|------|-----|--------|-----|
+| A | `@` | `195.110.35.155` | 3600 |
+| A | `www` | `195.110.35.155` | 3600 |
+| A | `sendfloo` | `195.110.35.155` | 3600 |
+| A | `api` | `195.110.35.155` | 3600 |
 
-1. **Setup VPS** : `apt update`, installer Node 20, Python 3.11, MongoDB 7, Nginx, Certbot, ufw, fail2ban, pm2.
-2. **MongoDB** : `systemctl enable --now mongod`, créer un user dédié `sendbid_prod` avec password.
-3. **Cloner le code** : `git clone` ou transfert `scp` depuis Emergent (bouton "Download code").
-4. **Backend FastAPI** : `python3.11 -m venv`, `pip install -r requirements.txt`, créer `.env` (voir 2.6), démarrer via pm2.
-5. **Frontend Expo** : `yarn install`, `npx expo export --platform web --output-dir dist`.
-6. **Nginx** : 3 server blocks (voir 2.7), `certbot --nginx` pour SSL.
-7. **Vérifications** : `curl -I https://sendbid.app/`, `https://sendfloo.sendbid.app/`, tester login admin.
-8. **Sécurité** : changer credentials seed, backups Mongo quotidiens, fail2ban SSH.
+> ⏱️ **Propagation** : 5-60 minutes typiquement (TTL 3600s).
+> Vous pouvez vérifier avec : `dig sendfloo.sendbid.app +short` (devrait renvoyer `195.110.35.155`).
 
-### 2.5. Backend env variables (production)
+---
+
+## 🔐 Étape finale (à exécuter une fois DNS propagé)
+
+Une fois `dig sendfloo.sendbid.app` retourne `195.110.35.155`, lancez la commande SSL :
 
 ```bash
-# /var/www/sendbid/backend/.env
-MONGO_URL=mongodb://sendbid:<password>@localhost:27017/sendbid_prod?authSource=admin
-DB_NAME=sendbid_prod
-JWT_SECRET=<générer 64 caractères aléatoires>
-ENVIRONMENT=production
-
-# LLM
-EMERGENT_LLM_KEY=<si vous voulez garder Emergent>
-# ou
-OPENAI_API_KEY=<si bascule directe>
-
-# Paiements
-STRIPE_API_KEY=sk_live_<votre clé>
-STRIPE_WEBHOOK_SECRET=whsec_<votre webhook>
-PAYPAL_CLIENT_ID=<live>
-PAYPAL_CLIENT_SECRET=<live>
-
-# Notifications
-SENDGRID_API_KEY=<votre clé>
-TWILIO_ACCOUNT_SID=<votre SID>
-TWILIO_AUTH_TOKEN=<votre token>
-TWILIO_FROM=+33XXXXXXXXX
-
-# CORS (autorise les domaines prod)
-CORS_ORIGINS=https://sendbid.app,https://www.sendbid.app,https://sendfloo.sendbid.app
-```
-
-### 2.6. Frontend env variables (build Expo)
-
-```bash
-# /var/www/sendbid/frontend/.env
-EXPO_PUBLIC_BACKEND_URL=https://sendbid.app
-```
-
-> Le frontend Expo appelle `${EXPO_PUBLIC_BACKEND_URL}/api/...` — l'API reste sur le domaine principal.
-
-### 2.7. Nginx — configuration complète
-
-```nginx
-# /etc/nginx/sites-available/sendbid.conf
-
-# --- 1) sendbid.app + www : frontend SendBID (Expo web statique) + API ---
-server {
-  listen 80;
-  server_name sendbid.app www.sendbid.app;
-
-  root /var/www/sendbid/frontend/dist;
-  index index.html;
-
-  # SPA fallback pour Expo Router
-  location / {
-    try_files $uri $uri.html $uri/ /index.html;
-  }
-
-  # API backend (toutes les routes /api/*)
-  location /api/ {
-    proxy_pass http://127.0.0.1:8001;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_read_timeout 300s;
-    client_max_body_size 50M;
-  }
-}
-
-# --- 2) sendfloo.sendbid.app : panels web + marketing ---
-server {
-  listen 80;
-  server_name sendfloo.sendbid.app;
-
-  # Marketing + panels (URL "propres" vers /api/web/*)
-  # Ex: /pricing -> /api/web/pricing  |  /admin -> /api/web/admin
-  location / {
-    proxy_pass http://127.0.0.1:8001/api/web/;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_read_timeout 60s;
-  }
-
-  # API JSON (pour les éventuels appels XHR depuis les panels)
-  location /api/ {
-    proxy_pass http://127.0.0.1:8001;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_read_timeout 300s;
-    client_max_body_size 50M;
-  }
-}
-```
-
-```bash
-ln -s /etc/nginx/sites-available/sendbid.conf /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
-
-# SSL HTTPS (les 3 domaines en une commande)
+ssh root@195.110.35.155
 certbot --nginx \
-  -d sendbid.app -d www.sendbid.app -d sendfloo.sendbid.app \
-  --non-interactive --agree-tos --email votre@email.com --redirect
+  -d sendbid.app -d www.sendbid.app -d sendfloo.sendbid.app -d api.sendbid.app \
+  --non-interactive --agree-tos --email contact@sendbid.app --redirect
 ```
 
-### 2.8. Test de bout en bout après déploiement
+Certbot va automatiquement :
+1. Vérifier que les domaines pointent bien vers le VPS.
+2. Demander un certificat SSL gratuit.
+3. Modifier la config Nginx pour servir en HTTPS.
+4. Configurer l'auto-renouvellement (cron certbot.timer).
+
+---
+
+## 🧪 Tests à effectuer après SSL
 
 ```bash
 # Marketing public
@@ -235,13 +82,15 @@ curl -I https://sendfloo.sendbid.app/             # 200
 curl -I https://sendfloo.sendbid.app/pricing      # 200
 curl -I https://sendfloo.sendbid.app/faq          # 200
 
-# Panels (page de login)
-curl -I https://sendfloo.sendbid.app/admin        # 200 (form login)
+# Panels (avant login → 200 avec formulaire login)
+curl -I https://sendfloo.sendbid.app/admin        # 200
 curl -I https://sendfloo.sendbid.app/agent        # 200
 curl -I https://sendfloo.sendbid.app/superagent   # 200
 
-# App mobile
-curl -I https://sendbid.app/                      # 200
+# Redirect principal
+curl -I https://sendbid.app/                      # 301 → https://sendfloo.sendbid.app/
+
+# API mobile
 curl https://sendbid.app/api/corridors | head     # JSON pays
 
 # Login admin via curl
@@ -252,58 +101,91 @@ curl -b /tmp/c.txt https://sendfloo.sendbid.app/admin
 
 ---
 
-## 3. 🎯 Spécificités pour le sous-domaine `sendfloo.sendbid.app`
+## 📋 Commandes de gestion VPS
 
-### Points clés à comprendre
+```bash
+ssh root@195.110.35.155
 
-1. **URLs vues par l'utilisateur final** sur `sendfloo.sendbid.app` :
-   - `https://sendfloo.sendbid.app/`        → page marketing accueil
-   - `https://sendfloo.sendbid.app/pricing` → page tarifs
-   - `https://sendfloo.sendbid.app/admin`   → panel admin (avec login form)
-   - Nginx réécrit tout vers `http://127.0.0.1:8001/api/web/...`
-2. **Cookies de session** : maintenant configurés en `path="/"` (corrigé dans cette session) pour fonctionner aussi bien sur `https://sendbid.app/api/web/admin` que sur `https://sendfloo.sendbid.app/admin`.
-3. **Aucune modification de code requise** pour le sous-domaine : tout est géré par la couche Nginx.
-4. **Pas de CORS** nécessaire : les panels et le marketing sont **server-rendered** (Jinja2), pas d'XHR cross-origin.
-5. **Templates Jinja2** : les liens internes (footer, navigation) utilisent toujours `/api/web/...` actuellement → ils fonctionnent en passant par Nginx qui réécrit. **Optionnel** : on peut ajouter un middleware qui détecte l'header `X-Forwarded-Host: sendfloo.sendbid.app` et génère des URLs propres `/pricing` au lieu de `/api/web/pricing` (recommandé pour le SEO et l'esthétique).
+# Voir les logs
+pm2 logs sendbid-backend            # backend Python
+tail -f /var/log/nginx/access.log   # accès HTTP
+tail -f /var/log/nginx/error.log    # erreurs nginx
 
-### Amélioration optionnelle — URLs propres sur le sous-domaine
+# Redémarrer un service
+pm2 restart sendbid-backend
+systemctl reload nginx
+systemctl restart mongod
 
-Si vous souhaitez que les liens internes du site (boutons "Découvrir", footer) génèrent `/pricing` au lieu de `/api/web/pricing` quand l'utilisateur est sur `sendfloo.sendbid.app`, je peux ajouter une variable `URL_PREFIX` détectée dynamiquement depuis le `Host` header.
-
----
-
-## 4. 📋 Checklist déploiement (à cocher en SSH)
-
-- [ ] Accès SSH root au VPS LWS confirmé
-- [ ] DNS `sendbid.app`, `www`, `sendfloo`, `api` configurés et propagés (`dig sendfloo.sendbid.app`)
-- [ ] Code transféré sur le VPS (`/var/www/sendbid`)
-- [ ] MongoDB 7 installé + auth activée + backup quotidien planifié
-- [ ] Backend `.env` créé avec **toutes** les clés réelles (Stripe LIVE, PayPal LIVE, etc.)
-- [ ] `pm2 start sendbid-backend` → `pm2 save` → `pm2 startup`
-- [ ] Frontend buildé : `npx expo export --platform web --output-dir dist`
-- [ ] Nginx config copiée + `nginx -t` OK + reload
-- [ ] Certbot HTTPS pour les 3 domaines + auto-renew activé
-- [ ] Test login admin via le navigateur ✅
-- [ ] Changement des credentials seed (admin, agent, superagent) via l'API
-- [ ] Firewall ufw activé (`OpenSSH` + `Nginx Full` only)
-- [ ] Fail2ban activé pour SSH + Nginx
-- [ ] Backup MongoDB cron quotidien vers S3 ou stockage LWS
-- [ ] Monitoring (Netdata / Uptime Kuma) déployé
+# Mise à jour code (depuis votre poste)
+# 1. Build nouveau tar.gz
+cd /app && tar --exclude='node_modules' --exclude='.expo' --exclude='__pycache__' \
+  --exclude='.git' --exclude='dist' --exclude='backend/.venv' \
+  -czf /tmp/sendbid.tar.gz backend frontend
+# 2. Transfert
+scp /tmp/sendbid.tar.gz root@195.110.35.155:/tmp/
+# 3. Sur le VPS
+ssh root@195.110.35.155
+cd /var/www/sendbid
+tar -xzf /tmp/sendbid.tar.gz
+cd backend && .venv/bin/pip install -r requirements.txt --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+pm2 restart sendbid-backend
+cd ../frontend && yarn install && npx expo export --platform web --output-dir dist
+```
 
 ---
 
-## 5. 📞 Que faire en cas de problème ?
+## 🔑 Credentials de production (à changer après tests)
 
-| Symptôme | Diagnostic |
-|----------|-----------|
-| 502 Bad Gateway | `pm2 logs sendbid-backend` puis `pm2 restart sendbid-backend` |
-| 404 sur tous les panels | Vérifier que le router `web_panels` est bien inclus dans `server.py` |
-| Cookie de session non envoyé | Vérifier `path=/` (corrigé) et SSL valide |
-| MongoDB connection refused | `systemctl status mongod` + vérifier `MONGO_URL` |
-| Certbot fail | `nginx -t`, vérifier DNS propagé (`dig`) |
-| CORS error depuis app mobile | Vérifier `CORS_ORIGINS` dans `.env` backend |
+> ⚠️ Ces credentials sont **identiques** au dev. **Changez-les immédiatement** après le premier login en production via l'API ou en base MongoDB.
+
+| Panel | Email | Password |
+|-------|-------|----------|
+| Admin | admin@sendbid.app | Admin@123! |
+| Super-Admin | superadmin@sendbid.app | SuperAdmin@123! |
+| Partner-Admin | partner@sendbid.app | Partner@123! |
+| Agent | agent@paybid.app | Agent@123! |
+| Super-Agent | superagent@sendbid.app | Super@123! |
+
+### Procédure changement password admin
+```bash
+ssh root@195.110.35.155
+mongosh sendbid_prod
+> db.users.updateOne(
+    { email: "admin@sendbid.app" },
+    { $set: { password_hash: "<bcrypt hash du nouveau mdp>" } }
+  )
+```
+
+Ou via API :
+```bash
+TOKEN=$(curl -s -X POST https://sendbid.app/api/auth/login \
+  -d '{"identifier":"admin@sendbid.app","password":"Admin@123!"}' \
+  -H "Content-Type: application/json" | jq -r .access_token)
+curl -X POST https://sendbid.app/api/auth/change-password \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"old_password":"Admin@123!","new_password":"VotreNouveauMotDePasseFort!"}'
+```
 
 ---
 
-**Statut actuel** : ✅ Code prêt pour déploiement. Cookies corrigés pour fonctionner sur sous-domaine. Tests backend 43/43 passés.
-**Action utilisateur requise** : Fournir l'accès SSH au VPS LWS + l'IP publique pour démarrer le déploiement effectif (impossible depuis ce conteneur).
+## 🛡️ Recommandations sécurité post-déploiement
+
+- [ ] Changer **TOUS** les credentials seed
+- [ ] Désactiver le seed automatique en prod (commenter l'appel à `seed` dans `server.py`)
+- [ ] Configurer backup MongoDB quotidien (`mongodump` + cron + transfert externe)
+- [ ] Activer fail2ban : `apt install fail2ban` + jail SSH + jail Nginx
+- [ ] Monitoring : Netdata (`bash <(curl -fsSL https://my-netdata.io/kickstart.sh)`)
+- [ ] Activer logs rotation (`/etc/logrotate.d/sendbid`)
+- [ ] Désactiver root SSH login après création user dédié
+
+---
+
+## 📞 Support
+
+En cas de problème, vérifier dans cet ordre :
+1. `pm2 logs sendbid-backend --lines 50`
+2. `systemctl status nginx mongod`
+3. `tail -20 /var/log/nginx/error.log`
+4. `curl -v http://127.0.0.1:8001/api/web/` (backend direct)
+5. `curl -v -H "Host: sendfloo.sendbid.app" http://127.0.0.1/` (via nginx)
