@@ -35,6 +35,10 @@ export default function TransferStep3() {
   }
 
   const fee = draft.fee_percent ? (draft.send_amount * draft.fee_percent) / 100 : 0;
+  // "Autres frais" : placeholder réservé pour des frais additionnels futurs
+  // (ex: marge de change, frais de réseau, frais bancaires destinataire…).
+  // Pour l'instant 0,00 EUR — peut être branché sur draft.other_fees plus tard.
+  const otherFees = (draft as any).other_fees ? Number((draft as any).other_fees) : 0;
   // Spec v7 :
   // - VIP    = max(1% du montant, 15€)
   // - VIP+   = max(1,5% du montant, 20€)
@@ -43,7 +47,7 @@ export default function TransferStep3() {
     : draft.vip_delivery
     ? Math.max(draft.send_amount * 0.01, 15)
     : 0;
-  const total = draft.send_amount + fee + vipFee;
+  const total = draft.send_amount + fee + otherFees + vipFee;
   const insufficient = !!wallet && wallet.balance < total;
   const [knowBen, setKnowBen] = useState<null | boolean>(null);
 
@@ -112,12 +116,15 @@ export default function TransferStep3() {
           DÉTAIL DU TRANSFERT
         </TText>
         <Row label="Montant envoyé" value={`${draft.send_amount.toFixed(2)} EUR`} />
-        <Row label={`Frais transfert (${draft.fee_percent}%)`} value={`${fee.toFixed(2)} EUR`} />
+        <Row label={`Frais client (${draft.fee_percent}%)`} value={`${fee.toFixed(2)} EUR`} />
+        <Row label="Autres frais" value={`${otherFees.toFixed(2)} EUR`} />
         {draft.vip_express ? (
           <Row label="Service VIP+ (1,5%, min 20€)" value={`${vipFee.toFixed(2)} EUR`} />
         ) : draft.vip_delivery ? (
           <Row label="Service VIP (1%, min 15€)" value={`${vipFee.toFixed(2)} EUR`} />
-        ) : null}
+        ) : (
+          <Row label="Service" value="—" />
+        )}
         <View style={styles.divider} />
         <Row label="Total à débiter" value={`${total.toFixed(2)} EUR`} bold />
       </View>
