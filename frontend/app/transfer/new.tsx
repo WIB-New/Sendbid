@@ -255,7 +255,7 @@ export default function TransferStep1() {
                   <TText variant="label" weight="extraBold" color="#065F46">GRATUIT</TText>
                 </View>
               </View>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Retrait en agence sous 24h</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>Retrait en agence</TText>
             </View>
             {serviceLevel === "standard" ? <Ionicons name="checkmark-circle" size={22} color="#10B981" /> : null}
           </TouchableOpacity>
@@ -276,7 +276,7 @@ export default function TransferStep1() {
                   <TText variant="label" weight="extraBold" color="#92400E">1-4h</TText>
                 </View>
               </View>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Livraison rapide • +{VIP_FEE}€ si changement de lieu</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>Livraison rapide en 1h - 4h max (1%, min. 15€)</TText>
             </View>
             {serviceLevel === "vip" ? <Ionicons name="checkmark-circle" size={22} color="#F59E0B" /> : null}
           </TouchableOpacity>
@@ -292,15 +292,12 @@ export default function TransferStep1() {
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
-                <TText variant="body" weight="extraBold">VIP Express</TText>
+                <TText variant="body" weight="extraBold">VIP+</TText>
                 <View style={[styles.tagPill, { backgroundColor: "#FFEDD5", marginLeft: 8 }]}>
                   <TText variant="label" weight="extraBold" color="#9A3412">1-2h</TText>
                 </View>
-                <View style={[styles.tagPill, { backgroundColor: "#FEE2E2", marginLeft: 6 }]}>
-                  <TText variant="label" weight="extraBold" color="#991B1B">PREMIUM</TText>
-                </View>
               </View>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Livraison ultra-rapide • Choix du lieu inclus • +{VIP_EXPRESS_FEE}€</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>Livraison ultra rapide en 1h - 2h max (1,5%, min. 20€)</TText>
             </View>
             {serviceLevel === "vip_express" ? <Ionicons name="checkmark-circle" size={22} color="#EA580C" /> : null}
           </TouchableOpacity>

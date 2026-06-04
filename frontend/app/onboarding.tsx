@@ -42,7 +42,7 @@ const STEPS: Step[] = [
   {
     key: "s2",
     title: "Cash, virement ou mobile",
-    desc: "Choisissez librement le mode de remise : espèces chez un agent, virement bancaire ou portefeuille mobile.",
+    desc: "Choisissez librement le mode de remise : espèces, virement bancaire ou mobile.",
     heroImage: "https://images.pexels.com/photos/545065/pexels-photo-545065.jpeg",
     heroGradient: ["#04ba28", "#04d46f", "#022a6b"],
     badges: [
@@ -54,7 +54,7 @@ const STEPS: Step[] = [
   {
     key: "s3",
     title: "Votre argent est protégé",
-    desc: "PIN 6 chiffres, biométrie, KYC vérifié, chiffrement AES-256 et traçabilité complète conformité AML/RGPD.",
+    desc: "Code PIN à 6 chiffres, biométrie, KYC vérifié, chiffrement AES-256, traçabilité, conformité AML/RGPD.",
     heroImage: "https://images.unsplash.com/photo-1660732106134-f3009a1e90ea",
     heroGradient: ["#011645", "#022a6b", "#052080"],
     badges: [

@@ -316,10 +316,19 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                 if rnd < 0.15:
                     continue  # decline (no bid)
                 if rnd < 0.40:
-                    bid_pct = round(client_fee_pct, 2)  # accept
+                    bid_pct = round(client_fee_pct, 2)  # accept au prix exact client
                 else:
                     # bid lower — strictement INFÉRIEUR au taux client (règle stricte spec)
                     bid_pct = round(random.uniform(max(0.5, client_fee_pct - 1.5), client_fee_pct - 0.05), 2)
+
+                # === GARDE-FOU CRITIQUE ===
+                # Cap dur : aucun bid ne peut excéder client_fee_pct. Si dépassement
+                # (cas théorique de bug en amont), on tronque au max client.
+                if bid_pct > client_fee_pct:
+                    bid_pct = round(client_fee_pct, 2)
+                if bid_pct < 0.1:
+                    bid_pct = 0.1
+                # === FIN GARDE-FOU ===
                 bid = {
                     "id": gen_id(), "transfer_id": transfer_id,
                     "round": round_idx + 1, "phase": "main",
