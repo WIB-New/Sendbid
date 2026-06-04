@@ -61,7 +61,19 @@ export default function PaybidAuctions() {
   const submitBid = async () => {
     setErr(null);
     try {
-      const { data } = await api.post(`/agent/auctions/${bidOpen.id}/bid`, { transfer_id: bidOpen.id, bid_fee_percent: parseFloat(feePct), eta_minutes: parseInt(eta) });
+      // === CAP DUR CÔTÉ CLIENT ===
+      // Spec : aucune offre supérieure au taux client (fee_percent du transfert).
+      const clientMax = parseFloat(String(bidOpen?.fee_percent ?? 99));
+      const proposed = parseFloat(feePct);
+      if (isNaN(proposed) || proposed <= 0) {
+        setErr("Saisissez un pourcentage valide (> 0).");
+        return;
+      }
+      if (proposed > clientMax) {
+        setErr(`Offre invalide : votre proposition (${proposed.toFixed(2)}%) dépasse le maximum client (${clientMax.toFixed(2)}%). Ajustez à ${clientMax.toFixed(2)}% ou moins.`);
+        return;
+      }
+      const { data } = await api.post(`/agent/auctions/${bidOpen.id}/bid`, { transfer_id: bidOpen.id, bid_fee_percent: proposed, eta_minutes: parseInt(eta) });
       const c = data?.commission;
       const msg = c
         ? `Offre envoyée ✓\nFrais client : ${c.client_fee_amount.toFixed(2)}€ (${c.client_fee_pct}%)\nCommission entreprise (20%) : ${c.company_share.toFixed(2)}€\nVotre gain net si sélectionné : ${c.agent_net.toFixed(2)}€`
@@ -129,7 +141,33 @@ export default function PaybidAuctions() {
           <View style={styles.sheet}>
             <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 4 }}>Enchérir</TText>
             <TText variant="caption" color={paybidColors.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>{bidOpen?.beneficiary?.full_name} · {bidOpen?.destination_country} · {Number(bidOpen?.send_amount || 0).toFixed(0)} EUR</TText>
-            <Input label="Frais (%) — votre marge" value={feePct} onChangeText={setFeePct} keyboardType="decimal-pad" icon="trending-down-outline" />
+            {bidOpen ? (
+              <View style={{ backgroundColor: "#FEF3C7", borderColor: "#FCD34D", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: spacing.md }}>
+                <TText variant="caption" weight="extraBold" color="#92400E">
+                  Plafond client : {Number(bidOpen.fee_percent || 0).toFixed(2)}%
+                </TText>
+                <TText variant="label" color="#92400E" style={{ marginTop: 2 }}>
+                  Votre offre doit être ≤ {Number(bidOpen.fee_percent || 0).toFixed(2)}%. Les offres supérieures sont systématiquement refusées.
+                </TText>
+              </View>
+            ) : null}
+            <Input
+              label={`Frais (%) — max ${Number(bidOpen?.fee_percent || 0).toFixed(2)}%`}
+              value={feePct}
+              onChangeText={(v) => {
+                const cleaned = v.replace(",", ".").replace(/[^0-9.]/g, "");
+                // Bornage en temps réel
+                const num = parseFloat(cleaned);
+                const maxClient = parseFloat(String(bidOpen?.fee_percent ?? 99));
+                if (!isNaN(num) && num > maxClient) {
+                  setFeePct(maxClient.toFixed(2));
+                  return;
+                }
+                setFeePct(cleaned);
+              }}
+              keyboardType="decimal-pad"
+              icon="trending-down-outline"
+            />
             <Input label="ETA (minutes)" value={eta} onChangeText={setEta} keyboardType="number-pad" icon="time-outline" />
             {err ? <TText color={paybidColors.status.error}>{err}</TText> : null}
             <Button title="Envoyer mon offre" onPress={submitBid} icon="flash" style={{ backgroundColor: paybidColors.primary.base }} />

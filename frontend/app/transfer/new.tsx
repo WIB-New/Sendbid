@@ -229,7 +229,7 @@ export default function TransferStep1() {
         );
       })}
 
-      {/* VIP service level — only available for cash mode */}
+      {/* VIP service level — horizontal layout 3 colonnes */}
       {supportsVip ? (
         <View style={{ marginTop: spacing.md }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
@@ -239,68 +239,64 @@ export default function TransferStep1() {
             </TText>
           </View>
 
-          {/* Standard */}
-          <TouchableOpacity
-            testID="service-standard"
-            style={[styles.svcRow, serviceLevel === "standard" && styles.svcRowActiveGreen]}
-            onPress={() => setServiceLevel("standard")}
-          >
-            <View style={[styles.svcIcon, { backgroundColor: serviceLevel === "standard" ? "#10B981" : "#10B98122" }]}>
-              <Ionicons name="checkmark-circle" size={20} color={serviceLevel === "standard" ? "white" : "#10B981"} />
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TText variant="body" weight="extraBold">Standard</TText>
-                <View style={[styles.tagPill, { backgroundColor: "#D1FAE5", marginLeft: 8 }]}>
-                  <TText variant="label" weight="extraBold" color="#065F46">GRATUIT</TText>
-                </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {/* Standard */}
+            <TouchableOpacity
+              testID="service-standard"
+              style={[styles.svcCard, serviceLevel === "standard" && styles.svcCardActiveGreen]}
+              onPress={() => setServiceLevel("standard")}
+              activeOpacity={0.85}
+            >
+              <View style={[styles.svcIcon, { backgroundColor: serviceLevel === "standard" ? "#10B981" : "#10B98122" }]}>
+                <Ionicons name="checkmark-circle" size={18} color={serviceLevel === "standard" ? "white" : "#10B981"} />
               </View>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Retrait en agence</TText>
-            </View>
-            {serviceLevel === "standard" ? <Ionicons name="checkmark-circle" size={22} color="#10B981" /> : null}
-          </TouchableOpacity>
+              <TText variant="caption" weight="extraBold" align="center" style={{ marginTop: 6 }}>Standard</TText>
+              <View style={[styles.tagPill, { backgroundColor: "#D1FAE5", marginTop: 4 }]}>
+                <TText variant="label" weight="extraBold" color="#065F46">GRATUIT</TText>
+              </View>
+              <TText variant="label" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 4, fontSize: 10, lineHeight: 13 }}>
+                Retrait en agence
+              </TText>
+            </TouchableOpacity>
 
-          {/* VIP */}
-          <TouchableOpacity
-            testID="service-vip"
-            style={[styles.svcRow, serviceLevel === "vip" && styles.svcRowActiveOrange]}
-            onPress={() => setServiceLevel("vip")}
-          >
-            <View style={[styles.svcIcon, { backgroundColor: serviceLevel === "vip" ? "#F59E0B" : "#F59E0B22" }]}>
-              <Ionicons name="flash" size={20} color={serviceLevel === "vip" ? "white" : "#F59E0B"} />
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TText variant="body" weight="extraBold">VIP</TText>
-                <View style={[styles.tagPill, { backgroundColor: "#FEF3C7", marginLeft: 8 }]}>
-                  <TText variant="label" weight="extraBold" color="#92400E">1-4h</TText>
-                </View>
+            {/* VIP */}
+            <TouchableOpacity
+              testID="service-vip"
+              style={[styles.svcCard, serviceLevel === "vip" && styles.svcCardActiveOrange]}
+              onPress={() => setServiceLevel("vip")}
+              activeOpacity={0.85}
+            >
+              <View style={[styles.svcIcon, { backgroundColor: serviceLevel === "vip" ? "#F59E0B" : "#F59E0B22" }]}>
+                <Ionicons name="flash" size={18} color={serviceLevel === "vip" ? "white" : "#F59E0B"} />
               </View>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Livraison rapide en 1h - 4h max (1%, min. 15€)</TText>
-            </View>
-            {serviceLevel === "vip" ? <Ionicons name="checkmark-circle" size={22} color="#F59E0B" /> : null}
-          </TouchableOpacity>
+              <TText variant="caption" weight="extraBold" align="center" style={{ marginTop: 6 }}>VIP</TText>
+              <View style={[styles.tagPill, { backgroundColor: "#FEF3C7", marginTop: 4 }]}>
+                <TText variant="label" weight="extraBold" color="#92400E">1-4h</TText>
+              </View>
+              <TText variant="label" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 4, fontSize: 10, lineHeight: 13 }}>
+                Rapide{"\n"}1%, min. 15€
+              </TText>
+            </TouchableOpacity>
 
-          {/* VIP EXPRESS */}
-          <TouchableOpacity
-            testID="service-vip-express"
-            style={[styles.svcRow, serviceLevel === "vip_express" && styles.svcRowActiveOrange]}
-            onPress={() => setServiceLevel("vip_express")}
-          >
-            <View style={[styles.svcIcon, { backgroundColor: serviceLevel === "vip_express" ? "#EA580C" : "#EA580C22" }]}>
-              <Ionicons name="rocket" size={20} color={serviceLevel === "vip_express" ? "white" : "#EA580C"} />
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
-                <TText variant="body" weight="extraBold">VIP+</TText>
-                <View style={[styles.tagPill, { backgroundColor: "#FFEDD5", marginLeft: 8 }]}>
-                  <TText variant="label" weight="extraBold" color="#9A3412">1-2h</TText>
-                </View>
+            {/* VIP+ */}
+            <TouchableOpacity
+              testID="service-vip-express"
+              style={[styles.svcCard, serviceLevel === "vip_express" && styles.svcCardActiveOrange]}
+              onPress={() => setServiceLevel("vip_express")}
+              activeOpacity={0.85}
+            >
+              <View style={[styles.svcIcon, { backgroundColor: serviceLevel === "vip_express" ? "#EA580C" : "#EA580C22" }]}>
+                <Ionicons name="rocket" size={18} color={serviceLevel === "vip_express" ? "white" : "#EA580C"} />
               </View>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Livraison ultra rapide en 1h - 2h max (1,5%, min. 20€)</TText>
-            </View>
-            {serviceLevel === "vip_express" ? <Ionicons name="checkmark-circle" size={22} color="#EA580C" /> : null}
-          </TouchableOpacity>
+              <TText variant="caption" weight="extraBold" align="center" style={{ marginTop: 6 }}>VIP+</TText>
+              <View style={[styles.tagPill, { backgroundColor: "#FFEDD5", marginTop: 4 }]}>
+                <TText variant="label" weight="extraBold" color="#9A3412">1-2h</TText>
+              </View>
+              <TText variant="label" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 4, fontSize: 10, lineHeight: 13 }}>
+                Ultra rapide{"\n"}1,5%, min. 20€
+              </TText>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : null}
 
@@ -508,6 +504,16 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg, borderWidth: 1.5, borderColor: colors.neutrals.border,
     marginBottom: 8,
   },
+  svcCard: {
+    flex: 1,
+    backgroundColor: colors.neutrals.surface,
+    paddingVertical: 12, paddingHorizontal: 8,
+    borderRadius: radii.lg, borderWidth: 1.5, borderColor: colors.neutrals.border,
+    alignItems: "center", justifyContent: "flex-start",
+    minHeight: 120,
+  },
+  svcCardActiveGreen: { borderColor: "#10B981", backgroundColor: "rgba(16,185,129,0.06)" },
+  svcCardActiveOrange: { borderColor: "#F59E0B", backgroundColor: "rgba(245,158,11,0.06)" },
   svcRowActiveGreen: { borderColor: "#10B981", backgroundColor: "rgba(16,185,129,0.06)" },
   svcRowActiveOrange: { borderColor: "#F59E0B", backgroundColor: "rgba(245,158,11,0.06)" },
   svcIcon: {

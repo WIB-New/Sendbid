@@ -64,38 +64,61 @@ export default function TransferStep2() {
       {/* Cash mode: ville/adresse/tel + frais % saisie + VIP options exclusives */}
       {draft.delivery_mode === "cash" && (
         <View style={styles.box}>
-          <TText variant="body" weight="bold" style={{ marginBottom: 8 }}>Lieu de remise au bénéficiaire</TText>
+          <TText variant="body" weight="bold" style={{ marginBottom: 6 }}>Lieu de remise au bénéficiaire</TText>
           <Input testID="bn-city" label="Ville du bénéficiaire" value={city} onChangeText={setCity} icon="location-outline" />
           <Input testID="bn-address" label="Adresse du bénéficiaire" value={address} onChangeText={setAddress} icon="home-outline" />
           <Input testID="bn-phone" label="Numéro de téléphone du bénéficiaire" value={phone} onChangeText={setPhone} keyboardType="phone-pad" icon="call-outline" />
 
-          <TText variant="body" weight="bold" style={{ marginTop: spacing.md }}>Frais de votre transfert (%)</TText>
-          <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 12 }}>
-            Quels frais souhaiteriez-vous payer ?
+          <TText variant="body" weight="bold" style={{ marginTop: spacing.sm }}>Frais de votre transfert (%)</TText>
+          <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 8 }}>
+            Saisissez le pourcentage de frais que vous acceptez de payer (entre 0,5 % et 10 %).
           </TText>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            {[1, 2, 3, 4, 5].map((v) => (
-              <TouchableOpacity
-                key={v}
-                testID={`fee-${v}`}
-                onPress={() => setFeePercent(v)}
-                style={[styles.feeChip, feePercent === v && { backgroundColor: colors.primary.base, borderColor: colors.primary.base }]}
-              >
-                <TText weight="bold" color={feePercent === v ? "white" : colors.neutrals.textPrimary}>{v}%</TText>
-              </TouchableOpacity>
-            ))}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View style={{ flex: 1 }}>
+              <Input
+                testID="fee-custom"
+                value={String(feePercent)}
+                onChangeText={(v) => {
+                  // Accepter virgule OU point, max 1 décimale
+                  const cleaned = v.replace(",", ".").replace(/[^0-9.]/g, "");
+                  const num = parseFloat(cleaned);
+                  if (cleaned === "" || isNaN(num)) {
+                    setFeePercent(0 as any);
+                    return;
+                  }
+                  // Borner : min 0.5, max 10
+                  const bounded = Math.min(10, Math.max(0, num));
+                  setFeePercent(bounded);
+                }}
+                onBlur={() => {
+                  // À la sortie du champ, forcer min 0.5
+                  if (!feePercent || feePercent < 0.5) setFeePercent(0.5);
+                }}
+                keyboardType="decimal-pad"
+                icon="trending-up-outline"
+                placeholder="ex : 2,5"
+              />
+            </View>
+            <View style={styles.pctBadge}>
+              <TText variant="title" weight="extraBold" color={colors.primary.base}>%</TText>
+            </View>
           </View>
-          <TText variant="caption" color={colors.primary.base} style={{ marginTop: 12 }}>
-            Frais = {(draft.send_amount * feePercent / 100).toFixed(2)} EUR
-          </TText>
+          <View style={styles.feeBox}>
+            <TText variant="caption" color={colors.neutrals.textSecondary}>
+              Frais à payer : <TText weight="extraBold" color={colors.primary.base}>{(draft.send_amount * (feePercent || 0) / 100).toFixed(2)} EUR</TText>
+            </TText>
+            <TText variant="label" color={colors.neutrals.textTertiary} style={{ marginTop: 2 }}>
+              Plus le % est élevé, plus les agents proposeront rapidement.
+            </TText>
+          </View>
 
           {/* Niveau de service VIP — déjà choisi à l'étape 1, affichage en lecture seule v6.4 */}
           {(draft as any).service_level && (draft as any).service_level !== "standard" ? (
-            <View style={[styles.vipOption, styles.vipOptionActive, { marginTop: spacing.md }]}>
-              <Ionicons name="checkmark-circle" size={22} color={colors.accent.base} />
+            <View style={[styles.vipOption, styles.vipOptionActive, { marginTop: spacing.sm }]}>
+              <Ionicons name="checkmark-circle" size={18} color={colors.accent.base} />
               <View style={{ flex: 1, marginLeft: 8 }}>
-                <TText variant="body" weight="semiBold">
-                  {(draft as any).service_level === "vip_express" ? "Service VIP EXPRESS" : "Service VIP"}
+                <TText variant="caption" weight="semiBold">
+                  {(draft as any).service_level === "vip_express" ? "Service VIP+ activé" : "Service VIP activé"}
                 </TText>
               </View>
             </View>
@@ -164,7 +187,7 @@ export default function TransferStep2() {
 
 const styles = StyleSheet.create({
   box: {
-    backgroundColor: colors.neutrals.surface, padding: spacing.lg, borderRadius: radii.xl,
+    backgroundColor: colors.neutrals.surface, padding: spacing.md, borderRadius: radii.xl,
     borderWidth: 1, borderColor: colors.neutrals.border,
   },
   feeChip: {
@@ -172,6 +195,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutrals.surface,
     borderWidth: 1.5, borderColor: colors.neutrals.border,
     alignItems: "center", justifyContent: "center",
+  },
+  pctBadge: {
+    width: 52, height: 52,
+    borderRadius: radii.lg,
+    backgroundColor: colors.overlays.primarySoft,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1.5, borderColor: colors.primary.base,
+  },
+  feeBox: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: radii.lg,
+    backgroundColor: colors.overlays.primarySoft,
+    borderWidth: 1, borderColor: colors.primary.base + "33",
   },
   vipRow: { flexDirection: "row", alignItems: "center", marginTop: spacing.lg },
   vipOption: { flexDirection: "row", alignItems: "flex-start", padding: 12, marginTop: 8, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.neutrals.border, backgroundColor: colors.neutrals.surface },

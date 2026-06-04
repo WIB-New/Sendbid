@@ -37,6 +37,8 @@ class TransferDraftIn(BaseModel):
     purpose: str
     source_of_funds: str
     vip_delivery: bool = False
+    vip_express: bool = False
+    vip_fee_amount: float = 0.0  # Frais VIP séparés (max 1% min 15€ ou 1,5% min 20€)
 
 
 class ConfirmTransferIn(BaseModel):
@@ -86,18 +88,23 @@ async def fx_rate(from_currency: str = "EUR", to_currency: str = "XOF"):
 async def create_draft(payload: TransferDraftIn, user: dict = Depends(get_current_user)):
     draft_id = gen_id()
     fee_amount = round(payload.send_amount * payload.fee_percent / 100, 2)
-    total = round(payload.send_amount + fee_amount, 2)
+    vip_fee = round(max(0.0, float(payload.vip_fee_amount or 0.0)), 2)
+    total = round(payload.send_amount + fee_amount + vip_fee, 2)
     draft = {
         "id": draft_id, "user_id": user["id"],
         "destination_country": payload.destination_country,
         "destination_currency": payload.destination_currency,
         "send_amount": payload.send_amount, "receive_amount": payload.receive_amount,
         "fx_rate": payload.fx_rate, "fee_percent": payload.fee_percent,
-        "fee_amount": fee_amount, "total_amount": total,
+        "fee_amount": fee_amount,
+        "vip_fee_amount": vip_fee,
+        "total_amount": total,
         "delivery_mode": payload.delivery_mode, "beneficiary": payload.beneficiary,
         "delivery_details": payload.delivery_details or {},
         "purpose": payload.purpose, "source_of_funds": payload.source_of_funds,
-        "vip_delivery": payload.vip_delivery, "status": "DRAFT",
+        "vip_delivery": payload.vip_delivery,
+        "vip_express": payload.vip_express,
+        "status": "DRAFT",
         "created_at": iso(now_utc()),
     }
     await db.transfer_drafts.insert_one(draft)

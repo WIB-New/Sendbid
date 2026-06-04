@@ -35,7 +35,14 @@ export default function TransferStep3() {
   }
 
   const fee = draft.fee_percent ? (draft.send_amount * draft.fee_percent) / 100 : 0;
-  const vipFee = draft.vip_express ? (draft.send_amount * 3) / 100 : draft.vip_delivery ? (draft.send_amount * 1.5) / 100 : 0;
+  // Spec v7 :
+  // - VIP    = max(1% du montant, 15€)
+  // - VIP+   = max(1,5% du montant, 20€)
+  const vipFee = draft.vip_express
+    ? Math.max(draft.send_amount * 0.015, 20)
+    : draft.vip_delivery
+    ? Math.max(draft.send_amount * 0.01, 15)
+    : 0;
   const total = draft.send_amount + fee + vipFee;
   const insufficient = !!wallet && wallet.balance < total;
   const [knowBen, setKnowBen] = useState<null | boolean>(null);
@@ -51,13 +58,17 @@ export default function TransferStep3() {
         send_amount: draft.send_amount,
         receive_amount: draft.receive_amount,
         fx_rate: draft.fx_rate,
-        fee_percent: draft.fee_percent + (draft.vip_express ? 3 : draft.vip_delivery ? 1.5 : 0),
+        // IMPORTANT : fee_percent = uniquement les frais client (PAS de VIP dedans).
+        // Le cap des bids agents est basé strictement sur ce pourcentage.
+        fee_percent: draft.fee_percent,
+        vip_fee_amount: vipFee,
         delivery_mode: draft.delivery_mode,
         beneficiary: draft.beneficiary,
         delivery_details: draft.delivery_details,
         purpose: draft.purpose,
         source_of_funds: draft.source_of_funds,
         vip_delivery: !!draft.vip_delivery,
+        vip_express: !!draft.vip_express,
       });
       const confirmed = await api.post("/transfers/confirm", { draft_id: draftRes.data.id, pin });
       await refreshMe();
@@ -96,12 +107,25 @@ export default function TransferStep3() {
         ) : null}
       </View>
 
-      <View style={styles.box}>
+      <View style={[styles.box, { backgroundColor: "white" }]}>
+        <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 8, letterSpacing: 0.5 }}>
+          DÉTAIL DU TRANSFERT
+        </TText>
         <Row label="Montant envoyé" value={`${draft.send_amount.toFixed(2)} EUR`} />
-        <Row label={`Frais (${draft.fee_percent}%)`} value={`${fee.toFixed(2)} EUR`} />
-        {draft.vip_express ? <Row label="Service VIP Express (3%)" value={`${vipFee.toFixed(2)} EUR`} /> : draft.vip_delivery ? <Row label="Service VIP (1.5%)" value={`${vipFee.toFixed(2)} EUR`} /> : null}
+        <Row label={`Frais transfert (${draft.fee_percent}%)`} value={`${fee.toFixed(2)} EUR`} />
+        {draft.vip_express ? (
+          <Row label="Service VIP+ (1,5%, min 20€)" value={`${vipFee.toFixed(2)} EUR`} />
+        ) : draft.vip_delivery ? (
+          <Row label="Service VIP (1%, min 15€)" value={`${vipFee.toFixed(2)} EUR`} />
+        ) : null}
         <View style={styles.divider} />
         <Row label="Total à débiter" value={`${total.toFixed(2)} EUR`} bold />
+      </View>
+
+      <View style={[styles.box, { backgroundColor: "white" }]}>
+        <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 6, letterSpacing: 0.5 }}>
+          INFORMATIONS COMPLÉMENTAIRES
+        </TText>
         <Row label="Taux de change" value={`1 EUR = ${draft.fx_rate.toFixed(2)} ${draft.destination_currency}`} />
         <Row label="Mode de remise" value={draft.delivery_mode === "cash" ? "Espèces" : draft.delivery_mode === "bank" ? "Virement bancaire" : draft.delivery_mode === "momo" ? "Portefeuille mobile" : draft.delivery_mode.toUpperCase()} />
         <Row label="Motif" value={draft.purpose} />
@@ -150,11 +174,11 @@ export default function TransferStep3() {
 
       <Button
         testID="transfer-confirm"
-        title="Confirmer puis payer"
+        title="Valider et payer"
         icon="lock-closed"
         onPress={() => setPinModal(true)}
         disabled={insufficient || knowBen !== true}
-        style={{ marginTop: spacing.lg }}
+        style={{ marginTop: spacing.md, paddingVertical: 12 }}
       />
 
       <Modal visible={pinModal} transparent animationType="slide" onRequestClose={() => setPinModal(false)}>

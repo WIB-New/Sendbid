@@ -83,8 +83,8 @@ export default function Login() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F1B40" }}>
-      <LinearGradient colors={["#0F1B40", "#1B2A5B"]} style={styles.header}>
+    <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
+      <LinearGradient colors={["#022a6b", "#052080", "#0F1B40"]} style={styles.header}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerTop}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
