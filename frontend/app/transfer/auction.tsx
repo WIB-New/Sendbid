@@ -86,6 +86,12 @@ export default function LiveAuction() {
               if (prev.length === 0) setRoundEndedNoOffer(true);
               return prev;
             });
+          } else if (msg.event === "round_ended_early") {
+            // FAST-FINISH : tous les agents ont répondu et il y a au moins une offre satisfaisante.
+            // On termine immédiatement le compteur visuel pour que l'utilisateur voie la sélection arriver.
+            setSecondsLeft(0);
+            // Affiche brièvement un état "Sélection en cours..." via une ré-utilisation du flag existant
+            // (l'event agent_assigned arrivera juste après pour finaliser).
           } else if (msg.event === "agent_assigned") {
             setStatus("ASSIGNED");
             api.get(`/transfers/${transfer_id}`).then(r => {

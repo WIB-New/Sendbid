@@ -354,29 +354,72 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
                 await db.bids.insert_one(dict(bid))
                 await manager.broadcast(transfer_id, {"event": "new_bid", "bid": clean_doc(dict(bid))})
 
-            # Attendre fin du round + sélection (sortie anticipée si round_forced)
+            # Attendre fin du round + sélection (sortie anticipée si round_forced OU si tous les agents ont déjà répondu avec ≥1 offre valide)
             elapsed = asyncio.get_event_loop().time() - start_ts
             remaining = ROUND_SECONDS - elapsed
-            # Vérifie toutes les 0.5s si le client a demandé "Contacter d'autres agents"
-            waited = 0.0
-            while waited < remaining:
-                await asyncio.sleep(min(0.5, remaining - waited))
-                waited += 0.5
-                t_chk = await db.transfers.find_one(
-                    {"id": transfer_id},
-                    {"_id": 0, "agent_id": 1, "auction_round_force_next": 1},
+
+            # === FAST-FINISH (spec : raccourcir le délai si tous les agents ont répondu) ===
+            # À ce stade, la boucle `for at, agent in zip(schedule, pool):` est terminée
+            # → CHAQUE agent du pool a déjà pris sa décision (bid OU decline).
+            # Si au moins une offre satisfaisante (bid_fee_percent ≤ client_fee_pct) a été
+            # reçue, on FINIT IMMÉDIATEMENT sans attendre la fin des 30s.
+            early_bids_check = await db.bids.find(
+                {"transfer_id": transfer_id, "round": round_idx + 1, "phase": "main"},
+                {"_id": 0, "bid_fee_percent": 1},
+            ).to_list(50)
+            valid_early = [b for b in early_bids_check if float(b.get("bid_fee_percent", 99)) <= client_fee_pct]
+            if valid_early:
+                logger.info(
+                    f"[auction] {transfer_id} round {round_idx+1} FAST-FINISH at {elapsed:.1f}s "
+                    f"(all {len(pool)} agents responded · {len(valid_early)} valid offer(s))"
                 )
-                if not t_chk:
-                    return
-                if t_chk.get("agent_id"):
-                    return
-                if t_chk.get("auction_round_force_next"):
-                    logger.info(f"[auction] {transfer_id} round {round_idx+1} interrupted by client force-next request")
-                    await db.transfers.update_one(
+                await manager.broadcast(transfer_id, {
+                    "event": "round_ended_early",
+                    "round": round_idx + 1,
+                    "elapsed_sec": round(elapsed, 1),
+                    "valid_bids": len(valid_early),
+                    "reason": "all_agents_responded",
+                })
+                # On saute l'attente restante : sélection immédiate
+            else:
+                # Pas d'offre valide encore → on attend la fin des 30s (cas où des bids
+                # pourraient arriver après — théorique, ou pour laisser le compteur visuel
+                # se terminer côté client). Pendant l'attente : check toutes 0.5s du
+                # signal "force-next" (relance manuelle par le client).
+                waited = 0.0
+                while waited < remaining:
+                    await asyncio.sleep(min(0.5, remaining - waited))
+                    waited += 0.5
+                    t_chk = await db.transfers.find_one(
                         {"id": transfer_id},
-                        {"$unset": {"auction_round_force_next": "", "auction_round_force_next_at": ""}},
+                        {"_id": 0, "agent_id": 1, "auction_round_force_next": 1},
                     )
-                    break
+                    if not t_chk:
+                        return
+                    if t_chk.get("agent_id"):
+                        return
+                    if t_chk.get("auction_round_force_next"):
+                        logger.info(f"[auction] {transfer_id} round {round_idx+1} interrupted by client force-next request")
+                        await db.transfers.update_one(
+                            {"id": transfer_id},
+                            {"$unset": {"auction_round_force_next": "", "auction_round_force_next_at": ""}},
+                        )
+                        break
+                    # Re-check : une offre valide est-elle arrivée pendant l'attente ?
+                    late_bids = await db.bids.find(
+                        {"transfer_id": transfer_id, "round": round_idx + 1, "phase": "main"},
+                        {"_id": 0, "bid_fee_percent": 1},
+                    ).to_list(50)
+                    if any(float(b.get("bid_fee_percent", 99)) <= client_fee_pct for b in late_bids):
+                        # Une offre satisfaisante est apparue : on coupe l'attente
+                        await manager.broadcast(transfer_id, {
+                            "event": "round_ended_early",
+                            "round": round_idx + 1,
+                            "elapsed_sec": round(elapsed + waited, 1),
+                            "valid_bids": len([b for b in late_bids if float(b.get("bid_fee_percent", 99)) <= client_fee_pct]),
+                            "reason": "satisfactory_offer_received",
+                        })
+                        break
             t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "agent_id": 1})
             if not t or t.get("agent_id"):
                 return
