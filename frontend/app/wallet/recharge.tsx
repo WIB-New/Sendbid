@@ -18,11 +18,15 @@ type Method = "cash" | "card" | "momo" | "paypal";
 type Pkg = { id: string; amount: number; label: string };
 
 const METHODS: { key: Method; label: string; icon: any; desc: string; available: boolean }[] = [
-  { key: "cash", label: "Espèces", icon: "cash-outline", desc: "Dépôt en espèces chez un agent agréé. Crédit sous 5-15 minutes après confirmation par l'agent.", available: true },
+  { key: "cash", label: "Espèces", icon: "cash-outline", desc: "Présentez le QR Code à un agent pour déposer instantanément de l'argent sur votre compte. Code PIN requis", available: true },
   { key: "card", label: "Carte", icon: "card-outline", desc: "Visa / Mastercard / 3DS via Stripe", available: true },
   { key: "momo", label: "Mobile (Bientôt)", icon: "phone-portrait-outline", desc: "Wave, Orange Money, MTN MoMo — Intégration en cours de finalisation. Veuillez utiliser Carte ou Espèces.", available: false },
-  { key: "paypal", label: "PayPal", icon: "logo-paypal", desc: "Recharge sécurisée via PayPal (Sandbox). Frais plateforme : 0.5%", available: true },
+  { key: "paypal", label: "PayPal", icon: "logo-paypal", desc: "Recharge sécurisée via PayPal", available: true },
 ];
+
+// Plafonds mensuels par tier KYC (cf. /app/frontend/app/kyc/index.tsx)
+// Affichage du montant maximum admissible pour une carte selon le KYC client.
+const KYC_MAX_BY_TIER: Record<number, number> = { 0: 200, 1: 2000, 2: 10000, 3: 50000 };
 
 const ORIGIN = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 
@@ -30,6 +34,10 @@ export default function Recharge() {
   const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);
+  const user = useAuth((s) => s.user);
+  const wallet = useAuth((s) => s.wallet);
+  const kycTier: number = Number((user as any)?.kyc_tier ?? 0);
+  const cardMax: number = KYC_MAX_BY_TIER[kycTier] ?? 500;
   const [method, setMethod] = useState<Method>("card");
   const [amount, setAmount] = useState("100");
   const [err, setErr] = useState<string | null>(null);
@@ -159,6 +167,17 @@ export default function Recharge() {
     <Screen title="Ajouter de l'argent" back hero scroll={false}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
+          {/* Solde disponible — affiché juste sous le titre de la page */}
+          <View style={styles.balanceBox}>
+            <Ionicons name="wallet-outline" size={18} color={colors.primary.base} />
+            <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginLeft: 8 }}>
+              Solde disponible :
+            </TText>
+            <TText variant="body" weight="extraBold" color={colors.primary.base} style={{ marginLeft: 6 }}>
+              {Number(wallet?.balance ?? 0).toFixed(2)} EUR
+            </TText>
+          </View>
+
           {/* Méthode picker — chips horizontaux comme RETRAIT */}
           <View style={styles.methodsRow}>
             {METHODS.map((m) => (
@@ -213,7 +232,7 @@ export default function Recharge() {
                     keyboardType="decimal-pad"
                     icon="cash-outline"
                     placeholder="Ex : 50.00"
-                    hint="Montant compris entre 5 € et 500 €"
+                    hint={`Montant compris entre 5 € et ${cardMax} €`}
                   />
                   <Button testID="recharge-pay-card" title={polling ? "Vérification…" : "Payer par carte"} onPress={startCard} loading={loading || polling} icon="card" />
                 </>
@@ -234,23 +253,12 @@ export default function Recharge() {
                 <>
                   <Input label="Montant (EUR)" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
                   <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 8, marginTop: 4 }}>
-                    Frais plateforme : 0.5% (en plus du montant)
+                    Frais plateforme : 0%. Frais Paypal à prévoir
                   </TText>
                   <Button testID="recharge-pay-paypal" title="Payer avec PayPal" onPress={submitPaypal} loading={loading} disabled={parseFloat(amount) <= 0} icon="logo-paypal" />
                 </>
               ) : method === "cash" ? (
                 <>
-                  <View style={styles.cashInfoBox}>
-                    <Ionicons name="storefront" size={22} color="#065F46" />
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <TText variant="caption" weight="extraBold" color="#065F46">DÉPÔT EN ESPÈCES — AGENT AGRÉÉ</TText>
-                      <TText variant="label" color="#065F46" style={{ marginTop: 4, lineHeight: 18 }}>
-                        1. Indiquez le montant ci-dessous{"\n"}
-                        2. Présentez le QR généré à un agent SENDBID{"\n"}
-                        3. L'agent valide le dépôt — votre solde est crédité instantanément
-                      </TText>
-                    </View>
-                  </View>
                   <Input label="Montant à déposer (EUR)" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
                   {cashQrToken ? (
                     <View style={styles.qrBox}>
@@ -420,6 +428,14 @@ export default function Recharge() {
 
 const styles = StyleSheet.create({
   methodsRow: { flexDirection: "row", gap: 6, marginBottom: spacing.md },
+  balanceBox: {
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: colors.overlays.primarySoft,
+    paddingHorizontal: 12, paddingVertical: 10,
+    borderRadius: radii.lg,
+    borderWidth: 1, borderColor: colors.primary.base + "33",
+    marginBottom: spacing.md,
+  },
   methodChip: {
     flex: 1,
     flexDirection: "row", alignItems: "center", justifyContent: "center",

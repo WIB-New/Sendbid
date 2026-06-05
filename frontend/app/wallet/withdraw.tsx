@@ -34,7 +34,23 @@ export default function Withdraw() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fee = method === "cash" ? Math.max(0.1, parseFloat(amount || "0") * 0.01) : method === "bank" ? 1.5 : method === "paypal" ? 0.7 : 0.5;
+  // === FORMULE DE FRAIS ===
+  // - Cash    : 1% du montant (min 0,10 €)
+  // - Bank    : pas de frais affichés au client (Frais 0 €)
+  // - Mobile  : pas de frais affichés (Frais 0 €)
+  // - PayPal  : 0.5% (plateforme) + 2% + 0.35 € (frais PayPal pour cash-out)
+  //   Spec : les frais PayPal facturés au client incluent désormais
+  //   à la fois les frais plateforme et les frais que PayPal impose à ses clients.
+  const amt = parseFloat(amount || "0");
+  const platformPaypalFee = amt * 0.005;          // 0.5 % plateforme
+  const paypalProviderFee = amt * 0.02 + 0.35;     // PayPal cash-out (sandbox = simulation)
+  const fee = method === "cash"
+    ? Math.max(0.1, amt * 0.01)
+    : method === "bank"
+    ? 0
+    : method === "paypal"
+    ? Number((platformPaypalFee + paypalProviderFee).toFixed(2))
+    : 0;
 
   const submitCash = async () => {
     setErr(null); setLoading(true);
@@ -87,10 +103,10 @@ export default function Withdraw() {
       <View style={styles.info}>
         <Ionicons name="information-circle-outline" size={18} color={colors.primary.base} />
         <TText variant="caption" color={colors.primary.base} style={{ marginLeft: 6, flex: 1 }}>
-          {method === "cash" ? "Présentez le QR à un agent SENDBID pour recevoir le cash. PIN requis."
-           : method === "bank" ? "Virement SEPA / international vers votre compte bancaire. Frais 1,50 €. Délai 1-2 jours ouvrés."
-           : method === "paypal" ? "Crédit instantané sur votre compte PayPal. Frais 0,70 €. Délai 1-3 minutes."
-           : "Crédit sur votre portefeuille mobile (Wave / OM / MTN / Moov). Frais 0,50 €."}
+          {method === "cash" ? "Présentez le QR code à un agent pour recevoir votre argent. Code PIN requis."
+           : method === "bank" ? "Virement SEPA / international vers votre compte bancaire. Délai 1-2 jours ouvrés."
+           : method === "paypal" ? "Crédit instantané sur votre compte PayPal. Délai 1-3 minutes"
+           : "Crédit sur votre portefeuille mobile"}
         </TText>
       </View>
 
@@ -130,6 +146,16 @@ export default function Withdraw() {
           <TText variant="caption" color={colors.neutrals.textSecondary}>Frais</TText>
           <TText weight="semiBold">{fee.toFixed(2)} EUR</TText>
         </View>
+        {method === "paypal" ? (
+          <View style={{ marginTop: 2 }}>
+            <TText variant="label" color={colors.neutrals.textTertiary} style={{ fontSize: 10 }}>
+              · Plateforme (0,5 %) : {platformPaypalFee.toFixed(2)} EUR
+            </TText>
+            <TText variant="label" color={colors.neutrals.textTertiary} style={{ fontSize: 10 }}>
+              · PayPal (2 % + 0,35 €) : {paypalProviderFee.toFixed(2)} EUR
+            </TText>
+          </View>
+        ) : null}
         <View style={{ height: 1, backgroundColor: colors.neutrals.border, marginVertical: 8 }} />
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <TText weight="bold">Total débité</TText>
@@ -180,15 +206,15 @@ export default function Withdraw() {
 function MethodChip({ active, onPress, icon, label }: { active: boolean; onPress: () => void; icon: any; label: string }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.methodChip, active && { backgroundColor: colors.primary.base, borderColor: colors.primary.base }]}>
-      <Ionicons name={icon} size={20} color={active ? "white" : colors.primary.base} />
-      <TText variant="caption" weight="bold" color={active ? "white" : colors.neutrals.textPrimary} style={{ marginLeft: 6 }}>{label}</TText>
+      <Ionicons name={icon} size={14} color={active ? "white" : colors.primary.base} />
+      <TText variant="label" weight="bold" color={active ? "white" : colors.neutrals.textPrimary} style={{ marginLeft: 4, fontSize: 11 }} numberOfLines={1}>{label}</TText>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   methodsRow: { flexDirection: "row", gap: 6, marginVertical: spacing.md },
-  methodChip: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 6, paddingVertical: 12, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1.5, borderColor: colors.neutrals.border },
+  methodChip: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 4, paddingVertical: 8, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1.5, borderColor: colors.neutrals.border },
   info: { flexDirection: "row", alignItems: "center", backgroundColor: colors.overlays.primarySoft, padding: spacing.md, borderRadius: radii.lg, marginBottom: spacing.lg },
   opChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1.5, borderColor: colors.neutrals.border },
   recapBox: { backgroundColor: colors.neutrals.surface, padding: spacing.md, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.neutrals.border, marginVertical: spacing.md },
