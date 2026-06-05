@@ -441,31 +441,6 @@ async def run_auction(transfer_id: str, transfer: dict, agents: List[dict]):
         # on bascule directement vers le fallback (ABSORBED ou EXPIRED).
         logger.info(f"[auction] {transfer_id} no winner after {ROUNDS} standard rounds → fallback (counter-bid désactivé)")
         return await _run_fallback(transfer_id, send_amount, client_fee_pct)
-
-        # ============================== ULTIMATE FALLBACK ==============================
-        # Aucune contre-enchère retournée — plateforme absorbe OU expire
-        # Politique simple : si send_amount < 200 EUR → ABSORBED (plateforme prend en charge)
-        # Sinon → EXPIRED (client doit republier avec frais plus attractifs)
-        if send_amount < 200:
-            await db.transfers.update_one({"id": transfer_id}, {"$set": {
-                "status": "ABSORBED",
-                "absorbed_at": iso(now_utc()),
-                "absorption_reason": "no_agent_after_5_rounds_and_3_counter_rounds",
-            }})
-            await manager.broadcast(transfer_id, {"event": "auction_absorbed", "transfer_id": transfer_id})
-            try:
-                await create_notification(transfer["user_id"], "Transfert pris en charge",
-                                          "Aucun agent disponible — la plateforme prend en charge votre transfert directement. Délai de remise étendu.")
-            except Exception:
-                pass
-        else:
-            await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "EXPIRED"}})
-            await manager.broadcast(transfer_id, {"event": "auction_expired"})
-            try:
-                await create_notification(transfer["user_id"], "Enchère expirée",
-                                          "Aucun agent disponible pour ce transfert. Vous pouvez relancer avec des frais plus attractifs.")
-            except Exception:
-                pass
     except Exception as e:
         logger.error(f"auction error: {e}", exc_info=True)
 
