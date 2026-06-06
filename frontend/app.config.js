@@ -45,6 +45,9 @@ module.exports = ({ config }) => ({
       backgroundColor: isPaybid ? "#994A26" : "#00147E",
     },
     package: isPaybid ? "app.paybid.agent" : "app.sendbid.client",
+    // Firebase config file pour les notifications push (FCM)
+    // Le fichier google-services.json doit être présent à la racine /app/frontend/
+    googleServicesFile: "./google-services.json",
     permissions: [
       "android.permission.CAMERA",
       "android.permission.READ_EXTERNAL_STORAGE",
@@ -53,6 +56,9 @@ module.exports = ({ config }) => ({
       "android.permission.READ_CONTACTS",
       "android.permission.USE_BIOMETRIC",
       "android.permission.USE_FINGERPRINT",
+      "android.permission.RECEIVE_BOOT_COMPLETED",
+      "android.permission.VIBRATE",
+      "android.permission.WAKE_LOCK",
     ],
     edgeToEdgeEnabled: true,
     config: {

@@ -13,6 +13,7 @@ import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii } from "../../../src/theme";
 
 export default function PaybidAuctions() {
+  const [sameCityOnly, setSameCityOnly] = React.useState(false);
   const paybidColors = useThemedPaybidColors();
   const token = useAuth((s) => s.token);
   const [list, setList] = useState<any[]>([]);
@@ -123,6 +124,15 @@ export default function PaybidAuctions() {
                 <TText variant="label" color={paybidColors.neutrals.textTertiary}>Le client envoie</TText>
                 <TText variant="title" weight="extraBold" color={paybidColors.primary.base}>{Number(item.send_amount).toFixed(0)} EUR</TText>
               </View>
+        <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 8 }}>
+          <TouchableOpacity onPress={() => setSameCityOnly(false)} style={{ paddingVertical: 6, paddingHorizontal: 14, borderRadius: 999, backgroundColor: !sameCityOnly ? paybidColors.primary.base : paybidColors.neutrals.surface, borderWidth: 1, borderColor: paybidColors.neutrals.border }}>
+            <TText weight="bold" color={!sameCityOnly ? "white" : paybidColors.neutrals.textPrimary}>Tout le pays</TText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setSameCityOnly(true)} style={{ paddingVertical: 6, paddingHorizontal: 14, borderRadius: 999, backgroundColor: sameCityOnly ? paybidColors.primary.base : paybidColors.neutrals.surface, borderWidth: 1, borderColor: paybidColors.neutrals.border }}>
+            <TText weight="bold" color={sameCityOnly ? "white" : paybidColors.neutrals.textPrimary}>Ma ville</TText>
+          </TouchableOpacity>
+        </View>
+
               <View style={{ alignItems: "flex-end" }}>
                 <TText variant="label" color={paybidColors.neutrals.textTertiary}>Le bénéficiaire reçoit</TText>
                 <TText variant="title" weight="extraBold">{Number(item.receive_amount).toFixed(0)} {item.destination_currency}</TText>

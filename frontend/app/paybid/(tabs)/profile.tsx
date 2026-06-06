@@ -7,6 +7,7 @@ import { TText } from "../../../src/components/TText";
 import { Button } from "../../../src/components/Button";
 import { api } from "../../../src/api";
 import { useAuth } from "../../../src/store";
+import { AgentLevelBadge } from "../../../src/components/AgentLevelBadge";
 import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii } from "../../../src/theme";
@@ -39,6 +40,16 @@ export default function PaybidProfile() {
           <Image source={{ uri: agent.avatar_url }} style={styles.avatar} />
           <TText variant="title" weight="extraBold">{agent.full_name}</TText>
           <TText variant="caption" color={paybidColors.neutrals.textSecondary}>{user.email} · {agent.city}</TText>
+          <View style={{ marginTop: 8 }}>
+            <AgentLevelBadge rating={agent.rating} transfersCount={agent.transfers_count} />
+          </View>
+          {/* KYC PENDING banner */}
+          {agent.status === "pending_verification" ? (
+            <View style={{ marginTop: 12, padding: 10, backgroundColor: "#FEF3C7", borderRadius: 10, flexDirection: "row", alignItems: "center" }}>
+              <Ionicons name="hourglass" size={18} color="#92400E" />
+              <TText variant="caption" weight="bold" color="#92400E" style={{ marginLeft: 6, flex: 1 }}>KYC en cours de vérification — vous pourrez recevoir des missions après approbation admin.</TText>
+            </View>
+          ) : null}
           <View style={styles.statsRow}>
             <Stat icon="star" label="Note" value={`${agent.rating} ⭐`} />
             <Stat icon="checkmark-done" label="Transferts" value={`${agent.transfers_count}`} />
