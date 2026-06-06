@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Screen } from "../../src/components/Screen";
@@ -9,6 +10,7 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 export default function ResetPassword() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { token } = useLocalSearchParams<{ token: string }>();
   const router = useRouter();
@@ -34,11 +36,11 @@ export default function ResetPassword() {
   };
 
   return (
-    <Screen title="Nouveau mot de passe" back>
+    <Screen title={t("auth2.newPassword")} back>
       <TText variant="title" weight="extraBold" style={{ marginTop: spacing.md, marginBottom: spacing.lg }}>
         Choisissez un nouveau mot de passe
       </TText>
-      <Input testID="reset-pwd" label="Nouveau mot de passe" value={pwd} onChangeText={setPwd} secureTextEntry passwordToggle icon="lock-closed-outline" />
+      <Input testID="reset-pwd" label={t("auth2.newPassword")} value={pwd} onChangeText={setPwd} secureTextEntry passwordToggle icon="lock-closed-outline" />
       {err ? <TText variant="caption" color={colors.status.error}>{err}</TText> : null}
       <Button testID="reset-submit" title="Mettre à jour" onPress={submit} loading={loading} />
     </Screen>

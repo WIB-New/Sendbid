@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Platform, TouchableOpacity, ActivityIndicator, Modal, KeyboardAvoidingView, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,6 +32,7 @@ const KYC_MAX_BY_TIER: Record<number, number> = { 0: 200, 1: 2000, 2: 10000, 3: 
 const ORIGIN = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 
 export default function Recharge() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);
@@ -360,7 +362,7 @@ export default function Recharge() {
               <Ionicons name="logo-paypal" size={48} color="#003087" />
               <TText variant="body" align="center" style={{ marginTop: 12 }}>Paiement PayPal sécurisé in-app</TText>
               <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
-                La fenêtre se fermera automatiquement après l'approbation.
+                La fenêtre se fermera automatiquement après l&apos;approbation.
               </TText>
               <Button
                 title="Continuer vers PayPal"

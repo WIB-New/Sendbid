@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Modal, TouchableOpacity, Alert, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -93,7 +94,7 @@ export default function P2P() {
             {success.amount.toFixed(2)} € envoyés à {recipientName || recipient}
           </TText>
           <View style={styles.balanceChip}>
-            <TText variant="caption" color="#065F46">Nouveau solde</TText>
+            <TText variant="caption" color="#065F46">{t("walletOps.newBalance")}</TText>
             <TText variant="title" weight="extraBold" color="#065F46">{success.balance.toFixed(2)} €</TText>
           </View>
           <Button testID="p2p-new" title="Nouveau virement" icon="add-circle-outline" onPress={reset} variant="outline" style={{ marginTop: spacing.md }} />
@@ -172,7 +173,7 @@ export default function P2P() {
                 <TText variant="caption" color={colors.neutrals.textSecondary}>Frais</TText>
                 <View style={styles.freeChip}>
                   <Ionicons name="gift" size={10} color="#065F46" />
-                  <TText variant="label" weight="extraBold" color="#065F46" style={{ marginLeft: 3 }}>GRATUIT</TText>
+                  <TText variant="label" weight="extraBold" color="#065F46" style={{ marginLeft: 3 }}>{t("walletOps.free")}</TText>
                 </View>
               </View>
               <View style={[styles.recapRow, { borderTopWidth: 1, borderTopColor: colors.neutrals.border, paddingTop: 10, marginTop: 6 }]}>

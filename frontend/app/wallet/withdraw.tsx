@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Modal, TouchableOpacity, Platform, Alert } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,6 +15,7 @@ import { useThemedColors } from "../../src/themeContext";
 type Method = "cash" | "bank" | "momo" | "paypal";
 
 export default function Withdraw() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const wallet = useAuth((s) => s.wallet);
   const refreshMe = useAuth((s) => s.refreshMe);
@@ -87,7 +89,7 @@ export default function Withdraw() {
   );
 
   return (
-    <Screen title="Retirer de l'argent" back hero>
+    <Screen title={t("walletOps.withdrawTitle")} back hero>
       {/* Solde disponible — design unifié avec Recharge */}
       <View style={styles.balanceBox}>
         <Ionicons name="wallet-outline" size={18} color={colors.primary.base} />

@@ -1,10 +1,35 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect } from "react";
-import { View, ActivityIndicator, Platform } from "react-native";
+import { View, ActivityIndicator, Platform, LogBox } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 import { initLocale } from "../src/i18n";
+
+// === Silencer les warnings web cosmétiques (shadow* deprecated, useNativeDriver, push tokens web) ===
+// Ces avertissements sont émis par React Native Web mais n'impactent ni les builds natifs (iOS/Android)
+// ni l'expérience utilisateur. On les filtre uniquement sur Expo Web et via LogBox sur mobile.
+if (Platform.OS === "web" && typeof console !== "undefined") {
+  const SILENCE_PATTERNS = [
+    '"shadow*" style props are deprecated',
+    "useNativeDriver",
+    "[expo-notifications] Listening to push token changes is not yet fully supported",
+  ];
+  const _origWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    const msg = typeof args[0] === "string" ? args[0] : "";
+    if (SILENCE_PATTERNS.some((p) => msg.includes(p))) return;
+    _origWarn(...args);
+  };
+}
+try {
+  LogBox.ignoreLogs([
+    /"shadow\*" style props are deprecated/,
+    /useNativeDriver/,
+    /\[expo-notifications\] Listening to push token changes/,
+  ]);
+} catch {}
+
 import {
   useFonts,
   Montserrat_400Regular,

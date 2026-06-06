@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Screen } from "../src/components/Screen";
@@ -9,6 +10,7 @@ import { api, apiError } from "../src/api";
 import { colors, spacing } from "../src/theme";
 import { useThemedColors } from "../src/themeContext";
 export default function ChangePassword() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [cur, setCur] = useState("");
@@ -36,8 +38,8 @@ export default function ChangePassword() {
       <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>
         Votre mot de passe doit contenir au moins 8 caractères, idéalement un mélange de majuscules, minuscules, chiffres et symboles.
       </TText>
-      <Input label="Mot de passe actuel" value={cur} onChangeText={setCur} secureTextEntry passwordToggle icon="lock-closed-outline" />
-      <Input label="Nouveau mot de passe" value={next} onChangeText={setNext} secureTextEntry passwordToggle icon="lock-closed-outline" />
+      <Input label={t("auth2.currentPassword")} value={cur} onChangeText={setCur} secureTextEntry passwordToggle icon="lock-closed-outline" />
+      <Input label={t("auth2.newPassword")} value={next} onChangeText={setNext} secureTextEntry passwordToggle icon="lock-closed-outline" />
       <Input label="Confirmer le nouveau mot de passe" value={confirm} onChangeText={setConfirm} secureTextEntry passwordToggle icon="lock-closed-outline" />
       {err ? <TText variant="caption" color={colors.status.error} style={{ marginTop: 6 }}>{err}</TText> : null}
       {ok ? <TText variant="caption" color={colors.status.success} weight="bold" align="center" style={{ marginTop: 6 }}>{ok}</TText> : null}

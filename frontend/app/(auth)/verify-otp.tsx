@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Screen } from "../../src/components/Screen";
@@ -10,6 +11,7 @@ import { useAuth } from "../../src/store";
 import { colors, spacing } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 export default function VerifyOtp() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const params = useLocalSearchParams<{ user_id: string; dev_email_otp?: string; dev_phone_otp?: string; from_banner?: string }>();
   const router = useRouter();
@@ -110,7 +112,7 @@ export default function VerifyOtp() {
 
       {err ? <TText variant="caption" color={colors.status.error} style={{ marginBottom: spacing.sm }}>{err}</TText> : null}
 
-      <Button testID="verify-submit" title="Vérifier" onPress={submit} loading={loading} disabled={emailCode.length < 6 || phoneCode.length < 6} />
+      <Button testID="verify-submit" title={t("auth2.verifyCode")} onPress={submit} loading={loading} disabled={emailCode.length < 6 || phoneCode.length < 6} />
 
       <TouchableOpacity testID="verify-resend" onPress={resend} disabled={seconds > 0} style={{ alignSelf: "center", marginTop: spacing.lg }}>
         <TText variant="caption" weight="semiBold" color={seconds > 0 ? colors.neutrals.textTertiary : colors.primary.base}>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, BackHandler, Platform } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Screen } from "../../src/components/Screen";
@@ -10,6 +11,7 @@ import { useAuth } from "../../src/store";
 import { colors, spacing } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 export default function CreatePin() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const refreshMe = useAuth((s) => s.refreshMe);

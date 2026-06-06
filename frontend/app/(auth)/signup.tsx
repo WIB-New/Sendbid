@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, TouchableOpacity, Modal, FlatList, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -15,6 +16,7 @@ import { dialToCountry, countryToDial, flagEmoji } from "../../src/utils/dialCod
 type Country = { country_code: string; country_name: string; flag?: string; currency?: string; cities?: string[]; capital?: string };
 
 export default function SignUp() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);
@@ -146,7 +148,7 @@ export default function SignUp() {
   };
 
   return (
-    <Screen title="Créer un compte" back>
+    <Screen title={t("auth2.signupTitle")} back>
       <TText variant="title" weight="extraBold" style={{ marginTop: spacing.md }}>
         Rejoignez SENDBID
       </TText>
@@ -156,10 +158,10 @@ export default function SignUp() {
 
       <View style={{ flexDirection: "row", gap: 8 }}>
         <View style={{ flex: 1 }}>
-          <Input testID="signup-firstname" label="Prénom" value={firstName} onChangeText={setFirstName} icon="person-outline" />
+          <Input testID="signup-firstname" label={t("auth2.firstName")} value={firstName} onChangeText={setFirstName} icon="person-outline" />
         </View>
         <View style={{ flex: 1 }}>
-          <Input testID="signup-lastname" label="Nom" value={lastName} onChangeText={setLastName} icon="person-outline" />
+          <Input testID="signup-lastname" label={t("auth2.lastName")} value={lastName} onChangeText={setLastName} icon="person-outline" />
         </View>
       </View>
 
@@ -219,7 +221,7 @@ export default function SignUp() {
 
       <Input testID="signup-city" label="Ville" value={city} onChangeText={setCity} icon="location-outline" placeholder="Ex: Paris" />
 
-      <Input testID="signup-password" label="Mot de passe" value={password} onChangeText={setPassword} icon="lock-closed-outline" passwordToggle secureTextEntry />
+      <Input testID="signup-password" label={t("auth2.password")} value={password} onChangeText={setPassword} icon="lock-closed-outline" passwordToggle secureTextEntry />
       <Input testID="signup-password-confirm" label="Confirmer le mot de passe" value={confirmPwd} onChangeText={setConfirmPwd} icon="lock-closed-outline" passwordToggle secureTextEntry />
 
       <View style={{ flexDirection: "row", gap: 4, marginBottom: spacing.sm }}>
@@ -238,7 +240,7 @@ export default function SignUp() {
           {terms ? <Ionicons name="checkmark" size={16} color="white" /> : null}
         </View>
         <TText variant="caption" color={colors.neutrals.textSecondary} style={{ flex: 1, marginLeft: 10 }}>
-          J'accepte les <TText variant="caption" weight="bold" color={colors.primary.base}>Conditions Générales d'Utilisation</TText> et la <TText variant="caption" weight="bold" color={colors.primary.base}>Politique de Confidentialité</TText>.
+          J&apos;accepte les <TText variant="caption" weight="bold" color={colors.primary.base}>Conditions Générales d&apos;Utilisation</TText> et la <TText variant="caption" weight="bold" color={colors.primary.base}>Politique de Confidentialité</TText>.
         </TText>
       </TouchableOpacity>
 

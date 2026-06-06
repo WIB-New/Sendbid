@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Alert, TouchableOpacity, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -13,6 +14,7 @@ import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 export default function BankTransfer() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const params = useLocalSearchParams<{ contact_name?: string; iban?: string; bank_name?: string; bic_swift?: string }>();
@@ -31,7 +33,7 @@ export default function BankTransfer() {
     api.get("/wallet").then((r) => setWallet(r.data)).catch(() => {});
   }, []);
 
-  // Le tap sur "Effectuer le virement" → ouvre le PIN-gate au lieu d'exécuter directement
+  // Le tap sur t("walletOps.submit") → ouvre le PIN-gate au lieu d'exécuter directement
   const onPressSubmit = () => {
     setErr(null);
     const v = parseFloat(amount.replace(",", "."));
@@ -60,7 +62,7 @@ export default function BankTransfer() {
   };
 
   return (
-    <Screen title="Virement bancaire" back hero scroll={false}>
+    <Screen title={t("walletOps.bankTitle")} back hero scroll={false}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
         <LinearGradient colors={["#022a6b", "#022a6b"]} style={styles.balanceCard}>
           <TText variant="caption" color="rgba(255,255,255,0.7)">Solde Portefeuille disponible</TText>
@@ -89,7 +91,7 @@ export default function BankTransfer() {
 
         {err ? <TText variant="caption" color={colors.status.error} style={{ marginTop: 8 }}>{err}</TText> : null}
 
-        <Button testID="bt-submit" title="Effectuer le virement" icon="arrow-forward" onPress={onPressSubmit} loading={busy} style={{ marginTop: spacing.lg }} />
+        <Button testID="bt-submit" title={t("walletOps.submit")} icon="arrow-forward" onPress={onPressSubmit} loading={busy} style={{ marginTop: spacing.lg }} />
       </ScrollView>
 
       {/* PIN-gate avant exécution du virement bancaire */}

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View } from "react-native";
 import { useRouter } from "expo-router";
 import { Screen } from "../../src/components/Screen";
@@ -9,6 +10,7 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 export default function ForgotPassword() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -32,7 +34,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <Screen title="Mot de passe oublié" back>
+    <Screen title={t("auth2.forgotTitle")} back>
       <TText variant="title" weight="extraBold" style={{ marginTop: spacing.md }}>
         Réinitialisation
       </TText>
