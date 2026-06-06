@@ -32,7 +32,9 @@ const CURRENCIES = [
 ];
 
 export default function PreferencesScreen() {
-  const locale = useLocale();
+  // Selector pattern Zustand — récupère uniquement le string locale (pas l'objet entier),
+  // garantissant un re-render à chaque changement effectif de la langue.
+  const locale = useLocale((s) => s.locale);
   const user = useAuth((s) => s.user);
   const refreshMe = useAuth((s) => s.refreshMe);
   const themeCtx = useThemeTokens();

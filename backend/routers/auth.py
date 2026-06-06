@@ -580,8 +580,9 @@ class VerifyPinIn(BaseModel):
 
 @router.post("/verify-pin")
 async def verify_pin(payload: VerifyPinIn, user: dict = Depends(get_current_user)):
-    """Vérifie le PIN sans modifier l'état. Utilisé pour des actions sensibles (ex : dévoiler le solde)."""
-    rec = await db.users.find_one({"id": user["id"]}, {"_id": 0, "pin_hash": 1})
-    if not rec or not rec.get("pin_hash") or not verify_password(payload.pin, rec["pin_hash"]):
-        raise HTTPException(status_code=401, detail="Code PIN incorrect")
+    """Vérifie le PIN avec brute-force lockout (5 essais → 15 min de blocage).
+    Délègue à core.deps.require_pin pour respecter la même politique de sécurité
+    que les actions sensibles (transfert, withdraw, p2p)."""
+    from core.deps import require_pin
+    await require_pin(user["id"], payload.pin)
     return {"ok": True}
