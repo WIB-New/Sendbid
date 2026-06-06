@@ -43,8 +43,9 @@ export default function BankTransfer() {
     setPinOpen(true);
   };
 
-  // Une fois le PIN validé, on exécute l'API
-  const submit = async () => {
+  // Une fois le PIN validé, on exécute l'API. Le PIN est inclus dans le payload
+  // pour respecter le contrat backend (BankWithdrawIn exige `pin`) + defence-in-depth.
+  const submitWithPin = async (pin: string) => {
     setPinOpen(false);
     const v = parseFloat(amount.replace(",", "."));
     setBusy(true);
@@ -52,10 +53,11 @@ export default function BankTransfer() {
       await api.post("/wallet/withdraw", {
         amount: v,
         method: "bank",
+        pin,
         details: { iban, holder, bank, bic },
       });
       await refreshMe();
-      Alert.alert("Virement envoyé", `${v.toFixed(2)} EUR sera crédité sous 1-3 jours ouvrés sur ${iban.slice(-4).padStart(iban.length, "•")}`, [{ text: "OK", onPress: () => router.back() }]);
+      Alert.alert(t("walletOps2.transferSent"), `${v.toFixed(2)} EUR ${t("walletOps2.willCredit")} ${iban.slice(-4).padStart(iban.length, "•")}`, [{ text: "OK", onPress: () => router.back() }]);
     } catch (e: any) {
       setErr(apiError(e));
     } finally { setBusy(false); }
@@ -94,14 +96,15 @@ export default function BankTransfer() {
         <Button testID="bt-submit" title={t("walletOps.submit")} icon="arrow-forward" onPress={onPressSubmit} loading={busy} style={{ marginTop: spacing.lg }} />
       </ScrollView>
 
-      {/* PIN-gate avant exécution du virement bancaire */}
+      {/* PIN-gate avant exécution du virement bancaire — le PIN est envoyé au backend
+           (BankWithdrawIn l'exige). On utilise returnPinToCaller pour récupérer le PIN saisi. */}
       <PinGate
         visible={pinOpen}
-        title="Confirmer le virement"
+        title={t("walletOps.bankTitle")}
         subtitle={`Confirmez votre PIN pour valider le virement de ${amount || "0"} EUR`}
-        onSuccess={submit}
+        onSuccess={() => {}}
+        returnPinToCaller={submitWithPin}
         onCancel={() => setPinOpen(false)}
-        allowBiometric
       />
     </Screen>
   );
