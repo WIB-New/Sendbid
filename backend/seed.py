@@ -366,6 +366,25 @@ async def seed_demo_data():
         )
         logger.info(f"[seed] demo wallet reset to 1250.50 EUR + PIN/password restored ({DEMO_CLIENT_EMAIL})")
 
+    # IDEMPOTENT DEMO RESET — agent@paybid.app (mirror the client reset so E2E tests
+    # don't drift when a previous test mutates the agent password / PIN).
+    demo_agent_user = await db.users.find_one({"email": "agent@paybid.app"}, {"id": 1})
+    if demo_agent_user and not IS_PROD:
+        await db.users.update_one(
+            {"id": demo_agent_user["id"]},
+            {"$set": {
+                "password_hash": hash_password("Agent@123!"),
+                "pin_hash": hash_password("123456"),
+                "pin_attempts": 0,
+                "pin_locked_until": None,
+            }},
+        )
+        await db.wallets.update_one(
+            {"user_id": demo_agent_user["id"]},
+            {"$set": {"balance": 4250.0, "currency": "EUR"}},
+        )
+        logger.info("[seed] demo agent PIN/password restored (agent@paybid.app)")
+
     # Test credentials file
     Path("/app/memory").mkdir(parents=True, exist_ok=True)
     creds = f"""# SENDBID — Test Credentials
