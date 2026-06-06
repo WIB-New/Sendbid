@@ -38,8 +38,8 @@ function fmt(iso?: string) {
 }
 
 // Cas 1 — Espèces standard (6 étapes)
-function buildCashStandard(t: any, deadlineCountdown?: string): ProgressStep[] {
-  const status = t.status as string;
+function buildCashStandard(tx: any, deadlineCountdown?: string): ProgressStep[] {
+  const status = tx.status as string;
   let cur = 0;
   if (status === "PENDING_PAYMENT") cur = 1;
   else if (["BIDDING", "AGENT_ASSIGNED"].includes(status)) cur = 2;
@@ -48,24 +48,24 @@ function buildCashStandard(t: any, deadlineCountdown?: string): ProgressStep[] {
   else if (status === "COMPLETED") cur = 5;
   else if (["FAILED", "EXPIRED", "CANCELLED_USER"].includes(status)) cur = -1;
 
-  const ref = (t.reference || t.id || "").slice(-8).toUpperCase();
-  const agentId = t.agent_snapshot?.profile_id || "—";
-  const agentLoc = `${t.agent_snapshot?.city || "—"}${t.agent_snapshot?.country ? ", " + t.agent_snapshot.country : ""}`;
-  const benName = t.beneficiary?.full_name || "—";
+  const ref = (tx.reference || tx.id || "").slice(-8).toUpperCase();
+  const agentId = tx.agent_snapshot?.profile_id || "—";
+  const agentLoc = `${tx.agent_snapshot?.city || "—"}${tx.agent_snapshot?.country ? ", " + tx.agent_snapshot.country : ""}`;
+  const benName = tx.beneficiary?.full_name || "—";
   const fundsDesc = deadlineCountdown ? `Prêts pour le retrait auprès de l'agent (${deadlineCountdown})` : "Prêts pour le retrait auprès de l'agent";
 
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
-    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(t.assigned_at) },
-    { key: "funds", label: "Fonds disponibles", description: fundsDesc, state: s(3, cur, status), timestamp: fmt(t.assigned_at) },
-    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(t.completed_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
+    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(tx.assigned_at) },
+    { key: "funds", label: "Fonds disponibles", description: fundsDesc, state: s(3, cur, status), timestamp: fmt(tx.assigned_at) },
+    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(tx.completed_at) },
   ];
 }
 
 // Cas 2 — Espèces VIP / VIP EXPRESS (5 étapes — agent en chemin)
-function buildCashVip(t: any): ProgressStep[] {
-  const status = t.status as string;
+function buildCashVip(tx: any): ProgressStep[] {
+  const status = tx.status as string;
   let cur = 0;
   if (status === "PENDING_PAYMENT") cur = 1;
   else if (["BIDDING", "AGENT_ASSIGNED"].includes(status)) cur = 2;
@@ -74,50 +74,50 @@ function buildCashVip(t: any): ProgressStep[] {
   else if (status === "COMPLETED") cur = 5;
   else if (["FAILED", "EXPIRED", "CANCELLED_USER"].includes(status)) cur = -1;
 
-  const ref = (t.reference || t.id || "").slice(-8).toUpperCase();
-  const agentId = t.agent_snapshot?.profile_id || "—";
-  const agentLoc = `${t.agent_snapshot?.city || "—"}${t.agent_snapshot?.country ? ", " + t.agent_snapshot.country : ""}`;
-  const benName = t.beneficiary?.full_name || "—";
+  const ref = (tx.reference || tx.id || "").slice(-8).toUpperCase();
+  const agentId = tx.agent_snapshot?.profile_id || "—";
+  const agentLoc = `${tx.agent_snapshot?.city || "—"}${tx.agent_snapshot?.country ? ", " + tx.agent_snapshot.country : ""}`;
+  const benName = tx.beneficiary?.full_name || "—";
 
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
-    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(t.assigned_at) },
-    { key: "delivery", label: "Fonds en cours de remise", description: cur >= 4 ? `${agentId} est en chemin vers ${benName}` : "L'agent se prépare", state: s(4, cur, status), timestamp: fmt(t.processing_at) },
-    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(t.completed_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
+    { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(tx.assigned_at) },
+    { key: "delivery", label: "Fonds en cours de remise", description: cur >= 4 ? `${agentId} est en chemin vers ${benName}` : "L'agent se prépare", state: s(4, cur, status), timestamp: fmt(tx.processing_at) },
+    { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(tx.completed_at) },
   ];
 }
 
 // Cas 3 — Virement bancaire (3 étapes)
-function buildBank(t: any): ProgressStep[] {
-  const status = t.status as string;
+function buildBank(tx: any): ProgressStep[] {
+  const status = tx.status as string;
   let cur = 0;
   if (status === "PENDING_PAYMENT") cur = 1;
   else if (["BIDDING", "AGENT_ASSIGNED", "NOTIFIED", "PROCESSING", "COMPLETED"].includes(status)) cur = 2;
   else if (["FAILED", "EXPIRED", "CANCELLED_USER"].includes(status)) cur = -1;
 
-  const ref = (t.reference || t.id || "").slice(-8).toUpperCase();
-  const sentDate = t.processing_at || t.assigned_at || t.completed_at;
+  const ref = (tx.reference || tx.id || "").slice(-8).toUpperCase();
+  const sentDate = tx.processing_at || tx.assigned_at || tx.completed_at;
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
     { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: `${fmt(sentDate) || "—"}\nUn délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.`, state: s(2, cur, status), timestamp: fmt(sentDate) },
   ];
 }
 
 // Cas 4 — Portefeuille mobile (3 étapes)
-function buildMomo(t: any): ProgressStep[] {
-  const status = t.status as string;
+function buildMomo(tx: any): ProgressStep[] {
+  const status = tx.status as string;
   let cur = 0;
   if (status === "PENDING_PAYMENT") cur = 1;
   else if (["BIDDING", "AGENT_ASSIGNED", "NOTIFIED", "PROCESSING", "COMPLETED"].includes(status)) cur = 2;
   else if (["FAILED", "EXPIRED", "CANCELLED_USER"].includes(status)) cur = -1;
 
-  const ref = (t.reference || t.id || "").slice(-8).toUpperCase();
-  const sentDate = t.processing_at || t.assigned_at || t.completed_at;
+  const ref = (tx.reference || tx.id || "").slice(-8).toUpperCase();
+  const sentDate = tx.processing_at || tx.assigned_at || tx.completed_at;
   return [
-    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(t.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(t.paid_at) },
+    { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
     { key: "sent", label: "Envoyé sur le téléphone du bénéficiaire", description: `${fmt(sentDate) || "—"}\nUn délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.`, state: s(2, cur, status), timestamp: fmt(sentDate) },
   ];
 }
@@ -152,7 +152,7 @@ export default function TransferDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const token = useAuth((s) => s.token);
-  const [t, setT] = useState<any>(null);
+  const [tx, setTx] = useState<any>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [now, setNow] = useState<number>(Date.now());
 
@@ -164,7 +164,7 @@ export default function TransferDetail() {
     api
       .get(`/transfers/${id}`)
       .then((r) => {
-        setT(r.data);
+        setTx(r.data);
         setLoadErr(null);
       })
       .catch((e) => {
@@ -188,24 +188,24 @@ export default function TransferDetail() {
   }, []);
 
   const mode: Mode = useMemo(() => {
-    const m = String(t?.delivery_mode || "cash").toLowerCase();
+    const m = String(tx?.delivery_mode || "cash").toLowerCase();
     return (m === "bank" || m === "momo" ? m : "cash") as Mode;
-  }, [t?.delivery_mode]);
+  }, [tx?.delivery_mode]);
 
   // 48h pickup deadline (cash only)
   const deadlineMs = useMemo(() => {
-    if (!t || mode !== "cash") return null;
-    if (!t.assigned_at) return null;
-    const base = new Date(t.assigned_at).getTime();
-    const extensionDays = Number(t.pickup_extension_days || 0);
+    if (!tx || mode !== "cash") return null;
+    if (!tx.assigned_at) return null;
+    const base = new Date(tx.assigned_at).getTime();
+    const extensionDays = Number(tx.pickup_extension_days || 0);
     const baseHours = 48;
     return base + (baseHours + extensionDays * 24) * 3600 * 1000;
-  }, [t, mode]);
+  }, [tx, mode]);
   const remainingMs = deadlineMs ? deadlineMs - now : 0;
   const isUrgent = remainingMs > 0 && remainingMs <= 12 * 3600 * 1000; // < 12h
-  const countdownLabel = deadlineMs && t?.status !== "COMPLETED" ? formatRemaining(Math.max(0, remainingMs)) : undefined;
+  const countdownLabel = deadlineMs && tx?.status !== "COMPLETED" ? formatRemaining(Math.max(0, remainingMs)) : undefined;
 
-  if (!t) {
+  if (!tx) {
     // v6.5 — affichage explicite de l'erreur de chargement (au lieu d'un écran blanc)
     if (loadErr) {
       return (
@@ -247,7 +247,7 @@ export default function TransferDetail() {
     return null;
   }
 
-  const hero = statusHero(t.status);
+  const hero = statusHero(tx.status);
   const downloadReceipt = () => {
     const base = process.env.EXPO_PUBLIC_BACKEND_URL || "";
     const url = `${base}/api/transfers/${id}/receipt-pdf${token ? `?token=${encodeURIComponent(token)}` : ""}`;
@@ -257,7 +257,7 @@ export default function TransferDetail() {
   };
   const shareTransfer = async () => {
     try {
-      await Share.share({ message: `SENDBID Transfert ${t.reference || t.id}\n${t.receive_amount} ${t.destination_currency} à ${t.beneficiary?.full_name}\nStatut : ${hero.label}` });
+      await Share.share({ message: `SENDBID Transfert ${tx.reference || tx.id}\n${tx.receive_amount} ${tx.destination_currency} à ${tx.beneficiary?.full_name}\nStatut : ${hero.label}` });
     } catch {}
   };
   const extendPickup = (days: number) => {
@@ -281,12 +281,12 @@ export default function TransferDetail() {
   };
 
   // Sélection de la timeline selon le mode de remise et le niveau de service
-  const isVip = !!t.vip_delivery || !!t.vip_express || (t.service_level && t.service_level !== "standard");
+  const isVip = !!tx.vip_delivery || !!tx.vip_express || (tx.service_level && tx.service_level !== "standard");
   let steps: ProgressStep[];
-  if (mode === "bank") steps = buildBank(t);
-  else if (mode === "momo") steps = buildMomo(t);
-  else if (isVip) steps = buildCashVip(t);
-  else steps = buildCashStandard(t, countdownLabel);
+  if (mode === "bank") steps = buildBank(tx);
+  else if (mode === "momo") steps = buildMomo(tx);
+  else if (isVip) steps = buildCashVip(tx);
+  else steps = buildCashStandard(tx, countdownLabel);
   const activeIdx = steps.findIndex((s) => s.state === "active");
 
   return (
@@ -311,15 +311,15 @@ export default function TransferDetail() {
           </View>
 
           <TText variant="display" weight="extraBold" color="white" align="center" style={{ marginTop: spacing.md }}>
-            {Number(t.receive_amount).toFixed(0)} {t.destination_currency}
+            {Number(tx.receive_amount).toFixed(0)} {tx.destination_currency}
           </TText>
           <TText variant="caption" color="rgba(255,255,255,0.75)" align="center" style={{ marginTop: 2 }}>
-            ≈ {Number(t.send_amount).toFixed(2)} {t.source_currency || "EUR"} envoyé · Taux {Number(t.fx_rate || 0).toFixed(4)}
+            ≈ {Number(tx.send_amount).toFixed(2)} {tx.source_currency || "EUR"} envoyé · Taux {Number(tx.fx_rate || 0).toFixed(4)}
           </TText>
-          <TouchableOpacity onPress={() => Clipboard.setStringAsync(t.reference || t.id)} style={styles.refChip}>
+          <TouchableOpacity onPress={() => Clipboard.setStringAsync(tx.reference || tx.id)} style={styles.refChip}>
             <Ionicons name="pricetag-outline" size={12} color="rgba(255,255,255,0.85)" />
             <TText variant="label" weight="semiBold" color="rgba(255,255,255,0.9)" style={{ marginLeft: 4 }}>
-              Ref #{(t.reference || t.id).slice(-10).toUpperCase()}
+              Ref #{(tx.reference || tx.id).slice(-10).toUpperCase()}
             </TText>
           </TouchableOpacity>
         </SafeAreaView>
@@ -330,15 +330,15 @@ export default function TransferDetail() {
         <View style={styles.actorsBox}>
           <ActorRow
             label="EXPÉDITEUR"
-            name={t.sender_snapshot?.full_name || "Vous"}
-            sub={t.sender_snapshot?.country || "—"}
+            name={tx.sender_snapshot?.full_name || "Vous"}
+            sub={tx.sender_snapshot?.country || "—"}
             color="#3B82F6"
           />
           <Separator />
           <ActorRow
             label="BÉNÉFICIAIRE"
-            name={t.beneficiary?.full_name || "—"}
-            sub={`${t.beneficiary?.city ? t.beneficiary.city + " · " : ""}${t.destination_country} · ${mode === "cash" ? "ESPÈCES" : mode === "bank" ? "VIREMENT BANCAIRE" : "PORTEFEUILLE MOBILE"}${t.vip_delivery ? " · VIP" : ""}`}
+            name={tx.beneficiary?.full_name || "—"}
+            sub={`${tx.beneficiary?.city ? tx.beneficiary.city + " · " : ""}${tx.destination_country} · ${mode === "cash" ? "ESPÈCES" : mode === "bank" ? "VIREMENT BANCAIRE" : "PORTEFEUILLE MOBILE"}${tx.vip_delivery ? " · VIP" : ""}`}
             color="#10B981"
           />
           {mode === "cash" ? (
@@ -346,17 +346,17 @@ export default function TransferDetail() {
               <Separator />
               <ActorRow
                 label="AGENT"
-                name={t.agent_snapshot?.profile_id || (t.status === "BIDDING" ? "En attente…" : "—")}
-                sub={t.agent_snapshot?.city || (t.status === "BIDDING" ? "Sélection en cours" : "—")}
+                name={tx.agent_snapshot?.profile_id || (tx.status === "BIDDING" ? "En attente…" : "—")}
+                sub={tx.agent_snapshot?.city || (tx.status === "BIDDING" ? "Sélection en cours" : "—")}
                 color="#F59E0B"
-                rating={t.agent_snapshot?.rating}
+                rating={tx.agent_snapshot?.rating}
               />
             </>
           ) : null}
         </View>
 
         {/* 48h countdown banner — visible quand fonds disponibles (cash + non terminé) */}
-        {mode === "cash" && deadlineMs && t.status !== "COMPLETED" && t.status !== "FAILED" && t.assigned_at ? (
+        {mode === "cash" && deadlineMs && tx.status !== "COMPLETED" && tx.status !== "FAILED" && tx.assigned_at ? (
           <View style={[styles.countdownBox, isUrgent && styles.countdownBoxUrgent]}>
             <View style={[styles.countdownIcon, { backgroundColor: isUrgent ? "#FEE2E2" : "#FEF3C7" }]}>
               <Ionicons name="time" size={20} color={isUrgent ? "#DC2626" : "#D97706"} />
@@ -395,11 +395,11 @@ export default function TransferDetail() {
           FINANCIER
         </TText>
         <View style={styles.finBox}>
-          <FinRow label="Montant envoyé" value={`${Number(t.send_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
-          <FinRow label="Taux" value={Number(t.fx_rate || 0).toFixed(4)} />
-          <FinRow label={t("transferFlow.fees")} value={`${Number(t.fee_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
-          <FinRow label="Total débité" value={`${Number(t.total_amount).toFixed(2)} ${t.source_currency || "EUR"}`} bold />
-          <FinRow label="Bénéficiaire reçoit" value={`${Number(t.receive_amount).toFixed(0)} ${t.destination_currency}`} tint="#10B981" bold last />
+          <FinRow label="Montant envoyé" value={`${Number(tx.send_amount).toFixed(2)} ${tx.source_currency || "EUR"}`} />
+          <FinRow label="Taux" value={Number(tx.fx_rate || 0).toFixed(4)} />
+          <FinRow label={t("transferFlow.fees")} value={`${Number(tx.fee_amount).toFixed(2)} ${tx.source_currency || "EUR"}`} />
+          <FinRow label="Total débité" value={`${Number(tx.total_amount).toFixed(2)} ${tx.source_currency || "EUR"}`} bold />
+          <FinRow label="Bénéficiaire reçoit" value={`${Number(tx.receive_amount).toFixed(0)} ${tx.destination_currency}`} tint="#10B981" bold last />
         </View>
 
         {/* Dates */}
@@ -407,9 +407,9 @@ export default function TransferDetail() {
           DATES
         </TText>
         <View style={styles.finBox}>
-          <FinRow label="Envoyé le" value={new Date(t.created_at).toLocaleString("fr-FR")} />
-          {mode === "cash" && t.assigned_at ? <FinRow label="Agent assigné" value={new Date(t.assigned_at).toLocaleString("fr-FR")} /> : null}
-          {t.completed_at ? <FinRow label="Livré le" value={new Date(t.completed_at).toLocaleString("fr-FR")} tint="#10B981" /> : null}
+          <FinRow label="Envoyé le" value={new Date(tx.created_at).toLocaleString("fr-FR")} />
+          {mode === "cash" && tx.assigned_at ? <FinRow label="Agent assigné" value={new Date(tx.assigned_at).toLocaleString("fr-FR")} /> : null}
+          {tx.completed_at ? <FinRow label="Livré le" value={new Date(tx.completed_at).toLocaleString("fr-FR")} tint="#10B981" /> : null}
           <FinRow label="Mode" value={mode === "cash" ? "ESPÈCES" : mode === "bank" ? "VIREMENT BANCAIRE" : "PORTEFEUILLE MOBILE"} last />
         </View>
 
@@ -424,12 +424,12 @@ export default function TransferDetail() {
         {/* VIP banner retiré — spec v6.4 : ne pas afficher la procédure VIP sur l'écran détail */}
 
         {/* Withdrawal code reminder for active cash transfers */}
-        {mode === "cash" && t.status !== "COMPLETED" && t.withdrawal_code ? (
-          <TouchableOpacity onPress={() => Clipboard.setStringAsync(t.withdrawal_code)} style={styles.codeStrip}>
+        {mode === "cash" && tx.status !== "COMPLETED" && tx.withdrawal_code ? (
+          <TouchableOpacity onPress={() => Clipboard.setStringAsync(tx.withdrawal_code)} style={styles.codeStrip}>
             <Ionicons name="key" size={16} color="#065F46" />
             <View style={{ flex: 1, marginLeft: 8 }}>
               <TText variant="label" color="#065F46">Code de retrait</TText>
-              <TText weight="extraBold" style={styles.codeStripValue}>{t.withdrawal_code}</TText>
+              <TText weight="extraBold" style={styles.codeStripValue}>{tx.withdrawal_code}</TText>
             </View>
             <Ionicons name="copy-outline" size={16} color="#065F46" />
           </TouchableOpacity>
@@ -441,18 +441,18 @@ export default function TransferDetail() {
             testID="detail-receipt"
             title="Voir le reçu officiel"
             icon="document-text-outline"
-            onPress={() => router.push({ pathname: "/transfer/receipt", params: { transfer_id: t.id } } as any)}
+            onPress={() => router.push({ pathname: "/transfer/receipt", params: { transfer_id: tx.id } } as any)}
           />
           <View style={{ flexDirection: "row", gap: 8 }}>
             <Button testID="detail-pdf" title="PDF" icon="download-outline" variant="outline" onPress={downloadReceipt} style={{ flex: 1 }} />
-            {mode === "cash" && t.vip_delivery ? (
-              <Button testID="detail-map" title="Carte" icon="map-outline" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: t.id } } as any)} style={{ flex: 1 }} />
+            {mode === "cash" && tx.vip_delivery ? (
+              <Button testID="detail-map" title="Carte" icon="map-outline" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: tx.id } } as any)} style={{ flex: 1 }} />
             ) : null}
-            {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(t.status) ? (
-              <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" variant="outline" onPress={() => router.push(`/chat/${t.id}` as any)} style={{ flex: 1 }} />
+            {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status) ? (
+              <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" variant="outline" onPress={() => router.push(`/chat/${tx.id}` as any)} style={{ flex: 1 }} />
             ) : null}
           </View>
-          <Button testID="detail-dispute" title="Ouvrir un litige" icon="warning-outline" variant="ghost" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: t.id } })} />
+          <Button testID="detail-dispute" title="Ouvrir un litige" icon="warning-outline" variant="ghost" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: tx.id } })} />
         </View>
       </ScrollView>
     </View>
