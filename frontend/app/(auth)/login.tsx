@@ -44,12 +44,15 @@ export default function Login() {
 
   // Redirection selon le rôle : admin/super_admin → /admin, partner_admin → /partner,
   // agent_admin (super-agent) → /agent, agent → /paybid, sinon (user) → /(tabs).
+  // Spec v7 : pour les utilisateurs CLIENT sans PIN, on force /create-pin
   const routeForRole = (u: any): any => {
     const r = u?.role;
     if (r === "admin" || r === "super_admin") return "/admin";
     if (r === "partner_admin") return "/partner";
     if (r === "agent_admin") return "/agent";
     if (r === "agent") return "/paybid/(tabs)";
+    // Client : PIN obligatoire — si pas encore créé, redirection forcée
+    if (!u?.has_pin && !u?.pin_hash) return { pathname: "/(auth)/create-pin", params: { user_id: u?.id, skip_otp: "1" } };
     return "/(tabs)";
   };
 
@@ -58,7 +61,12 @@ export default function Login() {
     try {
       const { data } = await api.post("/auth/login", { identifier, password });
       await setSession(data.access_token, data.user);
-      router.replace(routeForRole(data.user));
+      const target = routeForRole(data.user);
+      if (typeof target === "string") {
+        router.replace(target);
+      } else {
+        router.replace(target);
+      }
     } catch (e: any) {
       setErr(apiError(e));
     } finally {
@@ -78,7 +86,8 @@ export default function Login() {
       }
       const { data } = await api.post("/auth/biometric-login", { biometric_token: bioToken });
       await setSession(data.access_token, data.user);
-      router.replace(routeForRole(data.user));
+      const target = routeForRole(data.user);
+      router.replace(target);
     } catch (e: any) { setErr(apiError(e)); }
   };
 

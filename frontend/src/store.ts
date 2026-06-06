@@ -28,6 +28,11 @@ export type User = {
   language: string;
   theme: string;
   notif_prefs?: { push: boolean; email: boolean; sms: boolean };
+  // v7 — flags pour le flow PIN + popup de vérification post-1ère-connexion
+  has_pin?: boolean;
+  first_login_at?: string;
+  verification_popup_shown_at?: string;
+  role?: string;
 };
 
 export type Wallet = { id: string; user_id: string; balance: number; currency: string };

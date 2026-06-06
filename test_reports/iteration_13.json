@@ -1,0 +1,41 @@
+{
+  "summary": "SENDBID v7 — Validated separated-channel OTP flow + first_login_at tracking + verification popup tracking + PIN obligatoire + frontend smoke. 18/18 backend tests pass after fixing one bug found in /api/auth/me (has_pin was always false because get_current_user strips pin_hash before the route handler runs). Frontend smoke test for /(auth)/create-pin and /(tabs) works after restarting expo (Metro had a stale fast-resolver cache from when the two new components were added). No JS console errors, no React Native red screen, PIN keypad renders correctly, /(tabs) properly redirects unauth users to /welcome.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_auth_v7_verification.py",
+    "/app/test_reports/pytest/auth_v7_results.xml"
+  ],
+  "action_items": [
+    "Optional (already mitigated by me but worth a sanity-check): consider keeping pin_hash only inside auth.py's /me handler if you'd rather avoid the extra db.users.find_one round-trip — could also be solved by querying user inside /me with a projection that preserves pin_hash. The two-query approach I used keeps the deps.get_current_user contract (no leak) intact.",
+    "Twilio cannot deliver SMS to FR test numbers in this account (error 21408 'Permission to send an SMS has not been enabled for the region indicated by the To number'). This is a Twilio account config, not a code bug — the OTPs are still generated and returned via dev_phone_otp in non-prod. Worth noting if you ever flip ENVIRONMENT=production with French phones.",
+    "Stale Metro/fast-resolver cache caused a 500 SSR error ('Unable to resolve module ../../src/components/FirstLoginVerificationGuard') on every web route until I ran `sudo supervisorctl restart expo`. After restart everything resolves correctly. Main agent should be aware: any newly-added file under src/components/ may require an expo restart when EXPO_USE_FAST_RESOLVER=1 is set."
+  ],
+  "critical_code_review_comments": [
+    "auth.py:434-441 — Bug FOUND & FIXED: /me computed has_pin = bool(user.get('pin_hash')), but core/deps.py:27 pops pin_hash from the dict before get_current_user returns it → has_pin was always false even for the demo client whose PIN is pre-seeded. Patched by adding a small dedicated lookup `db.users.find_one({id}, {pin_hash:1})` in /me. Verified by tests test_09_create_pin_then_has_pin_true and test_demo_client_login_and_me which now pass.",
+    "auth.py:271-296 / 299-325 — resend-email-otp and resend-phone-otp use $set on a possibly-missing OTP record with $setOnInsert {phone_code: gen_otp()} (resp. email_code). Good defensive pattern, no issue.",
+    "auth.py:339-360 — Login correctly persists first_login_at only on the first login (verified by test_login_twice_does_not_overwrite_first_login_at).",
+    "auth.py:328-336 — mark-verification-popup-shown is idempotent (verified)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_auth_v7_verification.py (new)",
+    "/app/backend/routers/auth.py (fixed /me has_pin computation)"
+  ],
+  "success_rate": {
+    "backend": "100% (18/18)",
+    "frontend": "100% smoke (3/3 routes render with 0 console errors)"
+  },
+  "seed_data_creation": "Module-scoped fresh test users via /api/auth/register (TEST_ prefix in full_name, randomized email @example.com and randomized phone). Demo client (client@sendbid.app) used for first_login_at regression. No persistent test data needs cleanup beyond what pytest module scope handles.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend test file /app/backend/tests/test_auth_v7_verification.py is the canonical regression for v7 channel-separated OTP, first_login_at tracking, verification popup tracking, and the has_pin field of /api/auth/me. All 4 new endpoints + legacy verify-otp + /me security are covered. Note: tests use random phone numbers that Twilio cannot SMS in this account (21408) — they still succeed because dev_phone_otp is returned in non-prod mode. The /me has_pin field was broken before this iteration (always false); the fix re-queries the db for pin_hash with a minimal projection. If main agent ever changes get_current_user to keep pin_hash, the extra query in /me can be removed.",
+  "rca_of_issue": "ROOT CAUSE — /api/auth/me has_pin always false:\n  • core/deps.py:23-28 — get_current_user fetches the user and explicitly calls `user.pop('pin_hash', None)` to prevent hash leak in any downstream handler.\n  • routers/auth.py:438 (before fix) — /me computed `bool(user.get('pin_hash'))` on the already-stripped dict → always False.\nFIX — Added a dedicated minimal lookup inside /me:\n    pin_doc = await db.users.find_one({'id': user['id']}, {'_id': 0, 'pin_hash': 1})\n    user_clean['has_pin'] = bool(pin_doc and pin_doc.get('pin_hash'))\nThis preserves the no-leak contract of get_current_user.\n\nROOT CAUSE — Web preview returning 500 with 'Cannot read properties of undefined (reading map)':\n  • Metro bundler's fast-resolver cache (EXPO_USE_FAST_RESOLVER=1) did not pick up the newly-added /app/frontend/src/components/FirstLoginVerificationGuard.tsx and VerificationPopup.tsx files until expo was restarted.\nFIX — `sudo supervisorctl restart expo`. After ~20s the routes return HTTP 200 with full content."
+}

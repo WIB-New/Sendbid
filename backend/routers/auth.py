@@ -217,6 +217,125 @@ async def verify_otp(payload: VerifyOtpIn):
     return {"access_token": token, "user": user}
 
 
+# ============================================================================
+# v7 — OTP séparé par canal (email / téléphone)
+# Permet la procédure de vérification post-1ère-connexion (cf. VerificationPopup).
+# ============================================================================
+class ChannelOtpIn(BaseModel):
+    code: str
+
+@router.post("/verify-email-otp")
+async def verify_email_otp(payload: ChannelOtpIn, user: dict = Depends(get_current_user)):
+    """Vérifie UNIQUEMENT le code OTP email pour l'utilisateur authentifié."""
+    from datetime import datetime
+    if user.get("email_verified"):
+        return {"ok": True, "already_verified": True, "email_verified": True}
+    rec = await db.otp_codes.find_one({"user_id": user["id"]})
+    if not rec:
+        raise HTTPException(status_code=400, detail="Aucun code en attente — demandez l'envoi d'un nouveau code")
+    if datetime.fromisoformat(rec["expires_at"]) < now_utc():
+        raise HTTPException(status_code=400, detail="Code expiré — demandez un nouvel envoi")
+    if rec.get("email_code") != payload.code.strip():
+        raise HTTPException(status_code=400, detail="Code email incorrect")
+    await db.users.update_one({"id": user["id"]}, {"$set": {"email_verified": True}})
+    # Si phone déjà vérifié → on nettoie le record OTP
+    if rec.get("phone_used") or user.get("phone_verified"):
+        await db.otp_codes.delete_one({"user_id": user["id"]})
+    else:
+        # Marque email comme consommé sans détruire le code phone
+        await db.otp_codes.update_one({"user_id": user["id"]}, {"$set": {"email_used": True}})
+    return {"ok": True, "email_verified": True}
+
+
+@router.post("/verify-phone-otp")
+async def verify_phone_otp(payload: ChannelOtpIn, user: dict = Depends(get_current_user)):
+    """Vérifie UNIQUEMENT le code OTP SMS pour l'utilisateur authentifié."""
+    from datetime import datetime
+    if user.get("phone_verified"):
+        return {"ok": True, "already_verified": True, "phone_verified": True}
+    rec = await db.otp_codes.find_one({"user_id": user["id"]})
+    if not rec:
+        raise HTTPException(status_code=400, detail="Aucun code en attente — demandez l'envoi d'un nouveau code")
+    if datetime.fromisoformat(rec["expires_at"]) < now_utc():
+        raise HTTPException(status_code=400, detail="Code expiré — demandez un nouvel envoi")
+    if rec.get("phone_code") != payload.code.strip():
+        raise HTTPException(status_code=400, detail="Code SMS incorrect")
+    await db.users.update_one({"id": user["id"]}, {"$set": {"phone_verified": True}})
+    if rec.get("email_used") or user.get("email_verified"):
+        await db.otp_codes.delete_one({"user_id": user["id"]})
+    else:
+        await db.otp_codes.update_one({"user_id": user["id"]}, {"$set": {"phone_used": True}})
+    return {"ok": True, "phone_verified": True}
+
+
+@router.post("/resend-email-otp")
+async def resend_email_otp(user: dict = Depends(get_current_user)):
+    """Régénère et renvoie UNIQUEMENT le code OTP email."""
+    if user.get("email_verified"):
+        return {"ok": True, "already_verified": True}
+    email_code = gen_otp()
+    await db.otp_codes.update_one(
+        {"user_id": user["id"]},
+        {"$set": {
+            "email_code": email_code,
+            "email_used": False,
+            "expires_at": iso(now_utc() + timedelta(minutes=3)),
+            "created_at": iso(now_utc()),
+        }, "$setOnInsert": {"user_id": user["id"], "phone_code": gen_otp()}},
+        upsert=True,
+    )
+    logger.info(f"[OTP] resend-email user={user['id']} code={email_code}")
+    try:
+        from services.notify import notify_signup_otp
+        await notify_signup_otp(user["email"], None, email_code, None, user.get("full_name", ""))
+    except Exception as e:
+        logger.warning(f"[OTP resend-email] notify fail: {e}")
+    response = {"ok": True}
+    if not IS_PROD:
+        response["dev_email_otp"] = email_code
+    return response
+
+
+@router.post("/resend-phone-otp")
+async def resend_phone_otp(user: dict = Depends(get_current_user)):
+    """Régénère et renvoie UNIQUEMENT le code OTP SMS."""
+    if user.get("phone_verified"):
+        return {"ok": True, "already_verified": True}
+    phone_code = gen_otp()
+    await db.otp_codes.update_one(
+        {"user_id": user["id"]},
+        {"$set": {
+            "phone_code": phone_code,
+            "phone_used": False,
+            "expires_at": iso(now_utc() + timedelta(minutes=3)),
+            "created_at": iso(now_utc()),
+        }, "$setOnInsert": {"user_id": user["id"], "email_code": gen_otp()}},
+        upsert=True,
+    )
+    logger.info(f"[OTP] resend-phone user={user['id']} code={phone_code}")
+    try:
+        from services.twilio_service import send_sms_otp
+        if user.get("phone"):
+            await send_sms_otp(user["phone"], phone_code)
+    except Exception as e:
+        logger.warning(f"[OTP resend-phone] sms fail: {e}")
+    response = {"ok": True}
+    if not IS_PROD:
+        response["dev_phone_otp"] = phone_code
+    return response
+
+
+@router.post("/mark-verification-popup-shown")
+async def mark_verification_popup_shown(user: dict = Depends(get_current_user)):
+    """Mémorise que la popup post-1ère-connexion a déjà été présentée à l'utilisateur."""
+    if not user.get("verification_popup_shown_at"):
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {"verification_popup_shown_at": iso(now_utc())}},
+        )
+    return {"ok": True}
+
+
 @router.post("/login")
 async def login(payload: LoginIn, request: Request):
     ident = payload.identifier.lower().strip()
@@ -228,6 +347,13 @@ async def login(payload: LoginIn, request: Request):
     if not user or not verify_password(payload.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Identifiants invalides")
     token = create_access_token(user["id"])
+    # v7 : track first login pour déclencher la popup de vérification 30s après
+    if not user.get("first_login_at"):
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {"first_login_at": iso(now_utc())}},
+        )
+        user["first_login_at"] = iso(now_utc())
     # v6 : persiste une session pour la page Sessions actives
     from routers.sessions import record_session
     await record_session(user["id"], request, kind="password")
@@ -308,7 +434,12 @@ async def reset_password(payload: ResetPasswordIn):
 @router.get("/me")
 async def me(user: dict = Depends(get_current_user)):
     wallet = await db.wallets.find_one({"user_id": user["id"]}, {"_id": 0})
-    return {"user": user, "wallet": wallet}
+    # Spec v7 : exposer has_pin (booléen dérivé du hash) sans leaker le hash lui-même.
+    # NB: get_current_user strip déjà pin_hash de `user` → on requête séparément.
+    pin_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "pin_hash": 1})
+    user_clean = clean_doc(dict(user))
+    user_clean["has_pin"] = bool(pin_doc and pin_doc.get("pin_hash"))
+    return {"user": user_clean, "wallet": wallet}
 
 
 
