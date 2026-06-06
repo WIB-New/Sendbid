@@ -68,26 +68,9 @@ export default function Home() {
   const [benQuery, setBenQuery] = useState("");
   const [selectedBen, setSelectedBen] = useState<any>(null);
 
-  // 30s post-login verification popup
-  const [verifPopupVisible, setVerifPopupVisible] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    if (user.email_verified && user.phone_verified) return;
-    try {
-      const flag = (globalThis as any).__sendbid_verifPopupShown;
-      if (flag) return;
-    } catch {}
-    const t = setTimeout(() => {
-      (globalThis as any).__sendbid_verifPopupShown = true;
-      setVerifPopupVisible(true);
-      setTimeout(() => {
-        setVerifPopupVisible(false);
-        router.push({ pathname: "/(auth)/verify-otp" as any, params: { user_id: user.id, from_banner: "1" } });
-      }, 10000);
-    }, 30000);
-    return () => clearTimeout(t);
-  }, [user?.id, user?.email_verified, user?.phone_verified]);
+  // Note v7 : la popup post-1ère-connexion est désormais gérée globalement par
+  // FirstLoginVerificationGuard (cf. /app/frontend/app/(tabs)/_layout.tsx).
+  // L'ancien splash modal a été retiré pour éviter la double-popup.
 
   const load = useCallback(async () => {
     setRefreshing(true);
@@ -603,51 +586,8 @@ export default function Home() {
         </TouchableOpacity>
       </Modal>
 
-      {/* Pop-up vérification 30s — wording amélioré + indicateur de progression */}
-      <Modal visible={verifPopupVisible} transparent animationType="fade" onRequestClose={() => setVerifPopupVisible(false)}>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <View style={{ backgroundColor: "white", borderRadius: 24, padding: 24, maxWidth: 400, width: "100%" }}>
-            <View style={{ alignItems: "center" }}>
-              <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="shield-checkmark" size={32} color={colors.primary.base} />
-              </View>
-              <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 12 }}>
-                Vérification de sécurité
-              </TText>
-              <TText variant="body" align="center" color={colors.neutrals.textSecondary} style={{ marginTop: 8, lineHeight: 20 }}>
-                Pour protéger votre compte SENDBID, nous allons vérifier votre adresse e-mail ainsi que votre numéro de téléphone.{"\n"}
-                Cette étape est obligatoire et ne prendra que quelques instants.
-              </TText>
-            </View>
-            {/* Mini workflow */}
-            <View style={{ marginTop: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <View style={{ alignItems: "center", flex: 1 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary.base, alignItems: "center", justifyContent: "center" }}>
-                  <Ionicons name="mail" size={18} color="white" />
-                </View>
-                <TText variant="label" weight="bold" style={{ marginTop: 4 }}>1. E-mail</TText>
-              </View>
-              <View style={{ flex: 0.4, height: 2, backgroundColor: colors.neutrals.border, marginHorizontal: 4 }} />
-              <View style={{ alignItems: "center", flex: 1 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.neutrals.border, alignItems: "center", justifyContent: "center" }}>
-                  <Ionicons name="call" size={18} color={colors.neutrals.textSecondary} />
-                </View>
-                <TText variant="label" weight="bold" style={{ marginTop: 4 }}>2. Téléphone</TText>
-              </View>
-              <View style={{ flex: 0.4, height: 2, backgroundColor: colors.neutrals.border, marginHorizontal: 4 }} />
-              <View style={{ alignItems: "center", flex: 1 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.neutrals.border, alignItems: "center", justifyContent: "center" }}>
-                  <Ionicons name="checkmark-done" size={18} color={colors.neutrals.textSecondary} />
-                </View>
-                <TText variant="label" weight="bold" style={{ marginTop: 4 }}>3. Confirmé</TText>
-              </View>
-            </View>
-            <TText variant="caption" weight="bold" color={colors.primary.base} align="center" style={{ marginTop: 14 }}>
-              La procédure démarre dans quelques instants…
-            </TText>
-          </View>
-        </View>
-      </Modal>
+      {/* La pop-up de vérification post-1ère-connexion est gérée par
+          FirstLoginVerificationGuard (voir (tabs)/_layout.tsx). */}
     </SafeAreaView>
   );
 }

@@ -10,6 +10,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Modal, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { TText } from "./TText";
 import { Input } from "./Input";
 import { Button } from "./Button";
@@ -178,171 +179,194 @@ export default function VerificationPopup({ visible, onClose }: Props) {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => handleClose(bothDone)}>
       <View style={styles.backdrop}>
         <View style={[styles.sheet, { backgroundColor: themed.neutrals.surface }]}>
-          {/* Header sticky */}
-          <View style={styles.header}>
-            <TText variant="subtitle" weight="extraBold" style={{ flex: 1 }}>
-              Vérification de votre compte
-            </TText>
-            <TouchableOpacity testID="vp-close" onPress={() => handleClose(bothDone)} style={styles.closeBtn} accessibilityLabel="Fermer la fenêtre">
-              <Ionicons name="close" size={22} color={themed.neutrals.textPrimary} />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }} keyboardShouldPersistTaps="handled">
-            <TText variant="caption" color={themed.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>
-              Vérifiez votre email et votre numéro de téléphone pour sécuriser votre compte et débloquer toutes les fonctionnalités.
-            </TText>
-
-            {/* === Ligne 1 : email + bouton === */}
-            <TText variant="caption" weight="extraBold" color={themed.neutrals.textSecondary} style={styles.label}>1. Email d'inscription</TText>
-            <View style={styles.row}>
-              <View style={[styles.fieldReadonly, { flex: 1, borderColor: emailVerified ? themed.status.success : themed.neutrals.border }]}>
-                <Ionicons name="mail-outline" size={16} color={themed.neutrals.textSecondary} />
-                <TText weight="semiBold" style={{ marginLeft: 8, flex: 1 }} numberOfLines={1}>{user?.email || "—"}</TText>
-                {emailVerified ? <Ionicons name="checkmark-circle" size={18} color={themed.status.success} /> : null}
+          {/* === Header avec gradient bleu === */}
+          <LinearGradient colors={["#1E3A8A", "#3B82F6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.headerGradient}>
+            <View style={styles.headerInner}>
+              <View style={styles.headerIconCircle}>
+                <Ionicons name="shield-checkmark" size={22} color="white" />
               </View>
-              <TouchableOpacity
-                testID="vp-send-email"
-                disabled={emailVerified || emailLoadingSend}
-                onPress={sendEmailCode}
-                style={[styles.actionBtn, (emailVerified || emailLoadingSend) && { opacity: 0.5 }]}
-              >
-                <TText variant="caption" weight="extraBold" color="white">
-                  {emailVerified ? "Vérifié" : emailLoadingSend ? "..." : "Vérifier"}
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <TText variant="subtitle" weight="extraBold" color="white">Vérification de votre compte</TText>
+                <TText variant="label" color="rgba(255,255,255,0.85)" style={{ marginTop: 2 }}>
+                  Sécurisez votre accès en quelques secondes
                 </TText>
+              </View>
+              <TouchableOpacity testID="vp-close" onPress={() => handleClose(bothDone)} style={styles.closeBtn} accessibilityLabel="Fermer la fenêtre">
+                <Ionicons name="close" size={20} color="white" />
               </TouchableOpacity>
             </View>
+          </LinearGradient>
 
-            {/* === Ligne 2 : code OTP email + compteur 60s + renvoi === */}
-            <TText variant="caption" weight="extraBold" color={themed.neutrals.textSecondary} style={styles.label}>2. Code reçu par email</TText>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Input
-                  testID="vp-otp-email"
-                  value={emailOtp}
-                  onChangeText={(v) => setEmailOtp(v.replace(/[^0-9]/g, "").slice(0, 6))}
-                  keyboardType="number-pad"
-                  placeholder="6 chiffres"
-                  icon="key-outline"
-                  style={{ marginBottom: 0 } as any}
-                  editable={!emailVerified}
-                />
+          <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xl }} keyboardShouldPersistTaps="handled">
+            {/* ========================= SECTION EMAIL ========================= */}
+            {emailVerified ? (
+              // Carte condensée verte si email déjà vérifié
+              <View style={styles.verifiedCard}>
+                <View style={styles.verifiedIcon}>
+                  <Ionicons name="checkmark-circle" size={22} color="white" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <TText variant="caption" weight="extraBold" color="#065F46">Email vérifié</TText>
+                  <TText variant="label" color="#047857" numberOfLines={1}>{user?.email || "—"}</TText>
+                </View>
+                <Ionicons name="mail" size={18} color="#10B981" />
               </View>
-              <TouchableOpacity
-                testID="vp-validate-email"
-                disabled={emailVerified || emailLoadingVerify || emailOtp.length < 4}
-                onPress={verifyEmailCode}
-                style={[styles.actionBtn, (emailVerified || emailLoadingVerify || emailOtp.length < 4) && { opacity: 0.5 }]}
-              >
-                <TText variant="caption" weight="extraBold" color="white">OK</TText>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.timerRow}>
-              {emailLeft > 0 ? (
-                <TText variant="label" color={themed.neutrals.textSecondary}>
-                  Renvoi possible dans <TText weight="extraBold">{emailLeft}s</TText>
-                </TText>
-              ) : (
-                <TouchableOpacity testID="vp-resend-email" disabled={emailVerified || emailLoadingSend} onPress={sendEmailCode}>
-                  <TText variant="label" weight="extraBold" color={emailVerified ? themed.neutrals.textTertiary : themed.primary.base}>
-                    {emailVerified ? "—" : "↻ Renvoyer le code"}
+            ) : (
+              <View style={styles.sectionCard}>
+                <View style={styles.sectionHeader}>
+                  <View style={[styles.sectionDot, { backgroundColor: "#3B82F6" }]}>
+                    <Ionicons name="mail" size={16} color="white" />
+                  </View>
+                  <TText variant="caption" weight="extraBold" color="#1E3A8A" style={{ marginLeft: 8, letterSpacing: 0.4 }}>
+                    ÉTAPE 1 — EMAIL
                   </TText>
-                </TouchableOpacity>
-              )}
-            </View>
+                </View>
 
-            {/* === Ligne 3 : message confirmation/erreur email === */}
-            {emailMsg.type ? (
-              <View style={[styles.msgBox, emailMsg.type === "ok" ? styles.msgOk : styles.msgErr]}>
-                <Ionicons name={emailMsg.type === "ok" ? "checkmark-circle" : "alert-circle"} size={16} color={emailMsg.type === "ok" ? "#065F46" : "#991B1B"} />
-                <TText variant="label" color={emailMsg.type === "ok" ? "#065F46" : "#991B1B"} style={{ marginLeft: 6, flex: 1 }}>
-                  {emailMsg.text}
-                </TText>
+                {/* Email + bouton Vérifier */}
+                <TText variant="caption" weight="semiBold" color={themed.neutrals.textSecondary} style={styles.label}>Adresse email d'inscription</TText>
+                <View style={styles.row}>
+                  <View style={[styles.fieldReadonly, { flex: 1, borderColor: themed.neutrals.border }]}>
+                    <Ionicons name="mail-outline" size={16} color={themed.neutrals.textSecondary} />
+                    <TText weight="semiBold" style={{ marginLeft: 8, flex: 1 }} numberOfLines={1}>{user?.email || "—"}</TText>
+                  </View>
+                  <TouchableOpacity testID="vp-send-email" disabled={emailLoadingSend} onPress={sendEmailCode} style={[styles.actionBtnBlue, emailLoadingSend && { opacity: 0.5 }]}>
+                    <TText variant="caption" weight="extraBold" color="white">{emailLoadingSend ? "..." : "Envoyer code"}</TText>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Code OTP email */}
+                <TText variant="caption" weight="semiBold" color={themed.neutrals.textSecondary} style={styles.label}>Code reçu par email</TText>
+                <View style={styles.row}>
+                  <View style={{ flex: 1 }}>
+                    <Input
+                      testID="vp-otp-email"
+                      value={emailOtp}
+                      onChangeText={(v) => setEmailOtp(v.replace(/[^0-9]/g, "").slice(0, 6))}
+                      keyboardType="number-pad"
+                      placeholder="6 chiffres"
+                      icon="key-outline"
+                      style={{ marginBottom: 0 } as any}
+                    />
+                  </View>
+                  <TouchableOpacity testID="vp-validate-email" disabled={emailLoadingVerify || emailOtp.length < 4} onPress={verifyEmailCode} style={[styles.actionBtnBlue, (emailLoadingVerify || emailOtp.length < 4) && { opacity: 0.4 }]}>
+                    <TText variant="caption" weight="extraBold" color="white">Valider</TText>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.timerRow}>
+                  {emailLeft > 0 ? (
+                    <TText variant="label" color={themed.neutrals.textSecondary}>
+                      Renvoi possible dans <TText weight="extraBold">{emailLeft}s</TText>
+                    </TText>
+                  ) : (
+                    <TouchableOpacity testID="vp-resend-email" disabled={emailLoadingSend} onPress={sendEmailCode}>
+                      <TText variant="label" weight="extraBold" color="#3B82F6">↻ Renvoyer le code</TText>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Message confirmation/erreur email */}
+                {emailMsg.type ? (
+                  <View style={[styles.msgBox, emailMsg.type === "ok" ? styles.msgOk : styles.msgErr]}>
+                    <Ionicons name={emailMsg.type === "ok" ? "checkmark-circle" : "alert-circle"} size={16} color={emailMsg.type === "ok" ? "#065F46" : "#991B1B"} />
+                    <TText variant="label" color={emailMsg.type === "ok" ? "#065F46" : "#991B1B"} style={{ marginLeft: 6, flex: 1 }}>
+                      {emailMsg.text}
+                    </TText>
+                  </View>
+                ) : null}
               </View>
-            ) : null}
+            )}
 
-            <View style={styles.divider} />
-
-            {/* === Ligne 4 : phone + bouton === */}
-            <TText variant="caption" weight="extraBold" color={themed.neutrals.textSecondary} style={styles.label}>4. Numéro de téléphone d'inscription</TText>
-            <View style={styles.row}>
-              <View style={[styles.fieldReadonly, { flex: 1, borderColor: phoneVerified ? themed.status.success : themed.neutrals.border }]}>
-                <Ionicons name="call-outline" size={16} color={themed.neutrals.textSecondary} />
-                <TText weight="semiBold" style={{ marginLeft: 8, flex: 1 }} numberOfLines={1}>{user?.phone || "—"}</TText>
-                {phoneVerified ? <Ionicons name="checkmark-circle" size={18} color={themed.status.success} /> : null}
+            {/* ========================= SECTION PHONE ========================= */}
+            {phoneVerified ? (
+              // Carte condensée verte si téléphone déjà vérifié
+              <View style={[styles.verifiedCard, { marginTop: 10 }]}>
+                <View style={styles.verifiedIcon}>
+                  <Ionicons name="checkmark-circle" size={22} color="white" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <TText variant="caption" weight="extraBold" color="#065F46">Numéro de téléphone vérifié</TText>
+                  <TText variant="label" color="#047857" numberOfLines={1}>{user?.phone || "—"}</TText>
+                </View>
+                <Ionicons name="call" size={18} color="#10B981" />
               </View>
-              <TouchableOpacity
-                testID="vp-send-phone"
-                disabled={phoneVerified || phoneLoadingSend}
-                onPress={sendPhoneCode}
-                style={[styles.actionBtn, (phoneVerified || phoneLoadingSend) && { opacity: 0.5 }]}
-              >
-                <TText variant="caption" weight="extraBold" color="white">
-                  {phoneVerified ? "Vérifié" : phoneLoadingSend ? "..." : "Vérifier"}
-                </TText>
-              </TouchableOpacity>
-            </View>
-
-            {/* === Ligne 5 : code OTP SMS + compteur 60s === */}
-            <TText variant="caption" weight="extraBold" color={themed.neutrals.textSecondary} style={styles.label}>5. Code reçu par SMS</TText>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Input
-                  testID="vp-otp-phone"
-                  value={phoneOtp}
-                  onChangeText={(v) => setPhoneOtp(v.replace(/[^0-9]/g, "").slice(0, 6))}
-                  keyboardType="number-pad"
-                  placeholder="6 chiffres"
-                  icon="key-outline"
-                  style={{ marginBottom: 0 } as any}
-                  editable={!phoneVerified}
-                />
-              </View>
-              <TouchableOpacity
-                testID="vp-validate-phone"
-                disabled={phoneVerified || phoneLoadingVerify || phoneOtp.length < 4}
-                onPress={verifyPhoneCode}
-                style={[styles.actionBtn, (phoneVerified || phoneLoadingVerify || phoneOtp.length < 4) && { opacity: 0.5 }]}
-              >
-                <TText variant="caption" weight="extraBold" color="white">OK</TText>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.timerRow}>
-              {phoneLeft > 0 ? (
-                <TText variant="label" color={themed.neutrals.textSecondary}>
-                  Renvoi possible dans <TText weight="extraBold">{phoneLeft}s</TText>
-                </TText>
-              ) : (
-                <TouchableOpacity testID="vp-resend-phone" disabled={phoneVerified || phoneLoadingSend} onPress={sendPhoneCode}>
-                  <TText variant="label" weight="extraBold" color={phoneVerified ? themed.neutrals.textTertiary : themed.primary.base}>
-                    {phoneVerified ? "—" : "↻ Renvoyer le code"}
+            ) : (
+              <View style={[styles.sectionCard, { marginTop: 10, backgroundColor: "#FFF7ED", borderColor: "#FED7AA" }]}>
+                <View style={styles.sectionHeader}>
+                  <View style={[styles.sectionDot, { backgroundColor: "#F59E0B" }]}>
+                    <Ionicons name="call" size={16} color="white" />
+                  </View>
+                  <TText variant="caption" weight="extraBold" color="#92400E" style={{ marginLeft: 8, letterSpacing: 0.4 }}>
+                    ÉTAPE 2 — TÉLÉPHONE
                   </TText>
-                </TouchableOpacity>
-              )}
-            </View>
+                </View>
 
-            {/* === Ligne 6 : message confirmation/erreur phone === */}
-            {phoneMsg.type ? (
-              <View style={[styles.msgBox, phoneMsg.type === "ok" ? styles.msgOk : styles.msgErr]}>
-                <Ionicons name={phoneMsg.type === "ok" ? "checkmark-circle" : "alert-circle"} size={16} color={phoneMsg.type === "ok" ? "#065F46" : "#991B1B"} />
-                <TText variant="label" color={phoneMsg.type === "ok" ? "#065F46" : "#991B1B"} style={{ marginLeft: 6, flex: 1 }}>
-                  {phoneMsg.text}
-                </TText>
+                <TText variant="caption" weight="semiBold" color={themed.neutrals.textSecondary} style={styles.label}>Numéro de téléphone d'inscription</TText>
+                <View style={styles.row}>
+                  <View style={[styles.fieldReadonly, { flex: 1, borderColor: themed.neutrals.border }]}>
+                    <Ionicons name="call-outline" size={16} color={themed.neutrals.textSecondary} />
+                    <TText weight="semiBold" style={{ marginLeft: 8, flex: 1 }} numberOfLines={1}>{user?.phone || "—"}</TText>
+                  </View>
+                  <TouchableOpacity testID="vp-send-phone" disabled={phoneLoadingSend} onPress={sendPhoneCode} style={[styles.actionBtnOrange, phoneLoadingSend && { opacity: 0.5 }]}>
+                    <TText variant="caption" weight="extraBold" color="white">{phoneLoadingSend ? "..." : "Envoyer code"}</TText>
+                  </TouchableOpacity>
+                </View>
+
+                <TText variant="caption" weight="semiBold" color={themed.neutrals.textSecondary} style={styles.label}>Code reçu par SMS</TText>
+                <View style={styles.row}>
+                  <View style={{ flex: 1 }}>
+                    <Input
+                      testID="vp-otp-phone"
+                      value={phoneOtp}
+                      onChangeText={(v) => setPhoneOtp(v.replace(/[^0-9]/g, "").slice(0, 6))}
+                      keyboardType="number-pad"
+                      placeholder="6 chiffres"
+                      icon="key-outline"
+                      style={{ marginBottom: 0 } as any}
+                    />
+                  </View>
+                  <TouchableOpacity testID="vp-validate-phone" disabled={phoneLoadingVerify || phoneOtp.length < 4} onPress={verifyPhoneCode} style={[styles.actionBtnOrange, (phoneLoadingVerify || phoneOtp.length < 4) && { opacity: 0.4 }]}>
+                    <TText variant="caption" weight="extraBold" color="white">Valider</TText>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.timerRow}>
+                  {phoneLeft > 0 ? (
+                    <TText variant="label" color={themed.neutrals.textSecondary}>
+                      Renvoi possible dans <TText weight="extraBold">{phoneLeft}s</TText>
+                    </TText>
+                  ) : (
+                    <TouchableOpacity testID="vp-resend-phone" disabled={phoneLoadingSend} onPress={sendPhoneCode}>
+                      <TText variant="label" weight="extraBold" color="#F59E0B">↻ Renvoyer le code</TText>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {phoneMsg.type ? (
+                  <View style={[styles.msgBox, phoneMsg.type === "ok" ? styles.msgOk : styles.msgErr]}>
+                    <Ionicons name={phoneMsg.type === "ok" ? "checkmark-circle" : "alert-circle"} size={16} color={phoneMsg.type === "ok" ? "#065F46" : "#991B1B"} />
+                    <TText variant="label" color={phoneMsg.type === "ok" ? "#065F46" : "#991B1B"} style={{ marginLeft: 6, flex: 1 }}>
+                      {phoneMsg.text}
+                    </TText>
+                  </View>
+                ) : null}
               </View>
-            ) : null}
+            )}
 
-            {/* === Ligne 7 : félicitations + Fermer === */}
+            {/* ========================= FÉLICITATIONS ========================= */}
             {bothDone ? (
-              <View style={styles.successBox}>
-                <Ionicons name="trophy" size={28} color="#065F46" style={{ marginBottom: 8 }} />
-                <TText weight="extraBold" color="#065F46" align="center" style={{ marginBottom: 6 }}>
+              <LinearGradient colors={["#10B981", "#059669"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.successBox}>
+                <View style={styles.trophyCircle}>
+                  <Ionicons name="trophy" size={32} color="#FBBF24" />
+                </View>
+                <TText variant="title" weight="extraBold" color="white" align="center" style={{ marginTop: 10 }}>
                   Félicitations !
                 </TText>
-                <TText variant="caption" color="#065F46" align="center" style={{ marginBottom: 12 }}>
-                  Votre email et votre numéro de téléphone sont désormais vérifiés. Votre compte est pleinement sécurisé.
+                <TText variant="caption" color="rgba(255,255,255,0.95)" align="center" style={{ marginTop: 6, lineHeight: 18 }}>
+                  Votre email et votre numéro de téléphone sont désormais vérifiés. Votre compte est pleinement sécurisé et toutes les fonctionnalités sont débloquées.
                 </TText>
-                <Button testID="vp-finish" title="Fermer cette fenêtre" onPress={() => handleClose(true)} icon="checkmark-done" />
-              </View>
+                <View style={{ width: "100%", marginTop: 14 }}>
+                  <Button testID="vp-finish" title="Fermer cette fenêtre" onPress={() => handleClose(true)} icon="checkmark-done" style={{ backgroundColor: "white" }} textStyle={{ color: "#059669" } as any} />
+                </View>
+              </LinearGradient>
             ) : null}
           </ScrollView>
 
@@ -383,29 +407,72 @@ const styles = StyleSheet.create({
     maxWidth: 480,
     maxHeight: "92%",
     borderRadius: radii.xxl,
-    paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 16,
+    overflow: "hidden",
   },
-  header: {
+  // Header gradient bleu
+  headerGradient: { paddingHorizontal: spacing.lg, paddingVertical: 14 },
+  headerInner: { flexDirection: "row", alignItems: "center" },
+  headerIconCircle: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
+  },
+  closeBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+
+  // Carte section (email = bleu, phone = orange via override)
+  sectionCard: {
+    backgroundColor: "#EFF6FF",
+    borderRadius: radii.xl,
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    padding: spacing.md,
+  },
+  sectionHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  sectionDot: {
+    width: 28, height: 28, borderRadius: 14,
+    alignItems: "center", justifyContent: "center",
+  },
+
+  // Carte condensée verte pour canal déjà vérifié
+  verifiedCard: {
     flexDirection: "row", alignItems: "center",
-    paddingBottom: 12,
-    borderBottomWidth: 1, borderBottomColor: colors.neutrals.border,
-    marginBottom: 12,
+    backgroundColor: "#ECFDF5",
+    borderRadius: radii.xl,
+    borderWidth: 1, borderColor: "#10B981",
+    padding: spacing.md,
   },
-  closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: colors.neutrals.background },
-  label: { letterSpacing: 0.4, marginTop: 8, marginBottom: 6 },
+  verifiedIcon: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: "#10B981",
+    alignItems: "center", justifyContent: "center",
+  },
+
+  label: { letterSpacing: 0.3, marginTop: 8, marginBottom: 6 },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
   fieldReadonly: {
     flexDirection: "row", alignItems: "center",
     paddingHorizontal: 12, height: 44,
-    backgroundColor: colors.neutrals.background,
+    backgroundColor: "white",
     borderRadius: radii.lg, borderWidth: 1,
   },
-  actionBtn: {
-    backgroundColor: colors.primary.base,
+  // Boutons d'action colorés (bleu pour email, orange pour phone)
+  actionBtnBlue: {
+    backgroundColor: "#3B82F6",
     paddingHorizontal: 12, height: 44,
     borderRadius: radii.lg,
     alignItems: "center", justifyContent: "center",
-    minWidth: 80,
+    minWidth: 100,
+  },
+  actionBtnOrange: {
+    backgroundColor: "#F59E0B",
+    paddingHorizontal: 12, height: 44,
+    borderRadius: radii.lg,
+    alignItems: "center", justifyContent: "center",
+    minWidth: 100,
   },
   timerRow: { flexDirection: "row", justifyContent: "flex-end", marginTop: 4, marginBottom: 4 },
   msgBox: {
@@ -415,14 +482,21 @@ const styles = StyleSheet.create({
   msgOk: { backgroundColor: "#D1FAE5", borderColor: "#10B981" },
   msgErr: { backgroundColor: "#FEE2E2", borderColor: "#EF4444" },
   divider: { height: 1, backgroundColor: colors.neutrals.border, marginVertical: spacing.md },
+
+  // Box de félicitations avec gradient vert
   successBox: {
-    backgroundColor: "#D1FAE5",
-    borderRadius: radii.xl, borderWidth: 1, borderColor: "#10B981",
+    borderRadius: radii.xxl,
     padding: spacing.lg,
     alignItems: "center", justifyContent: "center",
     marginTop: spacing.md,
   },
-  // Overlay de confirmation d'interruption (au-dessus du contenu)
+  trophyCircle: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center", justifyContent: "center",
+  },
+
+  // Overlay confirmation d'interruption (inchangé)
   confirmOverlay: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: "rgba(0,0,0,0.5)",
