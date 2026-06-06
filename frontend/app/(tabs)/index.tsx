@@ -223,7 +223,7 @@ export default function Home() {
             <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{t("home.addMoney")}</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-withdraw" onPress={() => router.push("/wallet/withdraw" as any)} style={styles.walletQuickBtn}>
-            <View style={[styles.walletQuickIcon, { backgroundColor: "#3B82F6" }]}>
+            <View style={[styles.walletQuickIcon, { backgroundColor: "#022a6b" }]}>
               <Ionicons name="arrow-down-circle" size={22} color="white" />
             </View>
             <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{t("home.withdraw")}</TText>

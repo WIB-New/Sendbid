@@ -11,7 +11,7 @@ import { useThemedColors } from "../src/themeContext";
 // "Marketing & promotions" SUPPRIMÉ selon spécification
 type Pref = { key: string; label: string; description: string; icon: any; tint: string };
 const PREFS: Pref[] = [
-  { key: "push",  label: "Notifications push",  description: "Alertes en temps réel sur votre appareil", icon: "notifications-outline", tint: "#3B82F6" },
+  { key: "push",  label: "Notifications push",  description: "Alertes en temps réel sur votre appareil", icon: "notifications-outline", tint: "#022a6b" },
   { key: "email", label: "Notifications email", description: "Reçus par transfert, alertes sécurité",     icon: "mail-outline",         tint: "#10B981" },
   { key: "sms",   label: "Notifications SMS",   description: "Codes OTP, confirmations critiques",       icon: "chatbox-ellipses-outline", tint: "#F59E0B" },
 ];

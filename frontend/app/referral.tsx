@@ -87,7 +87,7 @@ export default function Referral() {
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          <StatBox label="Invités" value={invited} color="#3B82F6" icon="people-outline" />
+          <StatBox label="Invités" value={invited} color="#022a6b" icon="people-outline" />
           <View style={styles.sep} />
           <StatBox label="Gagnés" value={`${stats.earned || 0} €`} color="#10B981" icon="cash-outline" />
           <View style={styles.sep} />

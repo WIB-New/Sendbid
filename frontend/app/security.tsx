@@ -123,8 +123,8 @@ export default function SecurityScreen() {
 
         {/* Sessions actives */}
         <TouchableOpacity testID="security-sessions" onPress={() => router.push("/sessions" as any)} style={styles.row}>
-          <View style={[styles.icon, { backgroundColor: "#3B82F61A" }]}>
-            <Ionicons name="phone-portrait-outline" size={22} color="#3B82F6" />
+          <View style={[styles.icon, { backgroundColor: "#022a6b1A" }]}>
+            <Ionicons name="phone-portrait-outline" size={22} color="#022a6b" />
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <TText variant="body" weight="semiBold">Sessions actives</TText>

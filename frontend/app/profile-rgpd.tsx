@@ -23,7 +23,7 @@ export default function ProfileRgpd() {
       icon: "download-outline",
       label: "Export des données",
       description: "Recevez une archive de toutes vos données par email",
-      tint: "#3B82F6",
+      tint: "#022a6b",
       onPress: async () => {
         try { await import("../src/api").then(({ api }) => api.post("/auth/rgpd/export").catch(() => null)); } catch {}
         showAlert("Votre demande d'export RGPD a été enregistrée. Vous recevrez votre archive sous 48h par email.");

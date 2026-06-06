@@ -21,7 +21,7 @@ const NEXT_POINTS: any = { Bronze: 500, Silver: 2000, Gold: 5000, Platinum: 5000
 
 const PERKS = [
   { icon: "pricetag-outline", label: "Frais réduits", value: "-30%", color: "#10B981" },
-  { icon: "headset-outline", label: "Support prioritaire", value: "24/7", color: "#3B82F6" },
+  { icon: "headset-outline", label: "Support prioritaire", value: "24/7", color: "#022a6b" },
   { icon: "cash-outline", label: "Cashback transferts", value: "2%", color: "#F59E0B" },
   { icon: "flash", label: "Bonus offres", value: "×2", color: "#8B5CF6" },
 ];

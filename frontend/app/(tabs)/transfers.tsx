@@ -7,28 +7,30 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TText } from "../../src/components/TText";
 import { StatusChip } from "../../src/components/StatusChip";
 import { api } from "../../src/api";
+import { t, useLocale } from "../../src/i18n";
 import { colors, spacing, radii, shadows } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 
 const CATEGORIES = [
-  { key: "all", label: "Tous" },
-  { key: "sent", label: "Envoyés" },
-  { key: "received", label: "Reçus" },
-  { key: "in_progress", label: "En cours" },
-  { key: "done", label: "Terminés" },
+  { key: "all", labelKey: "transfers.cats.all" },
+  { key: "sent", labelKey: "transfers.cats.sent" },
+  { key: "received", labelKey: "transfers.cats.received" },
+  { key: "in_progress", labelKey: "transfers.cats.inProgress" },
+  { key: "done", labelKey: "transfers.cats.done" },
 ];
 
 const PERIODS = [
-  { key: "day", label: "Jour" },
-  { key: "week", label: "Sem." },
-  { key: "month", label: "Mois" },
-  { key: "quarter", label: "Trim." },
+  { key: "day", labelKey: "wallet.period.day" },
+  { key: "week", labelKey: "wallet.period.week" },
+  { key: "month", labelKey: "wallet.period.month" },
+  { key: "quarter", labelKey: "wallet.period.quarter" },
 ];
 
 const IN_PROGRESS = ["DRAFT", "PENDING_PAYMENT", "BIDDING", "AGENT_ASSIGNED", "PROCESSING", "PROCESSING_BANK", "PROCESSING_MOMO", "READY_FOR_PICKUP", "VIP_DELIVERY"];
 const DONE = ["COMPLETED", "EXPIRED", "CANCELLED_USER", "FAILED"];
 
 export default function Transfers() {
+  useLocale((st) => st.locale);
   const router = useRouter();
   const [cat, setCat] = useState<string>("all");
   const [period, setPeriod] = useState<string>("month");
@@ -73,7 +75,7 @@ export default function Transfers() {
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <View style={{ flex: 1 }}>
-              <TText variant="title" weight="extraBold" color="white">Mes transferts</TText>
+              <TText variant="title" weight="extraBold" color="white">{t("transfers.title")}</TText>
             </View>
             <TouchableOpacity testID="transfers-menu" onPress={() => setShowMenu(true)} hitSlop={10} style={styles.iconBtn}>
               <Ionicons name="menu" size={20} color="white" />
@@ -82,9 +84,9 @@ export default function Transfers() {
 
           {/* Mini stats row */}
           <View style={styles.statsRow}>
-            <StatTile label="Total" value={String(list.length)} icon="layers-outline" />
-            <StatTile label="En cours" value={String(inProgressCount)} icon="flash-outline" tint="#F59E0B" />
-            <StatTile label="Terminés" value={String(doneCount)} icon="checkmark-done-outline" tint="#5CE1A6" />
+            <StatTile label={t("transfers.stats.total")} value={String(list.length)} icon="layers-outline" />
+            <StatTile label={t("transfers.stats.inProgress")} value={String(inProgressCount)} icon="flash-outline" tint="#F59E0B" />
+            <StatTile label={t("transfers.stats.done")} value={String(doneCount)} icon="checkmark-done-outline" tint="#5CE1A6" />
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -94,7 +96,7 @@ export default function Transfers() {
         <View style={styles.segRow}>
           {CATEGORIES.map((c) => (
             <TouchableOpacity key={c.key} testID={`tab-${c.key}`} onPress={() => setCat(c.key)} style={[styles.segTab, cat === c.key && styles.segTabActive]}>
-              <TText variant="label" weight="bold" color={cat === c.key ? "white" : colors.neutrals.textPrimary}>{c.label}</TText>
+              <TText variant="label" weight="bold" color={cat === c.key ? "white" : colors.neutrals.textPrimary}>{t(c.labelKey)}</TText>
             </TouchableOpacity>
           ))}
         </View>
@@ -104,10 +106,10 @@ export default function Transfers() {
       <View style={styles.content}>
         {/* Titre + CTA Nouveau transfert */}
         <View style={styles.listHead}>
-          <TText variant="caption" weight="bold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.3, fontSize: 11 }}>Transferts récents</TText>
+          <TText variant="caption" weight="bold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.3, fontSize: 11 }}>{t("transfers.recent")}</TText>
           <TouchableOpacity testID="transfers-new-cta" onPress={() => router.push("/transfer/new")} style={styles.newCta}>
             <Ionicons name="add-circle" size={16} color={colors.primary.base} />
-            <TText variant="caption" weight="extraBold" color={colors.primary.base} style={{ marginLeft: 4 }}>Nouveau transfert</TText>
+            <TText variant="caption" weight="extraBold" color={colors.primary.base} style={{ marginLeft: 4 }}>{t("transfers.new")}</TText>
           </TouchableOpacity>
         </View>
 
@@ -115,7 +117,7 @@ export default function Transfers() {
         <View style={styles.periodRow}>
           {PERIODS.map((p) => (
             <TouchableOpacity key={p.key} testID={`period-${p.key}`} onPress={() => setPeriod(p.key)} style={[styles.pChip, period === p.key && styles.pChipActive]}>
-              <TText variant="label" weight="bold" color={period === p.key ? "white" : colors.neutrals.textPrimary}>{p.label}</TText>
+              <TText variant="label" weight="bold" color={period === p.key ? "white" : colors.neutrals.textPrimary}>{t(p.labelKey)}</TText>
             </TouchableOpacity>
           ))}
         </View>
@@ -136,11 +138,11 @@ export default function Transfers() {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Ionicons name="diamond-outline" size={48} color={colors.neutrals.textTertiary} />
-              <TText variant="body" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginTop: 10 }}>Aucun transfert</TText>
+              <TText variant="body" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginTop: 10 }}>{t("transfers.none")}</TText>
               <TText variant="caption" color={colors.neutrals.textTertiary} align="center" style={{ marginTop: 4 }}>Commencez votre premier transfert en un clic</TText>
               <TouchableOpacity onPress={() => router.push("/transfer/new")} style={styles.emptyCta}>
                 <Ionicons name="add" size={18} color="white" />
-                <TText weight="bold" color="white" style={{ marginLeft: 6 }}>Nouveau transfert</TText>
+                <TText weight="bold" color="white" style={{ marginLeft: 6 }}>{t("transfers.new")}</TText>
               </TouchableOpacity>
             </View>
           }
@@ -170,7 +172,7 @@ export default function Transfers() {
             <MenuItem icon="warning-outline" label="Déclarer un litige" onPress={() => { setShowMenu(false); router.push("/disputes/new" as any); }} />
             <MenuItem icon="speedometer-outline" label="Mes limites" onPress={() => { setShowMenu(false); router.push("/limits" as any); }} />
             <MenuItem icon="people-outline" label="Mes bénéficiaires" onPress={() => { setShowMenu(false); router.push("/beneficiaries" as any); }} />
-            <MenuItem icon="card-outline" label="Moyens de paiement" onPress={() => { setShowMenu(false); router.push("/payment-methods" as any); }} />
+            <MenuItem icon="card-outline" label={t("services.paymentMethods")} onPress={() => { setShowMenu(false); router.push("/payment-methods" as any); }} />
           </View>
         </TouchableOpacity>
       </Modal>

@@ -31,7 +31,7 @@ export default function ProfileAccount() {
   };
 
   const items: HubItem[] = [
-    { icon: "person-circle-outline", label: "Mes informations personnelles", description: "Nom, email, téléphone, adresse", route: "/personal-info", tint: "#3B82F6" },
+    { icon: "person-circle-outline", label: "Mes informations personnelles", description: "Nom, email, téléphone, adresse", route: "/personal-info", tint: "#022a6b" },
     isCorporate
       ? { icon: "business-outline", label: "Vérification KYC Entreprise", description: "Statuts, registre, bénéficiaires effectifs", route: "/kyc/corporate", tint: "#8B5CF6" }
       : { icon: "shield-checkmark-outline", label: "Vérification KYC", description: "Identité, justificatifs, niveaux KYC", route: "/kyc", tint: "#10B981" },

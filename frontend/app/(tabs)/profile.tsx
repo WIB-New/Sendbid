@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TText } from "../../src/components/TText";
 import { SendBidLogo } from "../../src/components/Logo";
 import { useAuth } from "../../src/store";
+import { t, useLocale } from "../../src/i18n";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 
@@ -38,6 +39,8 @@ const SOCIALS: { icon: keyof typeof Ionicons.glyphMap; url: string }[] = [
 ];
 
 export default function Profile() {
+  // Abonnement i18n pour re-render sur changement de locale
+  useLocale((s) => s.locale);
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
@@ -74,10 +77,10 @@ export default function Profile() {
 
   // Mes sections — RGPD retiré (l'action "Supprimer mon compte" est déplacée dans "Mon compte")
   const SECTIONS: { title: string; subtitle: string; route: string; icon: any; tint: string }[] = [
-    { title: "Mon compte", subtitle: "Informations, KYC, suppression de compte", route: "/profile-account", icon: "person-circle", tint: "#3B82F6" },
-    { title: "Paramètres", subtitle: "Sécurité, préférences, notifications", route: "/profile-settings", icon: "settings", tint: "#8B5CF6" },
-    { title: "Fidélité & Récompenses", subtitle: "Parrainage, programme, évaluations", route: "/profile-loyalty", icon: "trophy", tint: "#F59E0B" },
-    { title: "Aide & Support", subtitle: "Contact, FAQ, litiges, ressources", route: "/profile-help", icon: "help-circle", tint: "#10B981" },
+    { title: t("profile.account"), subtitle: t("profileSections.accountSubtitle"), route: "/profile-account", icon: "person-circle", tint: "#022a6b" },
+    { title: t("profile.settings"), subtitle: t("profileSections.settingsSubtitle"), route: "/profile-settings", icon: "settings", tint: "#8B5CF6" },
+    { title: t("profile.loyalty"), subtitle: t("profileSections.loyaltySubtitle"), route: "/profile-loyalty", icon: "trophy", tint: "#F59E0B" },
+    { title: t("profile.support"), subtitle: t("profileSections.supportSubtitle"), route: "/profile-help", icon: "help-circle", tint: "#10B981" },
   ];
 
   return (
@@ -85,7 +88,7 @@ export default function Profile() {
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         {/* Header */}
         <View style={styles.header}>
-          <TText variant="title" weight="extraBold" color="white">Profil</TText>
+          <TText variant="title" weight="extraBold" color="white">{t("profile.title")}</TText>
           <TouchableOpacity onPress={() => router.push("/settings" as any)} style={styles.iconBtn}>
             <Ionicons name="settings-outline" size={20} color="white" />
           </TouchableOpacity>
@@ -164,22 +167,22 @@ export default function Profile() {
                   <Ionicons name="phone-portrait" size={20} color="#10B981" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <TText variant="body" weight="semiBold">Cet appareil</TText>
-                  <TText variant="caption" color={colors.neutrals.textSecondary}>{Platform.OS === "web" ? "Web" : Platform.OS} • Actif maintenant</TText>
+                  <TText variant="body" weight="semiBold">{t("profile.thisDevice")}</TText>
+                  <TText variant="caption" color={colors.neutrals.textSecondary}>{Platform.OS === "web" ? "Web" : Platform.OS} • {t("profile.activeNow")}</TText>
                 </View>
-                <View style={styles.activeChip}><TText variant="label" weight="bold" color="#10B981">Actif</TText></View>
+                <View style={styles.activeChip}><TText variant="label" weight="bold" color="#10B981">{t("profile.active")}</TText></View>
               </View>
               <TouchableOpacity
                 testID="logout-all-devices"
                 style={styles.disconnectAllRow}
-                onPress={() => Alert.alert("Déconnecter tous les appareils", "Toutes vos sessions actives seront fermées sur tous vos appareils.", [{ text: "Annuler", style: "cancel" }, { text: "Confirmer", style: "destructive", onPress: onLogout }])}
+                onPress={() => Alert.alert(t("profile.confirmLogoutTitle"), t("profile.confirmLogoutMsg"), [{ text: t("common.cancel"), style: "cancel" }, { text: t("common.confirm"), style: "destructive", onPress: onLogout }])}
               >
                 <View style={[styles.rowIcon, { backgroundColor: "rgba(239,68,68,0.12)" }]}>
                   <Ionicons name="log-out-outline" size={20} color="#EF4444" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <TText variant="body" weight="semiBold" color="#EF4444">Déconnecter tous les appareils</TText>
-                  <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 2 }}>Fermer toutes les sessions actives</TText>
+                  <TText variant="body" weight="semiBold" color="#EF4444">{t("profile.disconnectAllDevices")}</TText>
+                  <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 2 }}>{t("profile.disconnectAllSubtitle")}</TText>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.neutrals.textTertiary} />
               </TouchableOpacity>
@@ -191,11 +194,11 @@ export default function Profile() {
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View style={styles.aboutLogo}><SendBidLogo size={28} /></View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <TText variant="caption" weight="extraBold" color="white">À propos de SENDBID</TText>
+                <TText variant="caption" weight="extraBold" color="white">{t("profile.aboutSendbid")}</TText>
               </View>
             </View>
             <TText color="rgba(255,255,255,0.78)" style={{ marginTop: spacing.sm, fontSize: 11, lineHeight: 15 }}>
-              Application innovante de transfert d'argent international qui met en relation les expéditeurs avec les agents pour des remises d'argent multimodes, rapides et sécurisées.
+              {t("profile.aboutDescription")}
             </TText>
             <View style={styles.socialRow}>
               {SOCIALS.map((s) => (
@@ -209,7 +212,7 @@ export default function Profile() {
           {/* Logout big button */}
           <TouchableOpacity testID="profile-logout" style={styles.logoutBtn} onPress={onLogout} disabled={busy}>
             <Ionicons name="log-out-outline" size={22} color="white" />
-            <TText variant="body" weight="extraBold" color="white" style={{ marginLeft: 8 }}>{busy ? "Déconnexion…" : "Se déconnecter"}</TText>
+            <TText variant="body" weight="extraBold" color="white" style={{ marginLeft: 8 }}>{busy ? t("common.loading") : t("common.logout")}</TText>
           </TouchableOpacity>
           <View style={{ height: spacing.xxxl }} />
         </ScrollView>

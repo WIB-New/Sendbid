@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
+import { t, useLocale } from "../../src/i18n";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
@@ -13,10 +14,10 @@ import { useThemedColors } from "../../src/themeContext";
 // Wallet tab v4.0 — "17 Wallet" : hero gradient + 4 quick actions (Recharger/Retirer/Envoyer/Historique)
 // + Opérations récentes liste cliquable vers /wallet/op/[id]
 const QUICK = [
-  { key: "recharge", icon: "add-circle" as const, label: "Ajouter de l'argent", color: "#10B981", route: "/wallet/recharge" },
-  { key: "withdraw", icon: "arrow-down-circle" as const, label: "Retirer", color: "#3B82F6", route: "/wallet/withdraw" },
-  { key: "send", icon: "paper-plane" as const, label: "Envoyer", color: "#F59E0B", route: "/wallet/p2p" },
-  { key: "bank", icon: "business" as const, label: "Virement bancaire", color: "#8B5CF6", route: "/wallet/bank-transfer" },
+  { key: "recharge", icon: "add-circle" as const, labelKey: "home.addMoney", color: "#10B981", route: "/wallet/recharge" },
+  { key: "withdraw", icon: "arrow-down-circle" as const, labelKey: "home.withdraw", color: "#022a6b", route: "/wallet/withdraw" },
+  { key: "send", icon: "paper-plane" as const, labelKey: "home.send", color: "#F59E0B", route: "/wallet/p2p" },
+  { key: "bank", icon: "business" as const, labelKey: "delivery.bank", color: "#8B5CF6", route: "/wallet/bank-transfer" },
 ];
 
 function tint(type: string) {
@@ -70,6 +71,7 @@ export default function WalletTab() {
     setBusy(false);
   }, [refreshMe]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
+  useLocale((st) => st.locale);
 
   const filtered = React.useMemo(() => {
     const days = period === "day" ? 1 : period === "week" ? 7 : period === "month" ? 30 : 90;
@@ -86,20 +88,20 @@ export default function WalletTab() {
       <LinearGradient colors={["#022a6b", "#052080"]} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
-            <TText variant="title" weight="extraBold" color="white">Mon portefeuille</TText>
+            <TText variant="title" weight="extraBold" color="white">{t("wallet.title")}</TText>
             <TouchableOpacity testID="wallet-menu-btn" onPress={() => setShowMenu(true)} style={styles.iconBtn}>
               <Ionicons name="menu" size={22} color="white" />
             </TouchableOpacity>
           </View>
           <View style={styles.balanceBox}>
-            <TText variant="label" color="rgba(255,255,255,0.75)" style={{ letterSpacing: 1 }}>SOLDE PRINCIPAL</TText>
+            <TText variant="label" color="rgba(255,255,255,0.75)" style={{ letterSpacing: 1 }}>{t("wallet.mainBalance")}</TText>
             <TText variant="display" weight="extraBold" color="white" style={{ marginTop: 4 }}>
               {Number(wallet?.balance || 0).toFixed(2)} <TText variant="title" weight="bold" color="rgba(255,255,255,0.8)">{wallet?.currency || "EUR"}</TText>
             </TText>
             <View style={styles.walletRow}>
               <Ionicons name="wallet" size={14} color="rgba(255,255,255,0.75)" />
               <TText variant="label" color="rgba(255,255,255,0.75)" style={{ marginLeft: 4 }}>
-                Wallet multi-devises · Gratuit
+                {t("wallet.multiCurrency")}
               </TText>
             </View>
           </View>
@@ -119,16 +121,14 @@ export default function WalletTab() {
               <View style={[styles.quickIcon, { backgroundColor: q.color }]}>
                 <Ionicons name={q.icon} size={20} color="white" />
               </View>
-              <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{q.label}</TText>
+              <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{t(q.labelKey)}</TText>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Transactions */}
         <View style={styles.secHead}>
-          <TText variant="label" weight="bold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.3, fontSize: 11 }}>
-            Opérations récentes
-          </TText>
+          <TText variant="label" weight="bold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.3, fontSize: 11 }}>{t("wallet.recentOps")}</TText>
           <TouchableOpacity onPress={load}>
             <Ionicons name="refresh" size={16} color={colors.neutrals.textSecondary} />
           </TouchableOpacity>
@@ -136,9 +136,9 @@ export default function WalletTab() {
 
         {/* Period filter chips */}
         <View style={styles.periodRow}>
-          {[{ k: "day", l: "Jour" }, { k: "week", l: "Sem." }, { k: "month", l: "Mois" }, { k: "quarter", l: "Trim." }].map((p) => (
+          {[{ k: "day", lk: "wallet.period.day" }, { k: "week", lk: "wallet.period.week" }, { k: "month", lk: "wallet.period.month" }, { k: "quarter", lk: "wallet.period.quarter" }].map((p) => (
             <TouchableOpacity key={p.k} testID={`wper-${p.k}`} onPress={() => { setPeriod(p.k as any); setShowAll(false); }} style={[styles.pChip, period === p.k && styles.pChipActive]}>
-              <TText variant="label" weight="bold" color={period === p.k ? "white" : colors.neutrals.textPrimary}>{p.l}</TText>
+              <TText variant="label" weight="bold" color={period === p.k ? "white" : colors.neutrals.textPrimary}>{t(p.lk)}</TText>
             </TouchableOpacity>
           ))}
         </View>
@@ -147,7 +147,7 @@ export default function WalletTab() {
           {visible.length === 0 ? (
             <View style={{ padding: spacing.xl, alignItems: "center" }}>
               <Ionicons name="receipt-outline" size={28} color={colors.neutrals.textTertiary} />
-              <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 6 }}>Aucune opération sur cette période</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 6 }}>{t("wallet.noOpsPeriod")}</TText>
             </View>
           ) : visible.map((tx: any, i: number) => {
             const amt = getAmount(tx);
@@ -178,7 +178,7 @@ export default function WalletTab() {
         {filtered.length > 10 ? (
           <TouchableOpacity testID="wallet-viewall" style={styles.seeAll} onPress={() => setShowAll((v) => !v)}>
             <TText variant="caption" weight="bold" color={colors.primary.base}>
-              {showAll ? "Réduire" : `Voir tout (${filtered.length})`}
+              {showAll ? t("wallet.reduce") : `${t("wallet.seeAll")} (${filtered.length})`}
             </TText>
             <Ionicons name={showAll ? "chevron-up" : "chevron-down"} size={16} color={colors.primary.base} />
           </TouchableOpacity>
@@ -189,11 +189,11 @@ export default function WalletTab() {
       <Modal visible={showMenu} transparent animationType="fade" onRequestClose={() => setShowMenu(false)}>
         <TouchableOpacity activeOpacity={1} style={styles.menuOverlay} onPress={() => setShowMenu(false)}>
           <View style={styles.menuCard}>
-            <MenuRow icon="qr-code-outline" label="Connaître mon SBTag" onPress={() => { setShowMenu(false); router.push("/sbtag" as any); }} />
+            <MenuRow icon="qr-code-outline" label="SBTag" onPress={() => { setShowMenu(false); router.push("/sbtag" as any); }} />
             <MenuRow icon="people-circle-outline" label="Mes contacts" onPress={() => { setShowMenu(false); router.push("/contacts" as any); }} />
             <MenuRow icon="speedometer-outline" label="Mes plafonds" onPress={() => { setShowMenu(false); router.push("/payment-caps" as any); }} />
-            <MenuRow icon="receipt-outline" label="Reçus PDF" onPress={() => { setShowMenu(false); router.push("/receipts" as any); }} />
-            <MenuRow icon="help-circle-outline" label="Support" onPress={() => { setShowMenu(false); router.push("/support" as any); }} last />
+            <MenuRow icon="receipt-outline" label={t("profile.documents")} onPress={() => { setShowMenu(false); router.push("/receipts" as any); }} />
+            <MenuRow icon="help-circle-outline" label={t("profile.support")} onPress={() => { setShowMenu(false); router.push("/support" as any); }} last />
           </View>
         </TouchableOpacity>
       </Modal>

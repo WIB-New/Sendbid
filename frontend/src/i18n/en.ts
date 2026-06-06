@@ -197,4 +197,10 @@ export default {
     noCards: "No saved card",
     connected: "Connected",
   },
+  profileSections: {
+    accountSubtitle: "Information, KYC, account deletion",
+    settingsSubtitle: "Security, preferences, notifications",
+    loyaltySubtitle: "Referrals, program, ratings",
+    supportSubtitle: "Contact, FAQ, disputes, resources",
+  },
 };

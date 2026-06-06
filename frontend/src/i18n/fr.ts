@@ -197,4 +197,10 @@ export default {
     noCards: "Aucune carte enregistrée",
     connected: "Connecté",
   },
+  profileSections: {
+    accountSubtitle: "Informations, KYC, suppression de compte",
+    settingsSubtitle: "Sécurité, préférences, notifications",
+    loyaltySubtitle: "Parrainage, programme, évaluations",
+    supportSubtitle: "Contact, FAQ, litiges, ressources",
+  },
 };
