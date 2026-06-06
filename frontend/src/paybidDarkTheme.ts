@@ -4,7 +4,7 @@
  * Bascul\u00e9 automatiquement par useThemedPaybidColors() en fonction du mode global SENDBID.
  */
 export const paybidDarkColors = {
-  primary: { base: "#FFB733", dark: "#CC7A00", light: "#FFCC66" },
+  primary: { base: "#FFB733", dark: "#F59E0B", light: "#FFCC66" },
   accent: { base: "#3A4D8F", dark: "#022a6b", light: "#5B6FB8" },
   status: { success: "#04d46f", pending: "#F59E0B", error: "#F87171", info: "#3B82F6" },
   neutrals: {

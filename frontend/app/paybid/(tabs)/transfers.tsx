@@ -40,9 +40,29 @@ export default function PaybidTransfers() {
 
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: paybidColors.neutrals.background }}>
-      <View style={{ padding: spacing.lg }}>
+      <View style={{ padding: spacing.lg, paddingBottom: 0 }}>
         <TText variant="title" weight="extraBold">Mes transferts</TText>
       </View>
+
+      {/* === ITEM 2 : Section "Offres en temps réel" intégrée en haut de Transferts === */}
+      <TouchableOpacity
+        testID="auctions-section"
+        onPress={() => router.push("/paybid/auctions" as any)}
+        activeOpacity={0.85}
+        style={styles.auctionsBanner}
+      >
+        <View style={[styles.icon, { backgroundColor: "#F59E0B" + "22" }]}>
+          <Ionicons name="flash" size={22} color="#F59E0B" />
+        </View>
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <TText weight="extraBold" color={paybidColors.neutrals.textPrimary}>Offres en temps réel</TText>
+          <TText variant="caption" color={paybidColors.neutrals.textSecondary}>
+            Voir les enchères ouvertes près de vous et y participer
+          </TText>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={paybidColors.neutrals.textTertiary} />
+      </TouchableOpacity>
+
       <View style={styles.tabsRow}>
         {CATS.map((c) => (
           <TouchableOpacity key={c.key} onPress={() => setCat(c.key)} style={[styles.tab, cat === c.key && styles.tabActive]}>
@@ -80,5 +100,6 @@ const styles = StyleSheet.create({
   tabActive: { backgroundColor: paybidColors.primary.base, borderColor: paybidColors.primary.base },
   row: { flexDirection: "row", alignItems: "center", padding: 12, backgroundColor: paybidColors.neutrals.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: paybidColors.neutrals.border, marginBottom: 8 },
   icon: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: paybidColors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
+  auctionsBanner: { flexDirection: "row", alignItems: "center", marginHorizontal: spacing.lg, marginBottom: spacing.md, padding: 14, backgroundColor: paybidColors.neutrals.surface, borderRadius: radii.xl, borderWidth: 1.5, borderColor: "#F59E0B" + "55" },
   empty: { alignItems: "center", padding: 40 },
 });

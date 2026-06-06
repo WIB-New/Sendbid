@@ -28,8 +28,10 @@ export default function PaybidTabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Tableau", tabBarIcon: ({ color }) => <Icon name="home" color={color} /> }} />
-      <Tabs.Screen name="auctions" options={{ title: "Offres", tabBarIcon: ({ color }) => <Icon name="flash" color={color} /> }} />
+      {/* Item 2 — Onglet Offres SUPPRIMÉ du tab bar, intégré dans Transferts */}
+      <Tabs.Screen name="auctions" options={{ href: null }} />
       <Tabs.Screen name="transfers" options={{ title: "Transferts", tabBarIcon: ({ color }) => <Icon name="paper-plane" color={color} /> }} />
+      <Tabs.Screen name="account" options={{ title: "Mon compte", tabBarIcon: ({ color }) => <Icon name="wallet" color={color} /> }} />
       <Tabs.Screen name="earnings" options={{ title: "Gains", tabBarIcon: ({ color }) => <Icon name="cash" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: "Profil", tabBarIcon: ({ color }) => <Icon name="person" color={color} /> }} />
     </Tabs>

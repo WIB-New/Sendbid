@@ -13,6 +13,7 @@ from core.security import gen_id
 from routers.notifications import create_notification
 
 from . import router
+from .core import _require_agent
 from .models import AgentSignupIn, BidIn, CompleteIn
 
 

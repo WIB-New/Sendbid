@@ -192,7 +192,32 @@ async def list_transfers(user: dict = Depends(get_current_user), status: Optiona
 
 @router.get("/{transfer_id}")
 async def get_transfer(transfer_id: str, user: dict = Depends(get_current_user)):
+    """Retourne le détail d'un transfert.
+    
+    Autorisations :
+      - L'expéditeur (user_id)
+      - L'agent assigné (agent.user_id == user.id, qu'il soit pending, processing, ou completed)
+      - L'admin / super-admin (accès complet)
+    """
+    role = user.get("role")
+    is_admin = role in ("admin", "super_admin", "partner_admin")
+    
+    # 1) Tentative en tant qu'expéditeur (le cas le plus fréquent)
     t = await db.transfers.find_one({"id": transfer_id, "user_id": user["id"]}, {"_id": 0})
+    
+    # 2) Si pas trouvé et c'est un agent → tenter en tant qu'agent assigné
+    if not t and role in ("agent", "agent_admin", "super_agent"):
+        # L'agent_id est stocké directement sur le user (cf core.deps._require_agent)
+        agent_id = user.get("agent_id")
+        if agent_id:
+            t = await db.transfers.find_one(
+                {"id": transfer_id, "agent_id": agent_id}, {"_id": 0}
+            )
+    
+    # 3) Si pas trouvé et c'est un admin → accès complet
+    if not t and is_admin:
+        t = await db.transfers.find_one({"id": transfer_id}, {"_id": 0})
+    
     if not t:
         raise HTTPException(status_code=404, detail="Transfert introuvable")
     # Si agent assigné, embarquer ses infos publiques (parcours live offers / receipt)

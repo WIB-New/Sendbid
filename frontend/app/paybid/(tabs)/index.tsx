@@ -145,15 +145,15 @@ export default function PaybidDashboard() {
         {/* ===== 4 quick actions transparentes (parité SendBID) ===== */}
         <View style={styles.quickRow}>
           <QuickAction icon="qr-code" color="#FFA500" label="Scanner" onPress={() => router.push("/paybid/scan" as any)} />
-          <QuickAction icon="cash" color="#3B82F6" label="Déposer" onPress={() => router.push("/paybid/float" as any)} />
+          <QuickAction icon="cash" color="#3B82F6" label="Déclarer les espèces" onPress={() => router.push("/paybid/cash" as any)} />
           <QuickAction icon="arrow-up-circle" color="#F59E0B" label="Verser au siège" onPress={() => router.push("/paybid/float" as any)} />
-          <QuickAction icon="trophy" color="#EA580C" label="Gains" onPress={() => router.push("/paybid/(tabs)/earnings" as any)} />
+          <QuickAction icon="trophy" color="#F59E0B" label="Gains" onPress={() => router.push("/paybid/(tabs)/earnings" as any)} />
         </View>
 
         {/* ===== CTA "Offres en temps réel" (parité Nouveau transfert) ===== */}
         <TouchableOpacity activeOpacity={0.85} onPress={() => router.push("/paybid/(tabs)/auctions" as any)} style={{ marginTop: spacing.xl }}>
           <LinearGradient
-            colors={hasLiveBids ? ["#FFA500", "#CC7A00"] : [paybidColors.primary.base, paybidColors.primary.dark]}
+            colors={hasLiveBids ? ["#FFA500", "#F59E0B"] : [paybidColors.primary.base, paybidColors.primary.dark]}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
             style={styles.liveCta}
           >
