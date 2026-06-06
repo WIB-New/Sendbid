@@ -153,9 +153,32 @@ export default function TransferDetail() {
   const router = useRouter();
   const token = useAuth((s) => s.token);
   const [t, setT] = useState<any>(null);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
   const [now, setNow] = useState<number>(Date.now());
 
-  const load = () => { if (id) api.get(`/transfers/${id}`).then((r) => setT(r.data)).catch(() => {}); };
+  const load = () => {
+    if (!id) {
+      setLoadErr("Identifiant de transfert manquant.");
+      return;
+    }
+    api
+      .get(`/transfers/${id}`)
+      .then((r) => {
+        setT(r.data);
+        setLoadErr(null);
+      })
+      .catch((e) => {
+        const status = e?.response?.status;
+        const detail = e?.response?.data?.detail;
+        setLoadErr(
+          status === 404
+            ? "Transfert introuvable."
+            : status === 401
+            ? "Vous n'êtes pas autorisé à voir ce transfert."
+            : detail || "Impossible de charger le transfert. Réessayez.",
+        );
+      });
+  };
   useEffect(load, [id]);
 
   // Tick every minute for countdown
@@ -182,7 +205,47 @@ export default function TransferDetail() {
   const isUrgent = remainingMs > 0 && remainingMs <= 12 * 3600 * 1000; // < 12h
   const countdownLabel = deadlineMs && t?.status !== "COMPLETED" ? formatRemaining(Math.max(0, remainingMs)) : undefined;
 
-  if (!t) return null;
+  if (!t) {
+    // v6.5 — affichage explicite de l'erreur de chargement (au lieu d'un écran blanc)
+    if (loadErr) {
+      return (
+        <View style={{ flex: 1, backgroundColor: colors.neutrals.background }}>
+          <SafeAreaView edges={["top"]} style={{ padding: spacing.lg }}>
+            <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: spacing.md }}>
+              <Ionicons name="chevron-back" size={26} color={colors.neutrals.textPrimary} />
+            </TouchableOpacity>
+            <View style={{ alignItems: "center", marginTop: spacing.xxl }}>
+              <Ionicons name="warning-outline" size={56} color="#F59E0B" />
+              <TText variant="title" weight="extraBold" align="center" style={{ marginTop: spacing.md }}>
+                Impossible d&apos;afficher le détail
+              </TText>
+              <TText
+                variant="caption"
+                color={colors.neutrals.textSecondary}
+                align="center"
+                style={{ marginTop: 8, maxWidth: 320 }}
+              >
+                {loadErr}
+              </TText>
+              <Button
+                testID="detail-retry"
+                title="Réessayer"
+                icon="refresh"
+                onPress={load}
+                style={{ marginTop: spacing.lg, minWidth: 200 }}
+              />
+              <TouchableOpacity onPress={() => router.back()} style={{ marginTop: spacing.md }}>
+                <TText variant="caption" weight="bold" color={colors.primary.base}>
+                  ← Retour aux transferts
+                </TText>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </View>
+      );
+    }
+    return null;
+  }
 
   const hero = statusHero(t.status);
   const downloadReceipt = () => {

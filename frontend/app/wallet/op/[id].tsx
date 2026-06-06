@@ -204,17 +204,33 @@ export default function WalletOperationDetail() {
             <TText variant="title" weight="extraBold" style={{ marginBottom: spacing.md }}>
               Calendrier de transfert
             </TText>
+            {/* v2 — alignement typographique sur l'onglet "Informations" :
+                  même variant caption pour labels & dates, même séparateur ligne,
+                  même padding vertical 8px. Les flèches (icônes ✓ / cercle) sont conservées. */}
             {timeline.map((e, i) => {
               const isLast = i === timeline.length - 1;
               return (
-                <View key={i} style={styles.timeRow}>
-                  <View style={{ alignItems: "center", width: 26 }}>
-                    <Ionicons name={e.done ? "checkmark" : "ellipse-outline"} size={18} color={e.done ? "#10B981" : "#9CA3AF"} />
-                    {!isLast ? <View style={styles.timeBar} /> : null}
+                <View key={i} style={styles.timelineRow}>
+                  <View style={styles.timelineIconCol}>
+                    <Ionicons
+                      name={e.done ? "checkmark-circle" : "ellipse-outline"}
+                      size={16}
+                      color={e.done ? "#10B981" : "#9CA3AF"}
+                    />
+                    {!isLast ? <View style={styles.timelineBar} /> : null}
                   </View>
-                  <View style={{ flex: 1, marginLeft: 12, paddingBottom: spacing.md }}>
-                    <TText variant="body" weight={isLast ? "extraBold" : "semiBold"}>{e.label}</TText>
-                    {e.date ? <TText variant="label" color={themed.neutrals.textSecondary}>{fmtDate(e.date)}</TText> : null}
+                  <View style={styles.timelineContent}>
+                    <TText variant="caption" color={colors.neutrals.textSecondary} style={{ flex: 1 }}>
+                      {e.label}
+                    </TText>
+                    <TText
+                      variant="caption"
+                      weight={e.done ? "extraBold" : "semiBold"}
+                      style={{ flex: 1, textAlign: "right" }}
+                      numberOfLines={2}
+                    >
+                      {e.date ? fmtDate(e.date) : "—"}
+                    </TText>
                   </View>
                 </View>
               );
@@ -310,6 +326,35 @@ const styles = StyleSheet.create({
 
   timeRow: { flexDirection: "row", alignItems: "flex-start" },
   timeBar: { width: 2, flex: 1, backgroundColor: "#D1D5DB", marginTop: 2 },
+
+  // v2 — Timeline alignée sur le style KV de l'onglet "Informations"
+  // (paddingVertical 8, séparateur ligne bottom, label gauche / valeur droite)
+  timelineRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  timelineIconCol: {
+    width: 22,
+    alignItems: "center",
+    paddingTop: 10,
+  },
+  timelineBar: {
+    width: 2,
+    flex: 1,
+    backgroundColor: "#D1D5DB",
+    marginTop: 2,
+    minHeight: 20,
+  },
+  timelineContent: {
+    flex: 1,
+    marginLeft: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    gap: 12,
+  },
 
   kv: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#F3F4F6", gap: 12 },
 

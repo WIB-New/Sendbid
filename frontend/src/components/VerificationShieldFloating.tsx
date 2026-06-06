@@ -1,12 +1,25 @@
 /**
  * Icône bouclier flottante globale (affichée sur toutes les pages).
- * - Visible tant que email OU phone non vérifié.
- * - Clignote pour attirer l'attention (animation opacity + scale).
- * - Petite (32px), positionnée bottom-right au-dessus de la tab bar.
- * - Clic → ré-ouvre la popup de vérification.
+ * v3 — Repositionné en HAUT à droite (près de la cloche), animation
+ *       multi-couches (pulse + glow + sparkle rotatif) pour ne pas
+ *       passer inaperçu. Toujours présent tant que email OU phone non vérifié.
+ *
+ *  - Position FIXE en haut-droit, sous la status bar (useSafeAreaInsets)
+ *  - Effet clignotant (opacity 1 ↔ 0.4) + scintillement (scale 1 ↔ 1.18)
+ *  - Halo coloré pulsant à l'arrière-plan
+ *  - Petite étoile de scintillement qui tourne en orbite
+ *  - Reste cliquable → ré-ouvre la popup de vérification
  */
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import {
+  Animated,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Easing,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../store";
 import { useVerifPopup } from "../uiState";
@@ -17,52 +30,208 @@ export default function VerificationShieldFloating() {
   const show = useVerifPopup((s) => s.show);
   const popupOpen = useVerifPopup((s) => s.open);
   const splashOpen = useVerifPopup((s) => s.splashOpen);
+  const insets = useSafeAreaInsets();
 
-  const pulse = useRef(new Animated.Value(1)).current;
+  // Trois animations parallèles
+  const pulse = useRef(new Animated.Value(1)).current;     // opacity du bouclier
+  const glow = useRef(new Animated.Value(0)).current;      // halo (cercle exterieur)
+  const sparkle = useRef(new Animated.Value(0)).current;   // rotation continue (0 → 1 → 0)
 
   useEffect(() => {
-    // Clignotement doux par boucle infinie
-    const loop = Animated.loop(
+    // 1) Pulse — opacity + scale (rythme rapide)
+    const pulseLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.55, duration: 700, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulse, {
+          toValue: 0.35,
+          duration: 550,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 550,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
       ]),
     );
-    loop.start();
-    return () => loop.stop();
-  }, [pulse]);
+    // 2) Glow — halo expanding/contracting plus lent
+    const glowLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glow, {
+          toValue: 1,
+          duration: 1100,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(glow, {
+          toValue: 0,
+          duration: 1100,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    // 3) Sparkle — étoile qui tourne en orbite + opacity sinusoïdale
+    const sparkleLoop = Animated.loop(
+      Animated.timing(sparkle, {
+        toValue: 1,
+        duration: 2400,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    );
+    pulseLoop.start();
+    glowLoop.start();
+    sparkleLoop.start();
+    return () => {
+      pulseLoop.stop();
+      glowLoop.stop();
+      sparkleLoop.stop();
+    };
+  }, [pulse, glow, sparkle]);
 
-  const visible = !!user && (!user.email_verified || !user.phone_verified) && !popupOpen && !splashOpen;
+  const visible =
+    !!user &&
+    (!user.email_verified || !user.phone_verified) &&
+    !popupOpen &&
+    !splashOpen;
   if (!visible) return null;
 
+  // Position : haut-droite, juste sous la status bar (mais au-dessus des headers).
+  // Décalé de la cloche habituelle (~14px) pour rester visible sans la chevaucher.
+  const topPos =
+    (insets.top || (Platform.OS === "ios" ? 44 : 24)) + 8;
+
+  const sparkleAngle = sparkle.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+  const sparkleOpacity = sparkle.interpolate({
+    inputRange: [0, 0.25, 0.5, 0.75, 1],
+    outputRange: [0.2, 1, 0.6, 1, 0.2],
+  });
+
   return (
-    <Animated.View style={[styles.wrap, { opacity: pulse, transform: [{ scale: pulse.interpolate({ inputRange: [0.55, 1], outputRange: [0.95, 1] }) }] }]}>
-      <TouchableOpacity
-        testID="floating-verify-shield"
-        onPress={show}
-        style={styles.btn}
-        activeOpacity={0.85}
-        accessibilityLabel="Vérifier votre compte"
+    <View
+      pointerEvents="box-none"
+      style={[styles.wrap, { top: topPos }]}
+    >
+      {/* Halo pulsant (cercle extérieur) — purement décoratif */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.glow,
+          {
+            opacity: glow.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 0.6],
+            }),
+            transform: [
+              {
+                scale: glow.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.7, 1.8],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+      {/* Sparkle orbital */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.sparkleOrbit,
+          {
+            opacity: sparkleOpacity,
+            transform: [{ rotate: sparkleAngle }],
+          },
+        ]}
       >
-        <Ionicons name="shield-half" size={16} color="white" />
-      </TouchableOpacity>
-    </Animated.View>
+        <View style={styles.sparkleDot}>
+          <Ionicons name="sparkles" size={10} color="#FCD34D" />
+        </View>
+      </Animated.View>
+
+      {/* Bouclier cliquable */}
+      <Animated.View
+        style={{
+          opacity: pulse,
+          transform: [
+            {
+              scale: pulse.interpolate({
+                inputRange: [0.35, 1],
+                outputRange: [1.18, 1],
+              }),
+            },
+          ],
+        }}
+      >
+        <TouchableOpacity
+          testID="floating-verify-shield"
+          onPress={show}
+          style={styles.btn}
+          activeOpacity={0.85}
+          accessibilityLabel="Vérifier votre compte"
+        >
+          <Ionicons name="shield-half" size={18} color="white" />
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 }
+
+const SIZE = 38;
 
 const styles = StyleSheet.create({
   wrap: {
     position: "absolute",
-    right: 14,
-    bottom: Platform.OS === "ios" ? 82 : 76,
-    zIndex: 9999,
+    right: 64, // décalé à gauche de l'emplacement de la cloche (qui est à ~14)
+    zIndex: 99999,
+    width: SIZE,
+    height: SIZE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  glow: {
+    position: "absolute",
+    width: SIZE,
+    height: SIZE,
+    borderRadius: SIZE / 2,
+    backgroundColor: "#F59E0B",
+    shadowColor: "#F59E0B",
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  sparkleOrbit: {
+    position: "absolute",
+    width: SIZE + 14,
+    height: SIZE + 14,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  sparkleDot: {
+    width: 12,
+    height: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -2,
   },
   btn: {
-    width: 32, height: 32, borderRadius: radii.full,
+    width: SIZE,
+    height: SIZE,
+    borderRadius: radii.full,
     backgroundColor: "#F59E0B",
-    alignItems: "center", justifyContent: "center",
-    shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
-    elevation: 5,
-    borderWidth: 1.5, borderColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#F59E0B",
+    shadowOpacity: 0.55,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: "white",
   },
 });

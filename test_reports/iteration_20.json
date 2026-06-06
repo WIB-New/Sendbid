@@ -1,0 +1,40 @@
+{
+  "summary": "Frontend-only review of 3 Sendbid items pre-APK build. ITEM 1 (floating verification shield top-right) ✅ visible on home & transfers (top≈32px, right offset≈64px, testID 'floating-verify-shield' present, animated pulse+glow+sparkle confirmed). ITEM 2 (wallet/op timeline 'Mises à jour' aligned on 'Informations' typo+spacing) ✅ verified — tab renders 'Calendrier de transfert', timeline rows show check/circle 16px icons left, caption-style labels left, caption-style date right, bottom-border separator, vertical bar connectors retained. ITEM 3 (transfer row click) ❌ CRITICAL BUG REPRODUCED — every tap on a transfer row crashes the screen with 'TypeError: t is not a function' at app/transfer/[id].tsx:400:26. The hardening (Réessayer screen on 404) DOES work for invalid UUIDs, but it cannot save the success-path render: a local-state variable named `t` shadows the imported i18n `t()` translation function. Detail page never renders for any of the 50 seeded transfers (verified row clicks AND direct URL navigation to 3 valid IDs).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "TransferDetail (/app/frontend/app/transfer/[id].tsx)",
+        "issue": "BLOCKING CRASH: 'TypeError: t is not a function' thrown at line 400 (FinRow label={t('transferFlow.fees')}). Root cause: line 155 `const [t, setT] = useState<any>(null)` shadows the i18n `t` imported at line 2 `import { t, useLocale } from '../../src/i18n'`. After fetch succeeds, `t` is the transfer object — calling `t('transferFlow.fees')` throws and unmounts the screen. Backend GET /api/transfers/{id} returns 200 OK with valid payload — the bug is 100% frontend variable-shadowing. All 50 seeded transfers (cash + bank) are unopenable from the Transferts tab. Fix: rename the state variable (e.g. `const [tx, setTx] = useState(...)` and update all references) OR alias the import (`import { t as tr } from ...`). The fake-UUID retry screen works because the crash happens only on the success render branch.",
+        "testID": "transfer-row-*",
+        "priority": "CRITICAL"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Tap transfer row → /transfer/[id]",
+        "issue": "Each tap navigates correctly but the detail component throws on render before any UI is visible. User sees red error overlay in dev / blank screen in prod. Reference: TransferDetail component stack reported by LogBox.",
+        "affected_testIDs": ["transfer-row-6dc2e650-...", "transfer-row-994eb1f1-...", "transfer-row-63a01051-..."]
+      }
+    ],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "URGENT: In /app/frontend/app/transfer/[id].tsx rename the state variable currently called `t` (line 155+ and ~70 usages such as `t.status`, `t.send_amount`, `t.beneficiary`, etc.) to avoid colliding with the imported i18n function `t`. Suggested change: `const [tx, setTx] = useState<any>(null);` then replace all `t.` / `setT(` accordingly. Also update the 4 builder helpers (buildCashStandard, buildCashVip, buildBank, buildMomo) which receive a parameter called `t` — rename it to `tx` to keep the `t()` translation function reachable. Re-test by clicking every visible transfer row.",
+    "After fix, confirm `t('transferFlow.fees')` resolves to the translated label and that timeline + FINANCIER + DATES blocks render for both COMPLETED (bank id 6dc2e650) and AGENT_ASSIGNED (cash id 994eb1f1) transfers."
+  ],
+  "critical_code_review_comments": [
+    "Variable shadowing of the i18n `t` import by local state in app/transfer/[id].tsx is the single root cause of the user-reported error. Same shadowing pattern exists for all `buildXxx(t)` helpers.",
+    "VerificationShieldFloating: clean, properly uses useSafeAreaInsets and react-native-safe-area-context; visible state correctly tied to email_verified/phone_verified. No issue.",
+    "wallet/op/[id].tsx: timeline restyle correctly mirrors KV styling (paddingVertical 8, borderBottom #F3F4F6, caption variant on both sides). No issue."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "66% (Items 1 & 2 OK, Item 3 BLOCKING)"},
+  "seed_data_creation": "None — used existing seed (50 transfers on client@sendbid.app).",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Re-test ITEM 3 after rename. Login client@sendbid.app / Client@123! / PIN 123456 (note: app auto-locks every ~30s so always handle the 'App verrouillée' / 'Confirmer votre identité' PIN modal between navigations). Then go to /transfers and tap each of the first 3 rows (ids start 6dc2e650 bank-COMPLETED, 994eb1f1 cash-AGENT_ASSIGNED, 63a01051 cash-AGENT_ASSIGNED). Each must render hero status chip + FINANCIER + DATES + PROGRESSION steps without console TypeError. Direct URL /transfer/<id> must also render. Fake UUID /transfer/00000000-0000-0000-0000-000000000000 must keep showing the 'Impossible d'afficher le détail' card with testID 'detail-retry'. Note: backend GET /api/transfers/{id} confirmed 200 OK for the 3 IDs above.",
+  "rca_of_issue": "BUG ITEM 3 — RCA: app/transfer/[id].tsx line 2 imports { t, useLocale } from '../../src/i18n' (i18n translator). Line 155 declares useState<any>(null) destructured as `[t, setT]` — shadowing the import inside the component body. Line 400 inside the success-render branch calls `t('transferFlow.fees')`. Since `t` is now the transfer object received from /api/transfers/{id}, calling it as a function throws 'TypeError: t is not a function'. React unmounts the component (error boundary). User perceives this as the 'message d'erreur en cliquant sur une ligne de transfert'. Reproduction: login → Transferts → tap any row. Mitigation: rename state variable to `tx` (and adjust the 4 buildXxx helpers + ~70 references). The previously applied hardening (Number(item.send_amount||0) in list & retry screen on fetch error) is good but does not address the success-path crash."
+}
