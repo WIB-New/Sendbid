@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from core.db import db, now_utc, iso, clean_doc
 from core.deps import get_current_user
-from core.security import gen_id
+from core.security import gen_id, hash_password
 from routers.notifications import create_notification
 
 from . import router

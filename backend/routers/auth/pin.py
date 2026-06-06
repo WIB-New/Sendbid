@@ -15,6 +15,7 @@ from core.security import (
 from routers.notifications import create_notification
 
 from . import router
+from core.security import is_weak_pin
 from .models import CreatePinIn, ChangePinIn, VerifyPinIn
 
 

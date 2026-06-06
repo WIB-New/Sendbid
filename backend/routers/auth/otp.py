@@ -15,6 +15,8 @@ from core.security import (
 from routers.notifications import create_notification
 
 from . import router
+from core.config import IS_PROD
+from services.notify import notify_signup_otp
 from .models import VerifyOtpIn, ChannelOtpIn
 
 
