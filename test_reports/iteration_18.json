@@ -1,0 +1,38 @@
+{
+  "summary": "3-party Chat (Sender ⇄ Agent ⇄ Beneficiary) iteration 18 — Backend: 6/6 PASSED on /app/backend/tests/test_chat_3party.py covering (1) GET /transfers/{id}/chat returns new fields my_role + participants (with sender/agent/beneficiary names and agent.phone), (2) client@sendbid.app gets my_role='sender', (3) agent@paybid.app gets my_role='agent', (4) POST tags the new message with the correct role for both sender and agent, (5) Mongo-injected outsider user gets 404, (6) closed chat_room (open=false) returns 400 on POST. Frontend: source-level review of /app/frontend/app/chat/[transferId].tsx confirms all 4 testIDs (chat-back, chat-input, chat-send, chat-call-agent), role-emoji labels (👤/🛡️/🎯/⚙️/🤖), 4s polling interval, participants pills, and the call-agent CTA (sender-side only). Route resolution: the file was returning 'Unmatched Route' on first hit because Metro had not picked up the new /app/frontend/app/chat/ directory created mid-session — a single `sudo supervisorctl restart expo` fixed it (404 → route loads). After restart, navigating directly to /chat/<id> while unauthenticated correctly redirects to /landing via the root _layout guard. Sendbid screens correctly route to `/chat/${id}` from transfer/[id].tsx (line 389), transfer/agent-assigned.tsx (line 200), and paybid/transfer/[id].tsx (line 106). Backend logs show real traffic during the test run: 3x GET + 3x POST as sender/agent, plus the 400 on the closed-room case — all confirming wire-level behaviour. Agent demo password was found stale in the DB (a prior test had changed it) and had to be reset to 'Agent@123!' via core.security.hash_password before the agent-side tests could run.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "seed.py — demo agent user", "issue": "Demo agent (agent@paybid.app) password is set only on first insert; there is no per-startup reset (unlike client@sendbid.app which has an explicit re-seed). A prior test that mutates the agent's password leaves the demo agent unusable until manual DB reset. Recommend mirroring the client reset pattern: on startup, force-set password_hash + pin_hash + reset pin_attempts/pin_locked_until for agent@paybid.app."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_chat_3party.py",
+    "/app/test_reports/pytest/chat_3party_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Add a startup re-seed for the demo PAYBID agent so password/pin are restored on every backend restart, like the client demo account already is.",
+    "(Optional) Document in /app/memory/test_credentials.md that the agent password may drift after prior test runs and requires manual reset."
+  ],
+  "critical_code_review_comments": [
+    "chat.py is clean (~105 lines): single FastAPI router, async I/O throughout, MongoDB _id excluded via {_id:0} projections, role resolution via _resolve_chat_access() returns 404 (not 403) to avoid leaking transfer existence — good ACL hygiene.",
+    "Closed-room behaviour: POST checks `if not room.get('open')` AFTER auto-creating a missing room. Edge case: if a sender posts to a transfer with no chat_rooms doc, the room is auto-created with open=True. This matches the lifecycle spec and was verified by the test.",
+    "Frontend chat/[transferId].tsx is well-structured (~520 lines, just under the 700-line cap): KeyboardAvoidingView, ScrollView with auto-scroll-to-end on message change, useCallback for load(), proper cleanup of the 4s polling interval. testID coverage is complete on all interactive elements. ROLE_META map drives both bubble color and emoji label.",
+    "Polling-only (no WebSocket) for chat is intentional — the websocket helper transfers.register_websocket is reserved for auction events only. The 4s polling is a reasonable trade-off for the demo."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_chat_3party.py (new — 6 tests)"
+  ],
+  "success_rate": {"backend": "100% (6/6 passed)", "frontend": "100% (source-level review + route resolution verified)"},
+  "seed_data_creation": "One TEST_ outsider user (test_outsider_<rand>@example.com) created and deleted in the ACL test. A handful of TEST_msg_sender_* / TEST_msg_agent_* / TEST_ui_msg_from_pw chat messages were appended to transfer 966f9ef9-0028-4fe8-962c-3eaa42eb0644 (cosmetic only). Agent password reset to Agent@123! (canonical value from seed.py).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Re-run with: `cd /app/backend && python -m pytest tests/test_chat_3party.py -v --junitxml=/app/test_reports/pytest/chat_3party_results.xml`. The fixture lazily reuses an existing transfer owned by the demo client AND assigned to the demo agent (transfer 966f9ef9-0028-4fe8-962c-3eaa42eb0644 at this iteration); it does NOT create new transfers (the /transfers/draft contract requires receive_amount/fx_rate/fee_percent/purpose/source_of_funds that are out of scope for chat testing). If the demo agent's password is again stale, run: `python -c \"import asyncio; from core.db import db; from core.security import hash_password; asyncio.run(db.users.update_one({'email':'agent@paybid.app'}, {'\\$set': {'password_hash': hash_password('Agent@123!')}}))\"` from /app/backend. The frontend chat route /chat/[transferId] now resolves correctly after the post-iteration Expo restart performed in this run.",
+  "rca_of_issue": "Initial frontend 'Unmatched Route' was a Metro-cache stale-route-map issue, not a code defect — the directory /app/frontend/app/chat was created during this iteration and Metro had bundled the older route table. Fix: `sudo supervisorctl restart expo`. After restart the route resolves and the root _layout's auth-guard correctly redirects unauthenticated visitors to /landing. The agent-side 401 was caused by a stale password_hash in MongoDB (no per-startup reset of the agent demo account, unlike the client demo); mitigation documented as the only minor backend issue + first action item."
+}

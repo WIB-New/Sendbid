@@ -197,7 +197,7 @@ export default function AgentAssigned() {
             title="Chat avec l'agent"
             icon="chatbubbles-outline"
             variant="outline"
-            onPress={() => router.push({ pathname: "/transfer/chat", params: { transfer_id: transfer_id! } })}
+            onPress={() => router.push(`/chat/${transfer_id}` as any)}
           />
         </View>
       </ScrollView>

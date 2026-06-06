@@ -103,9 +103,9 @@ export default function PaybidTransferDetail() {
               <Ionicons name="logo-whatsapp" size={22} color="white" />
               <TText variant="label" weight="bold" color="white" style={{ marginTop: 4 }}>WhatsApp</TText>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.contactBtn, { backgroundColor: "#3B82F6" }]} onPress={() => openExternal("sms", t.beneficiary.phone)}>
-              <Ionicons name="chatbubble" size={22} color="white" />
-              <TText variant="label" weight="bold" color="white" style={{ marginTop: 4 }}>SMS</TText>
+            <TouchableOpacity style={[styles.contactBtn, { backgroundColor: "#022a6b" }]} onPress={() => router.push(`/chat/${t.id}` as any)}>
+              <Ionicons name="chatbubbles" size={22} color="white" />
+              <TText variant="label" weight="bold" color="white" style={{ marginTop: 4 }}>Chat</TText>
             </TouchableOpacity>
             {(t.beneficiary?.city || t.beneficiary?.address) ? (
               <TouchableOpacity style={[styles.contactBtn, { backgroundColor: "#F59E0B" }]} onPress={() => openExternal("maps", `${t.beneficiary.address || ""} ${t.beneficiary.city || ""} ${t.destination_country || ""}`.trim())}>

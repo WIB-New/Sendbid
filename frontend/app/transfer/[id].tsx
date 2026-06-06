@@ -386,7 +386,7 @@ export default function TransferDetail() {
               <Button testID="detail-map" title="Carte" icon="map-outline" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: t.id } } as any)} style={{ flex: 1 }} />
             ) : null}
             {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(t.status) ? (
-              <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" variant="outline" onPress={() => router.push({ pathname: "/transfer/chat", params: { transfer_id: t.id } })} style={{ flex: 1 }} />
+              <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" variant="outline" onPress={() => router.push(`/chat/${t.id}` as any)} style={{ flex: 1 }} />
             ) : null}
           </View>
           <Button testID="detail-dispute" title="Ouvrir un litige" icon="warning-outline" variant="ghost" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: t.id } })} />
