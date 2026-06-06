@@ -13,6 +13,7 @@ import { useVerifPopup } from "../../src/uiState";
 import { useAuth, useDraft } from "../../src/store";
 import { KycPopup } from "../../src/components/KycPopup";
 import { api } from "../../src/api";
+import { t, useLocale } from "../../src/i18n";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemeTokens } from "../../src/themeContext";
 
@@ -28,21 +29,23 @@ type Corridor = {
 };
 
 const SERVICES = [
-  { key: "ben", label: "Bénéficiaires", icon: "people-outline" as const, route: "/beneficiaries" },
-  { key: "pm", label: "Moyens de paiement", icon: "card-outline" as const, route: "/payment-methods" },
-  { key: "kyc", label: "KYC", icon: "shield-checkmark-outline" as const, route: "/kyc" },
-  { key: "support", label: "Aide & Support", icon: "help-circle-outline" as const, route: "/support" },
-  { key: "limits", label: "Limites de transfert", icon: "speedometer-outline" as const, route: "/limits" },
-  { key: "caps", label: "Plafonds de paiement", icon: "lock-closed-outline" as const, route: "/payment-caps" },
+  { key: "ben", labelKey: "services.beneficiaries", icon: "people-outline" as const, route: "/beneficiaries" },
+  { key: "pm", labelKey: "services.paymentMethods", icon: "card-outline" as const, route: "/payment-methods" },
+  { key: "kyc", labelKey: "services.kyc", icon: "shield-checkmark-outline" as const, route: "/kyc" },
+  { key: "support", labelKey: "services.support", icon: "help-circle-outline" as const, route: "/support" },
+  { key: "limits", labelKey: "services.transferLimits", icon: "speedometer-outline" as const, route: "/limits" },
+  { key: "caps", labelKey: "services.paymentCaps", icon: "lock-closed-outline" as const, route: "/payment-caps" },
 ];
 
 const DELIVERY_MODES = [
-  { key: "cash", label: "Espèces", icon: "cash-outline" as const },
-  { key: "bank", label: "Virement bancaire", icon: "business-outline" as const },
-  { key: "momo", label: "Portefeuille mobile", icon: "phone-portrait-outline" as const },
+  { key: "cash", labelKey: "delivery.cash", icon: "cash-outline" as const },
+  { key: "bank", labelKey: "delivery.bank", icon: "business-outline" as const },
+  { key: "momo", labelKey: "delivery.momo", icon: "phone-portrait-outline" as const },
 ];
 
 export default function Home() {
+  // Abonnement Zustand pour forcer un re-render à chaque changement de locale
+  useLocale((s) => s.locale);
   const user = useAuth((s) => s.user);
   const wallet = useAuth((s) => s.wallet);
   const refreshMe = useAuth((s) => s.refreshMe);
@@ -134,12 +137,8 @@ export default function Home() {
     }
   }, [country, sendAmountStr, receiveAmountStr, editing]);
 
-  if (!user) return null;
-
-  const sendAmt = parseFloat(sendAmountStr || "0") || 0;
-  const receiveAmt = parseFloat(receiveAmountStr || "0") || 0;
-
   // Beneficiary suggestions (dynamic prefix search)
+  // (Hook placé AVANT le retour conditionnel `if (!user)` pour respecter rules-of-hooks)
   const benSuggestions = React.useMemo(() => {
     const q = (benQuery || "").trim().toLowerCase();
     if (!q) return [] as any[];
@@ -152,6 +151,11 @@ export default function Home() {
       })
       .slice(0, 8);
   }, [benQuery, beneficiaries]);
+
+  if (!user) return null;
+
+  const sendAmt = parseFloat(sendAmountStr || "0") || 0;
+  const receiveAmt = parseFloat(receiveAmountStr || "0") || 0;
 
   const continueTransfer = () => {
     if (!country || !selectedBen || sendAmt <= 0) return;
@@ -189,7 +193,7 @@ export default function Home() {
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12, flexDirection: "row", alignItems: "center" }}>
             <View style={{ flex: 1 }}>
-              <TText variant="caption" color={colors.neutrals.textSecondary}>Bonjour</TText>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>{t("home.hello")}</TText>
               <TText variant="subtitle" weight="extraBold">{user.full_name.split(" ")[0]} 👋</TText>
               <TText variant="label" color={colors.primary.base} weight="bold" style={{ marginTop: 2 }}>@{user.profile_id}</TText>
             </View>
@@ -216,19 +220,19 @@ export default function Home() {
             <View style={[styles.walletQuickIcon, { backgroundColor: "#10B981" }]}>
               <Ionicons name="add-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Ajouter de l'argent</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{t("home.addMoney")}</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-withdraw" onPress={() => router.push("/wallet/withdraw" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#3B82F6" }]}>
               <Ionicons name="arrow-down-circle" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Retirer</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{t("home.withdraw")}</TText>
           </TouchableOpacity>
           <TouchableOpacity testID="home-send" onPress={() => router.push("/wallet/p2p" as any)} style={styles.walletQuickBtn}>
             <View style={[styles.walletQuickIcon, { backgroundColor: "#F59E0B" }]}>
               <Ionicons name="paper-plane" size={22} color="white" />
             </View>
-            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>Envoyer</TText>
+            <TText variant="label" weight="semiBold" align="center" style={{ marginTop: 6 }}>{t("home.send")}</TText>
           </TouchableOpacity>
         </View>
 
@@ -249,9 +253,9 @@ export default function Home() {
               <SendBidLogo size={28} withBackground />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
-              <TText weight="extraBold" color="white">Nouveau transfert</TText>
+              <TText weight="extraBold" color="white">{t("home.newTransfer")}</TText>
               <TText variant="caption" color="rgba(255,255,255,0.92)">
-                {transferOpen ? "Replier pour masquer le formulaire" : "Envoyer de l'argent dans le monde entier"}
+                {transferOpen ? t("home.collapseForm") : t("home.newTransferSubtitle")}
               </TText>
             </View>
             <View style={styles.arrowCircle}>
@@ -265,16 +269,16 @@ export default function Home() {
           <View style={styles.transferForm}>
             {/* Pays bénéficiaire */}
             <TText variant="caption" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 6 }}>
-              Pays du bénéficiaire
+              {t("home.benefCountry")}
             </TText>
             <TouchableOpacity testID="home-tr-country" style={styles.selector} onPress={() => setShowCountry(true)}>
-              <TText weight="semiBold">{country ? `${country.flag} ${country.country_name}` : "Sélectionner"}</TText>
+              <TText weight="semiBold">{country ? `${country.flag} ${country.country_name}` : t("home.selectCountry")}</TText>
               <Ionicons name="chevron-down" size={18} color={colors.neutrals.textSecondary} />
             </TouchableOpacity>
 
             {/* === Combien voulez-vous envoyer ? === */}
             <TText variant="body" weight="extraBold" style={{ marginTop: spacing.md }}>
-              Combien voulez-vous envoyer ?
+              {t("home.howMuchToSend")}
             </TText>
             <View style={styles.amountsRow}>
               <View style={styles.amountBoxHalf}>
@@ -322,7 +326,7 @@ export default function Home() {
 
             {/* === Mode de remise === */}
             <TText variant="body" weight="extraBold" style={{ marginTop: spacing.lg }}>
-              Comment voulez-vous que le bénéficiaire reçoive l'argent ?
+              Comment voulez-vous que le bénéficiaire reçoive l&apos;argent ?
             </TText>
             <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
               {DELIVERY_MODES.map((m) => {
@@ -342,7 +346,7 @@ export default function Home() {
                   >
                     <Ionicons name={m.icon} size={16} color={active ? "white" : colors.primary.base} />
                     <TText variant="label" weight="bold" color={active ? "white" : colors.neutrals.textPrimary} style={{ marginLeft: 4 }}>
-                      {m.label}
+                      {t(m.labelKey)}
                     </TText>
                   </TouchableOpacity>
                 );
@@ -351,7 +355,7 @@ export default function Home() {
 
             {/* === Bénéficiaire (recherche dynamique) === */}
             <TText variant="body" weight="extraBold" style={{ marginTop: spacing.lg }}>
-              À qui voulez-vous envoyer de l'argent ?
+              À qui voulez-vous envoyer de l&apos;argent ?
             </TText>
             {selectedBen ? (
               <View style={styles.selectedBenRow}>
@@ -516,7 +520,7 @@ export default function Home() {
           {operations.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="diamond-outline" size={36} color={colors.neutrals.textTertiary} />
-              <TText variant="body" color={colors.neutrals.textSecondary} style={{ marginTop: 8 }}>Aucune opération pour l'instant</TText>
+              <TText variant="body" color={colors.neutrals.textSecondary} style={{ marginTop: 8 }}>Aucune opération pour l&apos;instant</TText>
             </View>
           ) : (
             operations.slice(0, 3).map((op) => (
@@ -555,7 +559,7 @@ export default function Home() {
                 style={styles.serviceMiniCard}
               >
                 <Ionicons name={s.icon} size={20} color="white" />
-                <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 4 }} numberOfLines={2}>{s.label}</TText>
+                <TText variant="label" weight="semiBold" color="white" align="center" style={{ marginTop: 4 }} numberOfLines={2}>{t(s.labelKey)}</TText>
               </TouchableOpacity>
             ))}
           </LinearGradient>
