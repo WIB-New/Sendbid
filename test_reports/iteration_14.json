@@ -1,0 +1,54 @@
+{
+  "summary": "SENDBID iteration 14 — Tested PIN-gate post-login, PIN brute-force lockout, receipt-pdf with ?token=, theme roundtrip on /me, AppLockGate on cold start, Dark Mode UI, and i18n switching. Backend: 7/8 pass (1 spec gap: /auth/verify-pin lacks brute-force lockout — never returns 423). Frontend: PIN-gate after password login WORKS with testIDs pingate-key-{0..9}/pingate-submit; user is NOT routed to /(tabs) before PIN validation. AppLockGate DOES re-prompt PIN on web reload (contradicts the agent_to_agent_note that said web was no-op — actually it works). Dark Mode visually applied (preferences + home both render dark navy bg). MAJOR BUG: language switch (pref-lang-en clicked) does NOT change UI labels — Préférences page still shows 'Français' as selected after click, and home still shows 'Bonjour' instead of 'Hello'. Console error 'Unexpected text node: A text node cannot be a child of a <View>' appears repeatedly across all screens — indicates stray whitespace in JSX inside <View> tags.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/verify-pin", "issue": "No brute-force lockout — handler does direct verify_password without invoking require_pin(). After 6 consecutive wrong PINs, all 6 responses are 401, never 423. Spec (test_credentials.md L22) mandates 5 wrong → 423 lock 15min. Same vulnerability could be exploited by an attacker with a stolen access token."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PinGate (web layout)", "issue": "On web preview the PinGate keypad is rendered BELOW the underlying screen rather than as a true overlay/modal — on the first run with viewport 390x844 the keys 0-9 were outside the viewport and only scrollIntoView() could reach them. Native iOS/Android Modal would not have this issue but the web build does. Reference: /app/frontend/src/components/PinGate.tsx", "testID": "pingate-key-*", "priority": "MEDIUM"},
+      {"component": "Preferences > Language", "issue": "Tapping testID pref-lang-en does NOT change the active language. After click, Préférences screen still shows '🇫🇷 Français' as selected and the home screen still renders 'Bonjour' instead of 'Hello'. Same observed for es/de/it/pt (Hola/Hallo/Ciao/Olá never appear). The theme switch (pref-theme-dark) IS persisted correctly via PUT /auth/me — but language is not. Likely root cause: i18n context isn't re-rendered, OR the click on the option doesn't fire saveLang(), OR saveLang() doesn't update both the i18n instance and the persisted user.language. Reference: /app/frontend/app/preferences.tsx (saveLang) + /app/frontend/src/i18n/*.ts wiring", "testID": "pref-lang-en, pref-lang-es, pref-lang-de, pref-lang-it, pref-lang-pt", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All screens (global)", "issues": ["Repeated console error: 'Unexpected text node:         . A text node cannot be a child of a <View>.' indicates raw whitespace inside <View>{...}</View> JSX. Find with grep -nE '<View>[[:space:]]+\\\\{' across the app/ tree and wrap text or remove whitespace."]}
+    ],
+    "react_native_issues": [
+      {"component": "shadow* style props", "issue": "React Native Web warns 'shadow* style props are deprecated. Use boxShadow'. Multiple components are still using shadowColor/shadowOffset/shadowOpacity/shadowRadius. For RN Web 0.20+ migrate to boxShadow."},
+      {"component": "props.pointerEvents", "issue": "Warning: 'props.pointerEvents is deprecated. Use style.pointerEvents'. Move pointerEvents from props to style across affected components."},
+      {"component": "useNativeDriver fallback", "issue": "Animated.timing/spring is using useNativeDriver: true on web where RCTAnimation is unavailable. Console warns 'Falling back to JS-based animation.' Guard with Platform.OS !== 'web' or set useNativeDriver: Platform.OS !== 'web' to avoid the warning storm."},
+      {"component": "expo-notifications (web)", "issue": "'Listening to push token changes is not yet fully supported on web' — wrap subscription in Platform.OS === 'web' guard to silence."}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pingate_and_receipt.py",
+    "/app/test_reports/pytest/pingate_receipt_results.xml"
+  ],
+  "action_items": [
+    "Fix /api/auth/verify-pin to call require_pin (or replicate its attempt-tracking) so 5 wrong PINs return 423 per spec.",
+    "Debug i18n language switching: clicking pref-lang-en/es/de/it/pt has no visible effect on the UI; preferences keeps showing 'Français'. Verify (1) saveLang() is actually called on the TouchableOpacity (force=True click did succeed in playwright), (2) saveLang() updates the i18n instance AND persists language via PUT /auth/me, (3) the React tree re-renders after language change. Theme switching works fine through the same dropdown pattern, so compare implementations.",
+    "Investigate PinGate layout on web: the keypad renders below the host page rather than as a full-screen Modal — on smaller heights keys are outside viewport. Either (a) use react-native Modal with absolute positioning, or (b) detect Platform.OS === 'web' and apply position:fixed + zIndex high + full viewport.",
+    "Clean up 'Unexpected text node' console errors — repeated for many screens; grep for whitespace between adjacent <View>...{...}</View> children.",
+    "Migrate deprecated style props: shadow* → boxShadow, pointerEvents prop → style.pointerEvents, set useNativeDriver: Platform.OS !== 'web' on Animated calls."
+  ],
+  "critical_code_review_comments": [
+    "routers/auth.py:581-587 — /verify-pin uses direct verify_password and does not consult/update pin_attempts/pin_locked_until. Inconsistent with require_pin() in core/deps.py which DOES implement 5-wrong-attempts-lockout. Either funnel verify-pin through require_pin() or duplicate the lockout logic; otherwise the endpoint becomes a brute-force oracle for any stolen access token.",
+    "routers/transfers.py:658-670 — /receipt-pdf accepts EITHER Authorization header OR ?token= query param. Behaviour is correct (verified) and returns proper 401 for bad/missing token. The PDF Content-Disposition uses 'attachment' which forces download in browser — appropriate.",
+    "routers/auth.py:339-363 — /login now returns user_resp with has_pin booléen derived without leaking pin_hash. Verified by automated test. Good.",
+    "PinGate.tsx — on web, Modal behaviour may not be applied since react-native-web 0.20+ has changed Modal semantics. The keypad is reachable via scroll but the visual flow is suboptimal."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pingate_and_receipt.py (new — 8 tests)"
+  ],
+  "success_rate": {
+    "backend": "87.5% (7/8 — only brute-force lockout test fails)",
+    "frontend": "60% (FE-1 PIN-gate OK, FE-4 dark mode visually OK, FE-6 AppLockGate cold-start OK on web; FE-5 i18n switching BROKEN for all 5 languages; FE-2 bank-transfer PIN flow and FE-3 op detail not run due to time/token budget and PinGate-on-web layout issue blocking automation flow)"
+  },
+  "seed_data_creation": "None. Used pre-seeded demo client (client@sendbid.app / Client@123! / PIN 123456) for all tests. Theme reverted to 'light' at end of backend test for idempotent re-runs.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend regression: /app/backend/tests/test_pingate_and_receipt.py covers login.has_pin, verify-pin (ok/wrong/lockout), receipt-pdf with ?token= (good/bad/none), and theme roundtrip via /me. The lockout test will keep failing until /auth/verify-pin is patched (see action items). Frontend: PinGate testIDs are 'pingate-key-{0..9}', 'pingate-back', 'pingate-submit', 'pingate-cancel', 'pingate-biometric'. AppLockGate uses same prefix. On web you MUST scroll the keypad into view via JS before clicking: document.querySelector('[data-testid=\"pingate-key-1\"]').scrollIntoView({block:'center'}). The web build re-fires AppLockGate on every page reload (page.goto) — this is actually desirable for FE-6 but blocks linear Playwright tests; account for it by detecting the keypad on each fresh navigation and unlocking. i18n is currently broken on the UI side: clicking pref-lang-{code} doesn't update labels. Don't waste cycles re-testing i18n labels until the main agent fixes saveLang().",
+  "rca_of_issue": "ROOT CAUSE — /api/auth/verify-pin missing brute-force lockout:\n  routers/auth.py:582-587 calls verify_password() directly without consulting pin_attempts/pin_locked_until. core/deps.py:46-61 provides require_pin() which DOES implement the lockout but is only used inside /transfers/confirm. Fix: replace the inline verify_password in /verify-pin with a call to require_pin(user['id'], payload.pin) wrapped in try/except so the 423 propagates correctly.\n\nROOT CAUSE — i18n language switch ineffective (suspected):\n  /app/frontend/app/preferences.tsx saveLang(code) is wired to TouchableOpacity testID=pref-lang-{code}. The click does fire in Playwright (force=True confirmed working for theme). Hypothesis: saveLang() either (a) only updates a local zustand/AsyncStorage key without re-initialising i18n, (b) calls i18n.changeLanguage() but the t() hooks are not subscribed to the language change, or (c) the persisted user.language is updated server-side but the i18n provider is bootstrapped only once at app start. Compare with theme handling (which DOES work) — theme likely uses a Context.Provider that triggers a re-render."
+}
