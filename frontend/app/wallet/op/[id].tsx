@@ -12,12 +12,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TText } from "../../../src/components/TText";
 import { api } from "../../../src/api";
 import { useAuth } from "../../../src/store"; // (eslint: kept for parity)
 import { colors, spacing, radii } from "../../../src/theme";
 import { useThemedColors } from "../../../src/themeContext";
-import * as SecureStore from "expo-secure-store";
 
 const INCOMING_TYPES = ["recharge", "recharge_qr", "recharge_card", "recharge_momo", "recharge_paypal", "p2p_in", "transfer_release", "refund"];
 
@@ -88,19 +88,19 @@ export default function WalletOperationDetail() {
   }, [tx, transfer]);
 
   const downloadPdf = async () => {
-    if (!transfer?.id) {
-      // Si pas de transfert lié, on génère un récap texte
-      return;
-    }
+    if (!transfer?.id) return;
     try {
-      const token = await SecureStore.getItemAsync("sb_token");
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL || ""}/api/transfers/${transfer.id}/receipt-pdf?token=${token || ""}`;
+      const token = await AsyncStorage.getItem("sb_token");
+      const base = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const url = `${base}/api/transfers/${transfer.id}/receipt-pdf?token=${encodeURIComponent(token || "")}`;
       if (Platform.OS === "web") {
         if (typeof window !== "undefined") window.open(url, "_blank");
       } else {
         await Linking.openURL(url);
       }
-    } catch {}
+    } catch (e) {
+      console.warn("[downloadPdf]", e);
+    }
   };
 
   const repeatTransfer = () => {
@@ -201,23 +201,42 @@ export default function WalletOperationDetail() {
 
         {tab === "updates" ? (
           <View style={{ marginTop: spacing.md }}>
-            {timeline.map((e, i) => (
-              <View key={i} style={styles.timeRow}>
-                <View style={{ alignItems: "center" }}>
-                  <View style={[styles.timeDot, { backgroundColor: e.done ? "#10B981" : "#D1D5DB" }]}>
-                    <Ionicons name={e.done ? "checkmark" : "ellipse-outline"} size={14} color="white" />
+            <TText variant="title" weight="extraBold" style={{ marginBottom: spacing.md }}>
+              Calendrier de transfert
+            </TText>
+            {timeline.map((e, i) => {
+              const isLast = i === timeline.length - 1;
+              return (
+                <View key={i} style={styles.timeRow}>
+                  <View style={{ alignItems: "center", width: 26 }}>
+                    <Ionicons name={e.done ? "checkmark" : "ellipse-outline"} size={18} color={e.done ? "#10B981" : "#9CA3AF"} />
+                    {!isLast ? <View style={styles.timeBar} /> : null}
                   </View>
-                  {i < timeline.length - 1 ? <View style={styles.timeBar} /> : null}
+                  <View style={{ flex: 1, marginLeft: 12, paddingBottom: spacing.md }}>
+                    <TText variant="body" weight={isLast ? "extraBold" : "semiBold"}>{e.label}</TText>
+                    {e.date ? <TText variant="label" color={themed.neutrals.textSecondary}>{fmtDate(e.date)}</TText> : null}
+                  </View>
                 </View>
-                <View style={{ flex: 1, marginLeft: 12, paddingBottom: spacing.md }}>
-                  <TText variant="body" weight={e.done ? "extraBold" : "semiBold"}>{e.label}</TText>
-                  {e.date ? <TText variant="label" color={themed.neutrals.textSecondary}>{fmtDate(e.date)}</TText> : null}
-                </View>
-              </View>
-            ))}
+              );
+            })}
+
+            {/* === Actions sous la timeline (Mises à jour uniquement) === */}
+            {transfer ? (
+              <TouchableOpacity onPress={repeatTransfer} style={styles.actionRow}>
+                <Ionicons name="refresh-circle" size={20} color="#059669" />
+                <TText variant="body" weight="extraBold" color="#065F46" style={{ marginLeft: 10 }}>Répéter ce transfert</TText>
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity onPress={rateApp} style={styles.linkRow}>
+              <Ionicons name="star-outline" size={16} color="#059669" />
+              <TText variant="caption" weight="extraBold" color="#059669" style={{ marginLeft: 6 }}>Noter l&apos;appli</TText>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={{ marginTop: spacing.md }}>
+            <TText variant="title" weight="extraBold" style={{ marginBottom: spacing.md }}>
+              Détails de la transaction
+            </TText>
             <KV label={isIncoming ? "Vous avez reçu" : "Vous avez envoyé"} value={`${amount.toFixed(2)} EUR`} bold />
             {transfer ? (
               <>
@@ -244,36 +263,22 @@ export default function WalletOperationDetail() {
                 <KV label="Statut" value={tx.status || "—"} />
               </>
             )}
+
+            {/* === Actions exclusives à l'onglet Informations === */}
+            <TouchableOpacity onPress={shareWithBen} style={styles.linkRow}>
+              <Ionicons name="share-social-outline" size={16} color="#059669" />
+              <TText variant="caption" weight="extraBold" color="#059669" style={{ marginLeft: 6 }}>Partager avec le bénéficiaire</TText>
+            </TouchableOpacity>
+            {transfer ? (
+              <TouchableOpacity onPress={downloadPdf} style={styles.pdfBtn} testID="download-pdf">
+                <Ionicons name="download-outline" size={18} color="#022a6b" />
+                <TText variant="caption" weight="extraBold" color="#022a6b" style={{ marginLeft: 8 }}>
+                  Télécharger la confirmation de transfert
+                </TText>
+              </TouchableOpacity>
+            ) : null}
           </View>
         )}
-
-        {/* 3 actions en cartes vertes */}
-        <View style={{ marginTop: spacing.xl, gap: 8 }}>
-          {transfer ? (
-            <TouchableOpacity onPress={repeatTransfer} style={styles.actionRow}>
-              <Ionicons name="refresh-circle" size={22} color="#059669" />
-              <TText variant="body" weight="extraBold" color="#065F46" style={{ marginLeft: 10 }}>Répéter ce transfert</TText>
-            </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity onPress={rateApp} style={styles.actionRow}>
-            <Ionicons name="star" size={22} color="#059669" />
-            <TText variant="body" weight="extraBold" color="#065F46" style={{ marginLeft: 10 }}>Notez l&apos;appli</TText>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={shareWithBen} style={styles.actionRow}>
-            <Ionicons name="share-social" size={22} color="#059669" />
-            <TText variant="body" weight="extraBold" color="#065F46" style={{ marginLeft: 10 }}>Partager avec le bénéficiaire</TText>
-          </TouchableOpacity>
-        </View>
-
-        {/* Bouton PDF */}
-        {transfer ? (
-          <TouchableOpacity onPress={downloadPdf} style={styles.pdfBtn} testID="download-pdf">
-            <Ionicons name="download-outline" size={18} color="#022a6b" />
-            <TText variant="caption" weight="extraBold" color="#022a6b" style={{ marginLeft: 8 }}>
-              Télécharger la confirmation de transfert
-            </TText>
-          </TouchableOpacity>
-        ) : null}
       </ScrollView>
     </View>
   );
@@ -304,12 +309,15 @@ const styles = StyleSheet.create({
   tabActive: { backgroundColor: "white", shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
 
   timeRow: { flexDirection: "row", alignItems: "flex-start" },
-  timeDot: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
   timeBar: { width: 2, flex: 1, backgroundColor: "#D1D5DB", marginTop: 2 },
 
   kv: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#F3F4F6", gap: 12 },
 
-  actionRow: { flexDirection: "row", alignItems: "center", padding: spacing.md, backgroundColor: "#D1FAE5", borderRadius: radii.xl, borderWidth: 1, borderColor: "#A7F3D0" },
+  // Bouton vert allégé/éclairci pour "Répéter ce transfert"
+  actionRow: { flexDirection: "row", alignItems: "center", padding: spacing.md, marginTop: spacing.md, backgroundColor: "#ECFDF5", borderRadius: radii.xl, borderWidth: 1, borderColor: "#D1FAE5" },
+
+  // Lien simple (pas de fond) pour "Noter l'appli" et "Partager"
+  linkRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 12, marginTop: 8 },
 
   pdfBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: spacing.md, marginTop: spacing.md, borderRadius: radii.full, borderWidth: 1.5, borderStyle: "dashed", borderColor: "#022a6b" + "55", backgroundColor: "white" },
 });
