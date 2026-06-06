@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, FlatList, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
@@ -11,6 +12,7 @@ import { useThemedColors } from "../src/themeContext";
  * Données mockées si l'endpoint n'est pas déployé (MOCKED fallback).
  */
 export default function Ratings() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -35,7 +37,7 @@ export default function Ratings() {
   useEffect(() => { load(); }, []);
 
   return (
-    <Screen title="Évaluations" back hero>
+    <Screen title={t("screens.ratings")} back hero>
       <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>
         Retrouvez ici les notes et commentaires que vous avez laissés après chaque transfert.
       </TText>
@@ -47,7 +49,7 @@ export default function Ratings() {
         ListEmptyComponent={
           <View style={{ alignItems: "center", padding: spacing.xxxl }}>
             <Ionicons name="star-outline" size={48} color={colors.neutrals.textTertiary} />
-            <TText color={colors.neutrals.textSecondary} style={{ marginTop: 8 }}>Aucune évaluation</TText>
+            <TText color={colors.neutrals.textSecondary} style={{ marginTop: 8 }}>{t("screens.noRatings")}</TText>
           </View>
         }
         renderItem={({ item }) => (

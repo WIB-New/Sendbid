@@ -1,4 +1,5 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
@@ -14,13 +15,14 @@ const CAPS: Cap[] = [
 ];
 
 export default function PaymentCaps() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   return (
-    <Screen title="Plafonds de paiement" back hero>
+    <Screen title={t("screens.paymentCaps")} back hero>
       <View style={styles.banner}>
         <Ionicons name="information-circle-outline" size={20} color={colors.primary.base} />
         <TText variant="caption" color={colors.primary.base} style={{ flex: 1, marginLeft: 8 }}>
-          Ces plafonds s'appliquent par moyen de paiement, indépendamment de votre niveau KYC.
+          Ces plafonds s&apos;appliquent par moyen de paiement, indépendamment de votre niveau KYC.
         </TText>
       </View>
 

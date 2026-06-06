@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Modal, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +23,8 @@ export default function TransferStep3() {
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Hook placé AVANT le return conditionnel pour respecter rules-of-hooks
+  const [knowBen, setKnowBen] = useState<null | boolean>(null);
 
   // Sentinel: redirect ONLY on truly cold mount (deep-link / refresh) without a draft.
   const hadDraftRef = useRef(false);
@@ -49,7 +52,6 @@ export default function TransferStep3() {
     : 0;
   const total = draft.send_amount + fee + otherFees + vipFee;
   const insufficient = !!wallet && wallet.balance < total;
-  const [knowBen, setKnowBen] = useState<null | boolean>(null);
 
   const confirm = async () => {
     if (pin.length !== 6) return;
@@ -87,7 +89,7 @@ export default function TransferStep3() {
   };
 
   return (
-    <Screen title="Récapitulatif" back hero>
+    <Screen title={t("transferFlow.recap")} back hero>
       <StepIndicator step={3} total={4} />
       <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.lg }}>
         Étape 3/4 — Vérifiez les informations
@@ -162,7 +164,7 @@ export default function TransferStep3() {
           <TText weight="extraBold" color={colors.neutrals.textPrimary} style={{ marginLeft: 6, fontSize: 13 }}>Connaissez-vous bien cette personne ?</TText>
         </View>
         <TText style={{ fontSize: 11, lineHeight: 15 }} color={colors.neutrals.textSecondary}>
-          N'envoyez jamais d'argent sans vérifier. Une fois confirmé, le transfert ne peut plus être annulé.
+          N&apos;envoyez jamais d&apos;argent sans vérifier. Une fois confirmé, le transfert ne peut plus être annulé.
         </TText>
         <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
           <TouchableOpacity testID="know-ben-yes" onPress={() => setKnowBen(true)} style={[{ flex: 2, paddingVertical: 7, borderRadius: 999, alignItems: "center", borderWidth: 1.5 }, knowBen === true ? { backgroundColor: "#10B981", borderColor: "#10B981" } : { borderColor: colors.neutrals.border, backgroundColor: "white" }]}>

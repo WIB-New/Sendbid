@@ -88,7 +88,7 @@ export default function SBTagPage() {
 
         {/* Texte explicatif */}
         <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 12, marginBottom: spacing.lg, paddingHorizontal: spacing.md }}>
-          Votre SBTag est votre identifiant unique SENDBID. Partagez-le pour recevoir des paiements ou scanner celui d'un proche pour lui envoyer de l'argent.
+          Votre SBTag est votre identifiant unique SENDBID. Partagez-le pour recevoir des paiements ou scanner celui d&apos;un proche pour lui envoyer de l&apos;argent.
         </TText>
 
         {/* QR code */}
@@ -126,7 +126,7 @@ export default function SBTagPage() {
           </View>
           <View style={{ flex: 1, marginLeft: 12 }}>
             <TText weight="extraBold">Demander un paiement</TText>
-            <TText variant="caption" color={colors.neutrals.textSecondary}>Partagez votre SBTag pour recevoir de l'argent</TText>
+            <TText variant="caption" color={colors.neutrals.textSecondary}>Partagez votre SBTag pour recevoir de l&apos;argent</TText>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.neutrals.textTertiary} />
         </TouchableOpacity>
@@ -149,13 +149,13 @@ export default function SBTagPage() {
           <View style={styles.modalCard}>
             <Ionicons name="information-circle" size={32} color="#022a6b" style={{ alignSelf: "center" }} />
             <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>
-              Qu'est-ce que le SBTag ?
+              Qu&apos;est-ce que le SBTag ?
             </TText>
             <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 10, lineHeight: 18 }}>
               Le SBTag est votre identifiant unique SENDBID (ex : @{sbtag}). Il remplace votre numéro de téléphone ou votre email pour recevoir des paiements de manière simple et sécurisée.{"\n\n"}
               • Partagez-le par message ou réseaux sociaux{"\n"}
               • Présentez le QR code pour un paiement en personne{"\n"}
-              • Aucune information bancaire n'est exposée
+              • Aucune information bancaire n&apos;est exposée
             </TText>
             <Button title="Compris" onPress={() => setShowInfo(false)} style={{ marginTop: spacing.lg, backgroundColor: "#022a6b" }} />
           </View>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, Alert, TouchableOpacity, Platform, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
@@ -16,6 +17,7 @@ import { useThemedColors } from "../src/themeContext";
 //   2) Envoi OTP / lien de confirmation
 //   3) Saisie OTP pour valider
 export default function PersonalInfo() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const user = useAuth((s) => s.user);
   const refreshMe = useAuth((s) => s.refreshMe);
@@ -68,7 +70,7 @@ export default function PersonalInfo() {
   const submitEmailStep1 = async () => {
     const trimmed = (newEmail || "").trim();
     if (!trimmed || trimmed === email) {
-      Alert.alert("Email invalide", "Saisissez une nouvelle adresse email différente de l'actuelle.");
+      Alert.alert(t("authMsg.emailInvalid"), "Saisissez une nouvelle adresse email différente de l'actuelle.");
       return;
     }
     try {
@@ -134,7 +136,7 @@ export default function PersonalInfo() {
       <View style={styles.notice}>
         <Ionicons name="information-circle" size={16} color={colors.primary.base} />
         <TText variant="caption" color={colors.primary.base} weight="semiBold" style={{ marginLeft: 8, flex: 1 }}>
-          La modification de l'Email et du numéro de téléphone nécessite une nouvelle vérification.
+          La modification de l&apos;Email et du numéro de téléphone nécessite une nouvelle vérification.
         </TText>
       </View>
 

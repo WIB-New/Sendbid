@@ -58,7 +58,7 @@ export default function LandingPaybid() {
               Devenez point de retrait SENDBID, gagnez des commissions attractives et développez votre clientèle.
             </TText>
             <TouchableOpacity onPress={() => router.push("/paybid/signup" as any)} style={styles.cta}>
-              <TText variant="body" weight="extraBold" color="white">S'inscrire comme agent</TText>
+              <TText variant="body" weight="extraBold" color="white">S&apos;inscrire comme agent</TText>
               <Ionicons name="arrow-forward" size={20} color="white" style={{ marginLeft: 8 }} />
             </TouchableOpacity>
           </View>

@@ -118,10 +118,10 @@ export default function KycTier2() {
             <Ionicons name="scan-outline" size={36} color={colors.primary.base} />
           </View>
           <TText variant="subtitle" weight="bold" align="center" style={{ marginTop: 12 }}>
-            Vérification d'identité avancée
+            Vérification d&apos;identité avancée
           </TText>
           <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
-            Scan de votre pièce d'identité + selfie via Didit. Limites étendues à 10 000 €/mois.
+            Scan de votre pièce d&apos;identité + selfie via Didit. Limites étendues à 10 000 €/mois.
           </TText>
         </View>
       </Card>

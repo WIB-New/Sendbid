@@ -54,7 +54,7 @@ export default function PaybidLogin() {
             <TText variant="display" weight="extraBold" color="white" align="center" style={{ letterSpacing: 1 }}>PAYBID</TText>
             <TText variant="subtitle" color="rgba(255,255,255,0.92)" align="center">Accept. Deliver. Earn.</TText>
             <TText variant="caption" color="rgba(255,255,255,0.85)" align="center" style={{ marginTop: spacing.md }}>
-              L'app agent du réseau SENDBID
+              L&apos;app agent du réseau SENDBID
             </TText>
           </View>
         </SafeAreaView>

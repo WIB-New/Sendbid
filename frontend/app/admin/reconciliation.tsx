@@ -58,7 +58,7 @@ export default function AdminReco() {
         {/* KPIs globales */}
         {kpis ? (
           <View style={styles.kpiBox}>
-            <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 1 }}>VUE D'ENSEMBLE</TText>
+            <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 1 }}>VUE D&apos;ENSEMBLE</TText>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
               <KpiCard icon="cash" tint="#10B981" label="Volume transferts" value={`${Number(kpis?.transfers?.volume_eur || 0).toLocaleString("fr-FR")} \u20ac`} />
               <KpiCard icon="wallet" tint="#3B82F6" label="Float déclaré" value={`${Number(kpis?.float?.total_declared || 0).toLocaleString("fr-FR")} \u20ac`} />

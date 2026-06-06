@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, ScrollView, Linking, Platform, Share } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,6 +21,7 @@ import { useThemedColors } from "../../src/themeContext";
  * - Actions: "Partager" + "PDF"
  */
 export default function OfficialReceipt() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
@@ -126,7 +128,7 @@ export default function OfficialReceipt() {
           <SectionTitle label="FINANCIER" icon="cash-outline" color="#F59E0B" />
           <PaperRow label="Montant envoyé" value={`${Number(t.send_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
           <PaperRow label="Taux de change" value={Number(t.fx_rate || 0).toFixed(4)} />
-          <PaperRow label="Frais" value={`${Number(t.fee_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
+          <PaperRow label={t("transferFlow.fees")} value={`${Number(t.fee_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
           <PaperRow label="Total débité" value={`${Number(t.total_amount).toFixed(2)} ${t.source_currency || "EUR"}`} bold />
           <View style={styles.receivedRow}>
             <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary}>REÇU PAR LE BÉNÉFICIAIRE</TText>

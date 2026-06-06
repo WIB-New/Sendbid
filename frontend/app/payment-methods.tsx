@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, Modal } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -43,6 +44,7 @@ const promptAsync = (msg: string): Promise<string | null> =>
   });
 
 export default function PaymentMethods() {
+  useLocale((st) => st.locale);
   const themed = useThemedColors();
   const router = useRouter();
   const [methods, setMethods] = useState<any[]>([]);

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, Alert, Platform } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,6 +41,7 @@ const promptAsync = (title: string, defaultValue?: string): Promise<string | nul
  * - Supprimer → DELETE /contacts/{id}
  */
 export default function Contacts() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [items, setItems] = useState<Contact[]>([]);

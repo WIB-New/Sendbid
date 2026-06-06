@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Modal, FlatList } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -70,7 +71,7 @@ export default function TransferStep2() {
   };
 
   return (
-    <Screen title="Détails du transfert" back hero>
+    <Screen title={t("transferFlow.details")} back hero>
       <StepIndicator step={2} total={4} />
       <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.lg }}>
         Étape 2/4 — Détails de la remise

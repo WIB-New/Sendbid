@@ -149,7 +149,7 @@ export default function Settings() {
         <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setShowLang(false)}>
           <TouchableOpacity activeOpacity={1} style={styles.modalSheet}>
             <TText variant="subtitle" weight="bold" style={{ marginBottom: 4 }}>Choisir la langue</TText>
-            <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 16 }}>L'application sera traduite immédiatement.</TText>
+            <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 16 }}>L&apos;application sera traduite immédiatement.</TText>
             <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
               {SUPPORTED_LOCALES.map((l) => (
                 <TouchableOpacity key={l.code} testID={`lang-opt-${l.code}`} onPress={() => switchLang(l.code)} style={[styles.langRow, l.code === i18n.locale && styles.langRowActive]}>
@@ -171,7 +171,7 @@ export default function Settings() {
         <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setShowTheme(false)}>
           <TouchableOpacity activeOpacity={1} style={styles.modalSheet}>
             <TText variant="subtitle" weight="bold" style={{ marginBottom: 4 }}>Choisir le thème</TText>
-            <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 16 }}>Apparence de l'application. Le mode sombre arrive prochainement.</TText>
+            <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: 16 }}>Apparence de l&apos;application. Le mode sombre arrive prochainement.</TText>
             {THEMES.map((t) => (
               <TouchableOpacity key={t.code} testID={`theme-opt-${t.code}`} disabled={t.disabled} onPress={() => !t.disabled && switchTheme(t.code)} style={[styles.langRow, t.code === theme && styles.langRowActive, t.disabled && { opacity: 0.4 }]}>
                 <Ionicons name={t.icon} size={22} color={colors.primary.base} />

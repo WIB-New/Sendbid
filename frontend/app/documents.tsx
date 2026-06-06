@@ -1,4 +1,5 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
@@ -15,12 +16,13 @@ const DOCS = [
 ];
 
 export default function Documents() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   return (
     <Screen title="Documents" back>
       <Card>
         <TText variant="caption" color={colors.neutrals.textSecondary}>
-          Téléchargez vos documents légaux et reçus depuis l'écran de chaque transfert.
+          Téléchargez vos documents légaux et reçus depuis l&apos;écran de chaque transfert.
         </TText>
       </Card>
       <View style={{ marginTop: spacing.md }}>

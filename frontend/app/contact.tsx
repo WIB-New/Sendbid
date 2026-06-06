@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert, TextInput as NativeTextInput, Platform } from "react-native";
+import { t, useLocale } from "../src/i18n";
+import { View, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert, TextInput as NativeTextInput, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +19,7 @@ const CHANNELS = [
 ];
 
 export default function Contact() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [subject, setSubject] = useState("");

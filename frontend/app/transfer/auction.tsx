@@ -8,6 +8,7 @@
  * - Actions : Détails du transfert, Aller à l'accueil, Support d'urgence
  */
 import React, { useEffect, useRef, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, ScrollView, Alert, Linking, Animated, Easing, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -23,6 +24,7 @@ import { useThemedColors } from "../../src/themeContext";
 const ROUND_DURATION = 30; // Spec : 30s par tour (corrige le 60s précédent)
 
 export default function LiveAuction() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
@@ -258,7 +260,7 @@ export default function LiveAuction() {
                   style={styles.forceRoundBtn}
                 >
                   <Ionicons name="megaphone" size={16} color="white" />
-                  <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Contacter d'autres agents à proximité</TText>
+                  <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Contacter d&apos;autres agents à proximité</TText>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -296,11 +298,11 @@ export default function LiveAuction() {
 
         {/* ======================= ACTIONS SUPPLÉMENTAIRES ======================= */}
         <View style={styles.actions}>
-          <Button title="Détails du transfert" icon="document-text-outline" variant="outline"
+          <Button title={t("transferFlow.details")} icon="document-text-outline" variant="outline"
             onPress={() => router.push({ pathname: "/transfer/[id]" as any, params: { id: transfer.id } })} />
           <TouchableOpacity onPress={() => router.replace("/(tabs)")} style={styles.linkRow}>
             <Ionicons name="home-outline" size={16} color={colors.primary.base} />
-            <TText weight="semiBold" color={colors.primary.base} style={{ marginLeft: 6 }}>Aller à l'accueil</TText>
+            <TText weight="semiBold" color={colors.primary.base} style={{ marginLeft: 6 }}>Aller à l&apos;accueil</TText>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/support" as any)} style={styles.linkRow}>
             <Ionicons name="warning-outline" size={16} color="#EF4444" />
@@ -359,7 +361,7 @@ function AssignmentBlock({ transfer, agent, router, isCash, isVip }: any) {
 
       <TouchableOpacity onPress={callAgent} style={styles.callBtn}>
         <Ionicons name="call" size={18} color="white" />
-        <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Appeler l'agent</TText>
+        <TText weight="extraBold" color="white" style={{ marginLeft: 8 }}>Appeler l&apos;agent</TText>
       </TouchableOpacity>
 
       {/* Cas retrait standard cash */}
@@ -374,7 +376,7 @@ function AssignmentBlock({ transfer, agent, router, isCash, isVip }: any) {
           <View style={styles.reminderBox}>
             <Ionicons name="notifications-outline" size={14} color="#3B82F6" />
             <TText variant="label" color={colors.neutrals.textSecondary} style={{ marginLeft: 8, flex: 1 }}>
-              Rappels automatiques toutes les 12h envoyés à l'expéditeur et au bénéficiaire.
+              Rappels automatiques toutes les 12h envoyés à l&apos;expéditeur et au bénéficiaire.
             </TText>
           </View>
           <Button title="Prolonger jusqu'à 7 jours (payant)" icon="time" variant="outline" size="small" style={{ marginTop: 10 }}
@@ -394,7 +396,7 @@ function AssignmentBlock({ transfer, agent, router, isCash, isVip }: any) {
           <View style={styles.reminderBox}>
             <Ionicons name="flash" size={14} color="#F59E0B" />
             <TText variant="label" color={colors.neutrals.textSecondary} style={{ marginLeft: 8, flex: 1 }}>
-              Mises à jour temps réel via WebSocket — notifications push à chaque changement d'étape.
+              Mises à jour temps réel via WebSocket — notifications push à chaque changement d&apos;étape.
             </TText>
           </View>
           <Button title="Suivre sur la carte" icon="map" variant="outline" size="small" style={{ marginTop: 10 }}
@@ -462,7 +464,7 @@ function AgentBidCard({ bid, transfer, isBest }: any) {
           </TText>
         </View>
         <View style={styles.feeBadge}>
-          <TText variant="caption" color={colors.neutrals.textSecondary} style={{ fontSize: 10 }}>Frais</TText>
+          <TText variant="caption" color={colors.neutrals.textSecondary} style={{ fontSize: 10 }}>{t("transferFlow.fees")}</TText>
           <TText variant="subtitle" weight="extraBold" color={colors.primary.base}>{Number(bid.bid_fee_percent).toFixed(2)}%</TText>
         </View>
       </View>
@@ -548,13 +550,5 @@ const styles = StyleSheet.create({
   detailGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 6, marginHorizontal: -2 },
   detailCell: { width: "33.33%", paddingHorizontal: 2, paddingVertical: 3 },
 
-  // === Carte agent détaillée ===
-  agentCard: { backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, borderRadius: radii.xxl, padding: spacing.md, marginBottom: 10, position: "relative" },
-  agentCardBest: { borderColor: colors.primary.base, borderWidth: 2, shadowColor: colors.primary.base, shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
-  bestBadge: { position: "absolute", top: -10, left: 12, flexDirection: "row", alignItems: "center", backgroundColor: colors.primary.base, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
-  agentAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
-  feeBadge: { alignItems: "flex-end", paddingLeft: 6 },
-  detailGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 10, marginHorizontal: -3 },
-  detailCell: { width: "33.33%", paddingHorizontal: 3, paddingVertical: 4 },
   detailCellHighlight: { /* mise en relief subtile */ },
 });

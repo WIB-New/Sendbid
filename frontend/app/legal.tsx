@@ -172,7 +172,7 @@ export default function Legal() {
   return (
     <Screen title="Documents légaux" back hero>
       <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>
-        Consultez l'ensemble des documents légaux et le guide d'utilisation.
+        Consultez l&apos;ensemble des documents légaux et le guide d&apos;utilisation.
       </TText>
 
       {LIST.map((d) => {

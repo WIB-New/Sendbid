@@ -1,4 +1,5 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, Platform, Alert, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
@@ -27,6 +28,7 @@ const TIERS = [
 ];
 
 export default function Limits() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const user = useAuth((s) => s.user);
   const currentTier = user?.kyc_tier ?? 0;
@@ -52,7 +54,7 @@ export default function Limits() {
   };
 
   return (
-    <Screen title="Limites de transfert" back hero>
+    <Screen title={t("screens.limits")} back hero>
       <Card>
         <View style={{ alignItems: "center" }}>
           <View style={[styles.iconBox, { backgroundColor: TIERS[currentTier].color }]}>

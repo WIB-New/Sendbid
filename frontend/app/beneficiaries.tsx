@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -11,6 +12,7 @@ import { colors, spacing, radii } from "../src/theme";
 import { useThemedColors } from "../src/themeContext";
 // Bénéficiaires v4.0 — "25 Bénéficiaires" : header navy + search + filtres pays + favoris en haut + liste cartes
 export default function Beneficiaries() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
@@ -54,7 +56,7 @@ export default function Beneficiaries() {
             <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
               <Ionicons name="chevron-back" size={22} color="white" />
             </TouchableOpacity>
-            <TText variant="body" weight="extraBold" color="white">Bénéficiaires</TText>
+            <TText variant="body" weight="extraBold" color="white">{t("screens.beneficiaries")}</TText>
             <TouchableOpacity testID="ben-add" onPress={() => router.push("/beneficiaries/add" as any)} style={styles.iconBtn}>
               <Ionicons name="add" size={20} color="white" />
             </TouchableOpacity>
@@ -97,8 +99,8 @@ export default function Beneficiaries() {
           {others.length === 0 ? (
             <View style={{ padding: spacing.xl, alignItems: "center" }}>
               <Ionicons name="people-outline" size={32} color={colors.neutrals.textTertiary} />
-              <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 6 }}>Aucun bénéficiaire</TText>
-              <Button title="Ajouter un bénéficiaire" icon="add" variant="outline" onPress={() => router.push("/beneficiaries/add" as any)} style={{ marginTop: 12 }} />
+              <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 6 }}>{t("screens.noBeneficiaries")}</TText>
+              <Button title={t("screens.addBeneficiary")} icon="add" variant="outline" onPress={() => router.push("/beneficiaries/add" as any)} style={{ marginTop: 12 }} />
             </View>
           ) : others.map((b, i) => (
             <BenRow key={b.id} b={b} last={i === others.length - 1} onSend={() => router.push({ pathname: "/transfer/new", params: { beneficiary_id: b.id } } as any)} onFav={() => toggleFav(b)} onDelete={() => remove(b)} />

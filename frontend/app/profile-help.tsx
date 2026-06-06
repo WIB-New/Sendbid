@@ -1,7 +1,9 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { HubScreen, HubItem } from "../src/components/HubScreen";
 
 export default function ProfileHelp() {
+  useLocale((st) => st.locale);
   const items: HubItem[] = [
     { icon: "call-outline", label: "Nous contacter", description: "Support téléphonique, email, chat", route: "/contact", tint: "#022a6b" },
     { icon: "chatbubbles-outline", label: "FAQ (Questions fréquentes)", description: "Réponses aux questions les plus fréquentes", route: "/support", tint: "#8B5CF6" },

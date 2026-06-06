@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Alert, Linking } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +16,7 @@ const ROLE_LABELS: Record<string, { name: string; color: string }> = {
 };
 
 export default function Chat() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();

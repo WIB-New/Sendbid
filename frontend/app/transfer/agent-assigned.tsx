@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Animated, Easing, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -30,6 +31,7 @@ type Bid = {
  * - "Suivre en direct" CTA
  */
 export default function AgentAssigned() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
@@ -106,14 +108,14 @@ export default function AgentAssigned() {
 
       <ScrollView style={styles.card} contentContainerStyle={styles.cardInner} showsVerticalScrollIndicator={false}>
         <TText variant="label" weight="extraBold" color={colors.neutrals.textSecondary} style={{ letterSpacing: 1, marginBottom: 12 }}>
-          INFORMATIONS DE L'AGENT
+          INFORMATIONS DE L&apos;AGENT
         </TText>
 
         {sortedBids.length === 0 ? (
           <View style={styles.emptyBox}>
             <Ionicons name="hourglass-outline" size={28} color={colors.neutrals.textTertiary} />
             <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 8 }}>
-              En attente de l'agent assigné…
+              En attente de l&apos;agent assigné…
             </TText>
           </View>
         ) : null}

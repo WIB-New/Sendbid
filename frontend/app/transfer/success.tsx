@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Share, Platform, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +22,7 @@ import { useThemedColors } from "../../src/themeContext";
  * - Two CTAs: "Suivre mon transfert" (navy) + "Nouveau transfert" (teal)
  */
 export default function TransferSuccess() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();

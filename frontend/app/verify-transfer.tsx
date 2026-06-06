@@ -49,7 +49,7 @@ export default function VerifyTransfer() {
   return (
     <Screen title="Vérifier un transfert" back hero>
       <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.lg }}>
-        Saisissez la référence (ex : SB-XXXXXX) ou l'identifiant complet du transfert pour consulter son état actuel.
+        Saisissez la référence (ex : SB-XXXXXX) ou l&apos;identifiant complet du transfert pour consulter son état actuel.
       </TText>
       <Input
         testID="verify-ref"

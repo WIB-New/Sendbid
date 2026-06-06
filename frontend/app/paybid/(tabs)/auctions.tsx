@@ -191,7 +191,7 @@ export default function PaybidAuctions() {
               <TText variant="caption" color={paybidColors.neutrals.textPrimary} style={{ lineHeight: 20 }}>{commissionMsg}</TText>
             </View>
             <TText variant="label" color={paybidColors.neutrals.textTertiary} align="center" style={{ marginTop: 8 }}>
-              L'attribution finale a lieu à la fin du round selon les autres offres.
+              L&apos;attribution finale a lieu à la fin du round selon les autres offres.
             </TText>
             <Button title="J'ai compris" onPress={() => setCommissionMsg(null)} style={{ marginTop: spacing.md, backgroundColor: paybidColors.primary.base }} />
           </View>

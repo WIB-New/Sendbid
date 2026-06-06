@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Switch, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +22,7 @@ const secureGet = async (k: string) =>
 
 // Sécurité — activation directe de la biométrie + accès rapide aux changements PIN/MDP/Sessions
 export default function SecurityScreen() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [bioEnabled, setBioEnabled] = useState(false);

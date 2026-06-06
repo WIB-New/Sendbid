@@ -34,7 +34,7 @@ export default function PaybidEarnings() {
           <TText variant="caption" color="rgba(255,255,255,0.85)">{data.transactions.length} transferts encaissés</TText>
         </LinearGradient>
         <TText variant="subtitle" weight="bold" style={{ marginTop: spacing.xl, marginBottom: 8 }}>Historique</TText>
-        {data.transactions.length === 0 ? <View style={styles.empty}><TText color={paybidColors.neutrals.textSecondary}>Aucun gain pour l'instant</TText></View> : data.transactions.map((t: any) => (
+        {data.transactions.length === 0 ? <View style={styles.empty}><TText color={paybidColors.neutrals.textSecondary}>Aucun gain pour l&apos;instant</TText></View> : data.transactions.map((t: any) => (
           <View key={t.id} style={styles.row}>
             <View style={styles.icon}><Ionicons name="cash" size={18} color={paybidColors.primary.base} /></View>
             <View style={{ flex: 1, marginLeft: 12 }}>

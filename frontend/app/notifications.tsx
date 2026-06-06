@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, FlatList, StyleSheet, TouchableOpacity, RefreshControl, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function Notifications() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);

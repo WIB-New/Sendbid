@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Linking, Platform, ScrollView, Share, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -146,6 +147,7 @@ function formatRemaining(ms: number): string {
 }
 
 export default function TransferDetail() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -332,7 +334,7 @@ export default function TransferDetail() {
         <View style={styles.finBox}>
           <FinRow label="Montant envoyé" value={`${Number(t.send_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
           <FinRow label="Taux" value={Number(t.fx_rate || 0).toFixed(4)} />
-          <FinRow label="Frais" value={`${Number(t.fee_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
+          <FinRow label={t("transferFlow.fees")} value={`${Number(t.fee_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
           <FinRow label="Total débité" value={`${Number(t.total_amount).toFixed(2)} ${t.source_currency || "EUR"}`} bold />
           <FinRow label="Bénéficiaire reçoit" value={`${Number(t.receive_amount).toFixed(0)} ${t.destination_currency}`} tint="#10B981" bold last />
         </View>

@@ -100,7 +100,7 @@ export default function PaybidScan() {
         </View>
 
         <TText variant="caption" color={paybidColors.neutrals.textSecondary} align="center" style={{ marginTop: spacing.md }}>
-          Tenez le QR client à l'intérieur du cadre
+          Tenez le QR client à l&apos;intérieur du cadre
         </TText>
 
         <View style={{ flexDirection: "row", gap: 8, marginTop: spacing.lg }}>

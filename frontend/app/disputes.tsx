@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +19,7 @@ const STATUS_COLOR: any = {
 };
 
 export default function Disputes() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);

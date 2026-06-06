@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Linking, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,6 +32,7 @@ type RouteData = {
 };
 
 export default function MapScreen() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const [t, setT] = useState<any>(null);
@@ -71,7 +73,7 @@ export default function MapScreen() {
           <View style={styles.fallback}>
             <ActivityIndicator color={colors.primary.base} />
             <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 8 }}>
-              Calcul de l'itinéraire…
+              Calcul de l&apos;itinéraire…
             </TText>
           </View>
         ) : route?.embed_url && !route?.stub ? (

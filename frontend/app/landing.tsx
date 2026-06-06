@@ -73,7 +73,7 @@ export default function Landing() {
           <View style={styles.hero}>
             <View style={styles.heroChip}><Ionicons name="flash" size={12} color="#F59E0B" /><TText variant="label" weight="bold" color="#F59E0B" style={{ marginLeft: 4 }}>NOUVEAU : 250+ pays couverts</TText></View>
             <TText variant="display" weight="extraBold" color="white" align="center" style={{ fontSize: 36, lineHeight: 42 }}>
-              Transférez de{"\n"}l'argent en{"\n"}<TText weight="extraBold" color="#5CE1A6" style={{ fontSize: 36 }}>quelques secondes</TText>
+              Transférez de{"\n"}l&apos;argent en{"\n"}<TText weight="extraBold" color="#5CE1A6" style={{ fontSize: 36 }}>quelques secondes</TText>
             </TText>
             <TText variant="body" color="rgba(255,255,255,0.75)" align="center" style={{ marginTop: spacing.md, lineHeight: 22 }}>
               Grâce aux offres en temps réel, nos agents locaux se concurrencent pour vous offrir le meilleur taux, partout dans le monde.
@@ -137,7 +137,7 @@ export default function Landing() {
             <TText variant="title" weight="extraBold" color="white" align="center">Prêt à envoyer ?</TText>
             <TText variant="caption" color="rgba(255,255,255,0.9)" align="center" style={{ marginTop: 4 }}>Rejoignez les 100 000 utilisateurs qui font confiance à SENDBID.</TText>
             <TouchableOpacity onPress={() => router.push("/(auth)/signup")} style={styles.ctaFinalBtn}>
-              <TText variant="body" weight="extraBold" color="#022a6b">Télécharger l'app</TText>
+              <TText variant="body" weight="extraBold" color="#022a6b">Télécharger l&apos;app</TText>
             </TouchableOpacity>
           </LinearGradient>
 

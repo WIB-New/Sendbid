@@ -163,7 +163,7 @@ export default function KycCorporate() {
             <>
               <TText variant="subtitle" weight="bold" style={{ marginBottom: 4 }}>Niveau 3 — Représentant légal</TText>
               <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginBottom: spacing.md }}>
-                Pièce d'identité, selfie, preuve d'adresse du dirigeant.
+                Pièce d&apos;identité, selfie, preuve d&apos;adresse du dirigeant.
               </TText>
               <Input label="Nom complet du représentant *" value={repName} onChangeText={setRepName} icon="person-outline" />
               <Input label="Date de naissance (JJ/MM/AAAA) *" value={repDob} onChangeText={setRepDob} icon="calendar-outline" />

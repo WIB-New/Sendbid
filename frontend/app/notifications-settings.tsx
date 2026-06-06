@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, Switch, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,6 +18,7 @@ const PREFS: Pref[] = [
 ];
 
 export default function NotificationsSettings() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const [vals, setVals] = useState<Record<string, boolean>>({ push: true, email: true, sms: true });
   const [busy, setBusy] = useState<string | null>(null);

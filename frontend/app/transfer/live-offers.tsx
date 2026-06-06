@@ -3,8 +3,10 @@
  * Délègue toute la logique métier à `auction.tsx` (déjà implémenté avec tours, offres WS-like et cards agents).
  */
 import React from "react";
+import { t, useLocale } from "../../src/i18n";
 import AuctionScreen from "./auction";
 
 export default function LiveOffers() {
+  useLocale((st) => st.locale);
   return <AuctionScreen />;
 }

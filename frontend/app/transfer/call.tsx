@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Platform, Linking, Alert, Animated } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,6 +15,7 @@ import { useThemedColors } from "../../src/themeContext";
  * - UI inspirée des apps d'appel natives (avatar, gradient sombre, boutons actions)
  */
 export default function Call() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const { transfer_id, phone, name } = useLocalSearchParams<{ transfer_id: string; phone?: string; name?: string }>();

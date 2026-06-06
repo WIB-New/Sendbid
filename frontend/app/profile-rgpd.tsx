@@ -1,9 +1,11 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { HubScreen, HubItem } from "../src/components/HubScreen";
 
 export default function ProfileRgpd() {
+  useLocale((st) => st.locale);
   const router = useRouter();
   const showAlert = (msg: string) => {
     if (Platform.OS === "web") (window as any).alert(msg);

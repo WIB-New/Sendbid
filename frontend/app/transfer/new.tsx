@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Modal, FlatList } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -233,7 +234,7 @@ export default function TransferStep1() {
 
       {/* === Mode de remise — chips horizontaux === */}
       <TText variant="body" weight="extraBold" style={{ marginTop: spacing.lg }}>
-        Comment voulez-vous que le bénéficiaire reçoive l'argent ?
+        Comment voulez-vous que le bénéficiaire reçoive l&apos;argent ?
       </TText>
       <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
         {DELIVERY_MODES.map((m) => {
@@ -262,7 +263,7 @@ export default function TransferStep1() {
 
       {/* === Bénéficiaire — recherche dynamique === */}
       <TText variant="body" weight="extraBold" style={{ marginTop: spacing.lg }}>
-        À qui voulez-vous envoyer de l'argent ?
+        À qui voulez-vous envoyer de l&apos;argent ?
       </TText>
       {selectedBen ? (
         <View style={styles.selectedBenRow}>
@@ -467,7 +468,7 @@ export default function TransferStep1() {
       <Modal visible={showBenSelect} transparent animationType="slide" onRequestClose={() => setShowBenSelect(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowBenSelect(false)}>
           <View style={styles.modalSheet}>
-            <TText variant="subtitle" weight="bold" style={{ marginBottom: 12 }}>Bénéficiaires</TText>
+            <TText variant="subtitle" weight="bold" style={{ marginBottom: 12 }}>{t("screens.beneficiaries")}</TText>
             {beneficiaries.length === 0 ? (
               <View style={{ padding: spacing.lg, alignItems: "center" }}>
                 <TText color={colors.neutrals.textSecondary}>Aucun bénéficiaire enregistré</TText>

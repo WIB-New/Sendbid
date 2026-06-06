@@ -1,4 +1,5 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../src/store";
@@ -6,6 +7,7 @@ import { HubScreen, HubItem } from "../src/components/HubScreen";
 import { api } from "../src/api";
 
 export default function ProfileAccount() {
+  useLocale((st) => st.locale);
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const router = useRouter();

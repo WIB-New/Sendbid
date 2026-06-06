@@ -45,7 +45,7 @@ export default function TransferStatuses() {
         <View style={styles.intro}>
           <Ionicons name="information-circle-outline" size={18} color={colors.primary.base} />
           <TText variant="caption" color={colors.primary.base} style={{ marginLeft: 6, flex: 1 }}>
-            Les 13 statuts officiels d'un transfert SENDBID. Chaque transfert progresse à travers un sous-ensemble selon son mode de remise.
+            Les 13 statuts officiels d&apos;un transfert SENDBID. Chaque transfert progresse à travers un sous-ensemble selon son mode de remise.
           </TText>
         </View>
 

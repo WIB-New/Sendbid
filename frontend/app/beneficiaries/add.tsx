@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Alert, TouchableOpacity, FlatList, Modal, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,6 +39,7 @@ type Corridor = {
 };
 
 export default function AddBeneficiary() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const [corridors, setCorridors] = useState<Corridor[]>([]);

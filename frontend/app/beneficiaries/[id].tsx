@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Alert, Platform, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +11,7 @@ import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 export default function BeneficiaryDetail() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();

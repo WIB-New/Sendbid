@@ -1,7 +1,9 @@
 import React from "react";
+import { t, useLocale } from "../src/i18n";
 import { HubScreen, HubItem } from "../src/components/HubScreen";
 
 export default function ProfileLoyalty() {
+  useLocale((st) => st.locale);
   const items: HubItem[] = [
     { icon: "gift-outline", label: "Parrainage", description: "Invitez vos proches et gagnez des récompenses", route: "/referral", tint: "#EC4899" },
     { icon: "trophy-outline", label: "Programme fidélité", description: "Niveaux Bronze, Silver, Gold, Platinum", route: "/loyalty", tint: "#F59E0B" },

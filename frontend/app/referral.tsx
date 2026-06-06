@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { t, useLocale } from "../src/i18n";
 import { View, StyleSheet, ScrollView, TouchableOpacity, Share } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,6 +21,7 @@ const STEPS = [
 ];
 
 export default function Referral() {
+  useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
