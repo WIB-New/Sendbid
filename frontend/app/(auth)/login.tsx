@@ -93,7 +93,7 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
-      <LinearGradient colors={["#022a6b", "#052080", "#0F1B40"]} style={styles.header}>
+      <LinearGradient colors={["#022a6b", "#052080", "#022a6b"]} style={styles.header}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerTop}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
@@ -126,6 +126,7 @@ export default function Login() {
           <Input
             testID="login-identifier"
             label="Email, téléphone ou ID de profil"
+            labelColor="#000000"
             value={identifier}
             onChangeText={setIdentifier}
             icon="person-outline"
@@ -135,6 +136,7 @@ export default function Login() {
           <Input
             testID="login-password"
             label="Mot de passe"
+            labelColor="#000000"
             value={password}
             onChangeText={setPassword}
             icon="lock-closed-outline"

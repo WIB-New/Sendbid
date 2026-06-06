@@ -52,7 +52,7 @@ export default function BankTransfer() {
   return (
     <Screen title="Virement bancaire" back hero scroll={false}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
-        <LinearGradient colors={["#0F1B40", "#1B2A5B"]} style={styles.balanceCard}>
+        <LinearGradient colors={["#022a6b", "#022a6b"]} style={styles.balanceCard}>
           <TText variant="caption" color="rgba(255,255,255,0.7)">Solde Portefeuille disponible</TText>
           <TText variant="display" weight="extraBold" color="white" style={{ marginTop: 4 }}>
             {wallet ? `${wallet.balance.toFixed(2)} EUR` : "…"}

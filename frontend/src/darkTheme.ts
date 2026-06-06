@@ -8,7 +8,7 @@
  * (Screen, Button, Input, TText, FlooMoneyCard, Home, Wallet, Profile) reçoivent les tokens progressivement.
  */
 export const darkColors = {
-  primary: { base: "#3D52D5", dark: "#022a6b", light: "#5C70E9" },
+  primary: { base: "#052080", dark: "#022a6b", light: "#5C70E9" },
   accent: { base: "#04d46f", dark: "#04ba28", light: "#5FE89F", biometric: "#04d46f" },
   gold: { base: "#D4AF37", dark: "#9A7C1F", light: "#F1D86A", soft: "#332C0F" },
   status: { success: "#04d46f", pending: "#F59E0B", error: "#F87171", info: "#5C70E9" },
@@ -24,11 +24,11 @@ export const darkColors = {
   },
   gradients: {
     flooMoney: ["#022a6b", "#052080"] as [string, string],
-    primary: ["#022a6b", "#3D52D5"] as [string, string],
+    primary: ["#022a6b", "#052080"] as [string, string],
     success: ["#04ba28", "#04d46f"] as [string, string],
     premiumDark: ["#011645", "#022a6b"] as [string, string],
-    splash: ["#011645", "#022a6b", "#3D52D5"] as [string, string, string],
-    imperial: ["#011645", "#022a6b", "#3D52D5"] as [string, string, string],
+    splash: ["#011645", "#022a6b", "#052080"] as [string, string, string],
+    imperial: ["#011645", "#022a6b", "#052080"] as [string, string, string],
     gold: ["#9A7C1F", "#D4AF37", "#F1D86A"] as [string, string, string],
   },
   overlays: {

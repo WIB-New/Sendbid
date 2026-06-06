@@ -14,10 +14,11 @@ type Props = TextInputProps & {
   passwordToggle?: boolean;
   hint?: string;
   testID?: string;
+  labelColor?: string;
 };
 
 export const Input = forwardRef<TextInput, Props>(function Input(
-  { label, error, icon, rightIcon, onRightPress, passwordToggle, hint, secureTextEntry, testID, style, ...rest },
+  { label, error, icon, rightIcon, onRightPress, passwordToggle, hint, secureTextEntry, testID, style, labelColor, ...rest },
   ref,
 ) {
   const { tokens } = useThemeTokens();
@@ -26,7 +27,7 @@ export const Input = forwardRef<TextInput, Props>(function Input(
   return (
     <View style={{ width: "100%", marginBottom: spacing.md }}>
       {label ? (
-        <TText variant="caption" weight="semiBold" color={tokens.neutrals.textSecondary} style={{ marginBottom: 6 }}>
+        <TText variant="caption" weight="semiBold" color={labelColor || tokens.neutrals.textSecondary} style={{ marginBottom: 6 }}>
           {label}
         </TText>
       ) : null}

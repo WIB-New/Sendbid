@@ -81,7 +81,7 @@ export default function Profile() {
   ];
 
   return (
-    <LinearGradient colors={["#00147E", "#3D52D5"]} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
+    <LinearGradient colors={["#022a6b", "#052080"]} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         {/* Header */}
         <View style={styles.header}>

@@ -5,7 +5,7 @@
  */
 export const paybidDarkColors = {
   primary: { base: "#FFB733", dark: "#CC7A00", light: "#FFCC66" },
-  accent: { base: "#3A4D8F", dark: "#1B2A5B", light: "#5B6FB8" },
+  accent: { base: "#3A4D8F", dark: "#022a6b", light: "#5B6FB8" },
   status: { success: "#04d46f", pending: "#F59E0B", error: "#F87171", info: "#3B82F6" },
   neutrals: {
     white: "#FFFFFF",

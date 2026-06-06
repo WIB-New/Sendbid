@@ -141,7 +141,7 @@ export default function LiveAuction() {
       <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 10, paddingTop: 8 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* ======================= BANNIÈRE LIVE (CTA principal) ======================= */}
         {status === "BIDDING" ? (
-          <LinearGradient colors={["#01155F", "#022a6b", "#3D52D5"]} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.banner}>
+          <LinearGradient colors={["#01155F", "#022a6b", "#052080"]} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.banner}>
             <View style={styles.bannerHeader}>
               <View style={styles.tourBadge}>
                 <Ionicons name="flash" size={14} color="white" />
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(61,82,213,0.45)",
   },
   clientInfoHeader: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
-  clientAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: "#3D52D5", alignItems: "center", justifyContent: "center" },
+  clientAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: "#052080", alignItems: "center", justifyContent: "center" },
   clientInfoGrid: { flexDirection: "row", borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.12)", paddingTop: 6 },
   clientInfoCell: { flex: 1, alignItems: "flex-start", paddingHorizontal: 3 },
   agentCard: { backgroundColor: colors.neutrals.surface, borderWidth: 1, borderColor: colors.neutrals.border, borderRadius: radii.lg, padding: 10, marginBottom: 8, position: "relative" },

@@ -225,8 +225,8 @@ export default function TransferDetail() {
   const activeIdx = steps.findIndex((s) => s.state === "active");
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F1B40" }}>
-      <LinearGradient colors={[hero.dark, "#0F1B40"]} style={styles.hero}>
+    <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
+      <LinearGradient colors={[hero.dark, "#022a6b"]} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>

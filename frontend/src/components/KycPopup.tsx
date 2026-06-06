@@ -71,7 +71,7 @@ export function KycPopup({ userId, kycTier }: { userId?: string; kycTier?: numbe
     <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
       <TouchableOpacity activeOpacity={1} style={styles.overlay} onPress={() => setOpen(false)}>
         <TouchableOpacity activeOpacity={1} style={styles.sheet}>
-          <LinearGradient colors={["#0A1338", "#0F1B40"]} style={styles.hero}>
+          <LinearGradient colors={["#0A1338", "#022a6b"]} style={styles.hero}>
             <View style={styles.handle} />
             <Ionicons name="shield-checkmark" size={40} color="#60A5FA" />
             <TText variant="subtitle" weight="extraBold" color="white" align="center" style={{ marginTop: 8 }}>

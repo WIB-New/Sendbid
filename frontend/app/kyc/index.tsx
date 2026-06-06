@@ -43,7 +43,7 @@ export default function KycHome() {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F1B40" }}>
+    <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
       <LinearGradient colors={["#92400E", "#F59E0B", "#FCD34D"]} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>

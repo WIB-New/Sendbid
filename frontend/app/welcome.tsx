@@ -28,7 +28,7 @@ export default function Welcome() {
   const cur = i18n.locale;
 
   return (
-    <LinearGradient colors={["#000A42", "#00147E", "#000A42"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient colors={["#000A42", "#022a6b", "#000A42"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <View style={styles.hero}>
           <View style={styles.logoBox}>

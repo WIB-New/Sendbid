@@ -180,7 +180,7 @@ export default function VerificationPopup({ visible, onClose }: Props) {
       <View style={styles.backdrop}>
         <View style={[styles.sheet, { backgroundColor: themed.neutrals.surface }]}>
           {/* === Header avec gradient bleu === */}
-          <LinearGradient colors={["#1E3A8A", "#3B82F6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.headerGradient}>
+          <LinearGradient colors={["#022a6b", "#3B82F6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.headerGradient}>
             <View style={styles.headerInner}>
               <View style={styles.headerIconCircle}>
                 <Ionicons name="shield-checkmark" size={22} color="white" />
@@ -217,7 +217,7 @@ export default function VerificationPopup({ visible, onClose }: Props) {
                   <View style={[styles.sectionDot, { backgroundColor: "#3B82F6" }]}>
                     <Ionicons name="mail" size={16} color="white" />
                   </View>
-                  <TText variant="caption" weight="extraBold" color="#1E3A8A" style={{ marginLeft: 8, letterSpacing: 0.4 }}>
+                  <TText variant="caption" weight="extraBold" color="#022a6b" style={{ marginLeft: 8, letterSpacing: 0.4 }}>
                     ÉTAPE 1 — EMAIL
                   </TText>
                 </View>

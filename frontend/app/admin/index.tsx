@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <LinearGradient colors={["#0A1338", "#0F1B40", "#070C24"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#0A1338", "#022a6b", "#070C24"]} style={{ flex: 1 }}>
       <Screen title="Console d'administration" back scroll={false}>
         <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
           <View style={styles.roleChip}>

@@ -69,7 +69,7 @@ export default function Transfers() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.neutrals.background }}>
       {/* === Hero header (imperial blue gradient) === */}
-      <LinearGradient colors={["#00147E", "#3D52D5"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+      <LinearGradient colors={["#022a6b", "#052080"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <View style={{ flex: 1 }}>

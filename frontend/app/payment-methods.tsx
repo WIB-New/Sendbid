@@ -98,8 +98,8 @@ export default function PaymentMethods() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#00147E" }}>
-      <LinearGradient colors={["#00147E", "#3D52D5"]} style={styles.hero}>
+    <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
+      <LinearGradient colors={["#022a6b", "#052080"]} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
@@ -129,9 +129,9 @@ export default function PaymentMethods() {
 
       <ScrollView style={styles.card} contentContainerStyle={styles.cardInner} showsVerticalScrollIndicator={false}>
         {/* ================== SECTION 1 — CARTES BANCAIRES ================== */}
-        <View style={[styles.section, { borderLeftColor: "#1B2A5B" }]}>
+        <View style={[styles.section, { borderLeftColor: "#022a6b" }]}>
           <View style={styles.sectionHead}>
-            <View style={[styles.groupIcon, { backgroundColor: "#1B2A5B" }]}>
+            <View style={[styles.groupIcon, { backgroundColor: "#022a6b" }]}>
               <Ionicons name="card" size={18} color="white" />
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
@@ -151,7 +151,7 @@ export default function PaymentMethods() {
               </View>
             ) : cards.map((c, i) => (
               <View key={c.id} style={[styles.cRow, i < cards.length - 1 && styles.cRowBorder]}>
-                <View style={[styles.cIcon, { backgroundColor: "#1B2A5B" }]}>
+                <View style={[styles.cIcon, { backgroundColor: "#022a6b" }]}>
                   <Ionicons name="card" size={18} color="white" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
@@ -169,11 +169,11 @@ export default function PaymentMethods() {
           <TouchableOpacity
             testID="add-card"
             onPress={() => router.push("/payment-methods/add-card" as any)}
-            style={[styles.addLink, { borderColor: "#1B2A5B" + "40" }]}
+            style={[styles.addLink, { borderColor: "#022a6b" + "40" }]}
             activeOpacity={0.8}
           >
-            <Ionicons name="add-circle" size={18} color="#1B2A5B" />
-            <TText variant="caption" weight="extraBold" color="#1B2A5B" style={{ marginLeft: 8 }}>
+            <Ionicons name="add-circle" size={18} color="#022a6b" />
+            <TText variant="caption" weight="extraBold" color="#022a6b" style={{ marginLeft: 8 }}>
               Ajouter une carte bancaire
             </TText>
           </TouchableOpacity>

@@ -5,7 +5,7 @@
  */
 export const paybidColors = {
   primary: { base: "#FFA500", dark: "#CC7A00", light: "#FFC04D" },
-  accent: { base: "#1B2A5B", dark: "#0F1B40", light: "#3A4D8F" }, // SENDBID blue tie-in
+  accent: { base: "#022a6b", dark: "#022a6b", light: "#3A4D8F" }, // SENDBID blue tie-in
   status: { success: "#FFA500", pending: "#F59E0B", error: "#EF4444", info: "#3B82F6" },
   neutrals: {
     white: "#FFFFFF",

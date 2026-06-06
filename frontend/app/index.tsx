@@ -51,7 +51,7 @@ export default function Splash() {
   const progressWidth = progress.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] });
 
   return (
-    <LinearGradient colors={["#0F1B40", "#1B2A5B", "#0F1B40"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient colors={["#022a6b", "#022a6b", "#022a6b"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <View style={styles.center}>
         <View style={styles.logoBox}>
           <SendBidLogo size={88} />

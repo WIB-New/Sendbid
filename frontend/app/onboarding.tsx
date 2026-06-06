@@ -98,7 +98,7 @@ export default function Onboarding() {
   const next = () => (last ? router.replace("/welcome") : setStep((s) => s + 1));
 
   return (
-    <LinearGradient colors={["#0F1B40", "#1B2A5B", "#142247"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient colors={["#022a6b", "#022a6b", "#142247"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
         <View style={styles.topBar}>
           <View style={styles.dots}>

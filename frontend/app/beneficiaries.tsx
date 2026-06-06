@@ -47,8 +47,8 @@ export default function Beneficiaries() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F1B40" }}>
-      <LinearGradient colors={["#0F1B40", "#1B2A5B"]} style={styles.hero}>
+    <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
+      <LinearGradient colors={["#022a6b", "#022a6b"]} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>

@@ -44,7 +44,7 @@ export default function Loyalty() {
   const progress = Math.min((points / nextThreshold) * 100, 100);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#0F1B40" }}>
+    <View style={{ flex: 1, backgroundColor: "#022a6b" }}>
       <LinearGradient colors={lvl.g} style={styles.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>

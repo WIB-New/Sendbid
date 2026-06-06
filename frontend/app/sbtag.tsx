@@ -116,7 +116,7 @@ export default function SBTagPage() {
         <View style={styles.actionsRow}>
           <ActionBtn testID="sbtag-share" icon="share-social-outline" label="Partager" color="#022a6b" onPress={onShare} />
           <ActionBtn testID="sbtag-download" icon="download-outline" label="Télécharger" color="#04d46f" onPress={onDownload} />
-          <ActionBtn testID="sbtag-scan" icon="scan-outline" label="Scanner" color="#3D52D5" onPress={onScan} />
+          <ActionBtn testID="sbtag-scan" icon="scan-outline" label="Scanner" color="#052080" onPress={onScan} />
         </View>
 
         {/* Actions secondaires */}

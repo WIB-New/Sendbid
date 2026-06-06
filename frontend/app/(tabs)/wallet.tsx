@@ -83,7 +83,7 @@ export default function WalletTab() {
 
   return (
     <View style={styles.bg}>
-      <LinearGradient colors={["#00147E", "#3D52D5"]} style={styles.hero}>
+      <LinearGradient colors={["#022a6b", "#052080"]} style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <TText variant="title" weight="extraBold" color="white">Mon portefeuille</TText>
@@ -217,7 +217,7 @@ const walletMenuStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: "#00147E" },
+  bg: { flex: 1, backgroundColor: "#022a6b" },
   hero: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl + 20 },
   heroTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingTop: spacing.sm },
   iconBtn: { width: 36, height: 36, borderRadius: radii.full, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },

@@ -41,7 +41,7 @@ export default function Landing() {
   const colors = useThemedColors();
   const router = useRouter();
   return (
-    <LinearGradient colors={["#070C24", "#0A1338", "#0F1B40"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#070C24", "#0A1338", "#022a6b"]} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
           {/* Nav */}
@@ -137,7 +137,7 @@ export default function Landing() {
             <TText variant="title" weight="extraBold" color="white" align="center">Prêt à envoyer ?</TText>
             <TText variant="caption" color="rgba(255,255,255,0.9)" align="center" style={{ marginTop: 4 }}>Rejoignez les 100 000 utilisateurs qui font confiance à SENDBID.</TText>
             <TouchableOpacity onPress={() => router.push("/(auth)/signup")} style={styles.ctaFinalBtn}>
-              <TText variant="body" weight="extraBold" color="#0F1B40">Télécharger l'app</TText>
+              <TText variant="body" weight="extraBold" color="#022a6b">Télécharger l'app</TText>
             </TouchableOpacity>
           </LinearGradient>
 
