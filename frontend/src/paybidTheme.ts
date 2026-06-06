@@ -20,6 +20,7 @@ export const paybidColors = {
   gradients: {
     // Couleur unie #54280f partout (option b retenue par l'utilisateur)
     main: ["#54280f", "#54280f", "#54280f"] as [string, string, string],
+    primary: ["#54280f", "#54280f"] as [string, string],
     earnings: ["#54280f", "#54280f"] as [string, string],
     success: ["#F59E0B", "#FFA500"] as [string, string],
     splash: ["#54280f", "#54280f", "#54280f"] as [string, string, string],

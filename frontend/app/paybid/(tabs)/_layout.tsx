@@ -31,8 +31,12 @@ export default function PaybidTabsLayout() {
       {/* Item 2 — Onglet Offres SUPPRIMÉ du tab bar, intégré dans Transferts */}
       <Tabs.Screen name="auctions" options={{ href: null }} />
       <Tabs.Screen name="transfers" options={{ title: "Transferts", tabBarIcon: ({ color }) => <Icon name="paper-plane" color={color} /> }} />
-      <Tabs.Screen name="account" options={{ title: "Mon compte", tabBarIcon: ({ color }) => <Icon name="wallet" color={color} /> }} />
-      <Tabs.Screen name="earnings" options={{ title: "Gains", tabBarIcon: ({ color }) => <Icon name="cash" color={color} /> }} />
+      {/* Item 5 — Portefeuille (clone Sendbid avec design Paybid) */}
+      <Tabs.Screen name="wallet" options={{ title: "Portefeuille", tabBarIcon: ({ color }) => <Icon name="wallet" color={color} /> }} />
+      {/* "Mon compte" = caisse de l'agence (différent du portefeuille personnel) */}
+      <Tabs.Screen name="account" options={{ title: "Mon compte", tabBarIcon: ({ color }) => <Icon name="briefcase" color={color} /> }} />
+      {/* Item 5 — Onglet "Gains" masqué : l'historique des commissions est dans Portefeuille */}
+      <Tabs.Screen name="earnings" options={{ href: null }} />
       <Tabs.Screen name="profile" options={{ title: "Profil", tabBarIcon: ({ color }) => <Icon name="person" color={color} /> }} />
     </Tabs>
   );
