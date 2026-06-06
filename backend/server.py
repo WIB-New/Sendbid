@@ -110,6 +110,18 @@ async def root():
     return {"name": "SENDBID API", "version": "1.0.0", "status": "ok", "env": "prod" if IS_PROD else "dev"}
 
 
+@api.get("/health")
+async def health():
+    """Healthcheck endpoint pour Dokploy/Traefik/Docker — vérifie la connectivité MongoDB."""
+    try:
+        from core.db import db
+        await db.command("ping")
+        return {"status": "ok", "mongo": "up"}
+    except Exception as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=503, content={"status": "error", "mongo": "down", "detail": str(e)})
+
+
 app.include_router(api)
 
 # WebSocket: registered on the app (not the /api APIRouter, since k8s ingress already

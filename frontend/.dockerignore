@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+.metro-cache/
+dist/
+web-build/
+.git/
+.env
+.env.*
+!.env.production.example
+*.log
+.DS_Store
+*.md
+!README.md
+ios/
+android/
+.vscode/

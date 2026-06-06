@@ -1,0 +1,81 @@
+# docker-compose.yml — Référence pour déploiement Dokploy / VPS
+# Importable directement dans Dokploy via "Compose" type project.
+# Les domaines + certificats SSL sont gérés par Traefik (intégré dans Dokploy).
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: always
+    volumes:
+      - sendbid-mongo:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-sendbid}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?MONGO_PASSWORD requis}
+    networks:
+      - dokploy-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URL: mongodb://${MONGO_USER:-sendbid}:${MONGO_PASSWORD}@mongodb:27017/sendbid?authSource=admin
+      DB_NAME: sendbid
+      JWT_SECRET: ${JWT_SECRET}
+      ENVIRONMENT: production
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://app.sendfloo.sendbid.app,https://agent.sendfloo.sendbid.app}
+      EMERGENT_LLM_KEY: ${EMERGENT_LLM_KEY:-}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_ENV: ${PAYPAL_ENV:-live}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM: ${TWILIO_FROM:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@sendbid.app}
+      IS_PROD: "true"
+    expose:
+      - "8001"
+    labels:
+      # ── Traefik / Dokploy router pour api.sendfloo.sendbid.app ──
+      - traefik.enable=true
+      - traefik.http.routers.sendbid-api.rule=Host(`api.sendfloo.sendbid.app`)
+      - traefik.http.routers.sendbid-api.entrypoints=websecure
+      - traefik.http.routers.sendbid-api.tls.certresolver=letsencrypt
+      - traefik.http.services.sendbid-api.loadbalancer.server.port=8001
+    networks:
+      - dokploy-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        EXPO_PUBLIC_BACKEND_URL: https://api.sendfloo.sendbid.app
+    restart: always
+    depends_on:
+      - backend
+    expose:
+      - "80"
+    labels:
+      # ── Routers Traefik (app.* = Sendbid, agent.* = Paybid via redirect JS) ──
+      - traefik.enable=true
+      - traefik.http.routers.sendbid-app.rule=Host(`app.sendfloo.sendbid.app`) || Host(`agent.sendfloo.sendbid.app`)
+      - traefik.http.routers.sendbid-app.entrypoints=websecure
+      - traefik.http.routers.sendbid-app.tls.certresolver=letsencrypt
+      - traefik.http.services.sendbid-app.loadbalancer.server.port=80
+    networks:
+      - dokploy-network
+
+volumes:
+  sendbid-mongo:
+    driver: local
+
+networks:
+  dokploy-network:
+    external: true
