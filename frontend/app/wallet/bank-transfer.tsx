@@ -56,6 +56,11 @@ export default function BankTransfer() {
         pin,
         details: { iban, holder, bank, bic },
       });
+      // Rafraîchir le solde localement + dans le store auth
+      try {
+        const r = await api.get("/wallet");
+        setWallet(r.data);
+      } catch {}
       await refreshMe();
       Alert.alert(t("walletOps2.transferSent"), `${v.toFixed(2)} EUR ${t("walletOps2.willCredit")} ${iban.slice(-4).padStart(iban.length, "•")}`, [{ text: "OK", onPress: () => router.back() }]);
     } catch (e: any) {
