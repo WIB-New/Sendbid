@@ -25,6 +25,7 @@ import { useLocale } from "../src/i18n";
 import { registerForPushAndSync } from "../src/push";
 import { useThemedColors } from "../src/themeContext";
 import { ThemeProvider } from "../src/themeContext";
+import VerificationShieldFloating from "../src/components/VerificationShieldFloating";
 
 export default function RootLayout() {
   const colors = useThemedColors();
@@ -152,6 +153,8 @@ export default function RootLayout() {
       <ThemeProvider>
         <StatusBar style="dark" />
         <Stack key={locale} screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: colors.neutrals.background } }} />
+        {/* v8 — Icône bouclier flottante visible sur TOUTES les pages tant que vérification non terminée */}
+        {user ? <VerificationShieldFloating /> : null}
       </ThemeProvider>
     </SafeAreaProvider>
   );

@@ -88,9 +88,16 @@ export default function Withdraw() {
 
   return (
     <Screen title="Retirer de l'argent" back hero>
-      <TText variant="caption" color={colors.neutrals.textSecondary}>
-        Solde disponible : {wallet?.balance.toFixed(2)} EUR
-      </TText>
+      {/* Solde disponible — design unifié avec Recharge */}
+      <View style={styles.balanceBox}>
+        <Ionicons name="wallet-outline" size={18} color={colors.primary.base} />
+        <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginLeft: 8 }}>
+          Solde disponible :
+        </TText>
+        <TText variant="body" weight="extraBold" color={colors.primary.base} style={{ marginLeft: 6 }}>
+          {Number(wallet?.balance ?? 0).toFixed(2)} EUR
+        </TText>
+      </View>
 
       {/* Method selector */}
       <View style={styles.methodsRow}>
@@ -214,6 +221,13 @@ function MethodChip({ active, onPress, icon, label }: { active: boolean; onPress
 
 const styles = StyleSheet.create({
   methodsRow: { flexDirection: "row", gap: 6, marginVertical: spacing.md },
+  balanceBox: {
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: colors.overlays.primarySoft,
+    paddingHorizontal: 12, paddingVertical: 10,
+    borderRadius: radii.lg,
+    borderWidth: 1, borderColor: colors.primary.base + "33",
+  },
   methodChip: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 4, paddingVertical: 8, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1.5, borderColor: colors.neutrals.border },
   info: { flexDirection: "row", alignItems: "center", backgroundColor: colors.overlays.primarySoft, padding: spacing.md, borderRadius: radii.lg, marginBottom: spacing.lg },
   opChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radii.full, backgroundColor: colors.neutrals.surface, borderWidth: 1.5, borderColor: colors.neutrals.border },

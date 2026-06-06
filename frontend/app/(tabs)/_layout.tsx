@@ -58,6 +58,8 @@ export default function TabsLayout() {
       </Tabs>
       {/* v7 — Procédure de vérification post-1ère-connexion (popup + bannière de rappel) */}
       <FirstLoginVerificationGuard />
+      {/* Note : VerificationShieldFloating est désormais monté dans app/_layout.tsx
+          pour être visible sur TOUTES les pages (tabs + stack). */}
     </View>
   );
 }

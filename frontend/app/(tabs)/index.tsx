@@ -195,20 +195,6 @@ export default function Home() {
             </View>
             <SendBidLogo size={40} />
           </View>
-          {/* Icône bouclier de vérification — visible si email/phone à vérifier */}
-          {user && (!user.email_verified || !user.phone_verified) ? (
-            <TouchableOpacity
-              testID="home-verify-shield"
-              onPress={() => useVerifPopup.getState().show()}
-              style={[styles.notifBtn, { right: 56, backgroundColor: "rgba(255,165,0,0.12)" }]}
-              accessibilityLabel="Vérifier votre compte"
-            >
-              <Ionicons name="shield-half-outline" size={22} color="#F59E0B" />
-              <View style={[styles.badge, { backgroundColor: "#F59E0B" }]}>
-                <TText variant="label" weight="bold" color="white">!</TText>
-              </View>
-            </TouchableOpacity>
-          ) : null}
           <TouchableOpacity testID="home-notifications" onPress={() => router.push("/notifications")} style={styles.notifBtn}>
             <Ionicons name="notifications-outline" size={22} color={colors.neutrals.textPrimary} />
             {unread > 0 ? (
