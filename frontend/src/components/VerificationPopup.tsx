@@ -8,7 +8,7 @@
  * - Bouton X = demande de confirmation avant fermeture.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Modal, ScrollView, Platform, Alert } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Modal, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "./TText";
 import { Input } from "./Input";
@@ -155,30 +155,24 @@ export default function VerificationPopup({ visible, onClose }: Props) {
 
   const bothDone = emailVerified && phoneVerified;
 
+  // === Confirmation d'interruption (modal interne, multi-plateforme) ===
+  // Remplace window.confirm/Alert.alert qui ne fonctionnent pas dans un Modal RN Web.
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const handleClose = (completed: boolean) => {
     if (!completed) {
-      // Demande de confirmation avant interruption
-      if (Platform.OS === "web") {
-        // window.confirm est fiable côté web pour Expo Web
-        // eslint-disable-next-line no-alert
-        const ok = typeof window !== "undefined" && (window as any).confirm
-          ? (window as any).confirm("Interrompre la procédure de vérification ?\nVous pourrez la reprendre plus tard via la bannière de rappel.")
-          : true;
-        if (ok) onClose(false);
-      } else {
-        Alert.alert(
-          "Interrompre la vérification ?",
-          "Vous pourrez la reprendre plus tard via la bannière de rappel. Confirmer ?",
-          [
-            { text: "Continuer la vérification", style: "cancel" },
-            { text: "Interrompre", style: "destructive", onPress: () => onClose(false) },
-          ],
-        );
-      }
+      // Demande de confirmation via modal interne (fiable sur Web ET Native)
+      setConfirmOpen(true);
     } else {
       onClose(true);
     }
   };
+
+  const confirmInterrupt = () => {
+    setConfirmOpen(false);
+    onClose(false);
+  };
+  const cancelInterrupt = () => setConfirmOpen(false);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => handleClose(bothDone)}>
@@ -351,6 +345,31 @@ export default function VerificationPopup({ visible, onClose }: Props) {
               </View>
             ) : null}
           </ScrollView>
+
+          {/* === Confirmation interne d'interruption — overlay au-dessus du contenu === */}
+          {confirmOpen ? (
+            <View style={styles.confirmOverlay}>
+              <View style={[styles.confirmBox, { backgroundColor: themed.neutrals.surface }]}>
+                <View style={[styles.confirmIcon, { backgroundColor: "#FEF3C7" }]}>
+                  <Ionicons name="alert-circle" size={26} color="#92400E" />
+                </View>
+                <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>
+                  Interrompre la vérification ?
+                </TText>
+                <TText variant="caption" color={themed.neutrals.textSecondary} align="center" style={{ marginTop: 6, lineHeight: 18 }}>
+                  Vérifier votre email et votre numéro de téléphone est important pour sécuriser votre compte et débloquer toutes les fonctionnalités. Vous pourrez reprendre cette procédure plus tard via la bannière de rappel.
+                </TText>
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
+                  <TouchableOpacity testID="vp-cancel-interrupt" onPress={cancelInterrupt} style={[styles.confirmBtn, { backgroundColor: themed.primary.base, flex: 1.4 }]}>
+                    <TText variant="caption" weight="extraBold" color="white" align="center">Continuer la vérification</TText>
+                  </TouchableOpacity>
+                  <TouchableOpacity testID="vp-confirm-interrupt" onPress={confirmInterrupt} style={[styles.confirmBtnGhost, { borderColor: themed.neutrals.border, flex: 1 }]}>
+                    <TText variant="caption" weight="extraBold" color={themed.status.error} align="center">Interrompre</TText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          ) : null}
         </View>
       </View>
     </Modal>
@@ -403,4 +422,23 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     marginTop: spacing.md,
   },
+  // Overlay de confirmation d'interruption (au-dessus du contenu)
+  confirmOverlay: {
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center", alignItems: "center",
+    padding: spacing.lg, zIndex: 50,
+    borderRadius: radii.xxl,
+  },
+  confirmBox: {
+    width: "100%", maxWidth: 380,
+    borderRadius: radii.xxl,
+    padding: spacing.lg,
+    alignItems: "center",
+    shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
+  },
+  confirmIcon: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
+  confirmBtn: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: radii.full, alignItems: "center", justifyContent: "center" },
+  confirmBtnGhost: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: radii.full, alignItems: "center", justifyContent: "center", borderWidth: 1.5, backgroundColor: "transparent" },
 });
