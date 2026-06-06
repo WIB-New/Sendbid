@@ -7,6 +7,7 @@ import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
+import { PinGate } from "../../src/components/PinGate";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
@@ -24,17 +25,26 @@ export default function BankTransfer() {
   const [bic, setBic] = useState((params.bic_swift as string) || "");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
 
   useEffect(() => {
     api.get("/wallet").then((r) => setWallet(r.data)).catch(() => {});
   }, []);
 
-  const submit = async () => {
+  // Le tap sur "Effectuer le virement" → ouvre le PIN-gate au lieu d'exécuter directement
+  const onPressSubmit = () => {
     setErr(null);
     const v = parseFloat(amount.replace(",", "."));
     if (!v || v <= 0) { setErr("Montant invalide"); return; }
     if (!iban || !holder) { setErr("IBAN et titulaire requis"); return; }
     if (wallet && v > wallet.balance) { setErr("Solde insuffisant"); return; }
+    setPinOpen(true);
+  };
+
+  // Une fois le PIN validé, on exécute l'API
+  const submit = async () => {
+    setPinOpen(false);
+    const v = parseFloat(amount.replace(",", "."));
     setBusy(true);
     try {
       await api.post("/wallet/withdraw", {
@@ -79,8 +89,18 @@ export default function BankTransfer() {
 
         {err ? <TText variant="caption" color={colors.status.error} style={{ marginTop: 8 }}>{err}</TText> : null}
 
-        <Button testID="bt-submit" title="Effectuer le virement" icon="arrow-forward" onPress={submit} loading={busy} style={{ marginTop: spacing.lg }} />
+        <Button testID="bt-submit" title="Effectuer le virement" icon="arrow-forward" onPress={onPressSubmit} loading={busy} style={{ marginTop: spacing.lg }} />
       </ScrollView>
+
+      {/* PIN-gate avant exécution du virement bancaire */}
+      <PinGate
+        visible={pinOpen}
+        title="Confirmer le virement"
+        subtitle={`Confirmez votre PIN pour valider le virement de ${amount || "0"} EUR`}
+        onSuccess={submit}
+        onCancel={() => setPinOpen(false)}
+        allowBiometric
+      />
     </Screen>
   );
 }

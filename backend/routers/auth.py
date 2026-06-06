@@ -357,7 +357,10 @@ async def login(payload: LoginIn, request: Request):
     # v6 : persiste une session pour la page Sessions actives
     from routers.sessions import record_session
     await record_session(user["id"], request, kind="password")
-    return {"access_token": token, "user": clean_doc(dict(user))}
+    # v9 : expose has_pin sur la réponse de login (utile pour la PIN-gate post-mot-de-passe)
+    user_resp = clean_doc(dict(user))
+    user_resp["has_pin"] = bool(user.get("pin_hash"))
+    return {"access_token": token, "user": user_resp}
 
 
 @router.post("/biometric-login")

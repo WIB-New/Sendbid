@@ -5,10 +5,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as LocalAuth from "expo-local-authentication";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { SendBidLogo } from "../../src/components/Logo";
+import { PinGate } from "../../src/components/PinGate";
+import { markFreshLogin } from "../../src/components/AppLockGate";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
@@ -29,6 +32,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [bioAvailable, setBioAvailable] = useState(false);
   const [bioToken, setBioToken] = useState<string | null>(null);
+  // PIN gate post-login (obligatoire à chaque connexion par mot de passe)
+  const [pinGateOpen, setPinGateOpen] = useState(false);
+  const [postLoginUser, setPostLoginUser] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -60,18 +66,57 @@ export default function Login() {
     setErr(null); setLoading(true);
     try {
       const { data } = await api.post("/auth/login", { identifier, password });
-      await setSession(data.access_token, data.user);
-      const target = routeForRole(data.user);
-      if (typeof target === "string") {
-        router.replace(target);
-      } else {
-        router.replace(target);
+      const role = data.user?.role;
+      const isPrivileged = role === "admin" || role === "super_admin" || role === "partner_admin" || role === "agent_admin" || role === "agent";
+      const hasPin = !!(data.user?.has_pin || data.user?.pin_hash);
+      // CAS 1 — Pas de PIN + client : flow standard (création de PIN obligatoire)
+      if (!hasPin && !isPrivileged) {
+        await setSession(data.access_token, data.user);
+        router.replace({ pathname: "/(auth)/create-pin" as any, params: { user_id: data.user?.id, skip_otp: "1" } });
+        return;
       }
+      // CAS 2 — Pas de PIN + privilégié (agent/admin) : on autorise mais on l'invite à en créer un
+      if (!hasPin && isPrivileged) {
+        await setSession(data.access_token, data.user);
+        const target = routeForRole(data.user);
+        router.replace(target);
+        return;
+      }
+      // CAS 3 — A un PIN : on stocke uniquement le token côté AsyncStorage (pour que
+      // l'interceptor de /auth/verify-pin marche) MAIS on NE PUBLIE PAS l'utilisateur
+      // dans le store Zustand tant que le PIN n'est pas validé.
+      // Cela évite que _layout.tsx redirige l'utilisateur dans /(tabs) avant la PIN-gate.
+      await AsyncStorage.setItem("sb_token", data.access_token);
+      setPostLoginUser({ ...data.user, _access_token: data.access_token });
+      setPinGateOpen(true);
     } catch (e: any) {
       setErr(apiError(e));
     } finally {
       setLoading(false);
     }
+  };
+
+  // Une fois le PIN vérifié → on publie la session dans le store et on route
+  const onPinGateSuccess = async () => {
+    if (!postLoginUser) { setPinGateOpen(false); return; }
+    try {
+      await setSession(postLoginUser._access_token, postLoginUser);
+    } catch {}
+    // Marque cette connexion comme fraîche pour ne pas re-déclencher AppLockGate immédiatement
+    markFreshLogin();
+    setPinGateOpen(false);
+    const target = routeForRole(postLoginUser);
+    if (typeof target === "string") router.replace(target);
+    else router.replace(target);
+    setPostLoginUser(null);
+  };
+
+  // Annulation du PIN-gate : on purge le token pour rester sécurisé
+  const onPinGateCancel = async () => {
+    setPinGateOpen(false);
+    setPostLoginUser(null);
+    try { await AsyncStorage.removeItem("sb_token"); } catch {}
+    try { await AsyncStorage.removeItem("sb_user"); } catch {}
   };
 
   const biometricLogin = async () => {
@@ -186,12 +231,22 @@ export default function Login() {
             </TText>
             <TouchableOpacity testID="login-go-signup" onPress={() => router.replace("/(auth)/signup")}>
               <TText variant="caption" weight="bold" color={colors.primary.base}>
-                S'inscrire
+                S&apos;inscrire
               </TText>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* PIN-gate obligatoire post mot-de-passe (à chaque connexion) */}
+      <PinGate
+        visible={pinGateOpen}
+        title="Confirmer votre identité"
+        subtitle="Entrez votre code PIN à 6 chiffres pour accéder à votre compte"
+        onSuccess={onPinGateSuccess}
+        onCancel={onPinGateCancel}
+        allowBiometric
+      />
     </View>
   );
 }

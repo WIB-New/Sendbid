@@ -26,6 +26,7 @@ import { registerForPushAndSync } from "../src/push";
 import { useThemedColors } from "../src/themeContext";
 import { ThemeProvider } from "../src/themeContext";
 import VerificationShieldFloating from "../src/components/VerificationShieldFloating";
+import AppLockGate from "../src/components/AppLockGate";
 
 export default function RootLayout() {
   const colors = useThemedColors();
@@ -155,6 +156,8 @@ export default function RootLayout() {
         <Stack key={locale} screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: colors.neutrals.background } }} />
         {/* v8 — Icône bouclier flottante visible sur TOUTES les pages tant que vérification non terminée */}
         {user ? <VerificationShieldFloating /> : null}
+        {/* v9 — Verrouillage automatique au retour de l'arrière-plan (>60s) */}
+        {user ? <AppLockGate /> : null}
       </ThemeProvider>
     </SafeAreaProvider>
   );
