@@ -9,7 +9,8 @@
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "sendbid",
-        "EXPO_PUBLIC_BACKEND_URL": "https://sendfloo.sendbid.app",
+        "_doc_backend_url": "URL backend ciblée par l'APK. https://sendfloo.sendbid.app est ACTUELLEMENT INJOIGNABLE (HTTP 000), donc on pointe sur la preview Emergent qui est ALIGNÉE sur le code en cours. À remplacer par l'URL VPS Dokploy (https://api.sendfloo.sendbid.app) une fois le backend déployé en prod.",
+        "EXPO_PUBLIC_BACKEND_URL": "https://paybid-preview.preview.emergentagent.com",
         "EXPO_PUBLIC_APP_VARIANT": "sendbid"
       }
     },
@@ -18,7 +19,7 @@
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "paybid",
-        "EXPO_PUBLIC_BACKEND_URL": "https://sendfloo.sendbid.app",
+        "EXPO_PUBLIC_BACKEND_URL": "https://paybid-preview.preview.emergentagent.com",
         "EXPO_PUBLIC_APP_VARIANT": "paybid"
       }
     },
@@ -27,8 +28,26 @@
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "sendbid",
-        "EXPO_PUBLIC_BACKEND_URL": "https://sendfloo.sendbid.app",
+        "EXPO_PUBLIC_BACKEND_URL": "https://paybid-preview.preview.emergentagent.com",
         "EXPO_PUBLIC_APP_VARIANT": "sendbid"
+      }
+    },
+    "production-sendbid": {
+      "distribution": "store",
+      "android": { "buildType": "app-bundle" },
+      "env": {
+        "APP_VARIANT": "sendbid",
+        "EXPO_PUBLIC_BACKEND_URL": "https://api.sendfloo.sendbid.app",
+        "EXPO_PUBLIC_APP_VARIANT": "sendbid"
+      }
+    },
+    "production-paybid": {
+      "distribution": "store",
+      "android": { "buildType": "app-bundle" },
+      "env": {
+        "APP_VARIANT": "paybid",
+        "EXPO_PUBLIC_BACKEND_URL": "https://api.sendfloo.sendbid.app",
+        "EXPO_PUBLIC_APP_VARIANT": "paybid"
       }
     }
   },
