@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { t, useLocale } from "../../src/i18n";
-import { View, TouchableOpacity, Modal, FlatList, TextInput, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Modal, FlatList, TextInput, StyleSheet, Platform, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
@@ -255,11 +256,24 @@ export default function SignUp() {
         </TouchableOpacity>
       </View>
 
-      {/* Country picker modal */}
-      <Modal visible={showCountry} animationType="slide" onRequestClose={() => setShowCountry(false)}>
-        <View style={{ flex: 1, backgroundColor: "white", paddingTop: 60 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, marginBottom: 12 }}>
-            <TouchableOpacity onPress={() => setShowCountry(false)} style={{ padding: 6 }}>
+      {/* ===== Country picker modal =====
+          v3 — Compatible Android edgeToEdge + iOS notch :
+          - statusBarTranslucent={true} pour que la modal recouvre la status bar (Android)
+          - presentationStyle="fullScreen" pour ne pas être inset par le navigateur natif (iOS)
+          - SafeAreaView pour gérer notch + paddingTop dynamique au lieu du 60px fixe
+          - FlatList style flex:1 pour s'étendre correctement
+          - États vides/chargement pour ne plus afficher d'écran blanc */}
+      <Modal
+        visible={showCountry}
+        animationType="slide"
+        onRequestClose={() => setShowCountry(false)}
+        statusBarTranslucent={Platform.OS === "android"}
+        presentationStyle={Platform.OS === "ios" ? "fullScreen" : undefined}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top", "bottom", "left", "right"]}>
+          {Platform.OS === "android" ? <StatusBar barStyle="dark-content" backgroundColor="white" /> : null}
+          <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 }}>
+            <TouchableOpacity testID="signup-country-close" onPress={() => setShowCountry(false)} style={{ padding: 6 }}>
               <Ionicons name="close" size={26} />
             </TouchableOpacity>
             <TText weight="extraBold" style={{ marginLeft: 8 }}>Sélectionner un pays</TText>
@@ -271,16 +285,63 @@ export default function SignUp() {
                 value={countrySearch}
                 onChangeText={setCountrySearch}
                 placeholder="Rechercher un pays..."
-                style={{ flex: 1, paddingVertical: 12, marginLeft: 8 }}
+                placeholderTextColor={colors.neutrals.textTertiary}
+                style={{ flex: 1, paddingVertical: 12, marginLeft: 8, color: colors.neutrals.textPrimary }}
+                autoCorrect={false}
+                autoCapitalize="none"
               />
             </View>
           </View>
           <FlatList
             data={filteredCountries}
+            style={{ flex: 1 }}
+            contentContainerStyle={filteredCountries.length === 0 ? { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 } : { paddingBottom: 24 }}
             keyExtractor={(c) => c.country_code}
+            initialNumToRender={20}
+            keyboardShouldPersistTaps="handled"
+            ListEmptyComponent={
+              <View style={{ alignItems: "center" }}>
+                {countries.length === 0 ? (
+                  <>
+                    <Ionicons name="cloud-offline-outline" size={48} color={colors.neutrals.textTertiary} />
+                    <TText variant="body" weight="bold" align="center" style={{ marginTop: 12 }}>
+                      Chargement des pays…
+                    </TText>
+                    <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4, maxWidth: 260 }}>
+                      Si rien ne s&apos;affiche, vérifiez votre connexion Internet et réessayez.
+                    </TText>
+                    <TouchableOpacity
+                      testID="signup-country-retry"
+                      onPress={() => {
+                        api.get("/corridors").then((r) => {
+                          const list: Country[] = Array.isArray(r.data) ? r.data : (r.data?.corridors || []);
+                          setCountries(list);
+                        }).catch(() => {});
+                      }}
+                      style={{ marginTop: 16, paddingVertical: 10, paddingHorizontal: 20, borderRadius: radii.full, backgroundColor: colors.primary.base }}
+                    >
+                      <TText variant="label" weight="bold" color="white">Réessayer</TText>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons name="search-outline" size={48} color={colors.neutrals.textTertiary} />
+                    <TText variant="body" weight="bold" align="center" style={{ marginTop: 12 }}>
+                      Aucun pays trouvé
+                    </TText>
+                    <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
+                      Essayez avec un autre nom (ex : « France », « FR »).
+                    </TText>
+                  </>
+                )}
+              </View>
+            }
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => { setCountry(item); setShowCountry(false); setCountrySearch(""); setCountryAutoDetected(false); }}
-                style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.neutrals.border, flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                testID={`signup-country-item-${item.country_code}`}
+                onPress={() => { setCountry(item); setShowCountry(false); setCountrySearch(""); setCountryAutoDetected(false); }}
+                style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.neutrals.border, flexDirection: "row", alignItems: "center" }}
+              >
                 <TText style={{ fontSize: 22 }}>{item.flag || "🌍"}</TText>
                 <View style={{ marginLeft: 12, flex: 1 }}>
                   <TText weight="bold">{item.country_name}</TText>
@@ -289,7 +350,7 @@ export default function SignUp() {
               </TouchableOpacity>
             )}
           />
-        </View>
+        </SafeAreaView>
       </Modal>
     </Screen>
   );
