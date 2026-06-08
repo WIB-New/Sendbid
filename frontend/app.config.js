@@ -22,7 +22,11 @@ module.exports = ({ config }) => ({
   ios: {
     ...(config.ios || {}),
     supportsTablet: true,
-    bundleIdentifier: isPaybid ? "app.paybid.agent" : "app.sendbid.client",
+    // ⚠️ Doit MATCHER les package_name enregistrés dans google-services.json (sinon le task
+    //     ':app:processReleaseGoogleServices' du build Android échoue avec
+    //     "No matching client found for package name 'XXX'").
+    //     Firebase Console enregistre com.sendbid.app et com.paybid.app — on s'aligne.
+    bundleIdentifier: isPaybid ? "com.paybid.app" : "com.sendbid.app",
     infoPlist: {
       NSCameraUsageDescription: isPaybid
         ? "Scanner le QR / code client à la remise des fonds"
@@ -44,7 +48,10 @@ module.exports = ({ config }) => ({
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: isPaybid ? "#994A26" : "#00147E",
     },
-    package: isPaybid ? "app.paybid.agent" : "app.sendbid.client",
+    package: isPaybid ? "com.paybid.app" : "com.sendbid.app",
+    // ⚠️ DOIT MATCHER les package_name déclarés dans google-services.json (sinon le
+    //     task ':app:processReleaseGoogleServices' du build Android échoue avec
+    //     "No matching client found for package name 'XXX'").
     // Firebase config file pour les notifications push (FCM)
     // Le fichier google-services.json doit être présent à la racine /app/frontend/
     googleServicesFile: "./google-services.json",
