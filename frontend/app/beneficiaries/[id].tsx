@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { t, useLocale } from "../../src/i18n";
-import { View, StyleSheet, Alert, Platform, ScrollView } from "react-native";
+import { View, StyleSheet, Alert, Platform, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../../src/components/Screen";
