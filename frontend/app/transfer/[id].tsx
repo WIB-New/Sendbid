@@ -56,7 +56,7 @@ function buildCashStandard(tx: any, deadlineCountdown?: string): ProgressStep[] 
 
   return [
     { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at || tx.processing_at || tx.completed_at) },
     { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(tx.assigned_at) },
     { key: "funds", label: "Fonds disponibles", description: fundsDesc, state: s(3, cur, status), timestamp: fmt(tx.assigned_at) },
     { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(tx.completed_at) },
@@ -81,7 +81,7 @@ function buildCashVip(tx: any): ProgressStep[] {
 
   return [
     { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at || tx.processing_at || tx.completed_at) },
     { key: "agent", label: "Transfert confié à un agent", description: cur >= 2 ? `${agentId}\n${agentLoc} a accepté le transfert` : "En attente de la sélection d'un agent", state: s(2, cur, status), timestamp: fmt(tx.assigned_at) },
     { key: "delivery", label: "Fonds en cours de remise", description: cur >= 4 ? `${agentId} est en chemin vers ${benName}` : "L'agent se prépare", state: s(4, cur, status), timestamp: fmt(tx.processing_at) },
     { key: "done", label: "Transfert terminé", description: cur >= 5 ? `Argent récupéré par ${benName}` : "—", state: s(5, cur, status), timestamp: fmt(tx.completed_at) },
@@ -100,7 +100,7 @@ function buildBank(tx: any): ProgressStep[] {
   // (sentDate retiré v2 — date n'est plus affichée sous le statut bancaire, cf. Lot 2.3)
   return [
     { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at || tx.processing_at || tx.completed_at) },
     { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: "Un délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.", state: s(2, cur, status), timestamp: fmt(tx.completed_at || tx.processing_at || tx.assigned_at) },
   ];
 }
@@ -117,7 +117,7 @@ function buildMomo(tx: any): ProgressStep[] {
   const sentDate = tx.processing_at || tx.assigned_at || tx.completed_at;
   return [
     { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
-    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
+    { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at || tx.processing_at || tx.completed_at) },
     { key: "sent", label: "Envoyé sur le téléphone du bénéficiaire", description: `${fmt(sentDate) || "—"}\nUn délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.`, state: s(2, cur, status), timestamp: fmt(sentDate) },
   ];
 }
@@ -435,33 +435,36 @@ export default function TransferDetail() {
           </TouchableOpacity>
         ) : null}
 
-        {/* Actions — v3 : Voir le reçu officiel + PDF + Ouvrir un litige sur UNE SEULE LIGNE.
-            Tailles/polices réduites via size="sm" pour tenir confortablement sur mobile. */}
-        <View style={{ marginTop: spacing.lg, gap: 8 }}>
-          <View style={{ flexDirection: "row", gap: 6 }}>
-            <Button
-              testID="detail-receipt"
-              title="Reçu officiel"
-              icon="document-text-outline"
-              size="sm"
-              onPress={() => router.push({ pathname: "/transfer/receipt", params: { transfer_id: tx.id } } as any)}
-              style={{ flex: 2 }}
-            />
-            <Button testID="detail-pdf" title="PDF" icon="download-outline" size="sm" variant="outline" onPress={downloadReceipt} style={{ flex: 1 }} />
-            <Button testID="detail-dispute" title="Litige" icon="warning-outline" size="sm" variant="ghost" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: tx.id } })} style={{ flex: 1 }} />
-          </View>
-          {/* Boutons contextuels en dessous (Carte / Chat) si applicable */}
-          {(mode === "cash" && (tx.vip_delivery || ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status))) ? (
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {mode === "cash" && tx.vip_delivery ? (
-                <Button testID="detail-map" title="Carte" icon="map-outline" size="sm" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: tx.id } } as any)} style={{ flex: 1 }} />
-              ) : null}
-              {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status) ? (
-                <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" size="sm" variant="outline" onPress={() => router.push(`/chat/${tx.id}` as any)} style={{ flex: 1 }} />
-              ) : null}
-            </View>
-          ) : null}
+        {/* Actions — v4 : boutons mini-pills compacts (le composant Button n'a pas de size="sm",
+            mes précédentes corrections étaient donc invisibles). On utilise ici des TouchableOpacity
+            stylés directement pour garantir l'alignement sur UNE ligne avec textes/icônes réduits. */}
+        <View style={{ marginTop: spacing.lg, flexDirection: "row", gap: 6 }}>
+          <TouchableOpacity testID="detail-receipt" onPress={() => router.push({ pathname: "/transfer/receipt", params: { transfer_id: tx.id } } as any)}
+            style={{ flex: 2, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary.base, paddingVertical: 8, paddingHorizontal: 8, borderRadius: 10, gap: 4 }}>
+            <Ionicons name="document-text-outline" size={14} color="white" />
+            <TText variant="label" weight="bold" color="white" style={{ fontSize: 12 }}>Reçu officiel</TText>
+          </TouchableOpacity>
+          <TouchableOpacity testID="detail-pdf" onPress={downloadReceipt}
+            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.primary.base, paddingVertical: 8, paddingHorizontal: 6, borderRadius: 10, gap: 4 }}>
+            <Ionicons name="download-outline" size={14} color={colors.primary.base} />
+            <TText variant="label" weight="bold" color={colors.primary.base} style={{ fontSize: 12 }}>PDF</TText>
+          </TouchableOpacity>
+          <TouchableOpacity testID="detail-dispute" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: tx.id } })}
+            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, gap: 4 }}>
+            <Ionicons name="warning-outline" size={14} color={colors.status.error} />
+            <TText variant="label" weight="bold" color={colors.status.error} style={{ fontSize: 12 }}>Litige</TText>
+          </TouchableOpacity>
         </View>
+        {(mode === "cash" && (tx.vip_delivery || ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status))) ? (
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+            {mode === "cash" && tx.vip_delivery ? (
+              <Button testID="detail-map" title="Carte" icon="map-outline" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: tx.id } } as any)} style={{ flex: 1 }} />
+            ) : null}
+            {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status) ? (
+              <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" variant="outline" onPress={() => router.push(`/chat/${tx.id}` as any)} style={{ flex: 1 }} />
+            ) : null}
+          </View>
+        ) : null}
       </ScrollView>
     </View>
   );

@@ -115,11 +115,23 @@ export default function BeneficiaryDetail() {
         </View>
 
         {!edit ? (
-          // v2 — Boutons Modifier / Envoyer / Supprimer alignés sur UNE seule ligne (size="sm")
+          // v3 — TouchableOpacity compacts (Button n'a pas de prop size, donc inline forcé).
           <View style={{ flexDirection: "row", gap: 6, marginTop: spacing.lg }}>
-            <Button testID="ben-edit" title="Modifier" icon="create-outline" size="sm" variant="outline" onPress={() => setEdit(true)} style={{ flex: 1 }} />
-            <Button testID="ben-send" title="Envoyer" icon="paper-plane" size="sm" onPress={() => router.push({ pathname: "/transfer/new", params: { beneficiary_id: b.id } } as any)} style={{ flex: 1 }} />
-            <Button testID="ben-delete" title="Supprimer" icon="trash-outline" size="sm" variant="danger" onPress={remove} style={{ flex: 1 }} />
+            <TouchableOpacity testID="ben-edit" onPress={() => setEdit(true)}
+              style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#022a6b", paddingVertical: 9, borderRadius: 10, gap: 4 }}>
+              <Ionicons name="create-outline" size={14} color="#022a6b" />
+              <TText variant="label" weight="bold" color="#022a6b" style={{ fontSize: 12 }}>Modifier</TText>
+            </TouchableOpacity>
+            <TouchableOpacity testID="ben-send" onPress={() => router.push({ pathname: "/transfer/new", params: { beneficiary_id: b.id } } as any)}
+              style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#022a6b", paddingVertical: 9, borderRadius: 10, gap: 4 }}>
+              <Ionicons name="paper-plane" size={14} color="white" />
+              <TText variant="label" weight="bold" color="white" style={{ fontSize: 12 }}>Envoyer</TText>
+            </TouchableOpacity>
+            <TouchableOpacity testID="ben-delete" onPress={remove}
+              style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#EF4444", paddingVertical: 9, borderRadius: 10, gap: 4 }}>
+              <Ionicons name="trash-outline" size={14} color="white" />
+              <TText variant="label" weight="bold" color="white" style={{ fontSize: 12 }}>Supprimer</TText>
+            </TouchableOpacity>
           </View>
         ) : null}
       </ScrollView>
