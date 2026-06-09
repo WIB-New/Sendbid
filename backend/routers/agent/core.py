@@ -66,6 +66,7 @@ async def agent_signup(payload: AgentSignupIn):
     await db.wallets.insert_one({
         "id": gen_id(), "user_id": user_id, "balance": 0.0, "currency": "EUR", "created_at": iso(now_utc())
     })
+    return {"ok": True, "user_id": user_id, "agent_id": agent_id, "profile_id": profile_id, "role": "agent"}
 
 
 @router.get("/super-agents/public")
@@ -94,8 +95,6 @@ async def list_super_agents_public(country: Optional[str] = None):
         }
         for a in items
     ]
-
-    return {"ok": True, "user_id": user_id, "agent_id": agent_id, "profile_id": profile_id, "role": "agent"}
 
 
 async def _require_agent(user: dict) -> dict:
