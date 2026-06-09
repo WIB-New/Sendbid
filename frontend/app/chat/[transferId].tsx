@@ -41,21 +41,15 @@ type Participants = {
   beneficiary?: { name?: string };
 };
 
-const ROLE_META: Record<
-  string,
-  { label: string; emoji: string; color: string; bg: string }
-> = {
+const ROLE_META: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
   sender: { label: "Expéditeur", emoji: "👤", color: "#022a6b", bg: "#022a6b" },
   agent: { label: "Agent", emoji: "🛡️", color: "#F59E0B", bg: "#F59E0B" },
-  beneficiary: {
-    label: "Bénéficiaire",
-    emoji: "🎯",
-    color: "#10B981",
-    bg: "#10B981",
-  },
+  beneficiary: { label: "Bénéficiaire", emoji: "🎯", color: "#10B981", bg: "#10B981" },
   admin: { label: "Admin", emoji: "⚙️", color: "#7C3AED", bg: "#7C3AED" },
   system: { label: "Système", emoji: "🤖", color: "#6B7280", bg: "#6B7280" },
 };
+
+// (Le bouclier de vérification (Lot 5) utilise la nuance #B91C1C — voir VerificationShieldFloating.tsx)
 
 function formatTime(iso: string) {
   try {

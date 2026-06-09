@@ -61,10 +61,31 @@ export default function PaybidLogin() {
       </LinearGradient>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.formWrap}>
         <SafeAreaView edges={["bottom"]} style={styles.form}>
-          <TText variant="subtitle" weight="extraBold" style={{ marginBottom: 4 }}>Connexion agent</TText>
-          <TText variant="caption" color={paybidColors.neutrals.textSecondary} style={{ marginBottom: spacing.lg }}>Identifiants fournis par votre superviseur SENDBID.</TText>
-          <Input testID="paybid-email" label="Email agent" value={email} onChangeText={setEmail} icon="person-outline" autoCapitalize="none" />
-          <Input testID="paybid-password" label="Mot de passe" value={password} onChangeText={setPassword} icon="lock-closed-outline" secureTextEntry />
+          {/* Lot 5 — Texte "Connexion agent" en marron du thème PAYBID (au lieu d'hériter du thème
+                          texte sombre/blanc précédent qui rendait peu visible). */}
+          <TText variant="subtitle" weight="extraBold" color={paybidColors.primary.base} style={{ marginBottom: 4 }}>Connexion agent</TText>
+          <TText variant="caption" color="#022a6b" weight="semiBold" style={{ marginBottom: spacing.lg }}>Identifiants fournis par votre superviseur SENDBID.</TText>
+          {/* Lot 5 — Inputs : fond blanc, texte noir, label bleu sombre #022a6b plus visible. */}
+          <Input
+            testID="paybid-email"
+            label="Email agent"
+            value={email}
+            onChangeText={setEmail}
+            icon="person-outline"
+            autoCapitalize="none"
+            labelColor="#022a6b"
+            style={{ backgroundColor: "white", color: "#0F172A" }}
+          />
+          <Input
+            testID="paybid-password"
+            label="Mot de passe"
+            value={password}
+            onChangeText={setPassword}
+            icon="lock-closed-outline"
+            secureTextEntry
+            labelColor="#022a6b"
+            style={{ backgroundColor: "white", color: "#0F172A" }}
+          />
           {err ? <TText variant="caption" color={paybidColors.status.error}>{err}</TText> : null}
           <View style={{ height: 8 }} />
           <Button testID="paybid-submit" title="Se connecter" loading={loading} onPress={submit} icon="arrow-forward" style={{ backgroundColor: paybidColors.primary.base }} />

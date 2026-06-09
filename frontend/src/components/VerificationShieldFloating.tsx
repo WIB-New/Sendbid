@@ -183,6 +183,7 @@ export default function VerificationShieldFloating() {
 }
 
 const SIZE = 38;
+const SHIELD_COLOR = "#B91C1C"; // Lot 5 — rouge sombre demandé par l'utilisateur (au lieu du #F59E0B orange)
 
 const styles = StyleSheet.create({
   wrap: {
@@ -199,10 +200,10 @@ const styles = StyleSheet.create({
     width: SIZE,
     height: SIZE,
     borderRadius: SIZE / 2,
-    backgroundColor: "#F59E0B",
-    shadowColor: "#F59E0B",
-    shadowOpacity: 0.8,
-    shadowRadius: 10,
+    backgroundColor: SHIELD_COLOR,
+    shadowColor: SHIELD_COLOR,
+    shadowOpacity: 0.85,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
   },
   sparkleOrbit: {
@@ -223,11 +224,11 @@ const styles = StyleSheet.create({
     width: SIZE,
     height: SIZE,
     borderRadius: radii.full,
-    backgroundColor: "#F59E0B",
+    backgroundColor: SHIELD_COLOR,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#F59E0B",
-    shadowOpacity: 0.55,
+    shadowColor: SHIELD_COLOR,
+    shadowOpacity: 0.6,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 8,
