@@ -66,6 +66,35 @@ async def agent_signup(payload: AgentSignupIn):
     await db.wallets.insert_one({
         "id": gen_id(), "user_id": user_id, "balance": 0.0, "currency": "EUR", "created_at": iso(now_utc())
     })
+
+
+@router.get("/super-agents/public")
+async def list_super_agents_public(country: Optional[str] = None):
+    """Endpoint PUBLIC — liste minimaliste des Super-Agents validés.
+    Utilisé par l'écran d'inscription Paybid pour permettre à un sub-agent
+    de se rattacher à son Super-Agent parent. Pas d'authentification requise.
+    Filtrable par pays ISO2 (optionnel).
+    """
+    q: dict = {"agent_type": "super_agent", "status": {"$ne": "rejected"}}
+    if country:
+        q["country"] = country.upper()
+    cursor = db.agents.find(
+        q,
+        {"_id": 0, "id": 1, "legal_name": 1, "full_name": 1, "city": 1, "country": 1, "profile_id": 1},
+    ).limit(200)
+    items = await cursor.to_list(200)
+    # Étiquette d'affichage = legal_name si dispo, sinon full_name + ville/pays
+    return [
+        {
+            "id": a["id"],
+            "label": a.get("legal_name") or a.get("full_name") or "—",
+            "city": a.get("city"),
+            "country": a.get("country"),
+            "profile_id": a.get("profile_id"),
+        }
+        for a in items
+    ]
+
     return {"ok": True, "user_id": user_id, "agent_id": agent_id, "profile_id": profile_id, "role": "agent"}
 
 

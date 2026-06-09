@@ -220,6 +220,14 @@ async def get_transfer(transfer_id: str, user: dict = Depends(get_current_user))
     
     if not t:
         raise HTTPException(status_code=404, detail="Transfert introuvable")
+    # Alias rétrocompatibles pour le frontend : assigned_at == agent_assigned_at.
+    # On expose aussi paid_at = created_at quand le statut est postérieur au paiement,
+    # de sorte que la timeline de progression affiche TOUJOURS une date sous chaque
+    # étape complétée (demande utilisateur explicite, P0 v7).
+    if t.get("agent_assigned_at") and not t.get("assigned_at"):
+        t["assigned_at"] = t["agent_assigned_at"]
+    if t.get("status") not in ("DRAFT", "PENDING_PAYMENT") and not t.get("paid_at"):
+        t["paid_at"] = t.get("created_at")
     # Si agent assigné, embarquer ses infos publiques (parcours live offers / receipt)
     if t.get("agent_id"):
         ag = await db.agents.find_one({"id": t["agent_id"]},
