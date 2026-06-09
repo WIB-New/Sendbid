@@ -107,6 +107,10 @@ async def register(payload: RegisterIn):
             "loyalty_level": "Bronze", "loyalty_points": 0, "language": "fr",
             "email_verified": False, "phone_verified": False,
             "biometric_enabled": False, "avatar_url": None,
+            # v10 — Exposé explicitement pour que la PIN-gate du _layout root soit déclenchée
+            # IMMÉDIATEMENT après setSession (sinon `user.has_pin` est undefined côté front
+            # et la logique permissive `!user.has_pin` pourrait laisser passer).
+            "has_pin": False,
         },
     }
     if not IS_PROD:

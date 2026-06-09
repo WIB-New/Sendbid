@@ -137,7 +137,10 @@ export default function SignUp() {
       if (data.token && data.user) {
         await setSession(data.token, data.user);
       }
-      router.push({
+      // v10 — Spec item 1 : utiliser REPLACE (pas push) pour interdire le retour arrière.
+      // La PIN-gate dans _layout.tsx redirigera de toute façon tant que has_pin=false,
+      // mais on évite déjà un flash de routing.
+      router.replace({
         pathname: "/(auth)/create-pin",
         params: { user_id: data.user_id, skip_otp: "1" },
       });

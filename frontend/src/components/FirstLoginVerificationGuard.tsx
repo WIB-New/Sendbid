@@ -53,7 +53,14 @@ export default function FirstLoginVerificationGuard() {
 
   const handlePopupClose = async () => {
     hidePopup();
-    try { await api.post("/auth/mark-verification-popup-shown"); } catch {}
+    try {
+      await api.post("/auth/mark-verification-popup-shown");
+      // v10 — Spec item 2 : forcer la mise à jour locale de `verification_popup_shown_at`
+      // afin que la popup NE RÉAPPARAISSE JAMAIS pendant cette session
+      // (sans dépendre d'un re-login). Seule l'icône bouclier reste comme rappel.
+      const { refreshMe } = useAuth.getState();
+      await refreshMe();
+    } catch {}
   };
 
   return (

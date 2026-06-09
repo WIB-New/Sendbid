@@ -94,6 +94,22 @@ export default function RootLayout() {
     const inPaybid = segments[0] === "paybid";
     const isAgent = (user as any)?.role === "agent";
 
+    // === v10 — PIN-GATE STRICTE POST-INSCRIPTION ===
+    // Spec utilisateur item 1 : "La création du code PIN ne peut se déclencher que si
+    // et seulement si la création du compte est achevée entièrement et rien d'autre
+    // ni aucune autre procédure ne peut être déclenchée."
+    //
+    // Conséquence : tant que `user && user.has_pin === false`, on force /(auth)/create-pin
+    // ET on EMPÊCHE toute autre redirection (KYC, paybid, tabs, popup vérif, AppLock, etc).
+    // Cette gate est active SEULEMENT pour les clients SendBid (pas les agents Paybid).
+    if (user && (user as any).has_pin === false && !isAgent && appVariant !== "paybid") {
+      const onCreatePin = segments[0] === "(auth)" && segments[1] === "create-pin";
+      if (!onCreatePin) {
+        router.replace("/(auth)/create-pin" as any);
+      }
+      return; // ← bloque toute autre logique de redirection ci-dessous
+    }
+
     // === STRICT SPLIT BETWEEN SENDBID AND PAYBID ===
     if (appVariant === "paybid") {
       // PAYBID-only APK — every SENDBID route must redirect into /paybid/*
@@ -179,10 +195,10 @@ export default function RootLayout() {
       <ThemeProvider>
         <StatusBar style="dark" />
         <Stack key={locale} screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: colors.neutrals.background } }} />
-        {/* v8 — Icône bouclier flottante visible sur TOUTES les pages tant que vérification non terminée */}
-        {user ? <VerificationShieldFloating /> : null}
-        {/* v9 — Verrouillage automatique au retour de l'arrière-plan (>60s) */}
-        {user ? <AppLockGate /> : null}
+        {/* v10 — Pendant la création du PIN post-inscription, RIEN d'autre ne doit
+            apparaître (pas de bouclier flottant, pas d'AppLockGate). Spec item 1. */}
+        {user && (user as any).has_pin !== false ? <VerificationShieldFloating /> : null}
+        {user && (user as any).has_pin !== false ? <AppLockGate /> : null}
       </ThemeProvider>
     </SafeAreaProvider>
   );
