@@ -8,6 +8,7 @@ import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
+import { flagEmoji } from "../../src/utils/dialCodes";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 // v6.4 — Bénéficiaire enrichi : Country/City autocomplete (pas de texte libre),
@@ -283,8 +284,10 @@ export default function AddBeneficiary() {
                   style={styles.modalRow}
                   onPress={() => { setCountry(item); setShowCountry(false); setSearchCountry(""); }}
                 >
+                  {/* v2 — drapeau en élément séparé, fontSize 22, fallback flagEmoji */}
+                  <TText style={{ fontSize: 22, marginRight: 10 }}>{item.flag || flagEmoji(item.country_code) || "🌍"}</TText>
                   <View style={{ flex: 1 }}>
-                    <TText variant="body" weight="semiBold">{item.flag} {item.country_name}</TText>
+                    <TText variant="body" weight="semiBold">{item.country_name}</TText>
                     <TText variant="caption" color={colors.neutrals.textSecondary}>
                       {item.capital ? `${item.capital} • ` : ""}{item.delivery_modes.join(" / ")}
                     </TText>

@@ -9,6 +9,7 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { StepIndicator } from "../../src/components/StepIndicator";
 import { api } from "../../src/api";
+import { flagEmoji } from "../../src/utils/dialCodes";
 import { useDraft } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
@@ -178,7 +179,11 @@ export default function TransferStep1() {
         Pays du bénéficiaire
       </TText>
       <TouchableOpacity testID="transfer-country" style={styles.selector} onPress={() => setShowCountry(true)}>
-        <TText weight="semiBold">{country ? `${country.flag} ${country.country_name}` : "Sélectionner"}</TText>
+        <TText weight="semiBold">
+          {country
+            ? `${country.flag || flagEmoji(country.country_code) || "🌍"} ${country.country_name}`
+            : "Sélectionner"}
+        </TText>
         <Ionicons name="chevron-down" size={18} color={colors.neutrals.textSecondary} />
       </TouchableOpacity>
 
@@ -452,8 +457,10 @@ export default function TransferStep1() {
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
                 <TouchableOpacity testID={`country-${item.country_code}`} style={styles.modalRow} onPress={() => { setCountry(item); setShowCountry(false); setSearch(""); }}>
+                  {/* v2 — fallback flagEmoji + fontSize 22 + style emoji-friendly pour garantir l'affichage sur toutes les plateformes */}
+                  <TText style={{ fontSize: 22, marginRight: 10 }}>{item.flag || flagEmoji(item.country_code) || "🌍"}</TText>
                   <View style={{ flex: 1 }}>
-                    <TText weight="semiBold">{item.flag} {item.country_name}</TText>
+                    <TText weight="semiBold">{item.country_name}</TText>
                     <TText variant="caption" color={colors.neutrals.textSecondary}>{item.capital || "—"} • {item.currency}</TText>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.neutrals.textTertiary} />

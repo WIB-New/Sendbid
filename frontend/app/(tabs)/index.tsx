@@ -13,6 +13,7 @@ import { useVerifPopup } from "../../src/uiState";
 import { useAuth, useDraft } from "../../src/store";
 import { KycPopup } from "../../src/components/KycPopup";
 import { api } from "../../src/api";
+import { flagEmoji } from "../../src/utils/dialCodes";
 import { t, useLocale } from "../../src/i18n";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemeTokens } from "../../src/themeContext";
@@ -579,8 +580,10 @@ export default function Home() {
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
                 <TouchableOpacity testID={`home-country-${item.country_code}`} style={styles.modalRow} onPress={() => { setCountry(item); setShowCountry(false); setSearch(""); }}>
+                  {/* v2 — drapeau en élément séparé, fontSize 22, fallback flagEmoji robuste sur toutes plateformes */}
+                  <TText style={{ fontSize: 22, marginRight: 10 }}>{item.flag || flagEmoji(item.country_code) || "🌍"}</TText>
                   <View style={{ flex: 1 }}>
-                    <TText weight="semiBold">{item.flag} {item.country_name}</TText>
+                    <TText weight="semiBold">{item.country_name}</TText>
                     <TText variant="caption" color={colors.neutrals.textSecondary}>{item.capital || "—"} • {item.currency}</TText>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.neutrals.textTertiary} />
