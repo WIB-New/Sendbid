@@ -115,10 +115,11 @@ export default function BeneficiaryDetail() {
         </View>
 
         {!edit ? (
-          <View style={{ gap: 8, marginTop: spacing.lg }}>
-            <Button title="Modifier" icon="create-outline" variant="outline" onPress={() => setEdit(true)} />
-            <Button title="Envoyer de l'argent" icon="paper-plane" onPress={() => router.push({ pathname: "/transfer/new", params: { beneficiary_id: b.id } } as any)} />
-            <Button title="Supprimer" icon="trash-outline" variant="danger" onPress={remove} />
+          // v2 — Boutons Modifier / Envoyer / Supprimer alignés sur UNE seule ligne (size="sm")
+          <View style={{ flexDirection: "row", gap: 6, marginTop: spacing.lg }}>
+            <Button testID="ben-edit" title="Modifier" icon="create-outline" size="sm" variant="outline" onPress={() => setEdit(true)} style={{ flex: 1 }} />
+            <Button testID="ben-send" title="Envoyer" icon="paper-plane" size="sm" onPress={() => router.push({ pathname: "/transfer/new", params: { beneficiary_id: b.id } } as any)} style={{ flex: 1 }} />
+            <Button testID="ben-delete" title="Supprimer" icon="trash-outline" size="sm" variant="danger" onPress={remove} style={{ flex: 1 }} />
           </View>
         ) : null}
       </ScrollView>

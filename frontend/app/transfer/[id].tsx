@@ -101,7 +101,7 @@ function buildBank(tx: any): ProgressStep[] {
   return [
     { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
     { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
-    { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: "Un délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.", state: s(2, cur, status) },
+    { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: "Un délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.", state: s(2, cur, status), timestamp: fmt(tx.completed_at || tx.processing_at || tx.assigned_at) },
   ];
 }
 
@@ -435,24 +435,32 @@ export default function TransferDetail() {
           </TouchableOpacity>
         ) : null}
 
-        {/* Actions */}
-        <View style={{ gap: 12, marginTop: spacing.lg }}>
-          <Button
-            testID="detail-receipt"
-            title="Voir le reçu officiel"
-            icon="document-text-outline"
-            onPress={() => router.push({ pathname: "/transfer/receipt", params: { transfer_id: tx.id } } as any)}
-          />
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <Button testID="detail-pdf" title="PDF" icon="download-outline" variant="outline" onPress={downloadReceipt} style={{ flex: 1 }} />
-            {mode === "cash" && tx.vip_delivery ? (
-              <Button testID="detail-map" title="Carte" icon="map-outline" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: tx.id } } as any)} style={{ flex: 1 }} />
-            ) : null}
-            {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status) ? (
-              <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" variant="outline" onPress={() => router.push(`/chat/${tx.id}` as any)} style={{ flex: 1 }} />
-            ) : null}
+        {/* Actions — v3 : Voir le reçu officiel + PDF + Ouvrir un litige sur UNE SEULE LIGNE.
+            Tailles/polices réduites via size="sm" pour tenir confortablement sur mobile. */}
+        <View style={{ marginTop: spacing.lg, gap: 8 }}>
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            <Button
+              testID="detail-receipt"
+              title="Reçu officiel"
+              icon="document-text-outline"
+              size="sm"
+              onPress={() => router.push({ pathname: "/transfer/receipt", params: { transfer_id: tx.id } } as any)}
+              style={{ flex: 2 }}
+            />
+            <Button testID="detail-pdf" title="PDF" icon="download-outline" size="sm" variant="outline" onPress={downloadReceipt} style={{ flex: 1 }} />
+            <Button testID="detail-dispute" title="Litige" icon="warning-outline" size="sm" variant="ghost" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: tx.id } })} style={{ flex: 1 }} />
           </View>
-          <Button testID="detail-dispute" title="Ouvrir un litige" icon="warning-outline" variant="ghost" onPress={() => router.push({ pathname: "/disputes", params: { transfer_id: tx.id } })} />
+          {/* Boutons contextuels en dessous (Carte / Chat) si applicable */}
+          {(mode === "cash" && (tx.vip_delivery || ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status))) ? (
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {mode === "cash" && tx.vip_delivery ? (
+                <Button testID="detail-map" title="Carte" icon="map-outline" size="sm" variant="outline" onPress={() => router.push({ pathname: "/transfer/map", params: { transfer_id: tx.id } } as any)} style={{ flex: 1 }} />
+              ) : null}
+              {mode === "cash" && ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"].includes(tx.status) ? (
+                <Button testID="detail-chat" title="Chat" icon="chatbubbles-outline" size="sm" variant="outline" onPress={() => router.push(`/chat/${tx.id}` as any)} style={{ flex: 1 }} />
+              ) : null}
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </View>

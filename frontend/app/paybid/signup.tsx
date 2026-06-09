@@ -8,6 +8,7 @@ import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
+import { flagEmoji } from "../../src/utils/dialCodes";
 import { useThemedPaybidColors } from "../../src/themeContext";
 import { paybidColors } from "../../src/paybidTheme";
 import { spacing, radii } from "../../src/theme";
@@ -70,7 +71,15 @@ export default function PaybidSignup() {
           <Input label="Email" value={email} onChangeText={setEmail} icon="mail-outline" autoCapitalize="none" keyboardType="email-address" />
           <Input label="Téléphone (E.164)" value={phone} onChangeText={setPhone} icon="call-outline" keyboardType="phone-pad" />
           <Input label="Ville d'activité" value={city} onChangeText={setCity} icon="location-outline" />
-          <Input label="Pays (ISO2)" value={country} onChangeText={setCountry} icon="flag-outline" autoCapitalize="characters" maxLength={2} />
+          <Input
+            label={`Pays ${country ? flagEmoji(country) : ""}`}
+            value={country}
+            onChangeText={(v) => setCountry(v.toUpperCase())}
+            icon="flag-outline"
+            autoCapitalize="characters"
+            maxLength={2}
+            placeholder="Saisissez le code ISO2 du pays (FR, SN, CM…)"
+          />
           <Input label="Mot de passe" value={password} onChangeText={setPassword} icon="lock-closed-outline" passwordToggle secureTextEntry />
 
           {err ? <TText variant="caption" color="#EF4444" style={{ marginVertical: 8 }}>{err}</TText> : null}

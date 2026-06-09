@@ -66,14 +66,16 @@ export function VerticalProgress({ steps }: Props) {
               <TText weight={s.state === "active" ? "extraBold" : "semiBold"} color={s.state === "pending" ? colors.neutrals.textTertiary : colors.neutrals.textPrimary}>
                 {s.label}
               </TText>
-              {s.description ? (
-                <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 2 }}>
-                  {s.description}
-                </TText>
-              ) : null}
+              {/* v2 — timestamp positionné JUSTE en-dessous du titre (avant la description),
+                       conformément à la demande utilisateur. */}
               {s.timestamp ? (
                 <TText variant="label" color={colors.neutrals.textTertiary} style={{ marginTop: 2 }}>
                   {s.timestamp}
+                </TText>
+              ) : null}
+              {s.description ? (
+                <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 2 }}>
+                  {s.description}
                 </TText>
               ) : null}
             </View>

@@ -24,7 +24,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet, Modal, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "./TText";
-import { countryToDial, dialToCountry, flagEmoji } from "../utils/countries";
+import { countryToDial, dialToCountry, flagEmoji } from "../utils/dialCodes";
 import { radii } from "../theme";
 import { useThemedColors } from "../themeContext";
 
