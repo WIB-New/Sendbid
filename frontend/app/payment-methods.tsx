@@ -49,10 +49,16 @@ export default function PaymentMethods() {
   const router = useRouter();
   const [methods, setMethods] = useState<any[]>([]);
 
-  // Modal d'ajout Mobile Money (sélection opérateur + numéro)
+  // Modal d'ajout Mobile Money (sélection opérateur + numéro + PIN obligatoire — Lot 3.7)
   const [momoModalOpen, setMomoModalOpen] = useState(false);
   const [pickedProvider, setPickedProvider] = useState<any>(null);
+  const [momoName, setMomoName] = useState("");          // v8 — nom & prénom titulaire du compte MoMo
   const [momoPhone, setMomoPhone] = useState("");
+  const [momoPinModal, setMomoPinModal] = useState(false); // v8 — popup PIN avant enregistrement
+  const [momoPinCode, setMomoPinCode] = useState("");
+  const [momoPinErr, setMomoPinErr] = useState<string | null>(null);
+  const [momoLoading, setMomoLoading] = useState(false);
+  const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null); // v8 — mise en évidence visuelle
 
   const load = useCallback(async () => {
     try { const r = await api.get("/payment-methods"); setMethods(r.data || []); } catch {}
@@ -64,23 +70,45 @@ export default function PaymentMethods() {
   const paypals = methods.filter((m) => m.type === "paypal");
 
   const submitMomo = async () => {
-    if (!pickedProvider || !momoPhone.trim()) {
-      showAlert("Champ requis", "Sélectionnez un opérateur et saisissez votre numéro.");
+    if (!pickedProvider || !momoPhone.trim() || !momoName.trim()) {
+      showAlert("Champ requis", "Renseignez votre nom & prénom, votre numéro et sélectionnez un opérateur.");
       return;
     }
+    // v8 (Lot 3.7) — Le PIN est obligatoire avant d'enregistrer un nouveau MoMo
+    setMomoPinErr(null); setMomoPinCode("");
+    setMomoPinModal(true);
+  };
+
+  const confirmMomoWithPin = async () => {
+    if (momoPinCode.length !== 6) { setMomoPinErr("Le PIN doit comporter 6 chiffres."); return; }
+    setMomoLoading(true); setMomoPinErr(null);
     try {
-      await api.post("/payment-methods", {
+      // 1) Vérifie le PIN auprès du backend (endpoint /auth/verify-pin)
+      await api.post("/auth/verify-pin", { pin: momoPinCode });
+      // 2) Crée le moyen de paiement
+      const { data } = await api.post("/payment-methods", {
         type: "momo",
         provider: pickedProvider.id,
         label: pickedProvider.name,
+        full_name: momoName.trim(),  // v8 — titulaire du compte
         phone: momoPhone.trim(),
       });
+      // 3) Highlight + reset + reload
+      setMomoPinModal(false);
       setMomoModalOpen(false);
       setPickedProvider(null);
-      setMomoPhone("");
-      load();
+      setMomoName(""); setMomoPhone(""); setMomoPinCode("");
+      await load();
+      if (data?.id) {
+        setRecentlyAddedId(data.id);
+        showAlert("Compte ajouté", `Votre compte ${pickedProvider.name} a été enregistré avec succès.`);
+        setTimeout(() => setRecentlyAddedId(null), 6000);
+      }
     } catch (e: any) {
-      showAlert("Erreur", e?.response?.data?.detail || "Impossible d'ajouter ce moyen.");
+      const detail = e?.response?.data?.detail || "PIN incorrect ou erreur serveur.";
+      setMomoPinErr(detail);
+    } finally {
+      setMomoLoading(false);
     }
   };
 
@@ -204,8 +232,16 @@ export default function PaymentMethods() {
               </View>
             ) : momos.map((m, i) => {
               const provider = MOBILE_PROVIDERS.find((p) => p.id === m.provider);
+              const isHighlighted = recentlyAddedId === m.id; // v8 Lot 3.7 — mise en évidence du nouveau MoMo
               return (
-                <View key={m.id} style={[styles.cRow, i < momos.length - 1 && styles.cRowBorder]}>
+                <View
+                  key={m.id}
+                  style={[
+                    styles.cRow,
+                    i < momos.length - 1 && styles.cRowBorder,
+                    isHighlighted && { backgroundColor: "#FEF3C7", borderLeftWidth: 4, borderLeftColor: "#F59E0B" },
+                  ]}
+                >
                   <LinearGradient
                     colors={(provider?.colors || ["#F59E0B", "#D97706"]) as any}
                     start={{ x: 0, y: 0 }}
@@ -336,15 +372,25 @@ export default function PaymentMethods() {
 
             {pickedProvider ? (
               <View style={{ marginTop: spacing.md }}>
+                {/* v8 Lot 3.7 — Nom & prénom titulaire du compte */}
                 <Input
-                  label={`Numéro ${pickedProvider.name}`}
+                  label="Votre nom et prénom enregistrés à votre compte"
+                  value={momoName}
+                  onChangeText={setMomoName}
+                  placeholder="Entrez votre nom et prénom"
+                  icon="person-outline"
+                  testID="momo-fullname"
+                />
+                <Input
+                  label="Votre numéro de téléphone mobile money"
                   value={momoPhone}
                   onChangeText={setMomoPhone}
                   keyboardType="phone-pad"
                   icon="call-outline"
-                  placeholder="ex: +221 77 123 45 67"
+                  placeholder="Entrez votre numéro de téléphone"
+                  testID="momo-phone"
                 />
-                <Button title="Enregistrer ce compte" icon="checkmark-circle" onPress={submitMomo} disabled={!momoPhone.trim()} />
+                <Button testID="momo-confirm" title="Confirmez l'ajout de votre compte" icon="checkmark-circle" onPress={submitMomo} disabled={!momoPhone.trim() || !momoName.trim()} />
               </View>
             ) : (
               <View style={{ marginTop: spacing.md, alignItems: "center" }}>
@@ -359,6 +405,34 @@ export default function PaymentMethods() {
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* v8 Lot 3.7 — Popup PIN obligatoire pour confirmer l'ajout d'un MoMo */}
+      <Modal visible={momoPinModal} transparent animationType="fade" onRequestClose={() => setMomoPinModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalSheet, { maxWidth: 360, alignSelf: "center", marginBottom: 0 }]}>
+            <Ionicons name="lock-closed" size={32} color={themed.primary.base} style={{ alignSelf: "center" }} />
+            <TText variant="subtitle" weight="extraBold" align="center" style={{ marginTop: 8 }}>Confirmez avec votre PIN</TText>
+            <TText variant="caption" color={themed.neutrals.textSecondary} align="center" style={{ marginTop: 4, marginBottom: spacing.md }}>
+              Saisissez votre code PIN à 6 chiffres pour finaliser l&apos;ajout de votre compte {pickedProvider?.name || "MoMo"}.
+            </TText>
+            <Input
+              label="Code PIN (6 chiffres)"
+              value={momoPinCode}
+              onChangeText={(v) => setMomoPinCode(v.replace(/\D/g, "").slice(0, 6))}
+              keyboardType="number-pad"
+              maxLength={6}
+              secureTextEntry
+              icon="keypad-outline"
+              testID="momo-pin-input"
+            />
+            {momoPinErr ? <TText variant="caption" color="#EF4444" style={{ marginBottom: 8 }}>{momoPinErr}</TText> : null}
+            <Button testID="momo-pin-confirm" title="Valider" icon="checkmark" onPress={confirmMomoWithPin} loading={momoLoading} disabled={momoPinCode.length !== 6} />
+            <TouchableOpacity onPress={() => setMomoPinModal(false)} style={{ alignSelf: "center", marginTop: 8, padding: 8 }}>
+              <TText variant="caption" color={themed.neutrals.textSecondary}>Annuler</TText>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </View>
   );

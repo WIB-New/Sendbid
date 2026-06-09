@@ -76,7 +76,7 @@ export default function P2P() {
             Solde : {balance.toFixed(2)} €
           </TText>
           <TText variant="label" color="rgba(255,255,255,0.85)" style={{ marginTop: 2 }}>
-            Envoyez à un autre utilisateur SENDBID — aucun frais.
+            Envoyez à un autre utilisateur — aucun frais.
           </TText>
         </View>
       </View>
@@ -112,7 +112,7 @@ export default function P2P() {
                 <View style={styles.avatarSm}><TText weight="extraBold" color="white">{recipientName.charAt(0).toUpperCase()}</TText></View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <TText weight="extraBold">{recipientName}</TText>
-                  <TText variant="label" color={colors.neutrals.textSecondary}>ID {recipient}</TText>
+                  <TText variant="label" color={colors.neutrals.textSecondary}>Profil ID {recipient}</TText>
                 </View>
                 <TouchableOpacity onPress={() => { setRecipientName(""); setRecipient(""); }} style={styles.clearChip}>
                   <Ionicons name="close" size={14} color={colors.neutrals.textSecondary} />
@@ -121,7 +121,7 @@ export default function P2P() {
             ) : (
               <Input
                 testID="p2p-recipient"
-                label="Email, téléphone ou ID SENDBID"
+                label="Email, téléphone ou Profil ID"
                 value={recipient}
                 onChangeText={setRecipient}
                 icon="person-outline"
