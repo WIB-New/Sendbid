@@ -1,11 +1,14 @@
 import React, { useState, useRef } from "react";
-import { View, StyleSheet, TouchableOpacity, Share, Alert, ScrollView, Modal } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Share, Alert, ScrollView, Modal, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import * as MediaLibrary from "expo-media-library";
 import { TText } from "../src/components/TText";
 import { Button } from "../src/components/Button";
 import { useAuth } from "../src/store";
@@ -16,6 +19,8 @@ export default function SBTagPage() {
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const [showInfo, setShowInfo] = useState(false);
+  // v2 (Lot 1.8) — ref vers le composant QR pour pouvoir exporter en PNG
+  const qrRef = useRef<any>(null);
 
   if (!user) return null;
 
@@ -43,15 +48,62 @@ export default function SBTagPage() {
     Alert.alert("Copié", "Le lien de paiement a été copié dans le presse-papiers.");
   };
 
-  const onDownload = () => {
-    Alert.alert(
-      "Télécharger le QR",
-      "Astuce : utilisez le bouton Partager pour enregistrer le QR via l'application de votre choix (Photos, Mail, Drive…).",
-      [{ text: "Partager maintenant", onPress: onShare }, { text: "OK", style: "cancel" }]
-    );
+  // v2 (Lot 1.8) — VRAI téléchargement du QR :
+  //  - récupère la dataURL PNG du SVG via QRCode.getRef().toDataURL(...)
+  //  - sur web : déclenche un download via un <a download>
+  //  - sur native : sauvegarde dans la galerie via MediaLibrary
+  //  - fallback partage si saisie permission impossible
+  const onDownload = async () => {
+    try {
+      if (Platform.OS === "web") {
+        const ref = qrRef.current;
+        if (!ref?.toDataURL) {
+          Alert.alert("Impossible", "Composant QR non prêt — réessayez dans 1 seconde.");
+          return;
+        }
+        ref.toDataURL((b64: string) => {
+          const dataUrl = `data:image/png;base64,${b64}`;
+          const a = document.createElement("a");
+          a.href = dataUrl;
+          a.download = `sbtag-${sbtag}.png`;
+          document.body.appendChild(a); a.click(); a.remove();
+        });
+        return;
+      }
+      // NATIF
+      const ref = qrRef.current;
+      if (!ref?.toDataURL) {
+        return onShare();
+      }
+      ref.toDataURL(async (b64: string) => {
+        const uri = `${FileSystem.cacheDirectory}sbtag-${sbtag}.png`;
+        await FileSystem.writeAsStringAsync(uri, b64, { encoding: FileSystem.EncodingType.Base64 });
+        try {
+          const { status, canAskAgain } = await MediaLibrary.requestPermissionsAsync();
+          if (status === "granted") {
+            await MediaLibrary.saveToLibraryAsync(uri);
+            Alert.alert("Enregistré", "Le QR code SBTag a été enregistré dans votre galerie.");
+            return;
+          }
+          // Si refusé : on tombe sur Sharing (le user peut choisir Drive, Mail, etc.)
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(uri, { dialogTitle: "Enregistrer mon QR SBTag", mimeType: "image/png" });
+          } else if (!canAskAgain) {
+            Alert.alert("Permission refusée", "Autorisez l'accès aux médias dans les paramètres pour enregistrer le QR.");
+          }
+        } catch {
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(uri, { dialogTitle: "Enregistrer mon QR SBTag", mimeType: "image/png" });
+          }
+        }
+      });
+    } catch (e: any) {
+      Alert.alert("Erreur", e?.message || "Téléchargement impossible. Essayez le bouton Partager.");
+    }
   };
 
-  const onScan = () => router.push("/verify-transfer" as any);
+  // v2 (Lot 1.8) — Scanner = vraie caméra (page dédiée /qrscan).
+  const onScan = () => router.push("/qrscan" as any);
 
   return (
     <View style={styles.bg}>
@@ -99,6 +151,7 @@ export default function SBTagPage() {
               size={200}
               color="#022a6b"
               backgroundColor="white"
+              getRef={(c) => { qrRef.current = c; }}
             />
           </View>
           <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 12 }}>

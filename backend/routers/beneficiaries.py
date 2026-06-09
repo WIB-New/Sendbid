@@ -44,6 +44,33 @@ async def list_beneficiaries(user: dict = Depends(get_current_user)):
     return await db.beneficiaries.find({"user_id": user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
 
 
+@router.get("/{bid}")
+async def get_beneficiary(bid: str, user: dict = Depends(get_current_user)):
+    """v2 — Endpoint manquant qui causait l'écran 'Chargement…' figé côté UI."""
+    b = await db.beneficiaries.find_one({"id": bid, "user_id": user["id"]}, {"_id": 0})
+    if not b:
+        raise HTTPException(status_code=404, detail="Bénéficiaire introuvable")
+    return clean_doc(b)
+
+
+@router.put("/{bid}")
+async def update_beneficiary(bid: str, payload: BeneficiaryIn, user: dict = Depends(get_current_user)):
+    """v2 — Mise à jour des champs d'un bénéficiaire (les coordonnées modifiables côté UI)."""
+    b = await db.beneficiaries.find_one({"id": bid, "user_id": user["id"]})
+    if not b:
+        raise HTTPException(status_code=404, detail="Bénéficiaire introuvable")
+    data = payload.model_dump(exclude_unset=True)
+    # Compat momo (mêmes règles que sur create)
+    if not data.get("momo_phone") and data.get("momo_number"):
+        data["momo_phone"] = data["momo_number"]
+    if not data.get("momo_number") and data.get("momo_phone"):
+        data["momo_number"] = data["momo_phone"]
+    data["updated_at"] = iso(now_utc())
+    await db.beneficiaries.update_one({"id": bid, "user_id": user["id"]}, {"$set": data})
+    updated = await db.beneficiaries.find_one({"id": bid, "user_id": user["id"]}, {"_id": 0})
+    return clean_doc(updated)
+
+
 @router.post("")
 async def create_beneficiary(payload: BeneficiaryIn, user: dict = Depends(get_current_user)):
     count = await db.beneficiaries.count_documents({"user_id": user["id"]})

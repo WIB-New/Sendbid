@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Venv
+venv/
+.venv/
+env/
+
+# Env files (injectés par Dokploy via variables d'environnement)
+.env
+.env.*
+!.env.example
+
+# Tests
+backend_test*.py
+tests/
+pytest_cache/
+.coverage
+
+# Dev tools
+.mypy_cache/
+.ruff_cache/
+.black_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+memory/

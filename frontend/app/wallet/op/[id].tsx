@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TText } from "../../../src/components/TText";
 import { api } from "../../../src/api";
-import { useAuth } from "../../../src/store"; // (eslint: kept for parity)
+import { useAuth, useDraft } from "../../../src/store"; // useDraft pour "Répéter ce transfert" (Lot 2.5)
 import { colors, spacing, radii } from "../../../src/theme";
 import { useThemedColors } from "../../../src/themeContext";
 
@@ -34,6 +34,7 @@ export default function WalletOperationDetail() {
   const themed = useThemedColors();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const setDraft = useDraft((s) => s.setDraft); // Lot 2.5 — "Répéter ce transfert"
   const [tx, setTx] = useState<any | null>(null);
   const [transfer, setTransfer] = useState<any | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -105,8 +106,32 @@ export default function WalletOperationDetail() {
 
   const repeatTransfer = () => {
     if (!transfer) return;
-    // Redirige vers le parcours transfert avec le bénéficiaire pré-sélectionné
-    router.push({ pathname: "/transfer/new" as any, params: { beneficiary_id: transfer.beneficiary?.id || "" } });
+    // v2 (Lot 2.5) — "Répéter ce transfert" : on hydrate le brouillon avec TOUTES les
+    // données du transfert source, puis on saute directement à l'écran de récapitulatif/PIN
+    // (au lieu de refaire le parcours new → recap). L'utilisateur n'a plus qu'à confirmer.
+    const draft = {
+      // Source / financier
+      send_amount: Number(transfer.send_amount || 0),
+      receive_amount: Number(transfer.receive_amount || 0),
+      source_currency: transfer.source_currency || "EUR",
+      destination_currency: transfer.destination_currency || "",
+      destination_country: transfer.destination_country || "",
+      fx_rate: Number(transfer.fx_rate || 0),
+      fee_percent: Number(transfer.fee_percent || 0),
+      fee_amount: Number(transfer.fee_amount || 0),
+      total_amount: Number(transfer.total_amount || transfer.send_amount || 0),
+      // Bénéficiaire
+      beneficiary: transfer.beneficiary,
+      beneficiary_id: transfer.beneficiary?.id,
+      // Livraison
+      delivery_mode: transfer.delivery_mode || "cash",
+      vip_delivery: !!transfer.vip_delivery,
+      vip_express: !!transfer.vip_express,
+      // Métadonnée
+      repeated_from: transfer.id,
+    };
+    setDraft(draft);
+    router.push("/transfer/recap" as any);
   };
 
   const rateApp = () => {

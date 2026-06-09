@@ -80,9 +80,9 @@ export default function Receipts() {
                   <View style={{ marginTop: 4 }}><StatusChip status={item.status} /></View>
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
-                  <TText weight="bold">{item.send_amount.toFixed(2)} EUR</TText>
+                  <TText weight="bold">{Number(item.send_amount || 0).toFixed(2)} EUR</TText>
                   <TText variant="caption" color={colors.neutrals.textTertiary}>
-                    {item.receive_amount.toFixed(0)} {item.destination_currency}
+                    {Number(item.receive_amount || 0).toFixed(0)} {item.destination_currency || ""}
                   </TText>
                 </View>
               </TouchableOpacity>

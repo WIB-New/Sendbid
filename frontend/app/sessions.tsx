@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Alert, TouchableOpacity, RefreshControl, ScrollView } from "react-native";
+import { View, StyleSheet, Alert, TouchableOpacity, RefreshControl, ScrollView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
@@ -33,13 +33,26 @@ export default function Sessions() {
   };
 
   const logoutAll = () => {
+    // v2 — Alert.alert ne fonctionne pas correctement sur web → fallback window.confirm.
+    const exec = async () => {
+      try { await api.post("/sessions/revoke-all"); } catch {}
+      try { await logout(); } catch {}
+      // Sur web, force un reload pour effacer tout l'état mémoire.
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.location.replace("/welcome");
+      } else {
+        router.replace("/welcome");
+      }
+    };
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      if (window.confirm("Toutes vos sessions seront fermées sur tous les appareils. Vous serez aussi déconnecté ici. Continuer ?")) {
+        exec();
+      }
+      return;
+    }
     Alert.alert("Tout déconnecter", "Toutes vos sessions seront fermées sur tous les appareils. Vous serez aussi déconnecté ici.", [
       { text: "Annuler", style: "cancel" },
-      { text: "Confirmer", style: "destructive", onPress: async () => {
-        try { await api.post("/sessions/revoke-all"); } catch {}
-        await logout();
-        router.replace("/welcome");
-      } },
+      { text: "Confirmer", style: "destructive", onPress: exec },
     ]);
   };
 

@@ -79,6 +79,15 @@ const STEPS: Step[] = [
   },
 ];
 
+// v6 — Préchargement éclair des images d'onboarding AU MOMENT DE L'IMPORT du module
+// (donc dès le tout premier démarrage de l'app). Quand le user arrive sur l'écran,
+// les images sont déjà dans le cache disque + mémoire d'expo-image. Plus aucun délai.
+try {
+  STEPS.forEach((s) => {
+    Image.prefetch(s.heroImage, "memory-disk").catch(() => {});
+  });
+} catch {}
+
 export default function Onboarding() {
   const colors = useThemedColors();
   const router = useRouter();
@@ -86,11 +95,14 @@ export default function Onboarding() {
   const cur = STEPS[step];
   const last = step === STEPS.length - 1;
 
-  // Prefetch toutes les images dès le mount pour un affichage instantané au changement de slide
+  // Préchargement éclair (v6 - Lot 1.1) :
+  // - prefetch dès le mount + à l'import du module via Image.prefetch (en-dessous du return du composant)
+  // - cachePolicy "memory-disk" pour éviter re-DL
+  // - transition=0 pour ne pas avoir le fondu de 150 ms qui donnait l'impression de "délai"
+  // - placeholder coloré pour ne JAMAIS afficher d'écran blanc dans le rond
   useEffect(() => {
     STEPS.forEach((s) => {
-      Image.prefetch(s.heroImage).catch(() => {});
-      // Fallback RN Image cache aussi
+      Image.prefetch(s.heroImage, "memory-disk").catch(() => {});
       try { (RNImage as any).prefetch?.(s.heroImage); } catch {}
     });
   }, []);
@@ -125,14 +137,17 @@ export default function Onboarding() {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <View style={styles.heroInner}>
+              <View style={[styles.heroInner, { backgroundColor: cur.heroGradient[1] }]}>
                 <Image
                   source={cur.heroImage}
                   style={styles.heroImage as any}
                   contentFit="cover"
                   cachePolicy="memory-disk"
-                  transition={150}
+                  transition={0}
                   priority="high"
+                  recyclingKey={cur.key}
+                  placeholderContentFit="cover"
+                  placeholder={{ blurhash: "L9AS}A%M9F-;~qIUM{xu00ay-;j[" }}
                 />
               </View>
               {/* Decorative rings */}

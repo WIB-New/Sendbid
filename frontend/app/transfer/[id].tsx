@@ -97,11 +97,11 @@ function buildBank(tx: any): ProgressStep[] {
   else if (["FAILED", "EXPIRED", "CANCELLED_USER"].includes(status)) cur = -1;
 
   const ref = (tx.reference || tx.id || "").slice(-8).toUpperCase();
-  const sentDate = tx.processing_at || tx.assigned_at || tx.completed_at;
+  // (sentDate retiré v2 — date n'est plus affichée sous le statut bancaire, cf. Lot 2.3)
   return [
     { key: "init", label: "Transfert créé", description: `Référence ${ref}`, state: s(0, cur, status), timestamp: fmt(tx.created_at) },
     { key: "pay", label: "Fonds reçus", description: "Le montant a été débité de votre compte", state: s(1, cur, status), timestamp: fmt(tx.paid_at) },
-    { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: `${fmt(sentDate) || "—"}\nUn délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.`, state: s(2, cur, status), timestamp: fmt(sentDate) },
+    { key: "sent", label: "Envoyé à la banque du bénéficiaire", description: "Un délai supplémentaire peut être nécessaire pour créditer le compte du bénéficiaire.", state: s(2, cur, status) },
   ];
 }
 

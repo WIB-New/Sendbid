@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      MONGO_URL: mongodb://sendbid:SendBidDb2026@sendbid-mongo-ixiwfs:27017/sendbid?authSource=admin
+      DB_NAME: sendbid
+      ENVIRONMENT: production
+      JWT_SECRET: d44ea865e665f2278758e9bfe149f7e92758b0ab202263ac2d911dd21a0b6400
+      QR_HMAC_SECRET: a9d57ab555e5ab51a1fd26377719e2b71e95b96b68d5e424bffd4b25b50539d0
+      ADMIN_EMAIL: admin@sendbid.com
+      ADMIN_PASSWORD: HomeboY@2026!#
+      DEMO_CLIENT_EMAIL: demo@client.com
+      DEMO_CLIENT_PASSWORD: Demo@123!
+      DEMO_CLIENT_PIN: "147258"
+      ALLOWED_ORIGINS: '*'
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`sendbid-sendbid-lwpcnd-9a1cc7-213-156-132-194.sslip.io`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.docker.network=dokploy-network"
+
+networks:
+  dokploy-network:
+    external: true
+    name: dokploy-network
