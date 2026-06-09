@@ -33,6 +33,7 @@ export default function TransferStep2() {
   const draft = useDraft((s) => s.draft);
   const patchDraft = useDraft((s) => s.patchDraft);
   const [feePercent, setFeePercent] = useState(2.0);
+  const [feeInput, setFeeInput] = useState("2,0"); // v3 — saisie brute pour préserver les décimales (virgule FR)
   const [vipMode, setVipMode] = useState<"none" | "vip" | "vip_express">("none");
   const [purpose, setPurpose] = useState<string>(PURPOSES[0].key);
   const [purposeOther, setPurposeOther] = useState("");
@@ -91,24 +92,36 @@ export default function TransferStep2() {
           </TText>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <View style={{ flex: 1 }}>
+              {/* v3 — l'ancienne version utilisait `value={String(feePercent)}` qui transformait
+                       "2," en "2" à chaque frappe, empêchant la saisie décimale (le user voyait
+                       la virgule disparaître). On garde maintenant la chaîne brute en local. */}
               <Input
                 testID="fee-custom"
-                value={String(feePercent)}
+                value={feeInput}
                 onChangeText={(v) => {
-                  // Accepter virgule OU point, max 1 décimale
-                  const cleaned = v.replace(",", ".").replace(/[^0-9.]/g, "");
-                  const num = parseFloat(cleaned);
-                  if (cleaned === "" || isNaN(num)) {
-                    setFeePercent(0 as any);
-                    return;
+                  // Autoriser uniquement chiffres + 1 séparateur décimal (, ou .)
+                  let cleaned = v.replace(/[^0-9.,]/g, "");
+                  // Garder UN SEUL séparateur (le 1er)
+                  const firstSep = cleaned.search(/[.,]/);
+                  if (firstSep >= 0) {
+                    cleaned = cleaned.slice(0, firstSep + 1) + cleaned.slice(firstSep + 1).replace(/[.,]/g, "");
                   }
-                  // Borner : min 0.5, max 10
-                  const bounded = Math.min(10, Math.max(0, num));
-                  setFeePercent(bounded);
+                  setFeeInput(cleaned);
+                  const num = parseFloat(cleaned.replace(",", "."));
+                  if (!isNaN(num)) setFeePercent(Math.min(10, Math.max(0, num)));
+                  else setFeePercent(0 as any);
                 }}
                 onBlur={() => {
-                  // À la sortie du champ, forcer min 0.5
-                  if (!feePercent || feePercent < 0.5) setFeePercent(0.5);
+                  const num = parseFloat(feeInput.replace(",", "."));
+                  if (isNaN(num) || num < 0.5) {
+                    setFeePercent(0.5);
+                    setFeeInput("0,5");
+                  } else {
+                    const bounded = Math.min(10, num);
+                    setFeePercent(bounded);
+                    // Réécrire au format FR (virgule)
+                    setFeeInput(String(bounded).replace(".", ","));
+                  }
                 }}
                 keyboardType="decimal-pad"
                 icon="trending-up-outline"
