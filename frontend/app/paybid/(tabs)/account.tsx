@@ -12,10 +12,9 @@
 import React, { useCallback, useState } from "react";
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect } from "@react-navigation/native";
 import { TText } from "../../../src/components/TText";
 import { api } from "../../../src/api";
 import { useAuth } from "../../../src/store";
@@ -69,10 +68,10 @@ export default function PaybidAccount() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paybidColors.neutrals.background }} edges={["top", "left", "right"]}>
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />} contentContainerStyle={{ padding: spacing.lg }}>
-        <TText variant="title" weight="extraBold" style={{ marginBottom: spacing.md }}>Mon compte</TText>
+        <TText variant="title" weight="extraBold" style={{ marginBottom: spacing.md }}>Activités</TText>
 
-        {/* CTA Caisse */}
-        <LinearGradient colors={paybidColors.gradients.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cashCard}>
+        {/* CTA Caisse — fond MARRON UNI #54280f (item 8) */}
+        <View style={[styles.cashCard, { backgroundColor: "#54280f" }]}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <TText variant="caption" weight="extraBold" color="white">{floatData.agency_name}</TText>
             <TText variant="caption" color="rgba(255,255,255,0.78)">ID: {(user as any)?.profile_id || (user as any)?.id?.slice(0, 8) || "—"}</TText>
@@ -86,7 +85,7 @@ export default function PaybidAccount() {
           <TText weight="extraBold" color="white" style={{ fontSize: 36, marginTop: 4 }}>
             {showBalance ? `${Number(floatData.balance).toFixed(2)} ${floatData.currency}` : "•••••• " + floatData.currency}
           </TText>
-        </LinearGradient>
+        </View>
 
         {/* 3 boutons colorés */}
         <View style={styles.row3}>

@@ -91,8 +91,8 @@ export default function PaybidDashboard() {
           </TouchableOpacity>
         </View>
 
-        {/* ===== Caisse Card (parité PORTEFEUILLE SendBID) ===== */}
-        <LinearGradient colors={[paybidColors.primary.dark, paybidColors.primary.base]} start={{x:0,y:0}} end={{x:1,y:1}} style={[styles.heroCard, shadows.lg]}>
+        {/* ===== Caisse Card (v8 — fond MARRON UNI #54280f selon demande utilisateur) ===== */}
+        <View style={[styles.heroCard, shadows.lg, { backgroundColor: "#54280f" }]}>
           <View style={styles.heroTopRow}>
             <View style={styles.logoChip}><Ionicons name="business" size={20} color="white" /></View>
             <View style={{ marginLeft: spacing.sm, flex: 1 }}>
@@ -102,7 +102,7 @@ export default function PaybidDashboard() {
               </TText>
             </View>
             {/* Toggle dispo */}
-            <TouchableOpacity onPress={toggleAvail} style={[styles.statusPill, { backgroundColor: available ? "rgba(194,65,12,0.32)" : "rgba(255,255,255,0.18)" }]}>
+            <TouchableOpacity onPress={toggleAvail} style={[styles.statusPill, { backgroundColor: available ? "rgba(255,165,0,0.32)" : "rgba(255,255,255,0.18)" }]}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: available ? "#FFA500" : "#9CA3AF", marginRight: 6 }} />
               <TText variant="label" weight="extraBold" color="white">{available ? "EN LIGNE" : "HORS LIGNE"}</TText>
             </TouchableOpacity>
@@ -140,24 +140,24 @@ export default function PaybidDashboard() {
               <TText weight="extraBold" color="white" style={{ fontSize: 14 }}>{stats.rating || "—"} ⭐</TText>
             </View>
           </View>
-        </LinearGradient>
-
-        {/* ===== 4 quick actions transparentes (parité SendBID) ===== */}
-        <View style={styles.quickRow}>
-          <QuickAction icon="qr-code" color="#FFA500" label="Scanner" onPress={() => router.push("/paybid/scan" as any)} />
-          <QuickAction icon="cash" color="#3B82F6" label="Déclarer les espèces" onPress={() => router.push("/paybid/cash" as any)} />
-          <QuickAction icon="arrow-up-circle" color="#F59E0B" label="Verser au siège" onPress={() => router.push("/paybid/float" as any)} />
-          <QuickAction icon="trophy" color="#F59E0B" label="Gains" onPress={() => router.push("/paybid/(tabs)/earnings" as any)} />
         </View>
 
-        {/* ===== CTA "Offres en temps réel" (parité Nouveau transfert) ===== */}
+        {/* ===== 4 quick actions — palette HARMONISÉE (item 9) ===== */}
+        <View style={styles.quickRow}>
+          <QuickAction icon="qr-code" color="#6366F1" label="Scanner" onPress={() => router.push("/paybid/scan" as any)} />
+          <QuickAction icon="cash" color="#10B981" label="Déclarer les espèces" onPress={() => router.push("/paybid/cash" as any)} />
+          <QuickAction icon="arrow-up-circle" color="#F59E0B" label="Verser au siège" onPress={() => router.push("/paybid/float" as any)} />
+          <QuickAction icon="trophy" color="#EC4899" label="Gains" onPress={() => router.push("/paybid/(tabs)/earnings" as any)} />
+        </View>
+
+        {/* ===== CTA "Offres en temps réel" — design INCHANGÉ, juste l'icône à gauche passe en MARRON (item 2) ===== */}
         <TouchableOpacity activeOpacity={0.85} onPress={() => router.push("/paybid/(tabs)/auctions" as any)} style={{ marginTop: spacing.xl }}>
           <LinearGradient
             colors={hasLiveBids ? ["#FFA500", "#F59E0B"] : [paybidColors.primary.base, paybidColors.primary.dark]}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
             style={styles.liveCta}
           >
-            <View style={styles.liveIconWrap}>
+            <View style={[styles.liveIconWrap, { backgroundColor: "#54280f" }]}>
               <Ionicons name="flash" size={26} color="white" />
               {hasLiveBids ? (
                 <Animated.View style={[styles.liveBlinker, { opacity: pulse }]} />
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   rowIcon: { width: 36, height: 36, borderRadius: radii.full, alignItems: "center", justifyContent: "center" },
   empty: { alignItems: "center", padding: spacing.lg, backgroundColor: paybidColors.neutrals.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: paybidColors.neutrals.border },
 
-  // Services brown container
-  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 4, backgroundColor: paybidColors.primary.base, borderRadius: radii.xl, borderWidth: 1, borderColor: paybidColors.primary.dark, padding: 8 },
+  // Services brown container — fond MARRON UNI #54280f (item 1)
+  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 4, backgroundColor: "#54280f", borderRadius: radii.xl, borderWidth: 1, borderColor: "#3D1C0A", padding: 8 },
   serviceMiniCard: { width: "31.5%", paddingVertical: 8, paddingHorizontal: 4, backgroundColor: "transparent", alignItems: "center", minHeight: 60 },
 });

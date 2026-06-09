@@ -19,7 +19,7 @@ from .models import AgentSignupIn, BidIn, CompleteIn
 
 @router.get("/earnings")
 async def earnings(user: dict = Depends(get_current_user), days: int = 30):
-    agent = await _require_agent(user)
+    await _require_agent(user)  # auth gate
     since = now_utc() - timedelta(days=days)
     txs = await db.wallet_tx.find(
         {"user_id": user["id"], "type": "agent_earnings", "created_at": {"$gte": iso(since)}},

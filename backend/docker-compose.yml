@@ -5,26 +5,46 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    restart: always
     environment:
-      MONGO_URL: mongodb://sendbid:SendBidDb2026@sendbid-mongo-ixiwfs:27017/sendbid?authSource=admin
-      DB_NAME: sendbid
+      MONGO_URL: ${MONGO_URL}
+      DB_NAME: ${DB_NAME:-sendbid}
       ENVIRONMENT: production
-      JWT_SECRET: d44ea865e665f2278758e9bfe149f7e92758b0ab202263ac2d911dd21a0b6400
-      QR_HMAC_SECRET: a9d57ab555e5ab51a1fd26377719e2b71e95b96b68d5e424bffd4b25b50539d0
-      ADMIN_EMAIL: admin@sendbid.com
-      ADMIN_PASSWORD: HomeboY@2026!#
-      DEMO_CLIENT_EMAIL: demo@client.com
-      DEMO_CLIENT_PASSWORD: Demo@123!
-      DEMO_CLIENT_PIN: "147258"
-      ALLOWED_ORIGINS: '*'
+      JWT_SECRET: ${JWT_SECRET}
+      QR_HMAC_SECRET: ${QR_HMAC_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      DEMO_CLIENT_EMAIL: ${DEMO_CLIENT_EMAIL}
+      DEMO_CLIENT_PASSWORD: ${DEMO_CLIENT_PASSWORD}
+      DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@sendbid.app}
+      SENDGRID_FROM_NAME: ${SENDGRID_FROM_NAME:-SENDBID}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_MODE: ${PAYPAL_MODE:-live}
+      PAYPAL_PAYOUTS_ENABLED: ${PAYPAL_PAYOUTS_ENABLED:-false}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      FIREBASE_CREDENTIALS_PATH: ${FIREBASE_CREDENTIALS_PATH:-/app/backend/secrets/firebase-service-account.json}
+      DIDIT_API_KEY: ${DIDIT_API_KEY:-}
+      DIDIT_WORKFLOW_ID: ${DIDIT_WORKFLOW_ID:-}
+    expose:
+      - "8000"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.sendbid-api.rule=Host(`api.sendfloo.sendbid.app`)
+      - traefik.http.routers.sendbid-api.entrypoints=websecure
+      - traefik.http.routers.sendbid-api.tls.certresolver=letsencrypt
+      - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
     networks:
       - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`sendbid-sendbid-lwpcnd-9a1cc7-213-156-132-194.sslip.io`)"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
-      - "traefik.docker.network=dokploy-network"
 
 networks:
   dokploy-network:
