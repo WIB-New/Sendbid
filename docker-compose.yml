@@ -1,5 +1,5 @@
 version: "3.8"
-
+ 
 services:
   backend:
     build:
@@ -7,33 +7,32 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      MONGO_URL: ${MONGO_URL}
-      DB_NAME: ${DB_NAME:-sendbid}
-      ENVIRONMENT: production
-      JWT_SECRET: ${JWT_SECRET}
-      QR_HMAC_SECRET: ${QR_HMAC_SECRET}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DEMO_CLIENT_EMAIL: ${DEMO_CLIENT_EMAIL}
-      DEMO_CLIENT_PASSWORD: ${DEMO_CLIENT_PASSWORD}
-      DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
-      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
-      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
-      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
-      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@sendbid.app}
-      SENDGRID_FROM_NAME: ${SENDGRID_FROM_NAME:-SENDBID}
-      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
-      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
-      PAYPAL_MODE: ${PAYPAL_MODE:-live}
-      PAYPAL_PAYOUTS_ENABLED: ${PAYPAL_PAYOUTS_ENABLED:-false}
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
-      FIREBASE_CREDENTIALS_PATH: ${FIREBASE_CREDENTIALS_PATH:-/app/backend/secrets/firebase-service-account.json}
-      DIDIT_API_KEY: ${DIDIT_API_KEY:-}
-      DIDIT_WORKFLOW_ID: ${DIDIT_WORKFLOW_ID:-}
+      MONGO_URL: "mongodb://sendbid:HomeboYdb2026@senfloosendbid-senfloomongodb-l9xkqw:27017/sendbid?authSource=admin"
+      DB_NAME: "sendbid"
+      ENVIRONMENT: "production"
+      JWT_SECRET: "a3f5b2c8d9e1f4a7b6c3d8e5f1a2b4c7d6e9f3a8b1c4d7e2f5a8b3c6d9e1f4a7"
+      QR_HMAC_SECRET: "b7e4a9c2f8d3e6b1a5c8d4f2e9a7b3c6d1f4a8e2b5c7d3f6a9b2c5d8e1f4a7b3"
+      ADMIN_EMAIL: "admin@sendbid.app"
+      ADMIN_PASSWORD: "admin123"
+      DEMO_CLIENT_EMAIL: "demo@sendbid.app"
+      DEMO_CLIENT_PASSWORD: "demo123"
+      DEMO_CLIENT_PIN: "123456"
+      ALLOWED_ORIGINS: "*"
+      STRIPE_API_KEY: "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"
+      STRIPE_WEBHOOK_SECRET: ""
+      TWILIO_ACCOUNT_SID: "AC6ecf876af485bb0da611cb223f1a34d0"
+      TWILIO_AUTH_TOKEN: "c824a172ba982515e812b993a1fc5cc7"
+      TWILIO_FROM_NUMBER: "+13612877058"
+      SENDGRID_API_KEY: "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"
+      SENDGRID_FROM_EMAIL: "noreply@sendbid.app"
+      SENDGRID_FROM_NAME: "SENDBID"
+      PAYPAL_CLIENT_ID: "AbpNEv18TlfpqiGC5f6KEroEKlOrBkpWhegoVcauS0KC2qBVEkio3yH4h_68ekIL8eD5drp3R_lciyQV"
+      PAYPAL_CLIENT_SECRET: "EFkXyA79t_3NBIvO5I_os29cj50f6tHBJatXpcdVnQlVrHxVjvO2E3vHASjqMfDYqzC3ladyhdVAh_3X"
+      PAYPAL_MODE: "live"
+      PAYPAL_PAYOUTS_ENABLED: "true"
+      GOOGLE_MAPS_API_KEY: "AIzaSyAY7UEMrwuTHQFl8kteDCF4sdUOUIy_6SA"
+      DIDIT_API_KEY: "8DcClXHnBzb8xYWPjrF26JaC-kxCsCuVrKn_-exP2Co"
+      DIDIT_WORKFLOW_ID: "05e40d18-f06e-49a0-a2cb-b407f1d01ce7"
     expose:
       - "8000"
     labels:
@@ -45,7 +44,7 @@ services:
       - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
     networks:
       - dokploy-network
-
+ 
 networks:
   dokploy-network:
     external: true
