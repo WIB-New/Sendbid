@@ -22,6 +22,21 @@ import { Button } from "../../src/components/Button";
 import { api, apiError } from "../../src/api";
 import { paybidColors } from "../../src/paybidTheme";
 import { spacing, radii } from "../../src/theme";
+import { formatMoney } from "../../src/utils/money";
+
+// Item 9 — Types de mouvements considérés comme "gestion des espèces".
+// Tous les autres (commissions, transferts, gains) sont exclus de cette vue.
+const CASH_MOVEMENT_TYPES = new Set([
+  "declare", "recharge", "cash_recharge",
+  "deposit", "withdraw", "agency_cashin", "agency_cashout",
+  "cashin", "cashout", "float_topup", "float_payout",
+  "verser_siege", "cash_in", "cash_out",
+]);
+
+function isCashMovement(t: { type?: string }): boolean {
+  const type = (t.type || "").toLowerCase();
+  return CASH_MOVEMENT_TYPES.has(type) || type.includes("cash") || type.includes("declare") || type.includes("recharge");
+}
 
 type FloatTx = { id: string; type: string; amount: number; currency: string; created_at: string; note?: string };
 
@@ -48,8 +63,9 @@ export default function DeclareCashScreen() {
       const items = floatR.data?.items || [];
       const main = items[0] || { balance: 0, currency: "XOF" };
       setData({ balance: main.balance, currency: main.currency, float_account: main });
-      // Movements : { items: [{ id, type, amount_signed, currency, created_at, reason }] }
-      const movs = movR.data?.items || [];
+      // Item 9 — Vue "gestion des espèces" : filtrer pour ne garder QUE les mouvements
+      // liés au cash. Les commissions/transferts/gains sont exclus.
+      const movs = (movR.data?.items || []).filter((m: any) => isCashMovement(m));
       setHist(movs.map((m: any) => ({
         id: m.id || m._id || String(Math.random()),
         type: m.type || m.movement_type || "operation",
@@ -96,27 +112,27 @@ export default function DeclareCashScreen() {
       </View>
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />} contentContainerStyle={{ padding: spacing.lg }}>
-        {/* Solde caisse — fond MARRON UNI #54280f (item 8) */}
+        {/* Solde caisse — fond MARRON UNI #54280f (item 9 — was orange in older builds) */}
         <View style={[styles.balanceCard, { backgroundColor: "#54280f" }]}>
           <TText variant="caption" weight="bold" color="rgba(255,255,255,0.78)" style={{ letterSpacing: 1 }}>FLOAT DISPONIBLE — CAISSE</TText>
-          <TText weight="extraBold" color="white" style={{ fontSize: 36, marginTop: 4 }}>
-            {Number(data.balance || 0).toFixed(2)} {data.currency || "EUR"}
+          <TText weight="extraBold" color="white" style={{ fontSize: 26, marginTop: 4 }} adjustsFontSizeToFit numberOfLines={1}>
+            {formatMoney(data.balance || 0, data.currency || "EUR")}
           </TText>
           <TText variant="caption" color="rgba(255,255,255,0.78)">Espèces disponibles en caisse</TText>
         </View>
 
-        {/* 4 KPIs analytiques */}
+        {/* 4 KPIs analytiques — taille icône & police réduites (item 9) */}
         <View style={styles.kpiGrid}>
-          <KpiBox icon="arrow-down-circle" color="#10B981" label="Entrées (jour)" value={`+${entriesToday.toFixed(2)}`} />
-          <KpiBox icon="arrow-up-circle" color="#EF4444" label="Sorties (jour)" value={`-${exitsToday.toFixed(2)}`} />
-          <KpiBox icon="trending-up" color="#F59E0B" label="Net du jour" value={`${netToday >= 0 ? "+" : ""}${netToday.toFixed(2)}`} />
-          <KpiBox icon="card" color="#022a6b" label="Encours emprunt" value={totalEncours.toFixed(2)} />
+          <KpiBox icon="arrow-down-circle" color="#10B981" label="Entrées (jour)" value={formatMoney(entriesToday, data.currency, { withCurrency: false })} />
+          <KpiBox icon="arrow-up-circle" color="#EF4444" label="Sorties (jour)" value={formatMoney(exitsToday, data.currency, { withCurrency: false })} />
+          <KpiBox icon="trending-up" color="#F59E0B" label="Net du jour" value={`${netToday >= 0 ? "+" : "-"}${formatMoney(Math.abs(netToday), data.currency, { withCurrency: false })}`} />
+          <KpiBox icon="card" color="#022a6b" label="Encours" value={formatMoney(totalEncours, data.currency, { withCurrency: false })} />
         </View>
 
         {/* Crédit total */}
         <View style={styles.summaryRow}>
           <TText variant="caption" weight="bold" color={paybidColors.neutrals.textSecondary}>Crédit total reçu</TText>
-          <TText weight="extraBold">{totalCredits.toFixed(2)} {data.currency}</TText>
+          <TText weight="extraBold">{formatMoney(totalCredits, data.currency)}</TText>
         </View>
 
         {/* CTA déclaration */}
