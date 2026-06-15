@@ -1,9 +1,17 @@
-"""Stripe payments service — wraps the emergentintegrations Stripe Checkout client.
+"""Stripe payments service — refactor 12/06/2026.
 
-Public functions:
-- create_recharge_session(user, package_id|amount, origin_url) → CheckoutSessionResponse
-- get_session_status(session_id) → CheckoutStatusResponse
-- credit_wallet_if_paid(session_id, user_id) → idempotent; returns True if newly credited
+Anciennement basé sur `emergentintegrations.payments.stripe.checkout`, ce module
+utilise désormais le SDK officiel `stripe` (15.0.1+) avec ses méthodes async natives.
+
+L'API publique du module reste STRICTEMENT identique pour ne pas casser
+`routers/payments.py` :
+
+    - create_recharge_session(user, *, package_id, custom_amount, origin_url, host_url)
+        → renvoie un objet exposant .url et .session_id
+    - get_session_status(session_id, host_url)
+        → renvoie un objet exposant .status, .payment_status, .amount_total
+    - credit_wallet_if_paid(session_id, *, host_url, user_id)
+        → idempotent ; renvoie un dict identique à l'ancien wrapper
 
 Wallet packages are defined server-side ONLY to prevent price manipulation.
 """
@@ -11,14 +19,10 @@ from __future__ import annotations
 
 import os
 import logging
+from dataclasses import dataclass
 from typing import Optional
 
-from emergentintegrations.payments.stripe.checkout import (
-    StripeCheckout,
-    CheckoutSessionRequest,
-    CheckoutSessionResponse,
-    CheckoutStatusResponse,
-)
+import stripe  # SDK officiel ≥ 15.0.1 (déjà dans requirements.txt)
 
 from core.db import db, now_utc, iso
 from core.security import gen_id
@@ -27,7 +31,11 @@ logger = logging.getLogger("sendbid.payments")
 
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "").strip()
 
-# Server-defined recharge packages (EUR) — frontend can ONLY pick a package id.
+# Configuration globale du SDK (idempotent — appelable plusieurs fois sans danger)
+if STRIPE_API_KEY:
+    stripe.api_key = STRIPE_API_KEY
+
+# Packages serveur (pas modifiables côté frontend)
 RECHARGE_PACKAGES = {
     "starter": {"amount": 20.0, "label": "Recharge Starter (20 €)"},
     "standard": {"amount": 50.0, "label": "Recharge Standard (50 €)"},
@@ -35,16 +43,33 @@ RECHARGE_PACKAGES = {
     "vip": {"amount": 250.0, "label": "Recharge VIP (250 €)"},
 }
 
-# Custom amount limits to prevent abuse if "custom" is used by the frontend
 CUSTOM_AMOUNT_MIN = 5.0
 CUSTOM_AMOUNT_MAX = 500.0
 
 
-def _client(host_url: str) -> StripeCheckout:
+# ─────────────────────────────────────────────────────────────────────
+# Réponses "compatibles" — préservent l'API publique de l'ancien wrapper
+# (qui exposait .url, .session_id, .status, .payment_status, .amount_total)
+# ─────────────────────────────────────────────────────────────────────
+@dataclass
+class CheckoutSessionResponse:
+    url: str
+    session_id: str
+
+
+@dataclass
+class CheckoutStatusResponse:
+    status: str
+    payment_status: str
+    amount_total: Optional[int]  # cents
+
+
+def _ensure_configured() -> None:
     if not STRIPE_API_KEY:
         raise RuntimeError("STRIPE_API_KEY is not configured")
-    webhook_url = host_url.rstrip("/") + "/api/webhook/stripe"
-    return StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    # Si la clé a été mise à jour entre-temps via env, on resynchronise
+    if stripe.api_key != STRIPE_API_KEY:
+        stripe.api_key = STRIPE_API_KEY
 
 
 async def create_recharge_session(
@@ -53,9 +78,16 @@ async def create_recharge_session(
     package_id: Optional[str],
     custom_amount: Optional[float],
     origin_url: str,
-    host_url: str,
+    host_url: str,  # kept for signature compatibility (was used for webhook_url)
 ) -> CheckoutSessionResponse:
-    # Resolve amount server-side ONLY
+    """Crée une session Stripe Checkout pour la recharge wallet.
+
+    - Résolution montant 100% côté serveur (anti-tampering).
+    - Persiste une transaction "open/pending" AVANT de retourner au client.
+    """
+    _ensure_configured()
+
+    # Résolution montant
     if package_id and package_id in RECHARGE_PACKAGES:
         amount = RECHARGE_PACKAGES[package_id]["amount"]
         label = RECHARGE_PACKAGES[package_id]["label"]
@@ -80,20 +112,27 @@ async def create_recharge_session(
         "label": label,
     }
 
-    client = _client(host_url)
-    req = CheckoutSessionRequest(
-        amount=amount,
-        currency="eur",
+    # Stripe Checkout : montant en cents, mode payment one-shot
+    amount_cents = int(round(amount * 100))
+    session = await stripe.checkout.Session.create_async(
+        mode="payment",
         success_url=success_url,
         cancel_url=cancel_url,
+        line_items=[{
+            "price_data": {
+                "currency": "eur",
+                "product_data": {"name": label},
+                "unit_amount": amount_cents,
+            },
+            "quantity": 1,
+        }],
         metadata=metadata,
     )
-    session: CheckoutSessionResponse = await client.create_checkout_session(req)
 
-    # Persist a pending transaction BEFORE returning to the client
+    # Persiste la transaction pending AVANT retour
     await db.payment_transactions.insert_one({
         "id": gen_id(),
-        "session_id": session.session_id,
+        "session_id": session.id,
         "user_id": user["id"],
         "amount": amount,
         "currency": "EUR",
@@ -106,12 +145,18 @@ async def create_recharge_session(
         "created_at": iso(now_utc()),
         "updated_at": iso(now_utc()),
     })
-    return session
+    return CheckoutSessionResponse(url=session.url, session_id=session.id)
 
 
 async def get_session_status(session_id: str, host_url: str) -> CheckoutStatusResponse:
-    client = _client(host_url)
-    return await client.get_checkout_status(session_id)
+    """Récupère le statut d'une session Stripe Checkout."""
+    _ensure_configured()
+    session = await stripe.checkout.Session.retrieve_async(session_id)
+    return CheckoutStatusResponse(
+        status=session.status or "open",
+        payment_status=session.payment_status or "unpaid",
+        amount_total=session.amount_total,
+    )
 
 
 async def credit_wallet_if_paid(
@@ -122,15 +167,16 @@ async def credit_wallet_if_paid(
 ) -> dict:
     """Check Stripe status and credit the wallet exactly once.
 
-    Returns a dict with { paid: bool, credited_now: bool, amount, status, payment_status }.
-    Safe to call repeatedly (idempotent via the 'credited' flag).
+    Returns a dict with { paid, credited, credited_now, amount, currency,
+    status, payment_status, label }. Safe to call repeatedly (idempotent).
 
-    If Stripe.retrieve() fails (e.g., emergent proxy can't yet expose the session,
-    or transient error), we gracefully fall back to the persisted state from
-    `payment_transactions` so the polling client doesn't see a 500. Webhook
-    remains the source of truth for actual credit.
+    En cas d'échec transitoire de l'appel Stripe (rate-limit, réseau…),
+    on retourne l'état persisté pour ne pas casser le polling du client.
+    Le webhook reste source de vérité du crédit réel.
     """
-    tx = await db.payment_transactions.find_one({"session_id": session_id, "user_id": user_id}, {"_id": 0})
+    tx = await db.payment_transactions.find_one(
+        {"session_id": session_id, "user_id": user_id}, {"_id": 0}
+    )
     if not tx:
         raise LookupError("Transaction inconnue")
 
@@ -152,7 +198,7 @@ async def credit_wallet_if_paid(
 
     paid = status.payment_status == "paid"
 
-    # Persist latest status
+    # Persiste le dernier statut
     await db.payment_transactions.update_one(
         {"session_id": session_id},
         {"$set": {
@@ -165,7 +211,7 @@ async def credit_wallet_if_paid(
 
     credited_now = False
     if paid and not tx.get("credited"):
-        # Atomic single-credit: only credit if the flag is still False
+        # Crédit atomique : on ne crédite que si le flag est encore False
         marker = await db.payment_transactions.find_one_and_update(
             {"session_id": session_id, "credited": {"$ne": True}},
             {"$set": {"credited": True, "credited_at": iso(now_utc())}},
@@ -187,7 +233,10 @@ async def credit_wallet_if_paid(
                 "created_at": iso(now_utc()),
             })
             credited_now = True
-            logger.info("[stripe] credited %s EUR to user=%s session=%s", tx["amount"], user_id, session_id)
+            logger.info(
+                "[stripe] credited %s EUR to user=%s session=%s",
+                tx["amount"], user_id, session_id,
+            )
 
     return {
         "paid": paid,

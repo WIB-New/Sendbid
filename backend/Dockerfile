@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --upgrade pip \
-    && pip install --extra-index-url https://pypi.emergentmethods.ai/simple/ emergentintegrations==0.1.0 \
     && pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 
