@@ -1,5 +1,16 @@
 version: "3.8"
- 
+
+# =================================================================
+# Dokploy SENDBID/PAYBID — Docker Compose (audité 12/06/2026)
+#
+# IMPORTANT : Aucune valeur en dur. Toutes les variables sont injectées
+# par Dokploy via l'interface (Service > Environment Variables).
+# Format obligatoire : ${VARIABLE_NAME} ou ${VARIABLE_NAME:-default}
+#
+# Si une variable est OPTIONNELLE (clef d'intégration externe), elle
+# utilise la forme ${VAR:-} pour que le conteneur démarre même sans elle.
+# =================================================================
+
 services:
   backend:
     build:
@@ -7,34 +18,76 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      MONGO_URL: "mongodb://sendbid:HomeboYdb2026@senfloosendbid-senfloomongodb-l9xkqw:27017/sendbid?authSource=admin"
-      DB_NAME: "sendbid"
-      ENVIRONMENT: "production"
-      JWT_SECRET: "a3f5b2c8d9e1f4a7b6c3d8e5f1a2b4c7d6e9f3a8b1c4d7e2f5a8b3c6d9e1f4a7"
-      QR_HMAC_SECRET: "b7e4a9c2f8d3e6b1a5c8d4f2e9a7b3c6d1f4a8e2b5c7d3f6a9b2c5d8e1f4a7b3"
-      ADMIN_EMAIL: "admin@sendbid.app"
-      ADMIN_PASSWORD: "admin123"
-      DEMO_CLIENT_EMAIL: "demo@sendbid.app"
-      DEMO_CLIENT_PASSWORD: "demo123"
-      DEMO_CLIENT_PIN: "123456"
-      ALLOWED_ORIGINS: "*"
-      STRIPE_API_KEY: "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"
-      STRIPE_WEBHOOK_SECRET: ""
-      TWILIO_ACCOUNT_SID: "AC6ecf876af485bb0da611cb223f1a34d0"
-      TWILIO_AUTH_TOKEN: "c824a172ba982515e812b993a1fc5cc7"
-      TWILIO_FROM_NUMBER: "+13612877058"
-      SENDGRID_API_KEY: "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"
-      SENDGRID_FROM_EMAIL: "noreply@sendbid.app"
-      SENDGRID_FROM_NAME: "SENDBID"
-      PAYPAL_CLIENT_ID: "AbpNEv18TlfpqiGC5f6KEroEKlOrBkpWhegoVcauS0KC2qBVEkio3yH4h_68ekIL8eD5drp3R_lciyQV"
-      PAYPAL_CLIENT_SECRET: "EFkXyA79t_3NBIvO5I_os29cj50f6tHBJatXpcdVnQlVrHxVjvO2E3vHASjqMfDYqzC3ladyhdVAh_3X"
-      PAYPAL_MODE: "live"
-      PAYPAL_PAYOUTS_ENABLED: "true"
-      GOOGLE_MAPS_API_KEY: "AIzaSyAY7UEMrwuTHQFl8kteDCF4sdUOUIy_6SA"
-      DIDIT_API_KEY: "8DcClXHnBzb8xYWPjrF26JaC-kxCsCuVrKn_-exP2Co"
-      DIDIT_WORKFLOW_ID: "05e40d18-f06e-49a0-a2cb-b407f1d01ce7"
+      # ── Core (OBLIGATOIRE) ──
+      MONGO_URL: ${MONGO_URL}
+      DB_NAME: ${DB_NAME:-sendbid}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      JWT_SECRET: ${JWT_SECRET}
+      QR_HMAC_SECRET: ${QR_HMAC_SECRET}
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://api.sendfloo.sendbid.app}
+
+      # ── Admin & comptes de démo (OBLIGATOIRE) ──
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      DEMO_CLIENT_EMAIL: ${DEMO_CLIENT_EMAIL}
+      DEMO_CLIENT_PASSWORD: ${DEMO_CLIENT_PASSWORD}
+      DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
+
+      # ── CORS ──
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+
+      # ── Stripe (paiements) ──
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+
+      # ── Twilio (SMS / OTP) ──
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
+      TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE:-}
+
+      # ── SendGrid (email transactionnel) ──
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@sendbid.app}
+      SENDGRID_FROM_NAME: ${SENDGRID_FROM_NAME:-SENDBID}
+
+      # ── PayPal (payouts) ──
+      # NB : le code utilise PAYPAL_SECRET (pas PAYPAL_CLIENT_SECRET).
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_SECRET: ${PAYPAL_SECRET:-}
+      PAYPAL_MODE: ${PAYPAL_MODE:-live}
+      PAYPAL_PAYOUTS_ENABLED: ${PAYPAL_PAYOUTS_ENABLED:-false}
+
+      # ── Firebase (push notifications) ──
+      FIREBASE_CREDENTIALS_PATH: ${FIREBASE_CREDENTIALS_PATH:-/app/secrets/firebase-service-account.json}
+
+      # ── KYC DIDIT ──
+      DIDIT_API_KEY: ${DIDIT_API_KEY:-}
+      DIDIT_WORKFLOW_ID: ${DIDIT_WORKFLOW_ID:-}
+
+      # ── Google Maps ──
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+
+      # ── Forex API (taux de change) ──
+      FOREX_API_BASE: ${FOREX_API_BASE:-}
+      FOREX_API_KEY: ${FOREX_API_KEY:-}
+
+      # ── CinetPay (paiements Afrique de l'Ouest) ──
+      CINETPAY_API_KEY: ${CINETPAY_API_KEY:-}
+      CINETPAY_SITE_ID: ${CINETPAY_SITE_ID:-}
+      CINETPAY_MODE: ${CINETPAY_MODE:-PROD}
+
+      # ── Emergent LLM Universal Key (optionnel) ──
+      EMERGENT_LLM_KEY: ${EMERGENT_LLM_KEY:-}
+
     expose:
       - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
@@ -44,7 +97,33 @@ services:
       - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
     networks:
       - dokploy-network
- 
+
+  # =================================================================
+  # FRONTEND — Expo Web build statique servi par nginx
+  # =================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-https://api.sendfloo.sendbid.app}
+        EXPO_PUBLIC_STRIPE_PK: ${EXPO_PUBLIC_STRIPE_PK:-}
+        EXPO_PUBLIC_APP_VARIANT: ${EXPO_PUBLIC_APP_VARIANT:-sendbid}
+        GOOGLE_MAPS_IOS_API_KEY: ${GOOGLE_MAPS_IOS_API_KEY:-}
+        GOOGLE_MAPS_ANDROID_API_KEY: ${GOOGLE_MAPS_ANDROID_API_KEY:-}
+    restart: always
+    expose:
+      - "80"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.sendbid-frontend.rule=Host(`sendfloo.sendbid.app`)
+      - traefik.http.routers.sendbid-frontend.entrypoints=websecure
+      - traefik.http.routers.sendbid-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.sendbid-frontend.loadbalancer.server.port=80
+    networks:
+      - dokploy-network
+
 networks:
   dokploy-network:
     external: true

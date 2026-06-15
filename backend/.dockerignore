@@ -1,0 +1,25 @@
+# .dockerignore (backend) — 12/06/2026
+# Évite d'embarquer fichiers inutiles ou sensibles dans l'image Docker.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+.env
+.env.*
+!.env.example
+tests/
+*.md
+!README.md
+memory/
+logs/
+*.log
+.DS_Store
+Thumbs.db
+.git/
+.gitignore

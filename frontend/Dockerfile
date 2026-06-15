@@ -17,9 +17,24 @@ RUN yarn install --frozen-lockfile --network-timeout 600000
 # Copie du code
 COPY . .
 
-# Variable d'env injectée à la build (l'URL backend prod)
+# === Variables d'env injectées à la build (audit 12/06/2026) ===
+# Backend URL (obligatoire)
 ARG EXPO_PUBLIC_BACKEND_URL
 ENV EXPO_PUBLIC_BACKEND_URL=${EXPO_PUBLIC_BACKEND_URL}
+
+# Stripe publishable key (web checkout)
+ARG EXPO_PUBLIC_STRIPE_PK
+ENV EXPO_PUBLIC_STRIPE_PK=${EXPO_PUBLIC_STRIPE_PK}
+
+# Variante : sendbid (client) ou paybid (agent)
+ARG EXPO_PUBLIC_APP_VARIANT=sendbid
+ENV EXPO_PUBLIC_APP_VARIANT=${EXPO_PUBLIC_APP_VARIANT}
+
+# Google Maps clés natives (injectées dans app.config.js pour iOS/Android builds)
+ARG GOOGLE_MAPS_IOS_API_KEY
+ENV GOOGLE_MAPS_IOS_API_KEY=${GOOGLE_MAPS_IOS_API_KEY}
+ARG GOOGLE_MAPS_ANDROID_API_KEY
+ENV GOOGLE_MAPS_ANDROID_API_KEY=${GOOGLE_MAPS_ANDROID_API_KEY}
 
 # Build statique pour le web → dossier dist/
 RUN npx expo export -p web
