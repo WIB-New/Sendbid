@@ -5,8 +5,9 @@
 # ===== Stage 1 : build du bundle Expo Web =====
 FROM node:20-alpine AS builder
 
-# Yarn n'est pas dans node:20-alpine ; on l'installe globalement
-RUN apk add --no-cache git python3 make g++ && npm install -g yarn@1.22.22
+# Yarn est déjà inclus dans node:20-alpine. On n'installe que les outils natifs
+# nécessaires aux wheels (sharp, jimp…) si jamais ils sont compilés depuis source.
+RUN apk add --no-cache git python3 make g++
 
 WORKDIR /app
 
