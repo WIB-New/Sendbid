@@ -162,10 +162,13 @@ export function PinGate({
             <View style={styles.lockIcon}>
               <Ionicons name="shield-checkmark" size={26} color="#022a6b" />
             </View>
-            <TText variant="title" weight="extraBold" align="center" style={{ marginTop: spacing.md }}>
+            {/* v12 — Spec utilisateur : lisibilité maximale du titre et du sous-titre.
+                On force ici les couleurs en noir/gris foncé explicites pour ne pas dépendre
+                du thème (clair ou sombre) ni d'un éventuel override hérité d'un parent. */}
+            <TText variant="title" weight="extraBold" align="center" color="#0F172A" style={{ marginTop: spacing.md, fontSize: 20 }}>
               {title}
             </TText>
-            <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
+            <TText variant="body" weight="semiBold" color="#374151" align="center" style={{ marginTop: 6, paddingHorizontal: 8 }}>
               {subtitle}
             </TText>
           </View>

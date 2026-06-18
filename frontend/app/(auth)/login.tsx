@@ -99,11 +99,16 @@ export default function Login() {
   // Une fois le PIN vérifié → on publie la session dans le store et on route
   const onPinGateSuccess = async () => {
     if (!postLoginUser) { setPinGateOpen(false); return; }
+    // v12 — Spec utilisateur : ÉVITER le double PIN-gate (Confirmer puis App verrouillée).
+    // On marque la connexion comme fraîche AVANT setSession, car le useEffect[user]
+    // d'AppLockGate se déclenche dès que `user` devient défini dans le store.
+    // Si on appelait markFreshLogin() APRÈS setSession, AppLockGate aurait déjà décidé
+    // de re-verrouiller (setLocked(true)) → 2e écran "App verrouillée" qui apparaît tout
+    // de suite. L'ordre correct est : flag → session → routing.
+    markFreshLogin();
     try {
       await setSession(postLoginUser._access_token, postLoginUser);
     } catch {}
-    // Marque cette connexion comme fraîche pour ne pas re-déclencher AppLockGate immédiatement
-    markFreshLogin();
     setPinGateOpen(false);
     const target = routeForRole(postLoginUser);
     if (typeof target === "string") router.replace(target);
