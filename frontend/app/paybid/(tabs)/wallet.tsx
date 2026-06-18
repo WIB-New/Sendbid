@@ -481,12 +481,15 @@ function MenuRow({
     <TouchableOpacity
       onPress={onPress}
       style={[walletMenuStyles.row, !last && walletMenuStyles.rowBorder]}
+      activeOpacity={0.6}
     >
       <Ionicons name={icon} size={20} color={paybidColors.primary.base} />
       <TText
         variant="body"
         weight="semiBold"
-        style={{ flex: 1, marginLeft: 12 }}
+        color="#0F172A"
+        numberOfLines={1}
+        style={{ flex: 1, marginLeft: 12, fontSize: 14 }}
       >
         {label}
       </TText>
@@ -503,8 +506,8 @@ const walletMenuStyles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 11,
-    paddingHorizontal: 14,
+    paddingVertical: 14,         // hauteur de ligne confortable
+    paddingHorizontal: 16,
   },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
 });
@@ -586,19 +589,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.35)",
     alignItems: "flex-end",
-    paddingTop: 60,
-    paddingRight: 10,
+    paddingTop: 70,
+    paddingRight: 14,
   },
   menuCard: {
+    // v13 — Spec utilisateur : popup lisible, ordonné, contenu intégralement visible
     backgroundColor: "white",
-    borderRadius: radii.lg,
-    minWidth: 180,
+    borderRadius: radii.xl,
+    width: 260,                // largeur fixe suffisante pour les labels les plus longs
     overflow: "hidden",
-    elevation: 6,
+    paddingVertical: 6,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
   },
   listBox: { borderRadius: radii.xl, borderWidth: 1 },
   tx: { flexDirection: "row", alignItems: "center", padding: spacing.md },

@@ -21,7 +21,7 @@ import { api, wsUrl } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
-const ROUND_DURATION = 30; // Spec : 30s par tour (corrige le 60s précédent)
+const ROUND_DURATION = 60; // v13 — Spec utilisateur : 60s par tour (laisse plus de temps aux agents)
 
 export default function LiveAuction() {
   useLocale((st) => st.locale);
@@ -399,10 +399,33 @@ function AssignmentBlock({ transfer, agent, router, isCash, isVip }: any) {
               Mises à jour temps réel via WebSocket — notifications push à chaque changement d&apos;étape.
             </TText>
           </View>
-          <Button title="Suivre sur la carte" icon="map" variant="outline" size="small" style={{ marginTop: 10 }}
-            onPress={() => router.push({ pathname: "/transfer/map" as any, params: { transfer_id: transfer.id } })} />
-          <Button title="Chat avec l'agent" icon="chatbubble-ellipses" size="small" style={{ marginTop: 8 }}
-            onPress={() => router.push({ pathname: "/transfer/chat" as any, params: { transfer_id: transfer.id } })} />
+          {/* v13 — Spec utilisateur : 3 boutons sur la MÊME ligne (Suivre / Chat / Détails) */}
+          <View style={{ flexDirection: "row", gap: 6, marginTop: 12 }}>
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: "/transfer/map" as any, params: { transfer_id: transfer.id } })}
+              style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.primary.base, paddingVertical: 10, paddingHorizontal: 4, borderRadius: radii.lg, gap: 4 }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="map" size={13} color={colors.primary.base} />
+              <TText variant="label" weight="extraBold" color={colors.primary.base} numberOfLines={1} style={{ fontSize: 11, flexShrink: 1 }}>Carte</TText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: "/transfer/chat" as any, params: { transfer_id: transfer.id } })}
+              style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.primary.base, paddingVertical: 10, paddingHorizontal: 4, borderRadius: radii.lg, gap: 4 }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="chatbubble-ellipses" size={13} color={colors.primary.base} />
+              <TText variant="label" weight="extraBold" color={colors.primary.base} numberOfLines={1} style={{ fontSize: 11, flexShrink: 1 }}>Chat</TText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: "/transfer/[id]", params: { id: transfer.id } })}
+              style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary.base, paddingVertical: 10, paddingHorizontal: 4, borderRadius: radii.lg, gap: 4 }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="document-text-outline" size={13} color="white" />
+              <TText variant="label" weight="extraBold" color="white" numberOfLines={1} style={{ fontSize: 11, flexShrink: 1 }}>Détails</TText>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : null}
     </View>

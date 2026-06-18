@@ -176,10 +176,30 @@ export default function TransferSuccess() {
           </View>
         </View>
 
-        {/* CTAs */}
-        <View style={{ gap: 12, marginTop: spacing.xl }}>
-          <Button testID="success-track" title={t.delivery_mode === "cash" ? "Poursuivre mon transfert" : "Suivre mon transfert"} icon={t.delivery_mode === "cash" ? "arrow-forward" : "eye-outline"} onPress={goTrack} />
-          <Button testID="success-new" title="+ Nouveau transfert" icon="add" variant="outline" onPress={() => router.replace("/transfer/new")} />
+        {/* CTAs — v13 : sur UNE MÊME LIGNE (spec utilisateur) */}
+        <View style={{ flexDirection: "row", gap: 8, marginTop: spacing.xl }}>
+          <TouchableOpacity
+            testID="success-track"
+            onPress={goTrack}
+            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary.base, paddingVertical: 12, paddingHorizontal: 6, borderRadius: radii.lg, gap: 5 }}
+            activeOpacity={0.85}
+          >
+            <Ionicons name={t.delivery_mode === "cash" ? "arrow-forward" : "eye-outline"} size={15} color="white" />
+            <TText variant="label" weight="extraBold" color="white" numberOfLines={1} style={{ fontSize: 12, flexShrink: 1 }}>
+              {t.delivery_mode === "cash" ? "Poursuivre" : "Suivre transfert"}
+            </TText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            testID="success-new"
+            onPress={() => router.replace("/transfer/new")}
+            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.primary.base, paddingVertical: 12, paddingHorizontal: 6, borderRadius: radii.lg, gap: 5 }}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="add" size={15} color={colors.primary.base} />
+            <TText variant="label" weight="extraBold" color={colors.primary.base} numberOfLines={1} style={{ fontSize: 12, flexShrink: 1 }}>
+              Nouveau transfert
+            </TText>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
