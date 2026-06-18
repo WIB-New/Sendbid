@@ -74,7 +74,9 @@ export default function PaybidLogin() {
             icon="person-outline"
             autoCapitalize="none"
             labelColor="#022a6b"
-            style={{ backgroundColor: "white", color: "#0F172A" }}
+            boxStyle={{ backgroundColor: "#FFFFFF", borderColor: "#D1D5DB" }}
+            style={{ color: "#0F172A" }}
+            placeholderTextColor="#6B7280"
           />
           <Input
             testID="paybid-password"
@@ -84,7 +86,9 @@ export default function PaybidLogin() {
             icon="lock-closed-outline"
             secureTextEntry
             labelColor="#022a6b"
-            style={{ backgroundColor: "white", color: "#0F172A" }}
+            boxStyle={{ backgroundColor: "#FFFFFF", borderColor: "#D1D5DB" }}
+            style={{ color: "#0F172A" }}
+            placeholderTextColor="#6B7280"
           />
           {err ? <TText variant="caption" color={paybidColors.status.error}>{err}</TText> : null}
           <View style={{ height: 8 }} />

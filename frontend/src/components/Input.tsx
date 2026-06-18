@@ -15,10 +15,12 @@ type Props = TextInputProps & {
   hint?: string;
   testID?: string;
   labelColor?: string;
+  /** Surcharge du fond du conteneur (utile pour forcer blanc sur thèmes sombres). */
+  boxStyle?: any;
 };
 
 export const Input = forwardRef<TextInput, Props>(function Input(
-  { label, error, icon, rightIcon, onRightPress, passwordToggle, hint, secureTextEntry, testID, style, labelColor, ...rest },
+  { label, error, icon, rightIcon, onRightPress, passwordToggle, hint, secureTextEntry, testID, style, labelColor, boxStyle, ...rest },
   ref,
 ) {
   const { tokens } = useThemeTokens();
@@ -38,6 +40,7 @@ export const Input = forwardRef<TextInput, Props>(function Input(
             backgroundColor: tokens.neutrals.surface,
             borderColor: error ? tokens.status.error : focused ? tokens.primary.base : tokens.neutrals.border,
           },
+          boxStyle,
         ]}
       >
         {icon ? <Ionicons name={icon} size={18} color={tokens.neutrals.textSecondary} style={{ marginRight: 8 }} /> : null}

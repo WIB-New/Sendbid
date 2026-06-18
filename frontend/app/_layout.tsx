@@ -124,7 +124,37 @@ export default function RootLayout() {
         router.replace("/paybid/login" as any);
         return;
       }
-      if (!inPaybid) {
+      // v11 — Whitelist des routes PARTAGÉES autorisées en mode Paybid.
+      // Sans cela, ouvrir /profile-account, /chat/[id], /wallet/recharge, /personal-info,
+      // /kyc, /notifications, /transfer/[id], /beneficiaries, /disputes etc. depuis Paybid
+      // était systématiquement rerouté vers /paybid/(tabs) → "plante" perçu par l'utilisateur.
+      const PAYBID_ALLOWED_SHARED_PREFIXES = [
+        "profile-",          // profile-account, profile-settings, profile-loyalty, profile-help, profile-rgpd
+        "personal-info",
+        "kyc",
+        "notifications",
+        "chat",
+        "wallet",
+        "transfer",          // transfer/[id] (détail) + transfer/receipt
+        "beneficiaries",
+        "disputes",
+        "loyalty",
+        "sessions",
+        "languages",
+        "sbtag",
+        "appearance",
+        "billing",
+        "security",
+        "promo",
+        "search",
+        "_sitemap",          // expo-router internal
+        "+not-found",        // expo-router internal
+      ];
+      const top = segments[0];
+      const isAllowedShared = top && PAYBID_ALLOWED_SHARED_PREFIXES.some(
+        (p) => top === p || top.startsWith(p)
+      );
+      if (!inPaybid && !isAllowedShared) {
         router.replace("/paybid/(tabs)" as any);
       }
       return;

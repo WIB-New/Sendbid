@@ -177,6 +177,9 @@ export default function Login() {
             icon="person-outline"
             autoCapitalize="none"
             keyboardType="email-address"
+            boxStyle={{ backgroundColor: "#FFFFFF", borderColor: "#D1D5DB" }}
+            style={{ color: "#0F172A" }}
+            placeholderTextColor="#6B7280"
           />
           <Input
             testID="login-password"
@@ -187,6 +190,9 @@ export default function Login() {
             icon="lock-closed-outline"
             passwordToggle
             secureTextEntry
+            boxStyle={{ backgroundColor: "#FFFFFF", borderColor: "#D1D5DB" }}
+            style={{ color: "#0F172A" }}
+            placeholderTextColor="#6B7280"
           />
 
           <TouchableOpacity
