@@ -40,9 +40,12 @@ export function PINPad({ pin, onChange, length = 6, testIDPrefix = "pinpad" }: P
             style={[styles.key, !k && { opacity: 0 }]}
           >
             {k === "back" ? (
-              <Ionicons name="backspace-outline" size={26} color={colors.neutrals.textPrimary} />
+              <Ionicons name="backspace-outline" size={28} color="#0F172A" />
             ) : (
-              <TText variant="title" weight="semiBold">
+              // v13 — Spec utilisateur : chiffres LISIBLES, contrastés.
+              // On force la couleur en noir foncé pour éviter l'héritage d'un thème
+              // sombre/sourd qui rendait les touches presque invisibles.
+              <TText weight="extraBold" color="#0F172A" style={{ fontSize: 28 }}>
                 {k}
               </TText>
             )}
@@ -62,5 +65,7 @@ const styles = StyleSheet.create({
     height: 64,
     alignItems: "center",
     justifyContent: "center",
+    // léger fond gris très clair pour mieux distinguer les touches
+    backgroundColor: "transparent",
   },
 });
