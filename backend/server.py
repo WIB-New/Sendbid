@@ -60,17 +60,28 @@ async def stripe_webhook(request: Request):
 
     if not payments_service.STRIPE_API_KEY:
         raise HTTPException(status_code=503, detail="Stripe non configuré")
+    import stripe as _stripe
+
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
     body = await request.body()
     signature = request.headers.get("Stripe-Signature", "")
     try:
-        client = payments_service._client(str(request.base_url))
-        webhook_response = await client.handle_webhook(body, signature)
+        event = _stripe.Webhook.construct_event(body, signature, webhook_secret) if webhook_secret else None
+        if event is None:
+            logger.warning("[stripe] webhook reçu sans secret configuré — ignoré")
+            return {"received": True}
     except Exception as exc:  # noqa: BLE001
         logger.exception("[stripe] webhook verification failed: %s", exc)
         raise HTTPException(status_code=400, detail="Webhook invalide")
 
-    session_id = webhook_response.session_id
-    if webhook_response.payment_status == "paid" and session_id:
+    session_id = None
+    payment_status = None
+    if event["type"] in ("checkout.session.completed", "checkout.session.async_payment_succeeded"):
+        obj = event["data"]["object"]
+        session_id = obj.get("id")
+        payment_status = obj.get("payment_status")
+
+    if payment_status == "paid" and session_id:
         # Update transaction + credit wallet (idempotent)
         tx = await db.payment_transactions.find_one({"session_id": session_id}, {"_id": 0})
         if tx and not tx.get("credited"):

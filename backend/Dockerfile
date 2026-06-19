@@ -20,6 +20,10 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# curl requis pour le healthcheck docker-compose
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copier les packages installés depuis le builder
 COPY --from=builder /install /usr/local
 
@@ -36,4 +40,4 @@ USER appuser
 EXPOSE 8000
 
 # Démarrage production : sans --reload, workers multiples
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

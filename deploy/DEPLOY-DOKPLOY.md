@@ -127,7 +127,7 @@ ssh root@195.110.35.155 'chmod +x /root/install-dokploy.sh && /root/install-dokp
    |---|---|---|---|
    | `app.sendfloo.sendbid.app` | `frontend` | 80 | ✅ Let's Encrypt |
    | `agent.sendfloo.sendbid.app` | `frontend` | 80 | ✅ Let's Encrypt |
-   | `api.sendfloo.sendbid.app` | `backend` | 8001 | ✅ Let's Encrypt |
+   | `api.sendfloo.sendbid.app` | `backend` | 8000 | ✅ Let's Encrypt |
 
 5. **Deploy !** ⏱ ~5-15 min de build (Docker + Expo export web)
 

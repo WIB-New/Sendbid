@@ -24,7 +24,7 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-production}
       JWT_SECRET: ${JWT_SECRET}
       QR_HMAC_SECRET: ${QR_HMAC_SECRET}
-      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://api.sendfloo.sendbid.app}
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
 
       # ── Admin & comptes de démo (OBLIGATOIRE) ──
       ADMIN_EMAIL: ${ADMIN_EMAIL}
@@ -34,7 +34,7 @@ services:
       DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
 
       # ── CORS ──
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://senfloosendbid-sendbidfrontend-wtic4z-61bc59-195-110-35-155.sslip.io,https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
 
       # ── Stripe (paiements) ──
       STRIPE_API_KEY: ${STRIPE_API_KEY:-}
@@ -91,7 +91,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-api.rule=Host(`api.sendfloo.sendbid.app`)
+      - traefik.http.routers.sendbid-api.rule=Host(`senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io`)
       - traefik.http.routers.sendbid-api.entrypoints=websecure
       - traefik.http.routers.sendbid-api.tls.certresolver=letsencrypt
       - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
@@ -106,7 +106,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-https://api.sendfloo.sendbid.app}
+        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
         EXPO_PUBLIC_STRIPE_PK: ${EXPO_PUBLIC_STRIPE_PK:-}
         EXPO_PUBLIC_APP_VARIANT: ${EXPO_PUBLIC_APP_VARIANT:-sendbid}
         GOOGLE_MAPS_IOS_API_KEY: ${GOOGLE_MAPS_IOS_API_KEY:-}
@@ -117,7 +117,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-frontend.rule=Host(`sendfloo.sendbid.app`)
+      - traefik.http.routers.sendbid-frontend.rule=Host(`${FRONTEND_HOST:-senfloosendbid-sendbidfrontend-wtic4z-61bc59-195-110-35-155.sslip.io}`)
       - traefik.http.routers.sendbid-frontend.entrypoints=websecure
       - traefik.http.routers.sendbid-frontend.tls.certresolver=letsencrypt
       - traefik.http.services.sendbid-frontend.loadbalancer.server.port=80

@@ -14,9 +14,14 @@ env/
 .env.*
 !.env.example
 tests/
+backend_test*.py
+backend_regression*.py
+backend_retest*.py
 *.md
 !README.md
 memory/
+secrets/
+.coverage
 logs/
 *.log
 .DS_Store
