@@ -24,7 +24,7 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-production}
       JWT_SECRET: ${JWT_SECRET}
       QR_HMAC_SECRET: ${QR_HMAC_SECRET}
-      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
 
       # ── Admin & comptes de démo (OBLIGATOIRE) ──
       ADMIN_EMAIL: ${ADMIN_EMAIL}
@@ -34,7 +34,7 @@ services:
       DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
 
       # ── CORS ──
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://senfloosendbid-sendbidfrontend-wtic4z-61bc59-195-110-35-155.sslip.io,https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://senfloosendbid-sendbidfrontend-wtic4z-61bc59-195-110-35-155.sslip.io,http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
 
       # ── Stripe (paiements) ──
       STRIPE_API_KEY: ${STRIPE_API_KEY:-}
