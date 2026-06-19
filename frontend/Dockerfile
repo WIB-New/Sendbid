@@ -13,18 +13,18 @@ WORKDIR /app
 
 # Cache layer : install des deps
 COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile --network-timeout 600000
+RUN yarn install --no-frozen-lockfile --network-timeout 600000
 
 # Copie du code
 COPY . .
 
 # === Variables d'env injectées à la build (audit 12/06/2026) ===
 # Backend URL (obligatoire)
-ARG EXPO_PUBLIC_BACKEND_URL
+ARG EXPO_PUBLIC_BACKEND_URL=https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io
 ENV EXPO_PUBLIC_BACKEND_URL=${EXPO_PUBLIC_BACKEND_URL}
 
 # Stripe publishable key (web checkout)
-ARG EXPO_PUBLIC_STRIPE_PK
+ARG EXPO_PUBLIC_STRIPE_PK=
 ENV EXPO_PUBLIC_STRIPE_PK=${EXPO_PUBLIC_STRIPE_PK}
 
 # Variante : sendbid (client) ou paybid (agent)
