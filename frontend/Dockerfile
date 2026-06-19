@@ -20,7 +20,7 @@ COPY . .
 
 # === Variables d'env injectées à la build (audit 12/06/2026) ===
 # Backend URL (obligatoire)
-ARG EXPO_PUBLIC_BACKEND_URL=https://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io
+ARG EXPO_PUBLIC_BACKEND_URL=http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io
 ENV EXPO_PUBLIC_BACKEND_URL=${EXPO_PUBLIC_BACKEND_URL}
 
 # Stripe publishable key (web checkout)
