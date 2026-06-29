@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "234744952966",
+    "project_id": "sendbid-wib",
+    "storage_bucket": "sendbid-wib.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234744952966:android:2abac4adf2d6d762af3907",
+        "android_client_info": {
+          "package_name": "com.paybid.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_u4kTPorIf6Gkr3BmMWfsUs9zchD77Ho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234744952966:android:57f47f958a7e7918af3907",
+        "android_client_info": {
+          "package_name": "com.sendbid.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_u4kTPorIf6Gkr3BmMWfsUs9zchD77Ho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
