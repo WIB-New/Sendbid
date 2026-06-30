@@ -102,6 +102,26 @@ async def place_bid(transfer_id: str, payload: BidIn, user: dict = Depends(get_c
     }
     await db.bids.insert_one(dict(bid))
     await manager.broadcast(transfer_id, {"event": "new_bid", "bid": clean_doc(dict(bid))})
+
+    # Notifier individuellement l'agent précédemment en tête qu'il est surclassé
+    previous_best = await db.bids.find_one(
+        {"transfer_id": transfer_id, "agent_id": {"$ne": agent["id"]}},
+        sort=[("bid_fee_percent", 1)],
+    )
+    if previous_best and float(previous_best.get("bid_fee_percent", 99)) > payload.bid_fee_percent:
+        outbid_agent_id = previous_best.get("agent_id")
+        if outbid_agent_id:
+            try:
+                await manager.broadcast_agents({
+                    "event": "outbid",
+                    "transfer_id": transfer_id,
+                    "your_bid": float(previous_best.get("bid_fee_percent", 0)),
+                    "new_best": round(payload.bid_fee_percent, 2),
+                    "message": f"Un autre agent a proposé {payload.bid_fee_percent:.2f}% — vous êtes surclassé. Proposez moins pour reprendre la tête.",
+                }, agent_ids=[outbid_agent_id])
+            except Exception:
+                pass
+
     # Calculate commission breakdown for the agent UI confirmation
     company_commission_pct = 20.0  # company keeps 20% of agent's bid fee
     client_fee_amount = round(transfer.get("send_amount", 0) * payload.bid_fee_percent / 100, 2)

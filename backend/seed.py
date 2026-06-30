@@ -20,11 +20,23 @@ IS_PROD = os.environ.get("ENVIRONMENT", "development").lower() == "production"
 
 
 async def seed_demo_data():
-    # Indexes
-    await db.users.create_index("email", unique=True)
-    await db.users.create_index("phone")
-    await db.users.create_index("profile_id")
-    await db.users.create_index("biometric_token")
+    # Indexes — on ignore les erreurs si l'index existe déjà avec des doublons
+    try:
+        await db.users.create_index("email", unique=True)
+    except Exception as e:
+        logger.warning(f"[seed] index email skipped: {e}")
+    try:
+        await db.users.create_index("phone")
+    except Exception as e:
+        logger.warning(f"[seed] index phone skipped: {e}")
+    try:
+        await db.users.create_index("profile_id")
+    except Exception as e:
+        logger.warning(f"[seed] index profile_id skipped: {e}")
+    try:
+        await db.users.create_index("biometric_token")
+    except Exception as e:
+        logger.warning(f"[seed] index biometric_token skipped: {e}")
     await db.transfers.create_index([("user_id", 1), ("created_at", -1)])
     await db.bids.create_index([("transfer_id", 1), ("bid_fee_percent", 1)])
     await db.beneficiaries.create_index([("user_id", 1)])
@@ -33,17 +45,20 @@ async def seed_demo_data():
 
     # Admin
     if not await db.users.find_one({"email": ADMIN_EMAIL}):
-        await db.users.insert_one({
-            "id": gen_id(), "profile_id": "SBADMIN", "email": ADMIN_EMAIL, "phone": "+33000000000",
-            "full_name": "Admin SENDBID", "password_hash": hash_password(ADMIN_PASSWORD),
-            "pin_hash": hash_password("123456"), "pin_attempts": 0, "pin_locked_until": None,
-            "email_verified": True, "phone_verified": True, "kyc_tier": 2, "kyc_status": "verified",
-            "loyalty_level": "Platinum", "loyalty_points": 5000,
-            "biometric_enabled": False, "biometric_token": None,
-            "avatar_url": None, "language": "fr", "theme": "light",
-            "notif_prefs": {"push": True, "email": True, "sms": False},
-            "role": "admin", "created_at": iso(now_utc()),
-        })
+        try:
+            await db.users.insert_one({
+                "id": gen_id(), "profile_id": "SBADMIN", "email": ADMIN_EMAIL, "phone": "+33000000000",
+                "full_name": "Admin SENDBID", "password_hash": hash_password(ADMIN_PASSWORD),
+                "pin_hash": hash_password("123456"), "pin_attempts": 0, "pin_locked_until": None,
+                "email_verified": True, "phone_verified": True, "kyc_tier": 2, "kyc_status": "verified",
+                "loyalty_level": "Platinum", "loyalty_points": 5000,
+                "biometric_enabled": False, "biometric_token": None,
+                "avatar_url": None, "language": "fr", "theme": "light",
+                "notif_prefs": {"push": True, "email": True, "sms": False},
+                "role": "admin", "created_at": iso(now_utc()),
+            })
+        except Exception as e:
+            logger.warning(f"[seed] admin insert skipped: {e}")
 
     # Extra admin roles (super_admin, partner_admin, super_agent)
     extra_admins = [
@@ -54,17 +69,20 @@ async def seed_demo_data():
     for a in extra_admins:
         existing = await db.users.find_one({"email": a["email"]})
         if not existing:
-            await db.users.insert_one({
-                "id": gen_id(), "profile_id": a["pid"], "email": a["email"], "phone": "+33000000001",
-                "full_name": a["name"], "password_hash": hash_password(a["pwd"]),
-                "pin_hash": hash_password("123456"), "pin_attempts": 0, "pin_locked_until": None,
-                "email_verified": True, "phone_verified": True, "kyc_tier": 2, "kyc_status": "verified",
-                "loyalty_level": "Platinum", "loyalty_points": 0,
-                "biometric_enabled": False, "biometric_token": None,
-                "avatar_url": None, "language": "fr", "theme": "light",
-                "notif_prefs": {"push": True, "email": True, "sms": False},
-                "role": a["role"], "created_at": iso(now_utc()),
-            })
+            try:
+                await db.users.insert_one({
+                    "id": gen_id(), "profile_id": a["pid"], "email": a["email"], "phone": "+33000000001",
+                    "full_name": a["name"], "password_hash": hash_password(a["pwd"]),
+                    "pin_hash": hash_password("123456"), "pin_attempts": 0, "pin_locked_until": None,
+                    "email_verified": True, "phone_verified": True, "kyc_tier": 2, "kyc_status": "verified",
+                    "loyalty_level": "Platinum", "loyalty_points": 0,
+                    "biometric_enabled": False, "biometric_token": None,
+                    "avatar_url": None, "language": "fr", "theme": "light",
+                    "notif_prefs": {"push": True, "email": True, "sms": False},
+                    "role": a["role"], "created_at": iso(now_utc()),
+                })
+            except Exception as e:
+                logger.warning(f"[seed] extra admin {a['email']} insert skipped: {e}")
         else:
             # Force role alignment (always safe). Password ONLY in dev to allow rotation in prod.
             update_set = {"role": a["role"]}
@@ -412,6 +430,10 @@ async def seed_demo_data():
 - Weak PIN rejection on /auth/create-pin: blocks 000000, 123456, sequential, repeated, common PINs.
 - Demo PINs (123456) are pre-seeded directly in DB and are NOT subject to weak-PIN check.
 """
-    with open("/app/memory/test_credentials.md", "w") as f:
-        f.write(creds)
+    try:
+        creds_path = Path(__file__).parent / "test_credentials.md"
+        with open(creds_path, "w", encoding="utf-8") as f:
+            f.write(creds)
+    except Exception as e:
+        logger.warning(f"[seed] could not write credentials file: {e}")
     logger.info("SENDBID seed complete")

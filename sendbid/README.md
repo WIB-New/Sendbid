@@ -1,50 +1,64 @@
-# Welcome to your Expo app 👋
+# SENDBID - Application Mobile Client
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Application mobile pour les clients SendBID (envoi d'argent, encheres).
 
-## Get started
+## Configuration
 
-1. Install dependencies
+- **Backend** : `http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io`
+- **Variante** : `sendbid`
+- **Package Android** : `com.sendbid.app`
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 1. Lancer l'app avec QR Code (test sur telephone)
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### Installer les dependances
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Lancer le serveur Expo
+```bash
+npx expo start --dev-client --clear
+```
 
-## Learn more
+### Scanner le QR Code
+1. Ouvrez **Expo Go** sur votre telephone Android
+2. Scannez le QR code qui apparait dans le terminal
+3. L'application SendBID se lance sur votre telephone
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 2. Builder l'APK SendBID
 
-## Join the community
+### Build preview (APK a telecharger)
+```bash
+npx eas build --platform android --profile preview --non-interactive
+```
 
-Join our community of developers creating universal apps.
+### Suivre le build
+Le lien du build apparait dans le terminal.
+Connectez-vous sur https://expo.dev avec le compte **wibuser** pour telecharger l'APK.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## Variables d'environnement (.env)
+
+```
+EXPO_PUBLIC_BACKEND_URL=http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io
+EXPO_PUBLIC_APP_VARIANT=sendbid
+APP_VARIANT=sendbid
+```
+
+---
+
+## Structure importante
+
+```
+sendbid/
+├── app/          # Pages de l'application
+├── assets/       # Images et icones
+├── app.config.js # Configuration Expo
+├── eas.json      # Configuration build EAS
+└── .env          # Variables d'environnement
+```

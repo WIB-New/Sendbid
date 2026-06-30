@@ -15,7 +15,7 @@ from routers.notifications import create_notification
 
 from . import router
 from .core import _require_agent
-from .models import AgentSignupIn, BidIn, CompleteIn
+from .models import AgentSignupIn, BidIn, CompleteIn, DeclineIn
 
 
 @router.get("/transfers")
@@ -87,4 +87,45 @@ async def complete_transfer(transfer_id: str, payload: CompleteIn, user: dict = 
     await db.agents.update_one({"id": agent["id"]}, {"$inc": {"transfers_count": 1}})
     await manager.broadcast(transfer_id, {"event": "completed"})
     return {"ok": True, "earned_eur": earned}
+
+
+@router.post("/transfers/{transfer_id}/decline")
+async def decline_transfer(transfer_id: str, payload: DeclineIn, user: dict = Depends(get_current_user)):
+    """Agent décline une mission assignée — remise en pool BIDDING pour réassignation."""
+    agent = await _require_agent(user)
+    t = await db.transfers.find_one({"id": transfer_id, "agent_id": agent["id"]}, {"_id": 0})
+    if not t:
+        raise HTTPException(status_code=404, detail="Transfert introuvable ou non assigné à cet agent")
+    # Seul un transfert AGENT_ASSIGNED peut être décliné
+    if t.get("status") != "AGENT_ASSIGNED":
+        raise HTTPException(status_code=409, detail=f"Impossible de décliner un transfert en statut '{t.get('status')}'")
+
+    # Remettre en BIDDING pour réassignation + noter le refus
+    await db.transfers.update_one(
+        {"id": transfer_id},
+        {
+            "$set": {
+                "status": "BIDDING",
+                "agent_id": None,
+                "agent_assigned_at": None,
+                "declined_at": iso(now_utc()),
+            },
+            "$push": {
+                "declined_by": {
+                    "agent_id": agent["id"],
+                    "reason": payload.reason or "Aucun motif",
+                    "at": iso(now_utc()),
+                }
+            },
+        },
+    )
+    # Notifier le manager WebSocket
+    await manager.broadcast(transfer_id, {
+        "event": "agent_declined",
+        "transfer_id": transfer_id,
+        "agent_id": agent["id"],
+    })
+    # Incrémenter le compteur de refus sur le profil agent
+    await db.agents.update_one({"id": agent["id"]}, {"$inc": {"declines_count": 1}})
+    return {"ok": True, "status": "BIDDING", "message": "Mission déclinée — remise en pool"}
 

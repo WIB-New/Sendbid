@@ -27,3 +27,7 @@ class BidIn(BaseModel):
 class CompleteIn(BaseModel):
     code: str  # withdrawal_code or qr_token
 
+
+class DeclineIn(BaseModel):
+    reason: Optional[str] = None  # optionnel : motif du refus
+

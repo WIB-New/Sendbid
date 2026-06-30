@@ -1,0 +1,15 @@
+node_modules/
+.expo/
+.git/
+assets/wireframes_v4/
+*.ps1
+*.md
+app.config.*.js
+app.json.old.bak
+build-*/
+auto-build-*.ps1
+generate-*.ps1
+move-*.ps1
+test_reports/
+__tests__/
+android/
