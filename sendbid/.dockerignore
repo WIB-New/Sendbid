@@ -1,5 +1,6 @@
 # .dockerignore (frontend) — 12/06/2026
 node_modules/
+app/app/
 .expo/
 .expo-shared/
 dist/
