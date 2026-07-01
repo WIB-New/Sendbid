@@ -97,7 +97,7 @@ export default function PaybidTransferDetail() {
   const colors = useThemedPaybidColors();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [t, setT] = useState<any>(null);
+  const [tx, setTx] = useState<any>(null);
   const [tab, setTab] = useState<"updates" | "info">("updates");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -106,7 +106,7 @@ export default function PaybidTransferDetail() {
   const load = async () => {
     try {
       const r = await api.get(`/transfers/${id}`);
-      setT(r.data);
+      setTx(r.data);
     } catch {}
   };
   useEffect(() => {
@@ -144,30 +144,30 @@ export default function PaybidTransferDetail() {
   };
 
   const timeline = useMemo(() => {
-    if (!t) return [];
+    if (!tx) return [];
     return [
-      { label: "Transfert créé", date: t.created_at, done: true },
-      { label: "Agent assigné (vous)", date: t.agent_assigned_at, done: !!t.agent_id },
+      { label: "Transfert créé", date: tx.created_at, done: true },
+      { label: "Agent assigné (vous)", date: tx.agent_assigned_at, done: !!tx.agent_id },
       {
         label: "Livraison démarrée",
-        date: t.started_at,
-        done: ["PROCESSING", "READY_FOR_PICKUP", "VIP_DELIVERY", "COMPLETED"].includes(t.status),
+        date: tx.started_at,
+        done: ["PROCESSING", "READY_FOR_PICKUP", "VIP_DELIVERY", "COMPLETED"].includes(tx.status),
       },
       {
         label: "Remise effectuée",
-        date: t.completed_at,
-        done: t.status === "COMPLETED",
+        date: tx.completed_at,
+        done: tx.status === "COMPLETED",
       },
     ];
-  }, [t]);
+  }, [tx]);
 
-  if (!t) return null;
-  const canStart = ["AGENT_ASSIGNED"].includes(t.status);
-  const canComplete = ["PROCESSING", "READY_FOR_PICKUP", "VIP_DELIVERY"].includes(t.status);
-  const status = STATUS_META[t.status] || { label: t.status, icon: "ellipse", color: colors.neutrals.textSecondary };
+  if (!tx) return null;
+  const canStart = ["AGENT_ASSIGNED"].includes(tx.status);
+  const canComplete = ["PROCESSING", "READY_FOR_PICKUP", "VIP_DELIVERY"].includes(tx.status);
+  const status = STATUS_META[tx.status] || { label: tx.status, icon: "ellipse", color: colors.neutrals.textSecondary };
   const bgGradient = canStart
     ? paybidColors.gradients.hero
-    : t.status === "COMPLETED"
+    : tx.status === "COMPLETED"
     ? (["#10B981", "#059669", "#059669"] as [string, string, string])
     : paybidColors.gradients.hero;
 
@@ -213,13 +213,13 @@ export default function PaybidTransferDetail() {
               color="white"
               style={{ marginTop: 4 }}
             >
-              {Number(t.receive_amount).toFixed(0)}{" "}
+              {Number(tx.receive_amount).toFixed(0)}{" "}
               <TText
                 variant="title"
                 weight="bold"
                 color="rgba(255,255,255,0.85)"
               >
-                {t.destination_currency}
+                {tx.destination_currency}
               </TText>
             </TText>
             <View style={styles.statusPill}>
@@ -236,9 +236,9 @@ export default function PaybidTransferDetail() {
           </View>
           <View style={{ alignItems: "center", marginTop: 8 }}>
             <TText variant="caption" color="rgba(255,255,255,0.85)">
-              {t.beneficiary?.full_name || "—"} · {t.destination_country} ·{" "}
-              {(t.delivery_mode || "").toUpperCase()}
-              {t.vip_delivery ? " · VIP" : ""}
+              {tx.beneficiary?.full_name || "—"} · {tx.destination_country} ·{" "}
+              {(tx.delivery_mode || "").toUpperCase()}
+              {tx.vip_delivery ? " · VIP" : ""}
             </TText>
           </View>
         </SafeAreaView>
@@ -254,27 +254,27 @@ export default function PaybidTransferDetail() {
         showsVerticalScrollIndicator={false}
       >
         {/* ===== Quick contact buttons ===== */}
-        {t.beneficiary?.phone ? (
+        {tx.beneficiary?.phone ? (
           <View style={styles.contactRow}>
             <ContactBtn
               icon="call"
               label="Appeler"
               color={paybidColors.primary.base}
-              onPress={() => openExternal("phone", t.beneficiary.phone)}
+              onPress={() => openExternal("phone", tx.beneficiary.phone)}
             />
             <ContactBtn
               icon="logo-whatsapp"
               label="WhatsApp"
               color="#25D366"
-              onPress={() => openExternal("whatsapp", t.beneficiary.phone)}
+              onPress={() => openExternal("whatsapp", tx.beneficiary.phone)}
             />
             <ContactBtn
               icon="chatbubbles"
               label="Chat"
               color="#022a6b"
-              onPress={() => router.push(`/chat/${t.id}` as any)}
+              onPress={() => router.push(`/chat/${tx.id}` as any)}
             />
-            {(t.beneficiary?.city || t.beneficiary?.address) ? (
+            {(tx.beneficiary?.city || tx.beneficiary?.address) ? (
               <ContactBtn
                 icon="navigate"
                 label="Itinéraire"
@@ -282,7 +282,7 @@ export default function PaybidTransferDetail() {
                 onPress={() =>
                   openExternal(
                     "maps",
-                    `${t.beneficiary.address || ""} ${t.beneficiary.city || ""} ${t.destination_country || ""}`.trim()
+                    `${tx.beneficiary.address || ""} ${tx.beneficiary.city || ""} ${tx.destination_country || ""}`.trim()
                   )
                 }
               />
@@ -406,57 +406,57 @@ export default function PaybidTransferDetail() {
           >
             <Row
               label="Bénéficiaire"
-              value={t.beneficiary?.full_name || "—"}
+              value={tx.beneficiary?.full_name || "—"}
               bold
             />
             <Row
               label="Téléphone"
-              value={t.beneficiary?.phone || "—"}
+              value={tx.beneficiary?.phone || "—"}
             />
-            {t.beneficiary?.city || t.beneficiary?.address ? (
+            {tx.beneficiary?.city || tx.beneficiary?.address ? (
               <Row
                 label="Ville / Adresse"
-                value={[t.beneficiary.address, t.beneficiary.city]
+                value={[tx.beneficiary.address, tx.beneficiary.city]
                   .filter(Boolean)
                   .join(", ")}
               />
             ) : null}
             <Row
               label="Pays / Devise"
-              value={`${t.destination_country} · ${t.destination_currency}`}
+              value={`${tx.destination_country} · ${tx.destination_currency}`}
             />
-            <Row label="Mode" value={(t.delivery_mode || "").toUpperCase()} />
+            <Row label="Mode" value={(tx.delivery_mode || "").toUpperCase()} />
             <Row
               label="Montant à remettre"
-              value={`${Number(t.receive_amount).toFixed(0)} ${t.destination_currency}`}
+              value={`${Number(tx.receive_amount).toFixed(0)} ${tx.destination_currency}`}
               bold
             />
             <Row
               label="Votre commission"
-              value={`+${Number(t.agent_commission || (t.fee_total || 0) * 0.6 || 0).toFixed(2)} EUR`}
+              value={`+${Number(tx.agent_commission || (tx.fee_total || 0) * 0.6 || 0).toFixed(2)} EUR`}
               tint={paybidColors.primary.base}
             />
             <Row
               label="Code retrait"
-              value={t.withdrawal_code || "—"}
+              value={tx.withdrawal_code || "—"}
               mono
             />
-            {t.beneficiary?.bank_account ? (
+            {tx.beneficiary?.bank_account ? (
               <Row
                 label="Compte bancaire"
-                value={t.beneficiary.bank_account}
+                value={tx.beneficiary.bank_account}
                 mono
               />
             ) : null}
-            {t.beneficiary?.momo_number ? (
+            {tx.beneficiary?.momo_number ? (
               <Row
                 label="Mobile Money"
-                value={`${t.beneficiary.momo_operator} ${t.beneficiary.momo_number}`}
+                value={`${tx.beneficiary.momo_operator} ${tx.beneficiary.momo_number}`}
                 mono
               />
             ) : null}
-            <Row label="Référence" value={t.id} mono />
-            <Row label="Créé le" value={fmtDate(t.created_at)} />
+            <Row label="Référence" value={tx.id} mono />
+            <Row label="Créé le" value={fmtDate(tx.created_at)} />
           </View>
         )}
 
