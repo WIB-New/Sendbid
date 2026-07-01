@@ -28,7 +28,6 @@ export default function ProfileRgpd() {
       tint: "#3B82F6",
       onPress: async () => {
         try { await import("../src/api").then(({ api }) => api.post("/auth/rgpd/export").catch(() => null)); } catch {}
-import { useTranslation } from "../src/i18n";
         showAlert("Votre demande d'export RGPD a été enregistrée. Vous recevrez votre archive sous 48h par email.");
       },
     },
