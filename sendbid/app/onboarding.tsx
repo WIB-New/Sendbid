@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -74,12 +74,13 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const cur = STEPS[step];
   const last = step === STEPS.length - 1;
+  const insets = useSafeAreaInsets();
 
   const next = () => (last ? router.replace("/welcome") : setStep((s) => s + 1));
 
   return (
     <View style={styles.bg}>
-      <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <View style={styles.topBar}>
           <View style={styles.dots}>
             {STEPS.map((_, i) => (
@@ -138,7 +139,7 @@ export default function Onboarding() {
           </TText>
         </View>
 
-        <View style={styles.cta}>
+        <View style={[styles.cta, { paddingBottom: Math.max(spacing.xl, insets.bottom + spacing.lg) }]}>
           {!last ? (
             <Button testID={`onboarding-next-${step}`} title="Suivant" onPress={next} icon="arrow-forward" style={{ backgroundColor: "#1A2B4C" }} />
           ) : (
