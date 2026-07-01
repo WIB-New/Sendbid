@@ -10,7 +10,7 @@ const IS_EAS = process.env.EAS_BUILD === "true";
 module.exports = ({ config }) => ({
   ...config,
   name: "PAYBID",
-  slug: "paybid",
+  slug: "sendbid-temp-project",
   ...(IS_EAS ? { owner: "wibuser" } : {}),
   version: "1.0.0",
   orientation: "portrait",
