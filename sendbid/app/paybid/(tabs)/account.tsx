@@ -19,7 +19,6 @@ import { api, apiError } from "../../../src/api";
 import { useAuth } from "../../../src/store";
 import { paybidColors, paybidFontFamily } from "../../../src/paybidTheme";
 import { spacing, radii, shadows } from "../../../src/theme";
-import { useTranslation } from "../../../src/i18n";
 
 interface FinancialSummary {
   gains: number;
