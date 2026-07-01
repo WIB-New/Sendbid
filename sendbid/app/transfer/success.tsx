@@ -24,28 +24,28 @@ export default function TransferSuccess() {
   const { t } = useTranslation();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
-  const [t, setT] = useState<any>(null);
+  const [tx, setTx] = useState<any>(null);
 
   useEffect(() => {
     if (!transfer_id) return;
-    api.get(`/transfers/${transfer_id}`).then((r) => setT(r.data));
+    api.get(`/transfers/${transfer_id}`).then((r) => setTx(r.data));
   }, [transfer_id]);
 
-  if (!t) return null;
+  if (!tx) return null;
 
   const copyCode = async () => {
     try {
-      await Clipboard.setStringAsync(t.withdrawal_code || "");
+      await Clipboard.setStringAsync(tx.withdrawal_code || "");
       if (Platform.OS === "web") (window as any).alert?.("Code copié dans le presse-papiers");
     } catch {
       // Fallback web : navigator.clipboard
       if (Platform.OS === "web" && (navigator as any)?.clipboard) {
-        try { await (navigator as any).clipboard.writeText(t.withdrawal_code || ""); (window as any).alert?.("Code copié"); } catch {}
+        try { await (navigator as any).clipboard.writeText(tx.withdrawal_code || ""); (window as any).alert?.("Code copié"); } catch {}
       }
     }
   };
   const share = async () => {
-    const msg = `Transfert SENDBID\nCode retrait : ${t.withdrawal_code}\nMontant : ${Number(t.receive_amount).toFixed(2)} ${t.destination_currency || "EUR"}`;
+    const msg = `Transfert SENDBID\nCode retrait : ${tx.withdrawal_code}\nMontant : ${Number(tx.receive_amount).toFixed(2)} ${tx.destination_currency || "EUR"}`;
     try {
       if (Platform.OS === "web" && (navigator as any)?.share) {
         await (navigator as any).share({ title: "Transfert SENDBID", text: msg });
@@ -58,10 +58,10 @@ export default function TransferSuccess() {
   };
 
   const goTrack = () => {
-    if (t.delivery_mode === "cash") {
-      router.replace(`/transfer/auction?transfer_id=${t.id}`);
+    if (tx.delivery_mode === "cash") {
+      router.replace(`/transfer/auction?transfer_id=${tx.id}`);
     } else {
-      router.replace(`/transfer/${t.id}`);
+      router.replace(`/transfer/${tx.id}`);
     }
   };
 
@@ -86,14 +86,14 @@ export default function TransferSuccess() {
             <TText variant="caption" color="rgba(255,255,255,0.85)" align="center" style={{ marginTop: 4 }}>
               Votre transfert va être pris en charge par un de nos agents
             </TText>
-            {t.service_level === "vip_express" || t.vip_express ? (
+            {tx.service_level === "vip_express" || tx.vip_express ? (
               <LinearGradient colors={["#EF4444", "#DC2626"]} style={styles.vipBadge} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
                 <Ionicons name="flash-outline" size={14} color="white" />
                 <TText variant="label" weight="extraBold" color="white" style={{ marginLeft: 6, letterSpacing: 1 }}>
                   VIP EXPRESS
                 </TText>
               </LinearGradient>
-            ) : (t.service_level === "vip" || t.vip_delivery) ? (
+            ) : (tx.service_level === "vip" || tx.vip_delivery) ? (
               <LinearGradient colors={["#F59E0B", "#EA580C"]} style={styles.vipBadge} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
                 <Ionicons name="rocket-outline" size={14} color="white" />
                 <TText variant="label" weight="extraBold" color="white" style={{ marginLeft: 6, letterSpacing: 1 }}>
@@ -108,23 +108,23 @@ export default function TransferSuccess() {
       <ScrollView style={styles.card} contentContainerStyle={styles.cardInner} showsVerticalScrollIndicator={false}>
         {/* Transaction details */}
         <View style={styles.detailsBox}>
-          <Row label="# Transaction" value={`#${(t.reference || t.id).slice(-10).toUpperCase()}`} mono />
-          <Row label="Montant envoyé" value={`${Number(t.send_amount).toFixed(2)} ${t.sender_currency || t.source_currency || "EUR"}`} />
-          <Row label={`Frais (${t.fee_percent ?? 0}%)`} value={`${Number(t.fee_amount ?? 0).toFixed(2)} ${t.sender_currency || t.source_currency || "EUR"}`} />
-          <Row label="Le bénéficiaire reçoit" value={`${Number(t.receive_amount).toFixed(0)} ${t.destination_currency || "—"}`} tint={colors.primary.base} />
+          <Row label="# Transaction" value={`#${(tx.reference || tx.id).slice(-10).toUpperCase()}`} mono />
+          <Row label="Montant envoyé" value={`${Number(tx.send_amount).toFixed(2)} ${tx.sender_currency || tx.source_currency || "EUR"}`} />
+          <Row label={`Frais (${tx.fee_percent ?? 0}%)`} value={`${Number(tx.fee_amount ?? 0).toFixed(2)} ${tx.sender_currency || tx.source_currency || "EUR"}`} />
+          <Row label="Le bénéficiaire reçoit" value={`${Number(tx.receive_amount).toFixed(0)} ${tx.destination_currency || "—"}`} tint={colors.primary.base} />
           <Row
             label="Bénéficiaire"
-            value={t.beneficiary?.full_name || "—"}
-            sub={`${t.destination_country || ""}${t.beneficiary?.city ? " · " + t.beneficiary.city : ""}`}
+            value={tx.beneficiary?.full_name || "—"}
+            sub={`${tx.destination_country || ""}${tx.beneficiary?.city ? " · " + tx.beneficiary.city : ""}`}
           />
           <Row
             label="Mode de remise"
-            value={t.delivery_mode === "cash" ? "💵 Espèces" : t.delivery_mode === "bank" ? "🏦 Virement" : "📱 Mobile Money"}
+            value={tx.delivery_mode === "cash" ? "💵 Espèces" : tx.delivery_mode === "bank" ? "🏦 Virement" : "📱 Mobile Money"}
           />
-          {!t.vip_delivery ? (
+          {!tx.vip_delivery ? (
             <Row label="Disponibilité" value="Dans 48h (Classique)" tint="#F59E0B" />
           ) : null}
-          <Row label="Statut" value={t.status} tint="#10B981" last />
+          <Row label="Statut" value={tx.status} tint="#10B981" last />
         </View>
 
         {/* Withdrawal code standout */}
@@ -136,10 +136,10 @@ export default function TransferSuccess() {
             </TText>
           </View>
           <TText variant="display" weight="extraBold" align="center" style={styles.codeValue}>
-            {t.withdrawal_code}
+            {tx.withdrawal_code}
           </TText>
           <TText variant="caption" color={colors.neutrals.textSecondary} align="center">
-            À transmettre à <TText variant="caption" weight="bold">{t.beneficiary?.full_name || "votre bénéficiaire"}</TText>
+            À transmettre à <TText variant="caption" weight="bold">{tx.beneficiary?.full_name || "votre bénéficiaire"}</TText>
           </TText>
           <TText variant="label" color={colors.neutrals.textTertiary} align="center" style={{ marginTop: 4 }}>
             Valide 48h · à usage unique
@@ -169,8 +169,8 @@ export default function TransferSuccess() {
         testID="success-chat-fab"
         style={styles.chatFab}
         onPress={async () => {
-          const phone = (t.beneficiary?.phone || "").replace(/\D/g, "");
-          const msg = `Bonjour ${t.beneficiary?.full_name || ""}, voici votre code de retrait SENDBID : ${t.withdrawal_code}. Valide 48h. Référence : #${(t.reference || t.id).slice(-8).toUpperCase()}`;
+          const phone = (tx.beneficiary?.phone || "").replace(/\D/g, "");
+          const msg = `Bonjour ${tx.beneficiary?.full_name || ""}, voici votre code de retrait SENDBID : ${tx.withdrawal_code}. Valide 48h. Référence : #${(tx.reference || tx.id).slice(-8).toUpperCase()}`;
           if (Platform.OS !== "web" && phone) {
             const wa = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(msg)}`;
             try { const { Linking } = require("react-native"); await Linking.openURL(wa); return; } catch {}

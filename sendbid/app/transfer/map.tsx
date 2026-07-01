@@ -34,14 +34,14 @@ type RouteData = {
 export default function MapScreen() {
   const { t } = useTranslation();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
-  const [t, setT] = useState<any>(null);
+  const [tx, setTx] = useState<any>(null);
   const [mode, setMode] = useState("drive");
   const [route, setRoute] = useState<RouteData | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!transfer_id) return;
-    api.get(`/transfers/${transfer_id}`).then((r) => setT(r.data)).catch(() => {});
+    api.get(`/transfers/${transfer_id}`).then((r) => setTx(r.data)).catch(() => {});
   }, [transfer_id]);
 
   useEffect(() => {
@@ -116,16 +116,16 @@ export default function MapScreen() {
         </View>
       ) : null}
 
-      {(t?.agent_snapshot || route?.agent) ? (
+      {(tx?.agent_snapshot || route?.agent) ? (
         <View style={styles.agentBox}>
           <View style={styles.row}>
             <Ionicons name="storefront-outline" size={18} color={colors.primary.base} />
             <TText variant="body" weight="semiBold" style={{ marginLeft: 8 }}>
-              Agence {(t?.agent_snapshot?.full_name) || route?.agent?.full_name}
+              Agence {(tx?.agent_snapshot?.full_name) || route?.agent?.full_name}
             </TText>
           </View>
           <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 4 }}>
-            {(t?.agent_snapshot?.city) || route?.agent?.city} • Ouverte 8h-20h
+            {(tx?.agent_snapshot?.city) || route?.agent?.city} • Ouverte 8h-20h
           </TText>
         </View>
       ) : null}

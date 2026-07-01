@@ -34,7 +34,7 @@ export default function AgentAssigned() {
   const { t } = useTranslation();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
-  const [t, setT] = useState<any>(null);
+  const [tx, setTx] = useState<any>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const pulse = useRef(new Animated.Value(0)).current;
 
@@ -44,7 +44,7 @@ export default function AgentAssigned() {
         api.get(`/transfers/${transfer_id}`),
         api.get(`/transfers/${transfer_id}/bids`),
       ]);
-      setT(t1.data);
+      setTx(t1.data);
       setBids(t2.data || []);
     } catch {}
   };
@@ -61,9 +61,9 @@ export default function AgentAssigned() {
     return () => loop.stop();
   }, [pulse]);
 
-  if (!t) return null;
-  const a = t.agent_snapshot || {};
-  const assignedId = t.agent_id;
+  if (!tx) return null;
+  const a = tx.agent_snapshot || {};
+  const assignedId = tx.agent_id;
   const scale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
   const ringOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0.1] });
 
@@ -182,7 +182,7 @@ export default function AgentAssigned() {
             icon="navigate"
             onPress={() => router.replace({ pathname: "/transfer/[id]", params: { id: transfer_id! } })}
           />
-          {t.vip_delivery ? (
+          {tx.vip_delivery ? (
             <Button
               testID="track-map"
               title="Voir la carte"

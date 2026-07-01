@@ -24,29 +24,29 @@ export default function OfficialReceipt() {
   const { t } = useTranslation();
   const { transfer_id } = useLocalSearchParams<{ transfer_id: string }>();
   const router = useRouter();
-  const [t, setT] = useState<any>(null);
+  const [tx, setTx] = useState<any>(null);
 
   useEffect(() => {
     if (!transfer_id) return;
-    api.get(`/transfers/${transfer_id}`).then((r) => setT(r.data));
+    api.get(`/transfers/${transfer_id}`).then((r) => setTx(r.data));
   }, [transfer_id]);
 
-  if (!t) return null;
+  if (!tx) return null;
 
-  const status = t.status as string;
+  const status = tx.status as string;
   const statusColor = status === "COMPLETED" ? "#10B981" : status === "FAILED" ? "#EF4444" : "#F59E0B";
   const statusLabel = status === "COMPLETED" ? "Terminé" : status === "FAILED" ? "Échec" : "En cours";
 
   const share = async () => {
     try {
       await Share.share({
-        message: `Reçu SENDBID\nRef ${(t.reference || t.id).slice(-10).toUpperCase()}\n${Number(t.send_amount).toFixed(2)} ${t.source_currency} → ${Number(t.receive_amount).toFixed(0)} ${t.destination_currency}\nBénéficiaire : ${t.beneficiary?.full_name}\nStatut : ${statusLabel}`,
+        message: `Reçu SENDBID\nRef ${(tx.reference || tx.id).slice(-10).toUpperCase()}\n${Number(tx.send_amount).toFixed(2)} ${tx.source_currency} → ${Number(tx.receive_amount).toFixed(0)} ${tx.destination_currency}\nBénéficiaire : ${tx.beneficiary?.full_name}\nStatut : ${statusLabel}`,
       });
     } catch {}
   };
 
   const downloadPDF = () => {
-    const url = `${process.env.EXPO_PUBLIC_BACKEND_URL || ""}/api/transfers/${t.id}/receipt-pdf`;
+    const url = `${process.env.EXPO_PUBLIC_BACKEND_URL || ""}/api/transfers/${tx.id}/receipt-pdf`;
     Linking.openURL(url);
   };
 
@@ -86,7 +86,7 @@ export default function OfficialReceipt() {
             <View>
               <TText variant="label" color={colors.neutrals.textTertiary} style={{ letterSpacing: 1 }}>RÉFÉRENCE</TText>
               <TText variant="body" weight="extraBold" style={styles.mono}>
-                #{(t.reference || t.id).slice(-10).toUpperCase()}
+                #{(tx.reference || tx.id).slice(-10).toUpperCase()}
               </TText>
             </View>
             <View style={{ alignItems: "flex-end" }}>
@@ -100,39 +100,39 @@ export default function OfficialReceipt() {
 
           <Divider />
 
-          <PaperRow label="Date d'émission" value={new Date(t.created_at).toLocaleString("fr-FR")} />
-          {t.completed_at ? (
-            <PaperRow label="Livré le" value={new Date(t.completed_at).toLocaleString("fr-FR")} />
+          <PaperRow label="Date d'émission" value={new Date(tx.created_at).toLocaleString("fr-FR")} />
+          {tx.completed_at ? (
+            <PaperRow label="Livré le" value={new Date(tx.completed_at).toLocaleString("fr-FR")} />
           ) : null}
-          <PaperRow label="Mode de remise" value={String(t.delivery_mode || "—").toUpperCase() + (t.vip_delivery ? " · VIP" : "")} />
+          <PaperRow label="Mode de remise" value={String(tx.delivery_mode || "—").toUpperCase() + (tx.vip_delivery ? " · VIP" : "")} />
 
           <Divider />
 
           {/* EXPÉDITEUR */}
           <SectionTitle label="EXPÉDITEUR" icon="person-outline" color="#3B82F6" />
-          <PaperRow label="Nom" value={t.sender_snapshot?.full_name || "—"} />
-          <PaperRow label="Pays" value={t.sender_snapshot?.country || "—"} />
+          <PaperRow label="Nom" value={tx.sender_snapshot?.full_name || "—"} />
+          <PaperRow label="Pays" value={tx.sender_snapshot?.country || "—"} />
 
           <Divider />
 
           {/* BÉNÉFICIAIRE */}
           <SectionTitle label="BÉNÉFICIAIRE" icon="people-outline" color="#10B981" />
-          <PaperRow label="Nom" value={t.beneficiary?.full_name || "—"} />
-          <PaperRow label="Pays" value={t.destination_country || "—"} />
-          {t.beneficiary?.phone ? <PaperRow label="Téléphone" value={t.beneficiary.phone} /> : null}
+          <PaperRow label="Nom" value={tx.beneficiary?.full_name || "—"} />
+          <PaperRow label="Pays" value={tx.destination_country || "—"} />
+          {tx.beneficiary?.phone ? <PaperRow label="Téléphone" value={tx.beneficiary.phone} /> : null}
 
           <Divider />
 
           {/* FINANCIER */}
           <SectionTitle label="FINANCIER" icon="cash-outline" color="#F59E0B" />
-          <PaperRow label="Montant envoyé" value={`${Number(t.send_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
-          <PaperRow label="Taux de change" value={Number(t.fx_rate || 0).toFixed(4)} />
-          <PaperRow label="Frais" value={`${Number(t.fee_amount).toFixed(2)} ${t.source_currency || "EUR"}`} />
-          <PaperRow label="Total débité" value={`${Number(t.total_amount).toFixed(2)} ${t.source_currency || "EUR"}`} bold />
+          <PaperRow label="Montant envoyé" value={`${Number(tx.send_amount).toFixed(2)} ${tx.source_currency || "EUR"}`} />
+          <PaperRow label="Taux de change" value={Number(tx.fx_rate || 0).toFixed(4)} />
+          <PaperRow label="Frais" value={`${Number(tx.fee_amount).toFixed(2)} ${tx.source_currency || "EUR"}`} />
+          <PaperRow label="Total débité" value={`${Number(tx.total_amount).toFixed(2)} ${tx.source_currency || "EUR"}`} bold />
           <View style={styles.receivedRow}>
             <TText variant="caption" weight="extraBold" color={colors.neutrals.textSecondary}>REÇU PAR LE BÉNÉFICIAIRE</TText>
             <TText variant="title" weight="extraBold" color="#10B981" style={{ marginTop: 4 }}>
-              {Number(t.receive_amount).toFixed(0)} {t.destination_currency}
+              {Number(tx.receive_amount).toFixed(0)} {tx.destination_currency}
             </TText>
           </View>
 
@@ -141,10 +141,10 @@ export default function OfficialReceipt() {
           {/* QR */}
           <View style={styles.qrWrap}>
             <View style={styles.qrBox}>
-              {Platform.OS === "web" || !t.qr_token ? (
+              {Platform.OS === "web" || !tx.qr_token ? (
                 <Ionicons name="qr-code" size={140} color={colors.neutrals.textPrimary} />
               ) : (
-                <QRCode value={t.qr_token} size={140} backgroundColor="white" color={colors.neutrals.textPrimary} />
+                <QRCode value={tx.qr_token} size={140} backgroundColor="white" color={colors.neutrals.textPrimary} />
               )}
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
@@ -152,7 +152,7 @@ export default function OfficialReceipt() {
                 CODE DE VÉRIFICATION
               </TText>
               <TText variant="title" weight="extraBold" style={[styles.mono, { marginTop: 2, letterSpacing: 4 }]}>
-                {t.withdrawal_code}
+                {tx.withdrawal_code}
               </TText>
               <TText variant="label" color={colors.neutrals.textTertiary} style={{ marginTop: 4 }}>
                 Signature HMAC-SHA256 · valide 48h
