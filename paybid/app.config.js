@@ -38,5 +38,6 @@ module.exports = ({ config }) => ({
     },
     package: "com.paybid.app",
     googleServicesFile: "./google-services.json",
+    usesCleartextTraffic: true,
   }
 });

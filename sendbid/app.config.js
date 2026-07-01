@@ -38,5 +38,6 @@ module.exports = ({ config }) => ({
     },
     package: "com.sendbid.app",
     googleServicesFile: "./google-services.json",
+    usesCleartextTraffic: true,
   }
 });
