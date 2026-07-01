@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
-import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Alert, TouchableOpacity, FlatList, Modal, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,7 +10,7 @@ import { api, apiError } from "../../src/api";
 import { flagEmoji } from "../../src/utils/dialCodes";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
-import { useTranslation } from "../../src/i18n";
+import { useTranslation, useLocale } from "../../src/i18n";
 // v6.4 — Bénéficiaire enrichi : Country/City autocomplete (pas de texte libre),
 // IBAN/RIB pour Bank, Opérateur+Téléphone pour MoMo, boutons Relation compacts.
 const RELATIONS = ["Famille", "Ami", "Conjoint", "Enfant", "Parent", "Collègue", "Autre"];

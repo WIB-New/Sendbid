@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useState, useRef } from "react";
-import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Alert, Linking } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,7 +7,7 @@ import { TText } from "../../src/components/TText";
 import { api } from "../../src/api";
 import { colors, spacing, radii, fontFamily } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
-import { useTranslation } from "../../src/i18n";
+import { useTranslation, useLocale } from "../../src/i18n";
 const ROLE_LABELS: Record<string, { name: string; color: string }> = {
   sender: { name: "Vous", color: colors.primary.base },
   agent: { name: "Agent", color: colors.accent.base },

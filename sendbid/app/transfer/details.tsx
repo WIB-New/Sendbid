@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
-import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Modal, FlatList } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";

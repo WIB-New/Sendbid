@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useState } from "react";
-import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Alert, Platform, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,7 +9,7 @@ import { Button } from "../../src/components/Button";
 import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
-import { useTranslation } from "../../src/i18n";
+import { useTranslation, useLocale } from "../../src/i18n";
 export default function BeneficiaryDetail() {
   const { t } = useTranslation();
   useLocale((st) => st.locale);

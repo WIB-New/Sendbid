@@ -34,7 +34,6 @@ export default function Receipts() {
     const msg = `Reçu SENDBID\nRéférence : ${ref}\nMontant : ${t.send_amount.toFixed(2)} EUR → ${t.receive_amount.toFixed(0)} ${t.destination_currency}\nBénéficiaire : ${t.beneficiary?.full_name || "—"}\nDate : ${new Date(t.created_at).toLocaleDateString("fr-FR")}\nStatut : ${t.status}`;
     if (Platform.OS === "web") {
       try { (await import("expo-clipboard")).setStringAsync(msg); Alert.alert("Reçu copié", "Le reçu a été copié dans le presse-papiers."); } catch {}
-import { useTranslation } from "../src/i18n";
       return;
     }
     try { await Share.share({ message: msg, title: `Reçu ${ref}` }); } catch {}

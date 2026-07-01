@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
-import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, Modal, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -67,7 +66,6 @@ export default function TransferStep3() {
         receive_amount: draft.receive_amount,
         fx_rate: draft.fx_rate,
         // IMPORTANT : fee_percent = uniquement les frais client (PAS de VIP dedans).
-import { useTranslation } from "../../src/i18n";
         // Le cap des bids agents est basé strictement sur ce pourcentage.
         fee_percent: draft.fee_percent,
         vip_fee_amount: vipFee,

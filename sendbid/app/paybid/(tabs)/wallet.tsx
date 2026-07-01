@@ -13,7 +13,7 @@
  * Transferts (item 7).
  */
 import React, { useCallback, useState } from "react";
-import { useTranslation } from "../../../src/i18n";
+import { useTranslation, useLocale } from "../../../src/i18n";
 import {
   View,
   StyleSheet,
@@ -28,7 +28,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../../src/components/TText";
 import { api } from "../../../src/api";
-import { t, useLocale } from "../../../src/i18n";
 import { useAuth } from "../../../src/store";
 import { spacing, radii } from "../../../src/theme";
 import { useThemedPaybidColors } from "../../../src/themeContext";

@@ -1,5 +1,4 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
-import { t, useLocale } from "../../src/i18n";
 import { View, StyleSheet, TouchableOpacity, Linking, Platform, ScrollView, Share, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,7 +12,7 @@ import { api } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
-import { useTranslation } from "../../src/i18n";
+import { useTranslation, useLocale } from "../../src/i18n";
 /**
  * Détail Transfert v6.4 — Timelines conditionnelles selon delivery_mode
  *  - CASH (Espèces) : 1) Créé 2) Fonds débités 3) Confié à un agent 4) Fonds disponibles (48h) 5) Bénéficiaire notifié 6) Terminé
