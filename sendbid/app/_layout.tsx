@@ -229,7 +229,7 @@ export default function RootLayout() {
         <StatusBar style="dark" />
         <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: "#E6ECF8", alignItems: "center", justifyContent: "center" }}>
           <Image
-            source={require("../assets/images/sendbid-splash.png")}
+            source={require("../assets/images/splash-icon.png")}
             style={{ width: 90, height: 90 }}
             resizeMode="contain"
           />
