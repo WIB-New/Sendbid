@@ -33,7 +33,6 @@ import { useAuth } from "../../../src/store";
 import { spacing, radii } from "../../../src/theme";
 import { useThemedPaybidColors } from "../../../src/themeContext";
 import { paybidColors } from "../../../src/paybidTheme";
-import { useTranslation } from "../../../src/i18n";
 
 // 4 quick actions — alignées sur Sendbid (Recharger / Retirer / Envoyer / Virement)
 const QUICK = [
