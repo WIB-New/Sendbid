@@ -49,6 +49,7 @@ export function VerificationModal({
 
   const handleResend = () => {
     onResendCode();
+    setCode("");
     setResendLeft(60);
   };
 

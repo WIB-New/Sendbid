@@ -122,8 +122,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       const { data } = await api.post("/auth/register", {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
+        full_name: `${firstName.trim()} ${lastName.trim()}`,
         email: email.trim(),
         phone: phone.trim(),
         country,
@@ -132,12 +131,27 @@ export default function SignUp() {
       if (data.token && data.user) {
         await setSession(data.token, data.user);
       }
+      if (data.dev_email_otp || data.dev_phone_otp) {
+        console.log(`[DEV OTP] Email: ${data.dev_email_otp} | SMS: ${data.dev_phone_otp}`);
+      }
       router.push({
         pathname: "/(auth)/create-pin",
-        params: { user_id: data.user_id, skip_otp: "1" },
+        params: {
+          user_id: data.user_id,
+          skip_otp: "1",
+          dev_email_otp: data.dev_email_otp || "",
+          dev_phone_otp: data.dev_phone_otp || "",
+        },
       });
     } catch (e: any) {
-      setErr(apiError(e));
+      const raw = apiError(e);
+      if (raw.toLowerCase().includes("already") || raw.toLowerCase().includes("exist")) {
+        setErr(t("auth.errEmailExists") || "Un compte existe déjà avec cet email.");
+      } else if (raw.toLowerCase().includes("422") || raw.toLowerCase().includes("field")) {
+        setErr("Veuillez vérifier tous les champs et réessayer.");
+      } else {
+        setErr(raw);
+      }
     } finally {
       setLoading(false);
     }

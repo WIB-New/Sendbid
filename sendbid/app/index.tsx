@@ -5,7 +5,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { TText } from "../src/components/TText";
 import { SendBidLogo } from "../src/components/Logo";
 import { colors, spacing } from "../src/theme";
-import { useThemedColors } from "../src/themeContext";
 import { useAuth } from "../src/store";
 import { useTranslation } from "../src/i18n";
 
@@ -15,7 +14,6 @@ import { useTranslation } from "../src/i18n";
  */
 export default function Splash() {
   const { t } = useTranslation();
-  const colors = useThemedColors();
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const hydrated = useAuth((s) => s.hydrated);
@@ -45,7 +43,7 @@ export default function Splash() {
     if (!hydrated) return;
     const t = setTimeout(() => {
       const isAgent = (user as any)?.role === "agent";
-      router.replace(user ? (isAgent ? ("/paybid/(tabs)" as any) : "/(tabs)") : "/onboarding");
+      router.replace(user ? (isAgent ? ("/paybid/(tabs)" as any) : "/(tabs)") : "/welcome"); 
     }, 1700);
     return () => clearTimeout(t);
   }, [hydrated, user, router]);

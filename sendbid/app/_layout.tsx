@@ -40,6 +40,7 @@ import { useAuth, usePinSession } from "../src/store";
 import { registerForPushAndSync } from "../src/push";
 import { colors } from "../src/theme";
 import { useThemeStore } from "../src/hooks/useThemeMode";
+import { ThemeProvider } from "../src/themeContext";
 // PinBiometryModal et StripeProvider non disponibles dans cette version
 const PinBiometryModal = (_: any) => null;
 const StripeProvider = ({ children }: any) => children;
@@ -136,6 +137,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (!hydrated) return;
     const segs = segments as string[];
+    console.log("[NAV] segments:", JSON.stringify(segs), "user:", !!user);
     const inAuth = segs[0] === "(auth)";
     const inTabs = segs[0] === "(tabs)";
     const inPaybid = segs[0] === "paybid";
@@ -165,24 +167,30 @@ export default function RootLayout() {
       router.replace(user ? "/(tabs)" : "/welcome");
       return;
     }
-    const isCreatePin = segs.length >= 2 && segs[1] === "create-pin";
-    const isVerifyPin = segs.length >= 2 && segs[1] === "verify-pin";
-    const isLoginPin = segs.length >= 2 && segs[1] === "login";
+    const isCreatePin = segs.includes("create-pin");
+    const isVerifyPin = segs.includes("verify-pin");
+    const isLoginPin = segs.includes("login");
+    const isSignup = segs.includes("signup");
     const isPublic =
       segs.length === 0 ||
       segs[0] === "index" ||
       segs[0] === "onboarding" ||
       segs[0] === "welcome" ||
       segs[0] === "landing" ||
-      inAuth;
+      inAuth ||
+      isLoginPin ||
+      isSignup ||
+      isCreatePin ||
+      isVerifyPin;
     if (!user && !isPublic) {
       router.replace("/welcome");
-    } else if (user && (inAuth || segs[0] === "welcome" || segs[0] === "onboarding") && !isCreatePin && !isVerifyPin && !isLoginPin) {
+    } else if (user && (inAuth || segs[0] === "welcome" || segs[0] === "onboarding") && !isCreatePin && !isVerifyPin && !isLoginPin && !isSignup) {
       // Post-login routing basé sur le rôle (sauf si besoin de créer le PIN)
       const role = (user as any).role;
       if (isAgent) {
-        // Agent credentials sur build client → log them out cleanly
-        router.replace("/welcome");
+        // Agent sur build client → déconnecter et laisser sur welcome
+        logout().catch(() => {});
+        return;
       } else if (role === "admin" || role === "super_admin") {
         router.replace("/admin" as any);
       } else if (role === "partner_admin") {
@@ -267,6 +275,7 @@ export default function RootLayout() {
       merchantIdentifier="merchant.com.sendbid"
       urlScheme="sendbid"
     >
+      <ThemeProvider>
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <Stack key={`${locale}-${tick}`} screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: colors.neutrals.background } }} />
@@ -277,6 +286,7 @@ export default function RootLayout() {
           onCancel={handlePinCancel}
         />
       </SafeAreaProvider>
+      </ThemeProvider>
     </StripeProvider>
   );
 }

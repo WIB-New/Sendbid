@@ -17,19 +17,23 @@ api.interceptors.request.use(async (config) => {
 export function apiError(e: any): string {
   const status = e?.response?.status;
   const detail = e?.response?.data?.detail;
+  const message = e?.response?.data?.message;
 
   // Messages clairs par code HTTP
+  if (status === 400) return message || "Requête invalide. Veuillez vérifier vos informations.";
   if (status === 401) return "Email ou mot de passe incorrect.";
   if (status === 403) return "Accès refusé. Votre compte est peut-être suspendu ou votre session a expiré.";
   if (status === 404) return "Ressource introuvable.";
+  if (status === 422) return "Certains champs sont incorrects ou incomplets. Veuillez vérifier votre saisie.";
   if (status === 429) return "Trop de tentatives. Veuillez patienter quelques minutes.";
   if (status === 500) return "Erreur serveur. Veuillez réessayer dans quelques instants.";
   if (status === 503) return "Service temporairement indisponible. Réessayez plus tard.";
 
-  if (!detail) return e?.message || "Erreur inconnue. Vérifiez votre connexion.";
+  if (!detail && !message) return e?.message || "Erreur inconnue. Vérifiez votre connexion.";
+  if (typeof message === "string") return message;
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) return detail.map((d: any) => d?.msg || JSON.stringify(d)).join(" ");
-  return String(detail);
+  return String(detail || message);
 }
 
 export function wsUrl(path: string, token?: string | null): string {

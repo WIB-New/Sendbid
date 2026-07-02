@@ -1,6 +1,12 @@
 # SENDBID - Application Mobile Client
 PS C:\Users\Utilisateur\Desktop\Sendfloo.SendBID-06juin2026\sendbid> $env:EXPO_DEVTOOLS_LISTEN_ADDRESS="192.168.1.113"; $env:REACT_NATIVE_PACKAGER_HOSTNAME="192.168.1.113"; npx expo start --offline --clear --port 8084  
 
+
+pour build apk sur exp 
+
+npx eas-cli build -p android --profile preview
+
+
 Application mobile pour les clients SendBID (envoi d'argent, encheres).
 
 ## Configuration

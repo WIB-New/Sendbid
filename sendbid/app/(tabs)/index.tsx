@@ -93,12 +93,12 @@ export default function Home() {
       verifyTimerRef.current = setTimeout(async () => {
         if (!emailOk) {
           setShowEmailVerify(true);
-          const res = await api.post("/auth/send-email-code").catch(() => null);
-          if (res?.data?.dev_code) console.log("[DEV] Email OTP:", res.data.dev_code);
+          const res = await api.post("/auth/resend-email-otp").catch(() => null);
+          if (res?.data?.dev_email_otp) console.log("[DEV] Email OTP:", res.data.dev_email_otp);
         } else if (!phoneOk) {
           setShowPhoneVerify(true);
-          const res = await api.post("/auth/send-sms-code").catch(() => null);
-          if (res?.data?.dev_code) console.log("[DEV] Phone OTP:", res.data.dev_code);
+          const res = await api.post("/auth/resend-phone-otp").catch(() => null);
+          if (res?.data?.dev_phone_otp) console.log("[DEV] Phone OTP:", res.data.dev_phone_otp);
         }
       }, 5000);
 
@@ -112,14 +112,14 @@ export default function Home() {
     setVerifyEmailErr(null);
     setVerifyEmailLoading(true);
     try {
-      await api.post("/auth/verify-email-code", { code });
+      await api.post("/auth/verify-email-otp", { code });
       setShowEmailVerify(false);
       await refreshMe();
       // Check if phone also needs verification
       const updated = useAuth.getState().user;
       if (updated && !updated.phone_verified) {
         setShowPhoneVerify(true);
-        api.post("/auth/send-sms-code").catch(() => {});
+        api.post("/auth/resend-phone-otp").catch(() => {});
       }
     } catch (e: any) {
       setVerifyEmailErr(apiError(e));
@@ -132,7 +132,7 @@ export default function Home() {
     setVerifyPhoneErr(null);
     setVerifyPhoneLoading(true);
     try {
-      await api.post("/auth/verify-phone-code", { code });
+      await api.post("/auth/verify-phone-otp", { code });
       setShowPhoneVerify(false);
       await refreshMe();
     } catch (e: any) {
@@ -144,14 +144,14 @@ export default function Home() {
 
   const resendEmailCode = async () => {
     setVerifyEmailErr(null);
-    const res = await api.post("/auth/send-email-code").catch(() => null);
-    if (res?.data?.dev_code) console.log("[DEV] Email OTP (resend):", res.data.dev_code);
+    const res = await api.post("/auth/resend-email-otp").catch(() => null);
+    if (res?.data?.dev_email_otp) console.log("[DEV] Email OTP (resend):", res.data.dev_email_otp);
   };
 
   const resendPhoneCode = async () => {
     setVerifyPhoneErr(null);
-    const res = await api.post("/auth/send-sms-code").catch(() => null);
-    if (res?.data?.dev_code) console.log("[DEV] Phone OTP (resend):", res.data.dev_code);
+    const res = await api.post("/auth/resend-phone-otp").catch(() => null);
+    if (res?.data?.dev_phone_otp) console.log("[DEV] Phone OTP (resend):", res.data.dev_phone_otp);
   };
 
   const load = useCallback(async () => {
