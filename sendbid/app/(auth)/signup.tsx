@@ -12,6 +12,7 @@ import { useAuth } from "../../src/store";
 import { useTranslation } from "../../src/i18n";
 import { useThemeColors } from "../../src/hooks/useThemeMode";
 import { fontFamily } from "../../src/theme";
+import { COUNTRY_TO_ISO } from "../../src/currency";
 
 const { height: SCREEN_H } = Dimensions.get("window");
 
@@ -125,7 +126,7 @@ export default function SignUp() {
         full_name: `${firstName.trim()} ${lastName.trim()}`,
         email: email.trim(),
         phone: phone.trim(),
-        country,
+        country: COUNTRY_TO_ISO[country] || country,
         password,
       });
       if (data.token && data.user) {

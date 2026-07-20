@@ -76,7 +76,6 @@ export default function RootLayout() {
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const locale = useLocale((s) => s.locale);
-  const tick = useLocale((s) => s.tick);
   const segments = useSegments();
   const router = useRouter();
   const [i18nReady, setI18nReady] = React.useState(false);
@@ -278,7 +277,7 @@ export default function RootLayout() {
       <ThemeProvider>
       <SafeAreaProvider>
         <StatusBar style="dark" />
-        <Stack key={`${locale}-${tick}`} screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: colors.neutrals.background } }} />
+        <Stack key={locale} screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: colors.neutrals.background } }} />
         {/* Pop-up PIN au démarrage si session existante */}
         <PinBiometryModal
           visible={showPinModal}

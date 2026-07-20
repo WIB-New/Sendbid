@@ -22,7 +22,7 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-production}
       JWT_SECRET: ${JWT_SECRET}
       QR_HMAC_SECRET: ${QR_HMAC_SECRET}
-      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://api.sendbid.app}
 
       # ── Admin & comptes de démo (OBLIGATOIRE) ──
       ADMIN_EMAIL: ${ADMIN_EMAIL}
@@ -32,7 +32,7 @@ services:
       DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
 
       # ── CORS ──
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://senfloosendbid-sendbidfrontend-wtic4z-61bc59-195-110-35-155.sslip.io,http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://sendfloo.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app}
 
       # ── Stripe (paiements) ──
       STRIPE_API_KEY: ${STRIPE_API_KEY:-}
@@ -89,9 +89,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-api.rule=Host(`senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io`)
+      - traefik.http.routers.sendbid-api.rule=Host(`${BACKEND_HOST:-api.sendbid.app}`) || Host(`${ADMIN_HOST:-admin.sendbid.app}`)
       - traefik.http.routers.sendbid-api.entrypoints=web
       - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
+      # Middleware optionnel : rediriger HTTP vers HTTPS en production
+      # - traefik.http.routers.sendbid-api.middlewares=redirect-to-https
+      # - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
     networks:
       - dokploy-network
 
@@ -103,7 +106,7 @@ services:
       context: ./sendbid
       dockerfile: Dockerfile
       args:
-        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io}
+        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-https://api.sendbid.app}
         EXPO_PUBLIC_STRIPE_PK: ${EXPO_PUBLIC_STRIPE_PK:-}
         EXPO_PUBLIC_APP_VARIANT: ${EXPO_PUBLIC_APP_VARIANT:-sendbid}
         GOOGLE_MAPS_IOS_API_KEY: ${GOOGLE_MAPS_IOS_API_KEY:-}
@@ -114,7 +117,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-frontend.rule=Host(`${FRONTEND_HOST:-senfloosendbid-sendbidfrontend-wtic4z-61bc59-195-110-35-155.sslip.io}`)
+      - traefik.http.routers.sendbid-frontend.rule=Host(`${FRONTEND_HOST:-sendfloo.sendbid.app}`) || Host(`sendbid.app`)
       - traefik.http.routers.sendbid-frontend.entrypoints=web
       - traefik.http.services.sendbid-frontend.loadbalancer.server.port=80
     networks:

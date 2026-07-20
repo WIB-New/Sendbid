@@ -2,20 +2,20 @@
  * Dynamic Expo config — switches between SENDBID (client) and PAYBID (agent)
  * at build/start time depending on APP_VARIANT env var.
  */
-const variant = "sendbid";
-const isPaybid = false;
+const variant = process.env.APP_VARIANT || process.env.EXPO_PUBLIC_APP_VARIANT || "sendbid";
+const isPaybid = variant === "paybid";
 
 const IS_EAS = process.env.EAS_BUILD === "true";
 
 module.exports = ({ config }) => ({
   ...config,
-  name: "SENDBID",
-  slug: "sendbid-temp-project",
+  name: isPaybid ? "PAYBID" : "SENDBID",
+  slug: isPaybid ? "paybid-temp-project" : "sendbid-temp-project",
   ...(IS_EAS ? { owner: "wibuser" } : {}),
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "sendbid",
+  scheme: isPaybid ? "paybid" : "sendbid",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   updates: {
@@ -28,15 +28,15 @@ module.exports = ({ config }) => ({
   ios: {
     ...(config?.ios || {}),
     supportsTablet: true,
-    bundleIdentifier: "com.sendbid.app",
+    bundleIdentifier: isPaybid ? "com.paybid.app" : "com.sendbid.app",
   },
   android: {
     ...(config?.android || {}),
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
-      backgroundColor: "#00147E",
+      backgroundColor: isPaybid ? "#994A26" : "#00147E",
     },
-    package: "com.sendbid.app",
+    package: isPaybid ? "com.paybid.app" : "com.sendbid.app",
     googleServicesFile: "./google-services.json",
     usesCleartextTraffic: true,
   }

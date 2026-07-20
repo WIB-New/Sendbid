@@ -34,6 +34,8 @@ type Props = {
   bottomInset?: boolean;
   /** Permet de fermer le clavier en tapant en dehors d'un champ. */
   dismissKeyboardOnTap?: boolean;
+  /** Ref forwarded vers le ScrollView interne (quand scroll=true). */
+  scrollRef?: React.RefObject<ScrollView | null>;
 };
 
 /**
@@ -57,6 +59,7 @@ export function Screen({
   noKeyboardAvoid = false,
   bottomInset = true,
   dismissKeyboardOnTap = true,
+  scrollRef,
 }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -105,6 +108,7 @@ export function Screen({
   // Body (scroll ou static), enveloppé pour gérer clavier + tap-to-dismiss.
   const Body = scroll ? (
     <ScrollView
+      ref={scrollRef}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[
         { padding: spacing.lg, paddingTop: hero ? spacing.lg : undefined, paddingBottom: bottomPad },

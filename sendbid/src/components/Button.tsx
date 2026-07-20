@@ -14,8 +14,9 @@ type Props = {
   icon?: keyof typeof Ionicons.glyphMap;
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle;
+  textColor?: string;
   testID?: string;
   fullWidth?: boolean;
 };
@@ -29,7 +30,7 @@ type Props = {
  * - outline  → bordure bleue, fond surface, texte bleu
  * - ghost    → transparent, texte secondaire
  */
-export function Button({ title, onPress, variant = "primary", icon, loading, disabled, style, textStyle, testID, fullWidth = true }: Props) {
+export function Button({ title, onPress, variant = "primary", icon, loading, disabled, style, textStyle, textColor, testID, fullWidth = true }: Props) {
   const { tokens } = useThemeTokens();
   const bg =
     variant === "primary"
@@ -52,7 +53,7 @@ export function Button({ title, onPress, variant = "primary", icon, loading, dis
       ? tokens.neutrals.textSecondary
       : tokens.neutrals.white;
   const borderColor = variant === "outline" ? tokens.primary.base : "transparent";
-  const finalFg = (textStyle as any)?.color || fg;
+  const finalFg = textColor || (textStyle as any)?.color || fg;
   return (
     <TouchableOpacity
       testID={testID}

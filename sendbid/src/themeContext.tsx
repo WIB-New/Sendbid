@@ -83,7 +83,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = useMemo<Ctx>(() => ({ mode, setMode, tokens, isDark }), [mode, tokens, isDark]);
+  const value = useMemo<Ctx>(() => ({ mode, setMode, tokens, isDark }), [mode, setMode, tokens, isDark]);
   return <ThemeCtx.Provider value={value}>{children}</ThemeCtx.Provider>;
 }
 

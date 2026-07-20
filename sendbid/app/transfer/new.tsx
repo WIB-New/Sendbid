@@ -11,6 +11,7 @@ import { api, apiError } from "../../src/api";
 import { useDraft, useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { getLocalCurrency } from "../../src/currency";
+import { convertFromEur } from "../../src/utils/fx";
 import { useTranslation } from "../../src/i18n";
 
 // v6 — TOUS les modes sont toujours activés (le bug v5 désactivait bank/momo selon corridor)
@@ -56,11 +57,13 @@ export default function TransferStep1() {
   // Niveau de service: "standard" | "vip" | "vip_express"
   const [serviceLevel, setServiceLevel] = useState<"standard" | "vip" | "vip_express">("standard");
   const [rate, setRate] = useState(1);
+  const [eurToSenderRate, setEurToSenderRate] = useState(1);
   const [feePercent, setFeePercent] = useState(2.0);
   const [fxLoading, setFxLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [benQuery, setBenQuery] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [dataErr, setDataErr] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView | null>(null);
   const benRef = useRef<View>(null);
 
@@ -106,6 +109,7 @@ export default function TransferStep1() {
   }, [selectedBen, mode]);
 
   const loadData = useCallback(() => {
+    setDataErr(null);
     // Charger corridors + bénéficiaires en parallèle pour éviter le flash "Afghanistan"
     Promise.all([api.get("/corridors"), api.get("/beneficiaries")])
       .then(([rc, rb]) => {
@@ -121,19 +125,13 @@ export default function TransferStep1() {
           const found = bens.find((b: any) => b.id === params.beneficiary_id);
           if (found) {
             setSelectedBen(found);
-            // Ne pas pré-sélectionner le pays - laisser l'utilisateur choisir
-            // const c = list.find((x) => x.country_code === found.country);
-            // if (c) setCountry(c);
-            // Mode par défaut du bénéficiaire (cash/bank/momo) - désactivé pour formulaire vide
-            // const dm = String(found.default_delivery_mode || "cash").toLowerCase();
-            // if (["cash", "bank", "momo"].includes(dm)) setMode(dm);
             return;
           }
         }
-        // Ne pas pré-sélectionner le premier pays - formulaire vide par défaut
-        // if (list.length > 0) setCountry(list[0]);
       })
-      .catch(() => {});
+      .catch((e: any) => {
+        setDataErr(apiError(e) || "Impossible de charger les pays. Vérifiez votre connexion au backend.");
+      });
   }, [params.beneficiary_id]);
 
   // Recharger à chaque fois que l'écran devient actif (ex: retour depuis ajout bénéficiaire)
@@ -157,6 +155,11 @@ export default function TransferStep1() {
     }
     // VIP options only available for cash delivery
     if (mode !== "cash" && serviceLevel !== "standard") setServiceLevel("standard");
+  // Taux EUR -> devise expéditeur pour les frais VIP
+  useEffect(() => {
+    convertFromEur(1, senderCurrency).then(setEurToSenderRate).catch(() => setEurToSenderRate(1));
+  }, [senderCurrency]);
+
     // Appel API FX : taux réel depuis la base corridors (Phase 2 : votre API externe)
     setFxLoading(true);
     api.get("/transfers/fx-rate", { params: { from_currency: senderCurrency, to_currency: country.currency } })
@@ -185,13 +188,7 @@ export default function TransferStep1() {
   // rate = devise_dest / senderCurrency, donc 1 senderCurrency = rate/effectiveRate en EUR (approx)
   // Approximation simple : si senderCurrency === destination currency, on convertit via rate
   // Sinon on garde la valeur nominale (la plupart des expéditeurs envoient en EUR)
-  const EUR_TO_SENDER = senderCurrency === "EUR" ? 1
-    : senderCurrency === "XAF" || senderCurrency === "XOF" ? 655.957
-    : senderCurrency === "USD" ? 1.08
-    : senderCurrency === "GBP" ? 0.86
-    : senderCurrency === "MAD" ? 10.85
-    : senderCurrency === "CAD" ? 1.47
-    : 1;
+  const EUR_TO_SENDER = eurToSenderRate;
   const VIP_FEE = parseFloat((2 * EUR_TO_SENDER).toFixed(2));       // VIP : 2€ converti
   const VIP_EXPRESS_FEE = parseFloat((5 * EUR_TO_SENDER).toFixed(2)); // VIP Express : 5€ converti
   const vipFeeFixed = serviceLevel === "vip_express" ? VIP_EXPRESS_FEE : serviceLevel === "vip" ? VIP_FEE : 0;
@@ -237,10 +234,11 @@ export default function TransferStep1() {
       </TText>
       <TouchableOpacity testID="transfer-country" style={styles.selector} onPress={() => setShowCountry(true)}>
         <TText variant="body" weight="semiBold">
-          {country ? `${country.flag} ${country.country_name}` : "Sélectionner"}
+          {country ? `${country.flag} ${country.country_name}` : (corridors.length === 0 ? "Aucun pays disponible" : "Sélectionner")}
         </TText>
         <Ionicons name="chevron-down" size={18} color={colors.neutrals.textSecondary} />
       </TouchableOpacity>
+      {dataErr ? <TText variant="caption" color={colors.status.error} style={{ marginTop: 6 }}>{dataErr}</TText> : null}
 
       {/* Amount */}
       <View style={{ marginTop: spacing.md }}>

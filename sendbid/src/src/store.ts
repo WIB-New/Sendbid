@@ -32,7 +32,10 @@ export type User = {
   has_pin?: boolean;
   first_login_at?: string;
   verification_popup_shown_at?: string;
-  role?: string;
+  country?: string | null;
+  role?: "user" | "admin" | "super_admin" | "partner_admin" | "agent_admin" | "agent";
+  referral_code?: string | null;
+  pin_created?: boolean;
 };
 
 export type Wallet = { id: string; user_id: string; balance: number; currency: string };

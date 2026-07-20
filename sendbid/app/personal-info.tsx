@@ -8,7 +8,7 @@ import { Button } from "../src/components/Button";
 import { api, apiError } from "../src/api";
 import { useAuth } from "../src/store";
 import { colors, spacing, radii } from "../src/theme";
-import { COUNTRY_CURRENCY } from "../src/currency";
+import { COUNTRY_CURRENCY, COUNTRY_TO_ISO } from "../src/currency";
 import { useTranslation } from "../src/i18n";
 
 const COUNTRIES = Object.keys(COUNTRY_CURRENCY);
@@ -60,7 +60,7 @@ export default function PersonalInfo() {
       await api.put("/auth/me", {
         full_name: `${firstName} ${lastName}`.trim(),
         address,
-        ...(country ? { country } : {}),
+        ...(country ? { country: COUNTRY_TO_ISO[country] || country } : {}),
       });
       await refreshMe();
       setMsgType("success");

@@ -22,18 +22,35 @@ class CheckoutSessionIn(BaseModel):
     origin_url: str
 
 
+def _eur_to_target(amount_eur: float, target_currency: str) -> float:
+    """Conversion de EUR vers la devise locale avec fallback fixe."""
+    curr = target_currency.upper()
+    if curr == "EUR":
+        return amount_eur
+    fallback = {"XOF": 655.957, "XAF": 655.957, "MAD": 10.85, "USD": 1.08, "GBP": 0.86, "CAD": 1.47, "CHF": 0.94}
+    rate = fallback.get(curr, 1.0)
+    return round(amount_eur * rate, 2)
+
+
 @router.get("/packages")
-async def list_packages(_: dict = Depends(get_current_user)):
-    """Public list of recharge packages (server-defined)."""
+async def list_packages(target_currency: str = "EUR", _: dict = Depends(get_current_user)):
+    """Public list of recharge packages (server-defined), convertis en devise locale."""
+    curr = target_currency.upper()
+    packages = []
+    for pid, info in payments_service.RECHARGE_PACKAGES.items():
+        local_amount = _eur_to_target(info["amount"], curr)
+        packages.append({
+            "id": pid,
+            "amount": local_amount,
+            "amount_eur": info["amount"],
+            "label": info["label"],
+        })
+    custom_min = _eur_to_target(payments_service.CUSTOM_AMOUNT_MIN, curr)
+    custom_max = _eur_to_target(payments_service.CUSTOM_AMOUNT_MAX, curr)
     return {
-        "packages": [
-            {"id": pid, **info} for pid, info in payments_service.RECHARGE_PACKAGES.items()
-        ],
-        "custom": {
-            "min": payments_service.CUSTOM_AMOUNT_MIN,
-            "max": payments_service.CUSTOM_AMOUNT_MAX,
-        },
-        "currency": "EUR",
+        "packages": packages,
+        "custom": {"min": custom_min, "max": custom_max, "min_eur": payments_service.CUSTOM_AMOUNT_MIN, "max_eur": payments_service.CUSTOM_AMOUNT_MAX},
+        "currency": curr,
         "enabled": bool(payments_service.STRIPE_API_KEY),
     }
 

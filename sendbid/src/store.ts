@@ -31,7 +31,8 @@ export type User = {
   pin_created?: boolean;
   has_pin?: boolean;
   country?: string | null;
-  role?: "user" | "admin" | "super_admin" | "partner_admin" | "agent_admin";
+  role?: "user" | "admin" | "super_admin" | "partner_admin" | "agent_admin" | "agent";
+  referral_code?: string | null;
 };
 
 export type Wallet = { id: string; user_id: string; balance: number; currency: string };

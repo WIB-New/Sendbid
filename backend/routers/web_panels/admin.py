@@ -112,3 +112,38 @@ async def admin_audit(request: Request):
         movements.append({"type": x["_id"]["type"], "currency": x["_id"]["currency"], "total": x["total"], "count": x["count"]})
     ctx = _panel_base_ctx(request, "admin", user, section="audit", section_title="Audit logs", movements=movements)
     return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.get("/web/admin/linked-accounts", response_class=HTMLResponse)
+async def admin_linked_accounts(request: Request):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    raw = await db.linked_accounts.find({"status": {"$ne": "deleted"}}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    user_ids = [a.get("user_id") for a in raw if a.get("user_id")]
+    users_map = {}
+    if user_ids:
+        async for u in db.users.find({"id": {"$in": user_ids}}, {"_id": 0, "id": 1, "full_name": 1, "email": 1, "country": 1}):
+            users_map[u["id"]] = u
+    accounts = []
+    for a in raw:
+        u = users_map.get(a.get("user_id"), {})
+        ca = a.get("created_at")
+        if isinstance(ca, _dt.datetime):
+            a["created_at"] = ca.isoformat()
+        accounts.append({**a, "user_name": u.get("full_name"), "user_email": u.get("email"), "user_country": u.get("country")})
+    ctx = _panel_base_ctx(request, "admin", user, section="linked-accounts", section_title="Comptes liés", accounts=accounts)
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.post("/web/admin/linked-accounts/{account_id}/verify", response_class=HTMLResponse)
+async def admin_verify_linked_account(request: Request, account_id: str, action: str = Form(...)):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    new_status = "active" if action == "approve" else "rejected"
+    await db.linked_accounts.update_one(
+        {"id": account_id},
+        {"$set": {"status": new_status, "verified_at": iso(now_utc()), "verified_by": "admin", "verification_note": "Action manuelle admin"}},
+    )
+    return RedirectResponse(url=f"{_url_prefix()}/admin/linked-accounts", status_code=303)

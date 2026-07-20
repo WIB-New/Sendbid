@@ -41,6 +41,7 @@ class UpdateMeIn(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
+    country: Optional[str] = None
     language: Optional[str] = None
     theme: Optional[str] = None  # "light" | "dark" | "system"
 

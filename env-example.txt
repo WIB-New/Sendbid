@@ -1,0 +1,76 @@
+# =================================================================
+# Exemple de variables d'environnement pour le deploiement SendBID/PayBID
+# Copier ce fichier en .env a la racine du projet et remplacer les valeurs.
+# =================================================================
+
+# ── URLs et domaines ──
+BACKEND_HOST=api.sendbid.app
+ADMIN_HOST=admin.sendbid.app
+FRONTEND_HOST=sendfloo.sendbid.app
+PUBLIC_BACKEND_URL=https://api.sendbid.app
+EXPO_PUBLIC_BACKEND_URL=https://api.sendbid.app
+
+# ── Base de donnees ──
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/sendbid?retryWrites=true&w=majority
+DB_NAME=sendbid
+
+# ── Securite ──
+JWT_SECRET=votre_jwt_secret_tres_long_et_aleatoire
+QR_HMAC_SECRET=votre_qr_hmac_secret_tres_long
+
+# ── Environnement ──
+ENVIRONMENT=production
+
+# ── Admin & comptes de demo ──
+ADMIN_EMAIL=admin@sendbid.app
+ADMIN_PASSWORD=VotreMotDePasseAdmin123!
+DEMO_CLIENT_EMAIL=demo@sendbid.app
+DEMO_CLIENT_PASSWORD=Demo@2026!
+DEMO_CLIENT_PIN=123456
+
+# ── CORS ──
+ALLOWED_ORIGINS=https://sendfloo.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
+
+# ── Stripe (paiements carte) ──
+STRIPE_API_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+EXPO_PUBLIC_STRIPE_PK=pk_test_...
+
+# ── PayPal (payouts/recharges) ──
+PAYPAL_CLIENT_ID=...
+PAYPAL_SECRET=...
+PAYPAL_MODE=sandbox
+PAYPAL_PAYOUTS_ENABLED=false
+
+# ── Twilio (SMS / validation telephone) ──
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_FROM_NUMBER=+1234567890
+TWILIO_FROM_PHONE=+1234567890
+
+# ── SendGrid (emails transactionnels) ──
+SENDGRID_API_KEY=SG...
+SENDGRID_FROM_EMAIL=noreply@votredomaine.com
+SENDGRID_FROM_NAME=SENDBID
+
+# ── Firebase (push notifications) ──
+FIREBASE_CREDENTIALS_PATH=/app/secrets/firebase-service-account.json
+
+# ── Google Maps ──
+GOOGLE_MAPS_API_KEY=...
+GOOGLE_MAPS_IOS_API_KEY=...
+GOOGLE_MAPS_ANDROID_API_KEY=...
+
+# ── KYC DIDIT ──
+DIDIT_API_KEY=...
+DIDIT_WORKFLOW_ID=...
+
+# ── Forex / CinetPay (optionnel) ──
+FOREX_API_BASE=
+FOREX_API_KEY=
+CINETPAY_API_KEY=
+CINETPAY_SITE_ID=
+CINETPAY_MODE=PROD
+
+# ── LLM optionnel ──
+EMERGENT_LLM_KEY=

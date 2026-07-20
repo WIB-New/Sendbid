@@ -1,4 +1,4 @@
-/** Mapping pays → devise locale */
+/** Mapping pays (nom français) → devise locale */
 export const COUNTRY_CURRENCY: Record<string, string> = {
   "France": "EUR",
   "Belgique": "EUR",
@@ -28,16 +28,46 @@ export const COUNTRY_CURRENCY: Record<string, string> = {
   "Suisse": "CHF",
 };
 
+/** Mapping code ISO 3166-1 alpha-2 → devise locale */
+export const COUNTRY_TO_ISO: Record<string, string> = {
+  "France": "FR", "Cameroun": "CM", "Sénégal": "SN", "Côte d'Ivoire": "CI", "Mali": "ML",
+  "Gabon": "GA", "Congo (RDC)": "CD", "Congo (Brazzaville)": "CG", "Guinée": "GN",
+  "Burkina Faso": "BF", "Togo": "TG", "Bénin": "BJ", "Niger": "NE", "Tchad": "TD",
+  "Madagascar": "MG", "Belgique": "BE", "Suisse": "CH", "Canada": "CA", "États-Unis": "US",
+  "Royaume-Uni": "GB", "Allemagne": "DE", "Espagne": "ES", "Italie": "IT", "Maroc": "MA",
+  "Tunisie": "TN", "Algérie": "DZ",
+};
+
+export const ISO_CURRENCY: Record<string, string> = {
+  "FR": "EUR", "BE": "EUR", "DE": "EUR", "ES": "EUR", "IT": "EUR",
+  "CM": "XAF", "GA": "XAF", "CG": "XAF", "TD": "XAF",
+  "SN": "XOF", "CI": "XOF", "ML": "XOF", "BF": "XOF", "TG": "XOF", "BJ": "XOF", "NE": "XOF",
+  "CD": "CDF", "GN": "GNF", "MG": "MGA", "MA": "MAD", "TN": "TND", "DZ": "DZD",
+  "GB": "GBP", "US": "USD", "CA": "CAD", "CH": "CHF",
+};
+
 /**
  * Retourne la devise locale du pays.
+ * Accepte le nom français du pays ou le code ISO alpha-2.
  * Si le pays n'est pas trouvé, retourne la devise du wallet (fallback).
  */
 export function getLocalCurrency(country?: string | null, walletCurrency?: string): string {
-  if (country && COUNTRY_CURRENCY[country]) {
-    return COUNTRY_CURRENCY[country];
-  }
+  if (!country) return walletCurrency || "EUR";
+  const normalized = country.trim();
+  if (COUNTRY_CURRENCY[normalized]) return COUNTRY_CURRENCY[normalized];
+  if (ISO_CURRENCY[normalized.toUpperCase()]) return ISO_CURRENCY[normalized.toUpperCase()];
   return walletCurrency || "EUR";
 }
+
+/** Mapping code ISO alpha-2 → nom pays (pour les mappings basés sur nom) */
+export const ISO_TO_COUNTRY_NAME: Record<string, string> = {
+  "FR": "France", "BE": "Belgique", "DE": "Allemagne", "ES": "Espagne", "IT": "Italie",
+  "CM": "Cameroun", "GA": "Gabon", "CG": "Congo (Brazzaville)", "TD": "Tchad",
+  "SN": "Sénégal", "CI": "Côte d'Ivoire", "ML": "Mali", "BF": "Burkina Faso",
+  "TG": "Togo", "BJ": "Bénin", "NE": "Niger", "CD": "Congo (RDC)", "GN": "Guinée",
+  "MG": "Madagascar", "MA": "Maroc", "TN": "Tunisie", "DZ": "Algérie",
+  "GB": "Royaume-Uni", "US": "États-Unis", "CA": "Canada", "CH": "Suisse",
+};
 
 /** Opérateurs Mobile Money disponibles par pays */
 export const COUNTRY_MOMO_OPS: Record<string, string[]> = {
@@ -71,43 +101,52 @@ export const COUNTRY_MOMO_OPS: Record<string, string[]> = {
 
 /** Méthodes de retrait disponibles par pays */
 export const COUNTRY_PAYMENT_METHODS: Record<string, ("cash" | "bank" | "momo" | "paypal")[]> = {
-  "France":             ["cash", "bank", "paypal"],
-  "Belgique":           ["cash", "bank", "paypal"],
-  "Allemagne":          ["cash", "bank", "paypal"],
-  "Espagne":            ["cash", "bank", "paypal"],
-  "Italie":             ["cash", "bank", "paypal"],
-  "Suisse":             ["cash", "bank", "paypal"],
-  "Royaume-Uni":        ["cash", "bank", "paypal"],
-  "États-Unis":         ["cash", "bank", "paypal"],
-  "Canada":             ["cash", "bank", "paypal"],
+  "France":             ["cash", "bank", "momo", "paypal"],
+  "Belgique":           ["cash", "bank", "momo", "paypal"],
+  "Allemagne":          ["cash", "bank", "momo", "paypal"],
+  "Espagne":            ["cash", "bank", "momo", "paypal"],
+  "Italie":             ["cash", "bank", "momo", "paypal"],
+  "Suisse":             ["cash", "bank", "momo", "paypal"],
+  "Royaume-Uni":        ["cash", "bank", "momo", "paypal"],
+  "États-Unis":         ["cash", "bank", "momo", "paypal"],
+  "Canada":             ["cash", "bank", "momo", "paypal"],
   "Cameroun":           ["cash", "momo", "bank", "paypal"],
   "Gabon":              ["cash", "momo", "bank", "paypal"],
-  "Congo (Brazzaville)":["cash", "momo", "paypal"],
-  "Tchad":              ["cash", "momo", "paypal"],
+  "Congo (Brazzaville)":["cash", "momo", "bank", "paypal"],
+  "Tchad":              ["cash", "momo", "bank", "paypal"],
   "Sénégal":            ["cash", "momo", "bank", "paypal"],
   "Côte d'Ivoire":      ["cash", "momo", "bank", "paypal"],
-  "Mali":               ["cash", "momo", "paypal"],
-  "Burkina Faso":       ["cash", "momo", "paypal"],
-  "Togo":               ["cash", "momo", "paypal"],
-  "Bénin":              ["cash", "momo", "paypal"],
-  "Niger":              ["cash", "momo", "paypal"],
-  "Congo (RDC)":        ["cash", "momo", "paypal"],
-  "Guinée":             ["cash", "momo", "paypal"],
-  "Madagascar":         ["cash", "momo", "paypal"],
+  "Mali":               ["cash", "momo", "bank", "paypal"],
+  "Burkina Faso":       ["cash", "momo", "bank", "paypal"],
+  "Togo":               ["cash", "momo", "bank", "paypal"],
+  "Bénin":              ["cash", "momo", "bank", "paypal"],
+  "Niger":              ["cash", "momo", "bank", "paypal"],
+  "Congo (RDC)":        ["cash", "momo", "bank", "paypal"],
+  "Guinée":             ["cash", "momo", "bank", "paypal"],
+  "Madagascar":         ["cash", "momo", "bank", "paypal"],
   "Maroc":              ["cash", "bank", "momo", "paypal"],
   "Tunisie":            ["cash", "bank", "momo", "paypal"],
   "Algérie":            ["cash", "bank", "momo", "paypal"],
 };
 
-/** Retourne les opérateurs MoMo disponibles pour un pays (fallback liste générique) */
+function resolveCountryName(country?: string | null): string | undefined {
+  if (!country) return undefined;
+  const normalized = country.trim();
+  if (COUNTRY_CURRENCY[normalized]) return normalized;
+  return ISO_TO_COUNTRY_NAME[normalized.toUpperCase()];
+}
+
+/** Retourne les opérateurs MoMo disponibles pour un pays (accepte nom ou ISO) */
 export function getMomoOps(country?: string | null): string[] {
-  if (country && COUNTRY_MOMO_OPS[country]) return COUNTRY_MOMO_OPS[country];
+  const name = resolveCountryName(country);
+  if (name && COUNTRY_MOMO_OPS[name]) return COUNTRY_MOMO_OPS[name];
   return ["Wave", "Orange Money", "MTN MoMo", "Moov Money", "Airtel Money"];
 }
 
-/** Retourne les méthodes de retrait disponibles pour un pays */
+/** Retourne les méthodes de retrait disponibles pour un pays (accepte nom ou ISO) */
 export function getPaymentMethods(country?: string | null): ("cash" | "bank" | "momo" | "paypal")[] {
-  if (country && COUNTRY_PAYMENT_METHODS[country]) return COUNTRY_PAYMENT_METHODS[country];
+  const name = resolveCountryName(country);
+  if (name && COUNTRY_PAYMENT_METHODS[name]) return COUNTRY_PAYMENT_METHODS[name];
   return ["cash", "bank", "momo", "paypal"];
 }
 
@@ -216,6 +255,18 @@ export const COUNTRY_BANKS: Record<string, string[]> = {
     "RBC (Royal Bank of Canada)", "TD Canada Trust", "Scotiabank",
     "BMO (Banque de Montréal)", "CIBC", "Desjardins",
   ],
+  "Allemagne": [
+    "Deutsche Bank", "Commerzbank", "Sparkasse", "Volksbanken Raiffeisenbanken",
+    "ING Allemagne", "Deutsche Kreditbank (DKB)", "N26", "Comdirect",
+  ],
+  "Espagne": [
+    "Banco Santander", "BBVA", "CaixaBank", "Sabadell", "Bankinter",
+    "Kutxabank", "Abanca", "Openbank",
+  ],
+  "Italie": [
+    "UniCredit", "Intesa Sanpaolo", "Banca Monte dei Paschi di Siena",
+    "Banco BPM", "UBI Banca", "Poste Italiane", "Deutsche Bank Italia",
+  ],
   "Suisse": [
     "UBS", "Credit Suisse", "PostFinance", "Raiffeisen", "Zürcher Kantonalbank",
   ],
@@ -313,8 +364,9 @@ export const COUNTRY_BANKS: Record<string, string[]> = {
   ],
 };
 
-/** Retourne la liste des banques pour un pays */
+/** Retourne la liste des banques pour un pays (accepte nom ou ISO) */
 export function getBanks(country?: string | null): string[] {
-  if (country && COUNTRY_BANKS[country]) return COUNTRY_BANKS[country];
+  const name = resolveCountryName(country);
+  if (name && COUNTRY_BANKS[name]) return COUNTRY_BANKS[name];
   return [];
 }

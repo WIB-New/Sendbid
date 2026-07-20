@@ -22,6 +22,25 @@ from .models import RegisterIn, LoginIn, UpdateMeIn
 
 logger = logging.getLogger("sendbid.auth.core")
 
+# Mapping des noms de pays ( signup frontend) vers code ISO alpha-2
+COUNTRY_NAME_TO_ISO = {
+    "FRANCE": "FR", "CAMEROUN": "CM", "SENEGAL": "SN", "COTE D'IVOIRE": "CI", "MALI": "ML",
+    "GABON": "GA", "CONGO (RDC)": "CD", "CONGO (BRAZZAVILLE)": "CG", "GUINEE": "GN",
+    "BURKINA FASO": "BF", "TOGO": "TG", "BENIN": "BJ", "NIGER": "NE", "TCHAD": "TD",
+    "MADAGASCAR": "MG", "BELGIQUE": "BE", "SUISSE": "CH", "CANADA": "CA", "ETATS-UNIS": "US",
+    "ROYAUME-UNI": "GB", "ALLEMAGNE": "DE", "ESPAGNE": "ES", "ITALIE": "IT", "MAROC": "MA",
+    "TUNISIE": "TN", "ALGERIE": "DZ",
+}
+
+
+def normalize_country(country: Optional[str]) -> Optional[str]:
+    if not country:
+        return None
+    c = country.strip().upper()
+    if len(c) == 2:
+        return c
+    return COUNTRY_NAME_TO_ISO.get(c)
+
 
 @router.post("/register")
 async def register(payload: RegisterIn):
@@ -74,7 +93,7 @@ async def register(payload: RegisterIn):
         "loyalty_level": "Bronze", "loyalty_points": 0,
         "biometric_enabled": False, "biometric_token": None,
         "avatar_url": None, "language": "fr", "theme": "light",
-        "country": (payload.country or country_lookup or "").upper()[:2] or None,
+        "country": normalize_country(payload.country or country_lookup) or None,
         "city": payload.city or None,
         "carrier_name": carrier_name,
         "phone_line_type": line_type,
@@ -163,6 +182,8 @@ async def update_me(payload: UpdateMeIn, user: dict = Depends(get_current_user))
     patch = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     if not patch:
         raise HTTPException(status_code=400, detail="Aucune modification fournie")
+    if "country" in patch:
+        patch["country"] = normalize_country(patch["country"]) or user.get("country")
     patch["updated_at"] = iso(now_utc())
     await db.users.update_one({"id": user["id"]}, {"$set": patch})
     fresh = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password_hash": 0, "pin_hash": 0})

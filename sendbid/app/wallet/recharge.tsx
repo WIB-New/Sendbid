@@ -9,6 +9,7 @@ import { Screen } from "../../src/components/Screen";
 import { TText } from "../../src/components/TText";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
+import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
@@ -61,6 +62,8 @@ export default function Recharge() {
   // QR code espèces
   const [cashQr, setCashQr] = useState<{ token: string; amount: number; currency: string; expires_at: string } | null>(null);
   const [cashQrLoading, setCashQrLoading] = useState(false);
+  const [pin, setPin] = useState("");
+  const [pinModal, setPinModal] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -75,6 +78,33 @@ export default function Recharge() {
       setLinkedAccounts(Array.isArray(data) ? data : []);
     } catch {}
   };
+
+  // Sélectionner automatiquement un compte lié adapté quand la méthode ou les comptes changent
+  useEffect(() => {
+    if (method === "momo") {
+      const acc = linkedAccounts.find((a) => a.type === "momo" && a.status === "active");
+      if (acc) {
+        setMomoOp(acc.operator || momoOps[0] || "Wave");
+        setMomoNumber(acc.identifier);
+        setSelectedLinkedAccount(acc);
+      } else {
+        setMomoNumber("");
+        setSelectedLinkedAccount(null);
+      }
+    } else if (method === "card") {
+      const acc = linkedAccounts.find((a) => a.type === "bank" && a.status === "active");
+      if (acc) setSelectedLinkedAccount(acc);
+    } else if (method === "paypal") {
+      const acc = linkedAccounts.find((a) => a.type === "paypal" && a.status === "active");
+      if (acc) {
+        setPplEmail(acc.identifier);
+        setSelectedLinkedAccount(acc);
+      } else {
+        setPplEmail("");
+        setSelectedLinkedAccount(null);
+      }
+    }
+  }, [method, linkedAccounts]);
 
   const loadPackages = async () => {
     try {
@@ -132,7 +162,7 @@ export default function Recharge() {
         allowsDelayedPaymentMethods: false,
         defaultBillingDetails: {
           email: user?.email,
-          name: `${user?.first_name || ""} ${user?.last_name || ""}`.trim(),
+          name: user?.full_name || "",
         },
       });
 
@@ -366,7 +396,7 @@ export default function Recharge() {
                             </View>
                             <View style={{ flex: 1, marginLeft: 12 }}>
                               <TText variant="caption" weight="extraBold" color={selectedLinkedAccount?.id === card.id ? colors.primary.base : colors.neutrals.textPrimary}>
-                                {card.label || card.bank_name || "Compte bancaire"}
+                                {card.bank_name || card.label || "Compte bancaire"}
                               </TText>
                               <TText variant="label" color={colors.neutrals.textSecondary}>
                                 {card.identifier || card.iban || ""}
@@ -376,7 +406,12 @@ export default function Recharge() {
                                   <Ionicons name="time-outline" size={11} color="#92400E" />
                                   <TText variant="label" color="#92400E" style={{ marginLeft: 3 }}>En attente de vérification</TText>
                                 </View>
-                              ) : null}
+                              ) : (
+                                <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+                                  <Ionicons name="checkmark-circle" size={11} color="#047857" />
+                                  <TText variant="label" color="#047857" style={{ marginLeft: 3 }}>Vérifié</TText>
+                                </View>
+                              )}
                             </View>
                             {selectedLinkedAccount?.id === card.id ? (
                               <Ionicons name="checkmark-circle" size={22} color={colors.primary.base} />
@@ -384,20 +419,28 @@ export default function Recharge() {
                           </TouchableOpacity>
                         );
                       })}
+                      <TouchableOpacity onPress={() => router.push("/wallet/linked-accounts")} style={{ marginBottom: 12 }}>
+                        <TText variant="caption" weight="bold" color={colors.primary.base}>+ Ajouter un autre compte bancaire</TText>
+                      </TouchableOpacity>
                       <View style={styles.dividerLine} />
                     </>
                   ) : (
                     <View style={styles.noCardBox}>
                       <Ionicons name="business-outline" size={28} color={colors.neutrals.textSecondary} />
                       <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 8 }}>
-                        Aucun compte bancaire enregistré.{"\n"}Ajoutez-en un dans Comptes liés.
+                        Aucun compte bancaire enregistré.
                       </TText>
+                      <TouchableOpacity onPress={() => router.push("/wallet/linked-accounts")} style={{ marginTop: 12 }}>
+                        <TText variant="caption" weight="bold" color={colors.primary.base}>
+                          + Ajouter un compte bancaire
+                        </TText>
+                      </TouchableOpacity>
                     </View>
                   )}
 
                   {/* Champ montant */}
                   <Input
-                    label={`Montant à recharger (${currency})`}
+                    label={t("recharge.amount", { currency })}
                     value={customAmount}
                     onChangeText={setCustomAmount}
                     keyboardType="decimal-pad"
@@ -417,49 +460,83 @@ export default function Recharge() {
               ) : method === "momo" ? (
                 <>
                   {/* Comptes Mobile Money liés */}
-                  {linkedAccounts.filter(a => a.type === "momo").length > 0 && (
+                  {linkedAccounts.filter(a => a.type === "momo").length > 0 ? (
                     <>
-                      <TText variant="caption" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 8 }}>Comptes liés</TText>
-                      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-                        {linkedAccounts.filter(a => a.type === "momo").map((acc) => (
+                      <TText variant="caption" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 8 }}>Comptes portefeuille mobile liés</TText>
+                      {linkedAccounts.filter(a => a.type === "momo").map((acc) => {
+                        const isPending = acc.status === "pending";
+                        const isSelected = selectedLinkedAccount?.id === acc.id;
+                        return (
                           <TouchableOpacity
                             key={acc.id}
                             onPress={() => {
+                              if (isPending) return;
                               setMomoOp(acc.operator || "Wave");
                               setMomoNumber(acc.identifier);
                               setSelectedLinkedAccount(acc);
                             }}
-                            style={[styles.opChip, selectedLinkedAccount?.id === acc.id && { backgroundColor: colors.primary.base, borderColor: colors.primary.base }]}
+                            style={[styles.momoAccountCard, isSelected && styles.momoAccountCardActive, isPending && { opacity: 0.55 }]}
                           >
-                            <TText variant="caption" weight="bold" color={selectedLinkedAccount?.id === acc.id ? "white" : colors.neutrals.textPrimary}>
-                              {acc.label || acc.operator} · {acc.identifier.slice(-4)}
-                            </TText>
+                            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <View style={[styles.momoLogoCircle, isSelected && { backgroundColor: colors.primary.base }]}>
+                                  <Ionicons name="phone-portrait-outline" size={20} color={isSelected ? "white" : colors.primary.base} />
+                                </View>
+                                <View style={{ marginLeft: 12 }}>
+                                  <TText variant="caption" weight="extraBold" color={isSelected ? colors.primary.base : colors.neutrals.textPrimary}>
+                                    {acc.operator || "Portefeuille mobile"}
+                                  </TText>
+                                  <TText variant="label" color={colors.neutrals.textSecondary} style={{ letterSpacing: 0.5 }}>
+                                    {acc.identifier}
+                                  </TText>
+                                </View>
+                              </View>
+                              {isSelected ? (
+                                <Ionicons name="checkmark-circle" size={24} color={colors.primary.base} />
+                              ) : isPending ? (
+                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                  <Ionicons name="time-outline" size={14} color="#92400E" />
+                                  <TText variant="label" color="#92400E" style={{ marginLeft: 4 }}>En attente</TText>
+                                </View>
+                              ) : (
+                                <Ionicons name="checkmark-circle" size={22} color="#047857" />
+                              )}
+                            </View>
                           </TouchableOpacity>
-                        ))}
-                      </View>
-                    </>
-                  )}
-                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-                    {momoOps.map((op) => (
-                      <TouchableOpacity key={op} onPress={() => setMomoOp(op)} style={[styles.opChip, momoOp === op && { backgroundColor: colors.primary.base, borderColor: colors.primary.base }]}>
-                        <TText variant="caption" weight="bold" color={momoOp === op ? "white" : colors.neutrals.textPrimary}>{op}</TText>
+                        );
+                      })}
+                      <TouchableOpacity onPress={() => router.push("/wallet/linked-accounts")} style={{ marginBottom: 12 }}>
+                        <TText variant="caption" weight="bold" color={colors.primary.base}>+ Ajouter un autre compte portefeuille mobile</TText>
                       </TouchableOpacity>
-                    ))}
-                  </View>
-                  <Input label={t("recharge.phoneNumber")} value={momoNumber} onChangeText={(txt) => { setMomoNumber(txt); setSelectedLinkedAccount(null); }} icon="call-outline" keyboardType="phone-pad" />
-                  <Input label={t("recharge.amount", { currency })} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
-                  <Button
-                    title={t("recharge.rechargeVia", { operator: momoOp })}
-                    onPress={submitMomo}
-                    loading={loading}
-                    disabled={!momoNumber || parseFloat(amount) <= 0}
-                    icon="phone-portrait-outline"
-                  />
+                      <Input label={t("recharge.amount", { currency })} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
+                      <Button
+                        title={t("recharge.rechargeVia", { operator: momoOp })}
+                        onPress={submitMomo}
+                        loading={loading}
+                        disabled={!momoNumber || parseFloat(amount) <= 0}
+                        icon="phone-portrait-outline"
+                      />
+                    </>
+                  ) : (
+                    <View style={styles.noCardBox}>
+                      <Ionicons name="phone-portrait-outline" size={28} color={colors.neutrals.textSecondary} />
+                      <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 8 }}>
+                        Aucun compte portefeuille mobile enregistré.
+                      </TText>
+                      <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
+                        Liez d'abord un portefeuille mobile pour recharger.
+                      </TText>
+                      <TouchableOpacity onPress={() => router.push("/wallet/linked-accounts")} style={{ marginTop: 12 }}>
+                        <TText variant="caption" weight="bold" color={colors.primary.base}>
+                          + Ajouter un compte portefeuille mobile
+                        </TText>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </>
               ) : method === "paypal" ? (
                 <>
-                  {/* Comptes PayPal liés */}
-                  {linkedAccounts.filter(a => a.type === "paypal").length > 0 && (
+                  {linkedAccounts.filter(a => a.type === "paypal").length > 0 ? (
                     <>
                       <TText variant="caption" weight="semiBold" color={colors.neutrals.textSecondary} style={{ marginBottom: 8 }}>Comptes PayPal liés</TText>
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
@@ -478,17 +555,31 @@ export default function Recharge() {
                           </TouchableOpacity>
                         ))}
                       </View>
+                      <Input label={t("recharge.amount", { currency })} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
+                      <Button
+                        title={t("recharge.payWithPaypal")}
+                        onPress={submitPaypal}
+                        loading={loading}
+                        disabled={!pplEmail || parseFloat(amount) <= 0}
+                        icon="logo-paypal"
+                      />
                     </>
+                  ) : (
+                    <View style={styles.noCardBox}>
+                      <Ionicons name="mail-outline" size={28} color={colors.neutrals.textSecondary} />
+                      <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 8 }}>
+                        Aucun compte PayPal enregistré.
+                      </TText>
+                      <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
+                        Liez d'abord un compte PayPal pour recharger.
+                      </TText>
+                      <TouchableOpacity onPress={() => router.push("/wallet/linked-accounts")} style={{ marginTop: 12 }}>
+                        <TText variant="caption" weight="bold" color={colors.primary.base}>
+                          + Ajouter un compte PayPal
+                        </TText>
+                      </TouchableOpacity>
+                    </View>
                   )}
-                  <Input label={t("recharge.paypalEmail")} value={pplEmail} onChangeText={(txt) => { setPplEmail(txt); setSelectedLinkedAccount(null); }} icon="mail-outline" keyboardType="email-address" autoCapitalize="none" />
-                  <Input label={t("recharge.amount", { currency })} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" icon="cash-outline" />
-                  <Button
-                    title={t("recharge.payWithPaypal")}
-                    onPress={submitPaypal}
-                    loading={loading}
-                    disabled={!pplEmail || parseFloat(amount) <= 0}
-                    icon="logo-paypal"
-                  />
                 </>
               ) : method === "cash" ? (
                 <>
@@ -507,19 +598,11 @@ export default function Recharge() {
                     title={cashQrLoading ? "Génération..." : t("recharge.generateQR")}
                     icon="qr-code"
                     loading={cashQrLoading}
-                    onPress={async () => {
+                    onPress={() => {
                       const a = parseFloat(amount.replace(",", "."));
                       if (!a || a <= 0) { setErr(t("recharge.invalidAmount")); return; }
                       setErr(null);
-                      setCashQrLoading(true);
-                      try {
-                        const { data } = await api.post("/wallet/recharge-qr", { amount: a });
-                        setCashQr({ token: data.qr_token, amount: a, currency, expires_at: data.expires_at });
-                      } catch (e: any) {
-                        setErr(apiError(e));
-                      } finally {
-                        setCashQrLoading(false);
-                      }
+                      setPinModal(true);
                     }}
                     disabled={parseFloat(amount) <= 0 || cashQrLoading}
                   />
@@ -529,7 +612,7 @@ export default function Recharge() {
                     <View style={styles.qrOverlay}>
                       <View style={styles.qrCard}>
                         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md }}>
-                          <TText variant="subtitle" weight="extraBold">Code de recharge</TText>
+                          <TText variant="subtitle" weight="extraBold">{t("recharge.qrTitle")}</TText>
                           <TouchableOpacity onPress={() => setCashQr(null)} hitSlop={10}>
                             <Ionicons name="close" size={24} color={colors.neutrals.textPrimary} />
                           </TouchableOpacity>
@@ -541,18 +624,18 @@ export default function Recharge() {
                           {cashQr?.amount.toFixed(2)} {cashQr?.currency}
                         </TText>
                         <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginTop: 4 }}>
-                          Présentez ce QR code à l’agent SENDBID
+                          {t("recharge.qrShowAgent")}
                         </TText>
                         {cashQr?.expires_at ? (
                           <View style={styles.expireRow}>
                             <Ionicons name="time-outline" size={14} color="#92400E" />
                             <TText variant="label" color="#92400E" style={{ marginLeft: 4 }}>
-                              Expire le {new Date(cashQr.expires_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                              {t("recharge.qrExpiresAt", { time: new Date(cashQr.expires_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) })}
                             </TText>
                           </View>
                         ) : null}
                         <Button
-                          title="Fermer"
+                          title={t("recharge.close")}
                           icon="checkmark-circle-outline"
                           style={{ marginTop: spacing.lg }}
                           onPress={() => setCashQr(null)}
@@ -639,6 +722,37 @@ export default function Recharge() {
             ) : null}
           </View>
         </Modal>
+
+      {/* Modal PIN pour recharge espèces */}
+      <Modal visible={Boolean(pinModal)} transparent animationType="slide" onRequestClose={() => setPinModal(false)}>
+        <View style={styles.modal}>
+          <View style={styles.sheet}>
+            <TText variant="subtitle" weight="bold" align="center">Saisissez votre PIN</TText>
+            <TText variant="caption" color={colors.neutrals.textSecondary} align="center" style={{ marginBottom: spacing.md }}>
+              Confirmez le dépôt de {amount} {currency} (espèces agent)
+            </TText>
+            <PINPad pin={pin} onChange={setPin} />
+            {err ? <TText variant="caption" color={colors.status.error} align="center">{err}</TText> : null}
+            <Button title="Valider" loading={cashQrLoading} disabled={pin.length !== 6 || cashQrLoading} onPress={async () => {
+              const a = parseFloat(amount.replace(",", "."));
+              if (!a || a <= 0) { setErr(t("recharge.invalidAmount")); return; }
+              setCashQrLoading(true);
+              try {
+                const { data } = await api.post("/wallet/recharge-qr", { amount: a, pin });
+                setCashQr({ token: data.qr_token, amount: a, currency, expires_at: data.expires_at });
+                setPinModal(false); setPin("");
+              } catch (e: any) {
+                setErr(apiError(e));
+              } finally {
+                setCashQrLoading(false);
+              }
+            }} style={{ marginTop: 12 }} />
+            <TouchableOpacity onPress={() => { setPinModal(false); setPin(""); }} style={{ alignItems: "center", marginTop: 8 }}>
+              <TText variant="caption" color={colors.neutrals.textSecondary}>Annuler</TText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -680,4 +794,9 @@ const styles = StyleSheet.create({
   dividerLine: { height: 1, backgroundColor: colors.neutrals.border, marginVertical: spacing.md },
   noCardBox: { alignItems: "center", backgroundColor: colors.neutrals.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.neutrals.border, padding: spacing.xl, marginBottom: spacing.md },
   pendingBadge: { flexDirection: "row", alignItems: "center", backgroundColor: "#FEF3C7", borderRadius: radii.full, paddingHorizontal: 8, paddingVertical: 3, marginTop: 4, alignSelf: "flex-start" },
+  momoAccountCard: { backgroundColor: colors.neutrals.surface, borderRadius: radii.xl, borderWidth: 1.5, borderColor: colors.neutrals.border, padding: 14, marginBottom: 10 },
+  momoAccountCardActive: { borderColor: colors.primary.base, backgroundColor: colors.overlays.primarySoft },
+  momoLogoCircle: { width: 40, height: 40, borderRadius: radii.full, backgroundColor: colors.overlays.primarySoft, alignItems: "center", justifyContent: "center" },
+  modal: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
+  sheet: { backgroundColor: colors.neutrals.background, borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl, padding: spacing.xl, paddingBottom: spacing.xxxl },
 });

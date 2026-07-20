@@ -164,21 +164,21 @@ export default function AccountPage() {
             onPress={() => openModal("withdraw")}
             variant="outline"
             style={[styles.quickButton, styles.withdrawButton]}
-            icon="arrow-down"
+            icon="arrow-down-outline"
           />
           <Button
             title="Recharger"
             onPress={() => openModal("deposit")}
             variant="outline"
             style={[styles.quickButton, styles.depositButton]}
-            icon="arrow-up"
+            icon="arrow-up-outline"
           />
           <Button
             title="Verser siège"
             onPress={() => openModal("payhq")}
             variant="outline"
             style={[styles.quickButton, styles.payhqButton]}
-            icon="business"
+            icon="business-outline"
           />
         </View>
 

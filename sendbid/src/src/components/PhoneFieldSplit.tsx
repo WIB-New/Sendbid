@@ -24,7 +24,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet, Modal, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "./TText";
-import { countryToDial, dialToCountry, flagEmoji } from "../utils/dialCodes";
+import { COUNTRY_TO_DIAL, countryToDial, dialToCountry, flagEmoji } from "../utils/dialCodes";
 import { radii } from "../theme";
 import { useThemedColors } from "../themeContext";
 
@@ -32,8 +32,8 @@ import { useThemedColors } from "../themeContext";
 type Country = { code: string; dial: string; flag: string; name: string };
 
 function buildCountryList(): Country[] {
-  // countryToDial est un map { ISO2 -> "+XX" }
-  const entries = Object.entries(countryToDial as Record<string, string>);
+  // COUNTRY_TO_DIAL est un map { ISO2 -> "+XX" }
+  const entries = Object.entries(COUNTRY_TO_DIAL);
   return entries
     .map(([code, dial]) => ({ code, dial, flag: flagEmoji(code), name: code }))
     .sort((a, b) => a.code.localeCompare(b.code));
@@ -66,7 +66,7 @@ export function PhoneFieldSplit({
   // Sync indicatif <- countryHint (parent change le pays)
   useEffect(() => {
     if (!countryHint) return;
-    const next = (countryToDial as any)[countryHint];
+    const next = countryToDial(countryHint);
     if (next && next !== dial) setDial(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryHint]);

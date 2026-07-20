@@ -9,7 +9,7 @@ export const colors = {
   mint: { base: "#00E676", dark: "#00C853", light: "#69F0AE" },
   // Gold tones for premium/loyalty states
   gold: { base: "#D4AF37", dark: "#9A7C1F", light: "#F1D86A", soft: "#FAF1D2" },
-  status: { success: "#10B981", pending: "#F59E0B", error: "#EF4444", info: "#2E4A7A" },
+  status: { success: "#10B981", pending: "#F59E0B", error: "#EF4444", warning: "#D97706", info: "#2E4A7A" },
   neutrals: {
     white: "#FFFFFF",
     background: "#FFFFFF",

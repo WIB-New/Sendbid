@@ -11,7 +11,7 @@ import { PINPad } from "../../src/components/PINPad";
 import { api, apiError } from "../../src/api";
 import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
-import { getLocalCurrency, getMomoOps, getPaymentMethods } from "../../src/currency";
+import { getLocalCurrency, getPaymentMethods } from "../../src/currency";
 import { useTranslation } from "../../src/i18n";
 
 type Method = "cash" | "bank" | "momo" | "paypal";
@@ -23,17 +23,8 @@ export default function Withdraw() {
   const refreshMe = useAuth((s) => s.refreshMe);
   const currency = getLocalCurrency(user?.country, wallet?.currency);
   const availableMethods = getPaymentMethods(user?.country);
-  const momoOps = getMomoOps(user?.country);
   const [method, setMethod] = useState<Method>("cash");
   const [amount, setAmount] = useState("50");
-  // bank
-  const [iban, setIban] = useState("");
-  const [bankName, setBankName] = useState("");
-  // momo
-  const [momoOp, setMomoOp] = useState("Wave");
-  const [momoNumber, setMomoNumber] = useState("");
-  // paypal
-  const [paypalEmail, setPaypalEmail] = useState("");
   // pin / state
   const [pin, setPin] = useState("");
   const [pinModal, setPinModal] = useState(false);
@@ -46,9 +37,17 @@ export default function Withdraw() {
 
   useEffect(() => {
     api.get("/wallet/linked-accounts").then(({ data }) => {
-      setLinkedAccounts(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setLinkedAccounts(list);
+      // Pré-sélectionner le premier compte actif correspondant à la méthode courante
+      const active = list.find((a: any) =>
+        method === "momo" ? a.type === "momo" && a.status === "active" :
+        method === "bank" ? a.type === "bank" && a.status === "active" :
+        method === "paypal" ? a.type === "paypal" && a.status === "active" : false
+      );
+      setSelectedAccount(active || null);
     }).catch(() => {});
-  }, []);
+  }, [method]);
 
   const accountsForMethod = linkedAccounts.filter((a) =>
     method === "momo" ? a.type === "momo" :
@@ -83,7 +82,7 @@ export default function Withdraw() {
       if (method === "paypal") {
         endpoint = "/payments/paypal/withdraw";
         payload = {
-          email: selectedAccount?.identifier || paypalEmail,
+          email: selectedAccount?.identifier,
           amount: parseFloat(amount),
           currency: currency,
         };
@@ -94,10 +93,10 @@ export default function Withdraw() {
       setPinModal(false); setPin("");
       
       const message = method === "bank"
-        ? `Virement de ${amount} ${currency} vers ${selectedAccount?.bank_name || bankName || "votre banque"} programmé. Délai 1–2 jours ouvrés.`
+        ? `Virement de ${amount} ${currency} vers ${selectedAccount?.bank_name || "votre banque"} programmé. Délai 1–2 jours ouvrés.`
         : method === "paypal"
-        ? `Transfert de ${amount} ${currency} vers PayPal (${selectedAccount?.identifier || paypalEmail}) en cours… Délai 1-3 minutes.`
-        : `Transfert de ${amount} ${currency} vers ${selectedAccount?.operator || momoOp} (${selectedAccount?.identifier || momoNumber}) en cours…`;
+        ? `Transfert de ${amount} ${currency} vers PayPal (${selectedAccount?.identifier}) en cours… Délai 1-3 minutes.`
+        : `Transfert de ${amount} ${currency} vers ${selectedAccount?.operator || "portefeuille mobile"} (${selectedAccount?.identifier}) en cours…`;
       
       Alert.alert(
         "Demande enregistrée",
@@ -114,10 +113,7 @@ export default function Withdraw() {
   const submit = () => method === "cash" ? submitCash() : submitOther();
   const canSubmit = amt > 0 && (
     method === "cash" ||
-    (selectedAccount != null) ||
-    (method === "bank" && iban.length >= 8) ||
-    (method === "momo" && momoNumber.length >= 6) ||
-    (method === "paypal" && /\S+@\S+\.\S+/.test(paypalEmail))
+    (selectedAccount != null)
   );
 
   return (
@@ -134,7 +130,7 @@ export default function Withdraw() {
         {[
           { key: "cash",   icon: "qr-code-outline",       label: "Espèces" },
           { key: "bank",   icon: "business-outline",      label: "Banque" },
-          { key: "momo",   icon: "phone-portrait-outline", label: "Mobile" },
+          { key: "momo",   icon: "phone-portrait-outline", label: "Portefeuille mobile" },
           { key: "paypal", icon: "logo-paypal",            label: "PayPal" },
         ].filter((m) => availableMethods.includes(m.key as any))
           .reduce<{key:string;icon:any;label:string}[][]>((rows, item, i) => {
@@ -206,14 +202,11 @@ export default function Withdraw() {
               </TouchableOpacity>
             );
           })}
-          <TouchableOpacity onPress={() => setSelectedAccount(null)} style={{ marginTop: 6 }}>
-            <TText variant="caption" color={colors.primary.base} weight="semiBold">+ Saisir manuellement</TText>
-          </TouchableOpacity>
         </View>
       ) : null}
 
-      {/* Aucun compte lié — invitation à en ajouter un (bank & momo) */}
-      {method !== "cash" && method !== "paypal" && accountsForMethod.length === 0 && !selectedAccount ? (
+      {/* Aucun compte lié — invitation à en ajouter un */}
+      {method !== "cash" && accountsForMethod.length === 0 && !selectedAccount ? (
         <TouchableOpacity
           onPress={() => router.push("/wallet/linked-accounts" as any)}
           style={styles.noAccountBanner}
@@ -222,19 +215,14 @@ export default function Withdraw() {
           <Ionicons name="wallet-outline" size={22} color={colors.primary.base} />
           <View style={{ flex: 1, marginLeft: 12 }}>
             <TText variant="body" weight="extraBold" color={colors.primary.base}>
-              {method === "bank" ? "Aucun compte bancaire lié" : "Aucun compte Mobile Money lié"}
+              {method === "bank" ? "Aucun compte bancaire lié" : method === "paypal" ? "Aucun compte PayPal lié" : "Aucun compte portefeuille mobile lié"}
             </TText>
             <TText variant="caption" color={colors.neutrals.textSecondary} style={{ marginTop: 2 }}>
-              Ajoutez un compte dans vos réglages pour retirer en 1 clic.
+              Liez d'abord un compte dans vos réglages pour retirer.
             </TText>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.primary.base} />
         </TouchableOpacity>
-      ) : null}
-
-      {/* Saisie manuelle PayPal — toujours visible si méthode paypal sans compte lié */}
-      {method === "paypal" && !selectedAccount ? (
-        <Input testID="withdraw-paypal-email" label="Email PayPal" value={paypalEmail} onChangeText={setPaypalEmail} icon="logo-paypal" keyboardType="email-address" autoCapitalize="none" />
       ) : null}
 
       {/* Récapitulatif */}

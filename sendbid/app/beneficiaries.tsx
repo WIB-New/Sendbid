@@ -111,7 +111,8 @@ export default function Beneficiaries() {
 }
 
 function BenRow({ b, last, onSend, onFav, onDelete }: any) {
-  const modeIcon: any = { cash: "cash", bank: "business", momo: "phone-portrait", wallet: "wallet", card: "card" }[b.default_delivery_mode || "cash"] || "cash";
+  const modeIconMap: Record<string, string> = { cash: "cash", bank: "business", momo: "phone-portrait", wallet: "wallet", card: "card" };
+  const modeIcon = (modeIconMap[b.default_delivery_mode || "cash"] || "cash") as any;
   return (
     <View style={[styles.brow, !last && { borderBottomWidth: 1, borderBottomColor: colors.neutrals.border }]}>
       <View style={styles.avatar}>
