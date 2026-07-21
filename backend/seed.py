@@ -59,6 +59,12 @@ async def seed_demo_data():
             })
         except Exception as e:
             logger.warning(f"[seed] admin insert skipped: {e}")
+    elif os.getenv("RESET_ADMIN_PASSWORD", "").lower() == "true":
+        await db.users.update_one(
+            {"email": ADMIN_EMAIL},
+            {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": "admin", "is_admin": True}},
+        )
+        logger.info("[seed] admin password reset")
 
     # Extra admin roles (super_admin, partner_admin, super_agent)
     extra_admins = [
