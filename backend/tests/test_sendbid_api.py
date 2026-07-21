@@ -475,11 +475,12 @@ def test_support_faq_and_contact(s, auth_headers):
 
 
 def test_countries(s):
-    r = s.get(f"{API}/countries", timeout=15)
+    r = s.get(f"{API}/countries/sending", timeout=15)
     assert r.status_code == 200
-    items = r.json()
+    data = r.json()
+    items = data.get("countries", [])
     assert len(items) >= 8
-    assert any(c["code"] == "SN" for c in items)
+    assert any(c["country_code"] == "SN" for c in items)
 
 
 # ------------------------------------------------------------------

@@ -94,7 +94,8 @@ async def seed_demo_data():
             )
 
     # Demo client
-    if not await db.users.find_one({"email": DEMO_CLIENT_EMAIL}):
+    existing_demo = await db.users.find_one({"email": DEMO_CLIENT_EMAIL})
+    if not existing_demo:
         demo_id = gen_id()
         await db.users.insert_one({
             "id": demo_id, "profile_id": "SB100001", "email": DEMO_CLIENT_EMAIL,
@@ -130,14 +131,23 @@ async def seed_demo_data():
             {"id": gen_id(), "user_id": demo_id, "title": "Bienvenue sur SENDBID", "body": "Votre compte est vérifié. Envoyez votre premier transfert !", "type": "info", "read": False, "created_at": iso(now_utc() - timedelta(hours=2))},
             {"id": gen_id(), "user_id": demo_id, "title": "Recharge réussie", "body": "+500 EUR sur votre wallet Floo Money", "type": "success", "read": True, "created_at": iso(now_utc() - timedelta(days=3))},
         ])
+    else:
+        if not IS_PROD:
+            await db.users.update_one(
+                {"email": DEMO_CLIENT_EMAIL},
+                {"$set": {
+                    "password_hash": hash_password(DEMO_CLIENT_PASSWORD),
+                    "pin_hash": hash_password(DEMO_CLIENT_PIN),
+                }},
+            )
 
     # === COMPTES WEB PANELS — Admin / Agent / Superagent ===
     # Comptes seedés pour accéder aux panels web /admin, /agent, /superagent
     # Mots de passe forts par défaut — à changer en production
     for cfg in [
-        {"email": "admin@sendfloo.sendbid.app", "password": "Admin@SendFloo2026!", "role": "super_admin", "name": "Admin SendFloo", "profile_id": "ADM-001"},
-        {"email": "agent@sendfloo.sendbid.app", "password": "Agent@SendFloo2026!", "role": "agent", "name": "Agent SendFloo", "profile_id": "AGT-001"},
-        {"email": "superagent@sendfloo.sendbid.app", "password": "SuperAgent@SendFloo2026!", "role": "super_agent", "name": "Superagent SendFloo", "profile_id": "SAG-001"},
+        {"email": "admin@sendbid.app", "password": "Admin@SendFloo2026!", "role": "super_admin", "name": "Admin SendFloo", "profile_id": "ADM-001"},
+        {"email": "agent@sendbid.app", "password": "Agent@SendFloo2026!", "role": "agent", "name": "Agent SendFloo", "profile_id": "AGT-001"},
+        {"email": "superagent@sendbid.app", "password": "SuperAgent@SendFloo2026!", "role": "super_agent", "name": "Superagent SendFloo", "profile_id": "SAG-001"},
     ]:
         if not await db.users.find_one({"email": cfg["email"]}):
             await db.users.insert_one({
