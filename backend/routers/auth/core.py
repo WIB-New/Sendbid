@@ -110,7 +110,7 @@ async def register(payload: RegisterIn):
         "user_id": user_id, "email_code": email_code, "phone_code": phone_code,
         "expires_at": iso(now_utc() + timedelta(minutes=3)), "created_at": iso(now_utc()),
     })
-    logger.info(f"[OTP] user={user_id} email_code={email_code} phone_code={phone_code}")
+    logger.info(f"[OTP] signup user={user_id}")
     # Send real SMS + email via Twilio + SendGrid (skipped for test domains/numbers)
     delivery = await notify_signup_otp(email, phone, email_code, phone_code, payload.full_name)
     response = {

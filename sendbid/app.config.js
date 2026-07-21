@@ -36,6 +36,6 @@ module.exports = ({ config }) => ({
     },
     package: isPaybid ? "com.paybid.app" : "com.sendbid.app",
     googleServicesFile: "./google-services.json",
-    usesCleartextTraffic: true,
+    usesCleartextTraffic: (process.env.EXPO_PUBLIC_BACKEND_URL || "").startsWith("http://"),
   }
 });

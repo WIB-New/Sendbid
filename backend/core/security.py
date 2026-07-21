@@ -5,7 +5,7 @@ import uuid
 import bcrypt
 import base64
 import hashlib
-import random
+import secrets
 import jwt
 from datetime import timedelta
 from typing import Optional
@@ -19,12 +19,12 @@ def gen_id() -> str:
 
 
 def gen_otp() -> str:
-    return f"{random.randint(0, 999999):06d}"
+    return f"{secrets.randbelow(1_000_000):06d}"
 
 
 def gen_withdrawal_code() -> str:
     """10-digit numeric server-generated withdrawal code."""
-    return f"{random.randint(0, 9999999999):010d}"
+    return f"{secrets.randbelow(10_000_000_000):010d}"
 
 
 def hash_password(pw: str) -> str:

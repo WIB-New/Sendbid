@@ -56,7 +56,7 @@ async def resend_otp(body: dict):
         }},
         upsert=True,
     )
-    logger.info(f"[OTP] resend user={user_id} email={email_code} phone={phone_code}")
+    logger.info(f"[OTP] resend user={user_id}")
     # Send SMS via Twilio (best-effort)
     try:
         from services.twilio_service import send_sms_otp
@@ -149,7 +149,7 @@ async def resend_email_otp(user: dict = Depends(get_current_user)):
         }, "$setOnInsert": {"user_id": user["id"], "phone_code": gen_otp()}},
         upsert=True,
     )
-    logger.info(f"[OTP] resend-email user={user['id']} code={email_code}")
+    logger.info(f"[OTP] resend-email user={user['id']}")
     try:
         from services.notify import notify_signup_otp
         await notify_signup_otp(user["email"], None, email_code, None, user.get("full_name", ""))
@@ -177,7 +177,7 @@ async def resend_phone_otp(user: dict = Depends(get_current_user)):
         }, "$setOnInsert": {"user_id": user["id"], "email_code": gen_otp()}},
         upsert=True,
     )
-    logger.info(f"[OTP] resend-phone user={user['id']} code={phone_code}")
+    logger.info(f"[OTP] resend-phone user={user['id']}")
     try:
         from services.twilio_service import send_sms_otp
         if user.get("phone"):
