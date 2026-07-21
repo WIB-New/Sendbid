@@ -3,7 +3,7 @@
 # Run   : docker run -p 8080:80 sendbid-frontend
 
 # ===== Stage 1 : build du bundle Expo Web =====
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Yarn est déjà inclus dans node:20-alpine. On n'installe que les outils natifs
 # nécessaires aux wheels (sharp, jimp…) si jamais ils sont compilés depuis source.
