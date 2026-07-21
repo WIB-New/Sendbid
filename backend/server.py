@@ -5,6 +5,7 @@ The monolithic server.py was split into modular packages:
 - seed.py — admin/demo/agent seeding
 """
 import logging
+import os
 from fastapi import APIRouter, FastAPI, Request, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
