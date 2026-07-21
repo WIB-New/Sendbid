@@ -5,13 +5,11 @@
 const variant = process.env.APP_VARIANT || process.env.EXPO_PUBLIC_APP_VARIANT || "sendbid";
 const isPaybid = variant === "paybid";
 
-const IS_EAS = process.env.EAS_BUILD === "true";
-
 module.exports = ({ config }) => ({
   ...config,
   name: isPaybid ? "PAYBID" : "SENDBID",
-  slug: isPaybid ? "paybid-temp-project" : "sendbid-temp-project",
-  ...(IS_EAS ? { owner: "wibuser" } : {}),
+  slug: "sendbid-temp-project",
+  owner: "wibuser",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
@@ -23,7 +21,7 @@ module.exports = ({ config }) => ({
   },
   extra: {
     ...config?.extra,
-    ...(IS_EAS ? { eas: { projectId: "8d97965d-d3f2-44d4-b147-7deb5865def9" } } : {}),
+    eas: { projectId: "8d97965d-d3f2-44d4-b147-7deb5865def9" },
   },
   ios: {
     ...(config?.ios || {}),
