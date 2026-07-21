@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from core.db import db, now_utc, iso, clean_doc
-from core.security import verify_password, create_access_token
+from core.security import verify_password, create_access_token, decode_token
 
 # templates est défini dans __init__.py et ré-importé ici. On ne le ré-instancie pas.
 from . import router, templates
