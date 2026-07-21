@@ -15,16 +15,23 @@ jobs:
   build-apks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
       - name: Install EAS CLI
         run: npm install --global eas-cli
+
+      - name: Verify Expo authentication
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          test -n "$EXPO_TOKEN" || { echo "::error::Le secret GitHub EXPO_TOKEN est manquant."; exit 1; }
+          eas whoami
 
       - name: Publish building status
         run: |
