@@ -1,8 +1,9 @@
 """Web panels submodule (split from web_panels.py)."""
 import logging
+import os
 from typing import Optional
 
-from fastapi import Request, Form
+from fastapi import Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from core.db import db, now_utc, iso, clean_doc
@@ -68,6 +69,18 @@ async def marketing_about(request: Request):
 @router.get("/web/download", response_class=HTMLResponse)
 async def marketing_download(request: Request):
     return templates.TemplateResponse("marketing/download.html", _marketing_ctx(request, "download"))
+
+
+@router.get("/web/download/{app_name}")
+async def download_apk(app_name: str):
+    apk_urls = {
+        "sendbid": os.getenv("SENDBID_APK_URL", ""),
+        "paybid": os.getenv("PAYBID_APK_URL", ""),
+    }
+    apk_url = apk_urls.get(app_name)
+    if not apk_url:
+        raise HTTPException(status_code=503, detail="APK indisponible")
+    return RedirectResponse(apk_url, status_code=307)
 
 
 @router.get("/web/superagent", response_class=HTMLResponse)

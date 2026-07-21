@@ -69,6 +69,8 @@ services:
       # ── Forex API (taux de change) ──
       FOREX_API_BASE: ${FOREX_API_BASE:-}
       FOREX_API_KEY: ${FOREX_API_KEY:-}
+      SENDBID_APK_URL: ${SENDBID_APK_URL:-}
+      PAYBID_APK_URL: ${PAYBID_APK_URL:-}
 
       # ── CinetPay (paiements Afrique de l'Ouest) ──
       CINETPAY_API_KEY: ${CINETPAY_API_KEY:-}
@@ -89,7 +91,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-api.rule=Host(`${BACKEND_HOST:-api.sendbid.app}`) || Host(`${ADMIN_HOST:-admin.sendbid.app}`)
+      - traefik.http.routers.sendbid-api.rule=Host(`${BACKEND_HOST:-api.sendbid.app}`) || Host(`${ADMIN_HOST:-admin.sendbid.app}`) || Host(`${FRONTEND_HOST:-sendbid.app}`)
       - traefik.http.routers.sendbid-api.entrypoints=websecure
       - traefik.http.routers.sendbid-api.tls.certresolver=letsencrypt
       - traefik.http.routers.sendbid-admin-root.rule=Host(`${ADMIN_HOST:-admin.sendbid.app}`) && Path(`/`)
@@ -100,59 +102,34 @@ services:
       - traefik.http.middlewares.sendbid-admin-root-redirect.redirectregex.regex=^https?://admin.sendbid.app/$
       - traefik.http.middlewares.sendbid-admin-root-redirect.redirectregex.replacement=https://admin.sendbid.app/api/web/admin
       - traefik.http.middlewares.sendbid-admin-root-redirect.redirectregex.permanent=true
+      - traefik.http.routers.sendbid-download-root.rule=Host(`${FRONTEND_HOST:-sendbid.app}`) && Path(`/`)
+      - traefik.http.routers.sendbid-download-root.entrypoints=websecure
+      - traefik.http.routers.sendbid-download-root.tls.certresolver=letsencrypt
+      - traefik.http.routers.sendbid-download-root.middlewares=sendbid-download-root-redirect
+      - traefik.http.routers.sendbid-download-root.service=sendbid-api
+      - traefik.http.middlewares.sendbid-download-root-redirect.redirectregex.regex=^https?://sendbid.app/$
+      - traefik.http.middlewares.sendbid-download-root-redirect.redirectregex.replacement=https://sendbid.app/api/web/download
+      - traefik.http.middlewares.sendbid-download-root-redirect.redirectregex.permanent=true
+      - traefik.http.routers.sendbid-apk-download.rule=Host(`${FRONTEND_HOST:-sendbid.app}`) && Path(`/download/sendbid`)
+      - traefik.http.routers.sendbid-apk-download.entrypoints=websecure
+      - traefik.http.routers.sendbid-apk-download.tls.certresolver=letsencrypt
+      - traefik.http.routers.sendbid-apk-download.middlewares=sendbid-apk-download-redirect
+      - traefik.http.routers.sendbid-apk-download.service=sendbid-api
+      - traefik.http.middlewares.sendbid-apk-download-redirect.redirectregex.regex=^https?://sendbid.app/download/sendbid$
+      - traefik.http.middlewares.sendbid-apk-download-redirect.redirectregex.replacement=https://sendbid.app/api/web/download/sendbid
+      - traefik.http.middlewares.sendbid-apk-download-redirect.redirectregex.permanent=true
+      - traefik.http.routers.paybid-apk-download.rule=Host(`${FRONTEND_HOST:-sendbid.app}`) && Path(`/download/paybid`)
+      - traefik.http.routers.paybid-apk-download.entrypoints=websecure
+      - traefik.http.routers.paybid-apk-download.tls.certresolver=letsencrypt
+      - traefik.http.routers.paybid-apk-download.middlewares=paybid-apk-download-redirect
+      - traefik.http.routers.paybid-apk-download.service=sendbid-api
+      - traefik.http.middlewares.paybid-apk-download-redirect.redirectregex.regex=^https?://sendbid.app/download/paybid$
+      - traefik.http.middlewares.paybid-apk-download-redirect.redirectregex.replacement=https://sendbid.app/api/web/download/paybid
+      - traefik.http.middlewares.paybid-apk-download-redirect.redirectregex.permanent=true
       - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
       # Middleware optionnel : rediriger HTTP vers HTTPS en production
       # - traefik.http.routers.sendbid-api.middlewares=redirect-to-https
       # - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-    networks:
-      - dokploy-network
-
-  # =================================================================
-  # FRONTEND — Expo Web build statique servi par nginx
-  # =================================================================
-  frontend:
-    build:
-      context: ./sendbid
-      dockerfile: Dockerfile
-      args:
-        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-https://api.sendbid.app}
-        EXPO_PUBLIC_STRIPE_PK: ${EXPO_PUBLIC_STRIPE_PK:-}
-        EXPO_PUBLIC_APP_VARIANT: ${EXPO_PUBLIC_APP_VARIANT:-sendbid}
-        GOOGLE_MAPS_IOS_API_KEY: ${GOOGLE_MAPS_IOS_API_KEY:-}
-        GOOGLE_MAPS_ANDROID_API_KEY: ${GOOGLE_MAPS_ANDROID_API_KEY:-}
-    restart: always
-    expose:
-      - "80"
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-frontend.rule=Host(`${FRONTEND_HOST:-sendbid.app}`)
-      - traefik.http.routers.sendbid-frontend.entrypoints=websecure
-      - traefik.http.routers.sendbid-frontend.tls.certresolver=letsencrypt
-      - traefik.http.services.sendbid-frontend.loadbalancer.server.port=80
-    networks:
-      - dokploy-network
-
-  paybid-frontend:
-    build:
-      context: ./paybid
-      dockerfile: Dockerfile
-      args:
-        EXPO_PUBLIC_BACKEND_URL: ${EXPO_PUBLIC_BACKEND_URL:-https://api.sendbid.app}
-        EXPO_PUBLIC_STRIPE_PK: ${EXPO_PUBLIC_STRIPE_PK:-}
-        EXPO_PUBLIC_APP_VARIANT: paybid
-        GOOGLE_MAPS_IOS_API_KEY: ${GOOGLE_MAPS_IOS_API_KEY:-}
-        GOOGLE_MAPS_ANDROID_API_KEY: ${GOOGLE_MAPS_ANDROID_API_KEY:-}
-    restart: always
-    expose:
-      - "80"
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=dokploy-network
-      - traefik.http.routers.paybid-frontend.rule=Host(`${PAYBID_HOST:-sendfloo.sendbid.app}`)
-      - traefik.http.routers.paybid-frontend.entrypoints=websecure
-      - traefik.http.routers.paybid-frontend.tls.certresolver=letsencrypt
-      - traefik.http.services.paybid-frontend.loadbalancer.server.port=80
     networks:
       - dokploy-network
 
