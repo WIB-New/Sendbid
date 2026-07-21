@@ -1,0 +1,10 @@
+{
+  "sendbid": {
+    "status": "building",
+    "url": ""
+  },
+  "paybid": {
+    "status": "building",
+    "url": ""
+  }
+}

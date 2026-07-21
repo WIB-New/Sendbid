@@ -1,0 +1,12 @@
+{% extends 'partials/base.html' %}
+{% block title %}{{ app_name|capitalize }} — Compilation en cours{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="container center">
+    <span class="eyebrow">{{ app_name|capitalize }}</span>
+    <h1>Votre APK est en cours de compilation</h1>
+    <p class="lead">Le téléchargement sera disponible dès la fin de la génération. Revenez dans quelques minutes.</p>
+    <a class="btn btn-primary" href="/api/web/download">Voir les applications</a>
+  </div>
+</section>
+{% endblock %}

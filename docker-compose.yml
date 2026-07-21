@@ -91,7 +91,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.sendbid-api.rule=Host(`${BACKEND_HOST:-api.sendbid.app}`) || Host(`${ADMIN_HOST:-admin.sendbid.app}`) || Host(`${FRONTEND_HOST:-sendbid.app}`)
+      - traefik.http.routers.sendbid-api.rule=Host(`${BACKEND_HOST:-api.sendbid.app}`) || Host(`${ADMIN_HOST:-admin.sendbid.app}`) || Host(`${DOWNLOAD_HOST:-sendbid.app}`)
       - traefik.http.routers.sendbid-api.entrypoints=websecure
       - traefik.http.routers.sendbid-api.tls.certresolver=letsencrypt
       - traefik.http.routers.sendbid-admin-root.rule=Host(`${ADMIN_HOST:-admin.sendbid.app}`) && Path(`/`)
@@ -102,7 +102,7 @@ services:
       - traefik.http.middlewares.sendbid-admin-root-redirect.redirectregex.regex=^https?://admin.sendbid.app/$
       - traefik.http.middlewares.sendbid-admin-root-redirect.redirectregex.replacement=https://admin.sendbid.app/api/web/admin
       - traefik.http.middlewares.sendbid-admin-root-redirect.redirectregex.permanent=true
-      - traefik.http.routers.sendbid-download-root.rule=Host(`${FRONTEND_HOST:-sendbid.app}`) && Path(`/`)
+      - traefik.http.routers.sendbid-download-root.rule=Host(`${DOWNLOAD_HOST:-sendbid.app}`) && Path(`/`)
       - traefik.http.routers.sendbid-download-root.entrypoints=websecure
       - traefik.http.routers.sendbid-download-root.tls.certresolver=letsencrypt
       - traefik.http.routers.sendbid-download-root.middlewares=sendbid-download-root-redirect
@@ -110,7 +110,7 @@ services:
       - traefik.http.middlewares.sendbid-download-root-redirect.redirectregex.regex=^https?://sendbid.app/$
       - traefik.http.middlewares.sendbid-download-root-redirect.redirectregex.replacement=https://sendbid.app/api/web/download
       - traefik.http.middlewares.sendbid-download-root-redirect.redirectregex.permanent=true
-      - traefik.http.routers.sendbid-apk-download.rule=Host(`${FRONTEND_HOST:-sendbid.app}`) && Path(`/download/sendbid`)
+      - traefik.http.routers.sendbid-apk-download.rule=Host(`${DOWNLOAD_HOST:-sendbid.app}`) && Path(`/download/sendbid`)
       - traefik.http.routers.sendbid-apk-download.entrypoints=websecure
       - traefik.http.routers.sendbid-apk-download.tls.certresolver=letsencrypt
       - traefik.http.routers.sendbid-apk-download.middlewares=sendbid-apk-download-redirect
@@ -118,7 +118,7 @@ services:
       - traefik.http.middlewares.sendbid-apk-download-redirect.redirectregex.regex=^https?://sendbid.app/download/sendbid$
       - traefik.http.middlewares.sendbid-apk-download-redirect.redirectregex.replacement=https://sendbid.app/api/web/download/sendbid
       - traefik.http.middlewares.sendbid-apk-download-redirect.redirectregex.permanent=true
-      - traefik.http.routers.paybid-apk-download.rule=Host(`${FRONTEND_HOST:-sendbid.app}`) && Path(`/download/paybid`)
+      - traefik.http.routers.paybid-apk-download.rule=Host(`${DOWNLOAD_HOST:-sendbid.app}`) && Path(`/download/paybid`)
       - traefik.http.routers.paybid-apk-download.entrypoints=websecure
       - traefik.http.routers.paybid-apk-download.tls.certresolver=letsencrypt
       - traefik.http.routers.paybid-apk-download.middlewares=paybid-apk-download-redirect

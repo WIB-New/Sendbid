@@ -1,0 +1,55 @@
+name: Build mobile APKs
+
+on:
+  push:
+    branches:
+      - franc2
+    paths-ignore:
+      - 'backend/apk_links.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install EAS CLI
+        run: npm install --global eas-cli
+
+      - name: Publish building status
+        run: |
+          node -e 'require("fs").writeFileSync("backend/apk_links.json", JSON.stringify({sendbid:{status:"building",url:""},paybid:{status:"building",url:""}}, null, 2) + "\n")'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/apk_links.json
+          git diff --cached --quiet || git commit -m "chore: mark APK builds in progress"
+          git push
+
+      - name: Build SendBID APK
+        working-directory: sendbid
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform android --profile preview --non-interactive --wait --json > ../sendbid-build.json
+
+      - name: Build PayBID APK
+        working-directory: paybid
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform android --profile preview --non-interactive --wait --json > ../paybid-build.json
+
+      - name: Publish APK download URLs
+        run: |
+          node -e 'const fs=require("fs"); const build=p=>{const value=JSON.parse(fs.readFileSync(p,"utf8")); const item=Array.isArray(value)?value[0]:value; if(!item?.artifacts?.buildUrl) throw new Error(`Missing artifact URL in ${p}`); return item.artifacts.buildUrl}; fs.writeFileSync("backend/apk_links.json", JSON.stringify({sendbid:{status:"ready",url:build("sendbid-build.json")},paybid:{status:"ready",url:build("paybid-build.json")}}, null, 2) + "\n")'
+          git add backend/apk_links.json
+          git diff --cached --quiet || git commit -m "chore: publish APK download URLs"
+          git push

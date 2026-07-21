@@ -9,7 +9,7 @@
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "paybid",
-        "EXPO_PUBLIC_BACKEND_URL": "http://senfloosendbid-sendbidbackend-4qvjcs-734725-195-110-35-155.sslip.io",
+        "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
         "EXPO_PUBLIC_APP_VARIANT": "paybid"
       }
     },
@@ -18,7 +18,7 @@
       "android": { "buildType": "app-bundle" },
       "env": {
         "APP_VARIANT": "paybid",
-        "EXPO_PUBLIC_BACKEND_URL": "https://api.sendfloo.sendbid.app",
+        "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
         "EXPO_PUBLIC_APP_VARIANT": "paybid"
       }
     }

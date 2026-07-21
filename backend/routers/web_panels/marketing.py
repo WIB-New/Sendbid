@@ -1,9 +1,11 @@
 """Web panels submodule (split from web_panels.py)."""
+import json
 import logging
 import os
+from pathlib import Path
 from typing import Optional
 
-from fastapi import Request, Form, HTTPException
+from fastapi import Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from core.db import db, now_utc, iso, clean_doc
@@ -17,6 +19,17 @@ from .utils import (
 
 
 logger = logging.getLogger("sendbid.web_panels.marketing")
+APK_LINKS_PATH = Path(__file__).resolve().parents[2] / "apk_links.json"
+
+
+def _apk_details(app_name: str) -> dict:
+    env_url = os.getenv(f"{app_name.upper()}_APK_URL", "")
+    if env_url:
+        return {"status": "ready", "url": env_url}
+    try:
+        return json.loads(APK_LINKS_PATH.read_text(encoding="utf-8")).get(app_name, {})
+    except (OSError, json.JSONDecodeError):
+        return {}
 
 
 @router.get("/web/", response_class=HTMLResponse)
@@ -71,16 +84,18 @@ async def marketing_download(request: Request):
     return templates.TemplateResponse("marketing/download.html", _marketing_ctx(request, "download"))
 
 
-@router.get("/web/download/{app_name}")
-async def download_apk(app_name: str):
-    apk_urls = {
-        "sendbid": os.getenv("SENDBID_APK_URL", ""),
-        "paybid": os.getenv("PAYBID_APK_URL", ""),
-    }
-    apk_url = apk_urls.get(app_name)
-    if not apk_url:
-        raise HTTPException(status_code=503, detail="APK indisponible")
-    return RedirectResponse(apk_url, status_code=307)
+@router.get("/web/download/{app_name}", response_class=HTMLResponse)
+async def download_apk(app_name: str, request: Request):
+    if app_name not in {"sendbid", "paybid"}:
+        return templates.TemplateResponse("marketing/apk_pending.html", {"request": request, "app_name": app_name}, status_code=404)
+    apk = _apk_details(app_name)
+    if apk.get("status") == "ready" and apk.get("url"):
+        return RedirectResponse(apk["url"], status_code=307)
+    return templates.TemplateResponse(
+        "marketing/apk_pending.html",
+        {"request": request, "app_name": app_name, "status": apk.get("status", "building")},
+        status_code=503,
+    )
 
 
 @router.get("/web/superagent", response_class=HTMLResponse)
