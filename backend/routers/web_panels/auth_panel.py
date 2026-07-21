@@ -10,7 +10,7 @@ from core.security import verify_password, create_access_token
 
 from . import router, templates
 from .utils import (
-    _safe_date, _current_year, _url_prefix, _u, _marketing_ctx,
+    COOKIE_PREFIX, ALLOWED_ROLES_BY_PANEL, _safe_date, _current_year, _url_prefix, _u, _marketing_ctx,
     _resolve_session, _panel_base_ctx, _login_page, _admin_kpis,
 )
 
