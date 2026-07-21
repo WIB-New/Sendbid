@@ -90,7 +90,8 @@ services:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
       - traefik.http.routers.sendbid-api.rule=Host(`${BACKEND_HOST:-api.sendbid.app}`)
-      - traefik.http.routers.sendbid-api.entrypoints=web
+      - traefik.http.routers.sendbid-api.entrypoints=websecure
+      - traefik.http.routers.sendbid-api.tls.certresolver=letsencrypt
       - traefik.http.services.sendbid-api.loadbalancer.server.port=8000
       # Middleware optionnel : rediriger HTTP vers HTTPS en production
       # - traefik.http.routers.sendbid-api.middlewares=redirect-to-https
@@ -118,7 +119,8 @@ services:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
       - traefik.http.routers.sendbid-frontend.rule=Host(`${FRONTEND_HOST:-sendfloo.sendbid.app}`) || Host(`sendbid.app`) || Host(`${ADMIN_HOST:-admin.sendbid.app}`)
-      - traefik.http.routers.sendbid-frontend.entrypoints=web
+      - traefik.http.routers.sendbid-frontend.entrypoints=websecure
+      - traefik.http.routers.sendbid-frontend.tls.certresolver=letsencrypt
       - traefik.http.services.sendbid-frontend.loadbalancer.server.port=80
     networks:
       - dokploy-network
