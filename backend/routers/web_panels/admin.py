@@ -81,6 +81,94 @@ async def admin_users(
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
+@router.get("/web/admin/users/{user_id}", response_class=HTMLResponse)
+async def admin_user_detail(request: Request, user_id: str, message: str = ""):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    target = await db.users.find_one(
+        {"id": user_id},
+        {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0},
+    )
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users", status_code=303)
+    ca = target.get("created_at")
+    if isinstance(ca, _dt.datetime):
+        target["created_at"] = ca.isoformat()
+    ua = target.get("updated_at")
+    if isinstance(ua, _dt.datetime):
+        target["updated_at"] = ua.isoformat()
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="user-detail", section_title="Détail utilisateur",
+        target=target, message=message,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.post("/web/admin/users/{user_id}/set-password", response_class=HTMLResponse)
+async def admin_user_set_password(request: Request, user_id: str, password: str = Form(...)):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if len(password) < 6:
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Le mot de passe doit faire au moins 6 caractères", status_code=303)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": hash_password(password), "updated_at": iso(now_utc())}},
+    )
+    return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Mot de passe mis à jour", status_code=303)
+
+
+@router.post("/web/admin/users/{user_id}/set-pin", response_class=HTMLResponse)
+async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...)):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if len(pin) != 6 or not pin.isdigit():
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Le PIN doit être 6 chiffres", status_code=303)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"pin_hash": hash_password(pin), "pin_attempts": 0, "pin_locked_until": None, "updated_at": iso(now_utc())}},
+    )
+    return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=PIN mis à jour", status_code=303)
+
+
+@router.post("/web/admin/users/{user_id}/toggle-status", response_class=HTMLResponse)
+async def admin_user_toggle_status(request: Request, user_id: str):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if user_id == admin.get("id"):
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Impossible de modifier votre propre compte", status_code=303)
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "suspended": 1})
+    if target:
+        new_status = not target.get("suspended", False)
+        label = "suspendu" if new_status else "réactivé"
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"suspended": new_status, "updated_at": iso(now_utc())}},
+        )
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Compte {label}", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix()}/admin/users", status_code=303)
+
+
+@router.post("/web/admin/users/{user_id}/delete", response_class=HTMLResponse)
+async def admin_user_delete(request: Request, user_id: str):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if user_id == admin.get("id"):
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Impossible de supprimer votre propre compte", status_code=303)
+    await db.users.delete_one({"id": user_id})
+    await db.wallets.delete_many({"user_id": user_id})
+    await db.wallet_tx.delete_many({"user_id": user_id})
+    await db.beneficiaries.delete_many({"user_id": user_id})
+    await db.payment_methods.delete_many({"user_id": user_id})
+    await db.notifications.delete_many({"user_id": user_id})
+    await db.linked_accounts.delete_many({"user_id": user_id})
+    return RedirectResponse(url=f"{_url_prefix()}/admin/users?message=Utilisateur supprimé", status_code=303)
+
+
 @router.get("/web/admin/agents", response_class=HTMLResponse)
 async def admin_agents(
     request: Request,

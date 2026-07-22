@@ -96,22 +96,23 @@
         <a href="{{ url_prefix }}/admin/users" class="btn btn-sm btn-ghost">Réinitialiser</a>
       </form>
       <table>
-        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Réseau</th><th>Rôle</th><th>KYC</th><th>Créé</th></tr></thead>
+        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Réseau</th><th>Rôle</th><th>KYC</th><th>Créé</th><th>Action</th></tr></thead>
         <tbody>
           {% for u in users %}
             {% set email = (u.email or '') %}
             {% set is_paybid = email.endswith('@paybid.app') %}
             <tr>
-              <td><b>{{ u.full_name or '—' }}</b></td>
+              <td><a href="{{ url_prefix }}/admin/users/{{ u.id }}" style="color:var(--text); text-decoration:none"><b>{{ u.full_name or '—' }}</b></a></td>
               <td>{{ u.email or '—' }}</td>
               <td>{{ u.phone or '—' }}</td>
               <td><span class="pill pill-{{ 'info' if is_paybid else 'ok' }}">{{ 'PayBID' if is_paybid else 'SendBID' }}</span></td>
               <td><span class="pill pill-neutral">{{ u.role or 'user' }}</span></td>
               <td>{{ u.kyc_tier or 'T0' }}</td>
               <td style="color:var(--text-muted); font-size:13px">{{ (u.created_at or '')[:10] }}</td>
+              <td><a href="{{ url_prefix }}/admin/users/{{ u.id }}" class="btn btn-sm">Gérer</a></td>
             </tr>
           {% else %}
-            <tr><td colspan="7"><div class="empty"><div class="emoji">👥</div>Aucun utilisateur.</div></td></tr>
+            <tr><td colspan="8"><div class="empty"><div class="emoji">👥</div>Aucun utilisateur.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -123,6 +124,59 @@
       </div>
       {% endif %}
     </div>
+  {% elif section == 'user-detail' %}
+    <div class="card">
+      <div class="card-header">
+        <h2>Détail de {{ target.full_name or target.email }}</h2>
+        <a href="{{ url_prefix }}/admin/users" class="btn btn-ghost btn-sm">← Retour</a>
+      </div>
+      {% if message %}<div class="error-box" style="background:#D1FAE5;color:#047857;margin-bottom:16px">{{ message }}</div>{% endif %}
+      <table>
+        <tbody>
+          <tr><th style="width:160px">ID</th><td><code>{{ target.id }}</code></td></tr>
+          <tr><th>Nom</th><td>{{ target.full_name or '—' }}</td></tr>
+          <tr><th>Email</th><td>{{ target.email or '—' }}</td></tr>
+          <tr><th>Téléphone</th><td>{{ target.phone or '—' }}</td></tr>
+          <tr><th>Rôle</th><td><span class="pill pill-neutral">{{ target.role or 'user' }}</span></td></tr>
+          <tr><th>Réseau</th><td><span class="pill pill-{{ 'info' if (target.email or '').endswith('@paybid.app') else 'ok' }}">{{ 'PayBID' if (target.email or '').endswith('@paybid.app') else 'SendBID' }}</span></td></tr>
+          <tr><th>KYC</th><td>Tier {{ target.kyc_tier or 0 }} — {{ target.kyc_status or 'none' }}</td></tr>
+          <tr><th>Statut</th><td>{% if target.suspended %}<span class="pill pill-err">Suspendu</span>{% else %}<span class="pill pill-ok">Actif</span>{% endif %}</td></tr>
+          <tr><th>Inscrit</th><td>{{ (target.created_at or '')[:10] }}</td></tr>
+          <tr><th>Mis à jour</th><td>{{ (target.updated_at or '')[:10] }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>🔑 Mot de passe</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/set-password" class="filters">
+        <input type="password" name="password" placeholder="Nouveau mot de passe (min 6 caractères)" required minlength="6" style="min-width:300px">
+        <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Mettre à jour</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>🔢 Code PIN</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/set-pin" class="filters">
+        <input type="text" name="pin" placeholder="Nouveau PIN (6 chiffres)" required pattern="\d{6}" maxlength="6" style="min-width:200px">
+        <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Mettre à jour</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>⚠️ Gestion du compte</h2></div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap">
+        <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/toggle-status">
+          <button type="submit" class="btn btn-sm {% if target.suspended %}btn-success{% else %}btn-danger{% endif %}">
+            {% if target.suspended %}Réactiver{% else %}Suspendre{% endif %}
+          </button>
+        </form>
+        <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/delete" onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
+          <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C">Supprimer</button>
+        </form>
+      </div>
+    </div>
+
   {% elif section == 'agents' %}
     <div class="card">
       <div class="card-header"><h2>Agents ({{ total }})</h2></div>

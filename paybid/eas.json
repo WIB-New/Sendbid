@@ -6,6 +6,7 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "node": "22.18.0",
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "paybid",
@@ -15,6 +16,7 @@
     },
     "production": {
       "distribution": "store",
+      "node": "22.18.0",
       "android": { "buildType": "app-bundle" },
       "env": {
         "APP_VARIANT": "paybid",
