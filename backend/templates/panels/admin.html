@@ -8,8 +8,11 @@
   <a href="{{ url_prefix }}/admin/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👨‍💼</span>Agents</a>
   <a href="{{ url_prefix }}/admin/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts</a>
   <a href="{{ url_prefix }}/admin/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
+  <a href="{{ url_prefix }}/admin/kyc" class="{% if section == 'kyc' %}active{% endif %}"><span class="nav-icon">🛡️</span>KYC</a>
   <a href="{{ url_prefix }}/admin/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon">💳</span>Wallets</a>
   <a href="{{ url_prefix }}/admin/linked-accounts" class="{% if section == 'linked-accounts' %}active{% endif %}"><span class="nav-icon">🔗</span>Comptes liés</a>
+  <a href="{{ url_prefix }}/admin/support" class="{% if section == 'support' %}active{% endif %}"><span class="nav-icon">🎧</span>Support</a>
+  <a href="{{ url_prefix }}/admin/partners" class="{% if section == 'partners' %}active{% endif %}"><span class="nav-icon">🤝</span>Partenaires</a>
   <a href="{{ url_prefix }}/admin/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon">📜</span>Audit logs</a>
 {% endblock %}
 
@@ -71,7 +74,26 @@
     </div>
   {% elif section == 'users' %}
     <div class="card">
-      <div class="card-header"><h2>Tous les utilisateurs ({{ users|length }})</h2></div>
+      <div class="card-header"><h2>Utilisateurs ({{ total }})</h2></div>
+      <form method="get" action="{{ url_prefix }}/admin/users" class="filters">
+        <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, téléphone…">
+        <select name="role">
+          <option value="">Tous les rôles</option>
+          <option value="user" {% if role == 'user' %}selected{% endif %}>User</option>
+          <option value="agent" {% if role == 'agent' %}selected{% endif %}>Agent</option>
+          <option value="super_agent" {% if role == 'super_agent' %}selected{% endif %}>Super-Agent</option>
+          <option value="partner_admin" {% if role == 'partner_admin' %}selected{% endif %}>Partenaire</option>
+          <option value="admin" {% if role == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="super_admin" {% if role == 'super_admin' %}selected{% endif %}>Super-Admin</option>
+        </select>
+        <select name="network">
+          <option value="">Tous les réseaux</option>
+          <option value="sendbid" {% if network == 'sendbid' %}selected{% endif %}>SendBID</option>
+          <option value="paybid" {% if network == 'paybid' %}selected{% endif %}>PayBID</option>
+        </select>
+        <button type="submit" class="btn btn-sm">Filtrer</button>
+        <a href="{{ url_prefix }}/admin/users" class="btn btn-sm btn-ghost">Réinitialiser</a>
+      </form>
       <table>
         <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Réseau</th><th>Rôle</th><th>KYC</th><th>Créé</th></tr></thead>
         <tbody>
@@ -92,10 +114,30 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if pages > 1 %}
+      <div class="pagination">
+        {% if page > 1 %}<a href="{{ url_prefix }}/admin/users?page={{ page - 1 }}&limit={{ limit }}&search={{ search }}&role={{ role }}&network={{ network }}" class="btn btn-sm btn-ghost">← Précédent</a>{% endif %}
+        <span>Page {{ page }} / {{ pages }}</span>
+        {% if page < pages %}<a href="{{ url_prefix }}/admin/users?page={{ page + 1 }}&limit={{ limit }}&search={{ search }}&role={{ role }}&network={{ network }}" class="btn btn-sm btn-ghost">Suivant →</a>{% endif %}
+      </div>
+      {% endif %}
     </div>
   {% elif section == 'agents' %}
     <div class="card">
-      <div class="card-header"><h2>Tous les agents ({{ agents|length }})</h2></div>
+      <div class="card-header"><h2>Agents ({{ total }})</h2></div>
+      <form method="get" action="{{ url_prefix }}/admin/agents" class="filters">
+        <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, ville…">
+        <select name="status">
+          <option value="">Tous les statuts</option>
+          <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approuvé</option>
+          <option value="pending_verification" {% if status == 'pending_verification' %}selected{% endif %}>En attente</option>
+          <option value="suspended" {% if status == 'suspended' %}selected{% endif %}>Suspendu</option>
+          <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Rejeté</option>
+        </select>
+        <input type="text" name="country" value="{{ country }}" placeholder="Pays (ex: CM, SN)">
+        <button type="submit" class="btn btn-sm">Filtrer</button>
+        <a href="{{ url_prefix }}/admin/agents" class="btn btn-sm btn-ghost">Réinitialiser</a>
+      </form>
       <table>
         <thead><tr><th>Nom</th><th>Email</th><th>Pays / Ville</th><th>Statut</th><th>Tier</th><th>Note</th><th>Transferts</th><th>Disponible</th></tr></thead>
         <tbody>
@@ -115,10 +157,31 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if pages > 1 %}
+      <div class="pagination">
+        {% if page > 1 %}<a href="{{ url_prefix }}/admin/agents?page={{ page - 1 }}&limit={{ limit }}&search={{ search }}&status={{ status }}&country={{ country }}" class="btn btn-sm btn-ghost">← Précédent</a>{% endif %}
+        <span>Page {{ page }} / {{ pages }}</span>
+        {% if page < pages %}<a href="{{ url_prefix }}/admin/agents?page={{ page + 1 }}&limit={{ limit }}&search={{ search }}&status={{ status }}&country={{ country }}" class="btn btn-sm btn-ghost">Suivant →</a>{% endif %}
+      </div>
+      {% endif %}
     </div>
   {% elif section == 'transfers' %}
     <div class="card">
-      <div class="card-header"><h2>Tous les transferts ({{ transfers|length }})</h2></div>
+      <div class="card-header"><h2>Transferts ({{ total }})</h2></div>
+      <form method="get" action="{{ url_prefix }}/admin/transfers" class="filters">
+        <select name="status">
+          <option value="">Tous les statuts</option>
+          <option value="BIDDING" {% if status == 'BIDDING' %}selected{% endif %}>Enchère en cours</option>
+          <option value="AGENT_ASSIGNED" {% if status == 'AGENT_ASSIGNED' %}selected{% endif %}>Agent assigné</option>
+          <option value="PROCESSING" {% if status == 'PROCESSING' %}selected{% endif %}>En traitement</option>
+          <option value="COMPLETED" {% if status == 'COMPLETED' %}selected{% endif %}>Complété</option>
+          <option value="CANCELLED" {% if status == 'CANCELLED' %}selected{% endif %}>Annulé</option>
+          <option value="REFUNDED" {% if status == 'REFUNDED' %}selected{% endif %}>Remboursé</option>
+        </select>
+        <input type="text" name="country" value="{{ country }}" placeholder="Pays destination (ex: SN, CM)">
+        <button type="submit" class="btn btn-sm">Filtrer</button>
+        <a href="{{ url_prefix }}/admin/transfers" class="btn btn-sm btn-ghost">Réinitialiser</a>
+      </form>
       <table>
         <thead><tr><th>ID</th><th>Expéditeur</th><th>Bénéficiaire</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
         <tbody>
@@ -137,6 +200,13 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if pages > 1 %}
+      <div class="pagination">
+        {% if page > 1 %}<a href="{{ url_prefix }}/admin/transfers?page={{ page - 1 }}&limit={{ limit }}&status={{ status }}&country={{ country }}" class="btn btn-sm btn-ghost">← Précédent</a>{% endif %}
+        <span>Page {{ page }} / {{ pages }}</span>
+        {% if page < pages %}<a href="{{ url_prefix }}/admin/transfers?page={{ page + 1 }}&limit={{ limit }}&status={{ status }}&country={{ country }}" class="btn btn-sm btn-ghost">Suivant →</a>{% endif %}
+      </div>
+      {% endif %}
     </div>
   {% elif section == 'auctions' %}
     <div class="card">
@@ -159,6 +229,52 @@
         </tbody>
       </table>
     </div>
+  {% elif section == 'kyc' %}
+    <div class="card">
+      <div class="card-header"><h2>🛡️ Utilisateurs en attente KYC ({{ pending_users|length }})</h2></div>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Réseau</th><th>Rôle</th><th>KYC actuel</th><th>Statut</th><th>Inscrit</th></tr></thead>
+        <tbody>
+          {% for u in pending_users %}
+            {% set email = (u.email or '') %}
+            {% set is_paybid = email.endswith('@paybid.app') %}
+            <tr>
+              <td><b>{{ u.full_name or '—' }}</b></td>
+              <td>{{ u.email or '—' }}</td>
+              <td><span class="pill pill-{{ 'info' if is_paybid else 'ok' }}">{{ 'PayBID' if is_paybid else 'SendBID' }}</span></td>
+              <td><span class="pill pill-neutral">{{ u.role or 'user' }}</span></td>
+              <td>Tier {{ u.kyc_tier or 0 }}</td>
+              <td><span class="pill pill-warn">{{ u.kyc_status or 'none' }}</span></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (u.created_at or '')[:10] }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7"><div class="empty"><div class="emoji">🛡️</div>Aucun utilisateur en attente KYC.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Sessions de vérification KYC</h2></div>
+      <table>
+        <thead><tr><th>Utilisateur</th><th>Email</th><th>Provider</th><th>Statut</th><th>Décision</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for s in kyc_sessions %}
+            <tr>
+              <td><b>{{ s.user_name or '—' }}</b></td>
+              <td>{{ s.user_email or '—' }}</td>
+              <td><span class="pill pill-neutral">{{ s.provider or 'didit' }}</span></td>
+              <td><span class="pill pill-{{ 'warn' if s.status in ('pending', 'Not Started') else ('ok' if s.status == 'verified' else 'err') }}">{{ s.status or 'pending' }}</span></td>
+              <td>{{ s.decision or '—' }}</td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (s.created_at or '')[:10] }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">🛡️</div>Aucune session KYC.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
   {% elif section == 'wallets' %}
     <div class="card">
       <div class="card-header"><h2>Wallets ({{ wallets|length }})</h2></div>
@@ -179,6 +295,51 @@
         </tbody>
       </table>
     </div>
+  {% elif section == 'support' %}
+    <div class="card">
+      <div class="card-header"><h2>🎧 Tickets de support ({{ tickets|length }})</h2></div>
+      <table>
+        <thead><tr><th>Utilisateur</th><th>Email</th><th>Statut</th><th>Dernier message</th><th>Expéditeur</th><th>Mise à jour</th></tr></thead>
+        <tbody>
+          {% for t in tickets %}
+            <tr>
+              <td><b>{{ t.user_name or '—' }}</b></td>
+              <td>{{ t.user_email or '—' }}</td>
+              <td><span class="pill pill-{{ 'ok' if t.status == 'closed' else 'warn' }}">{{ t.status or 'open' }}</span></td>
+              <td style="max-width:260px; font-size:13px; color:var(--text-muted)">{{ t.last_message.text[:80] if t.last_message else '—' }}</td>
+              <td><span class="pill pill-neutral">{{ t.last_message.sender or '—' if t.last_message else '—' }}</span></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (t.updated_at or t.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">🎧</div>Aucun ticket de support.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% elif section == 'partners' %}
+    <div class="card">
+      <div class="card-header"><h2>🤝 Partenaires ({{ partners|length }})</h2></div>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Pays</th><th>Ville</th><th>KYC</th><th>Créé</th></tr></thead>
+        <tbody>
+          {% for p in partners %}
+            <tr>
+              <td><b>{{ p.full_name or '—' }}</b></td>
+              <td>{{ p.email or '—' }}</td>
+              <td>{{ p.phone or '—' }}</td>
+              <td>{{ p.country or '—' }}</td>
+              <td>{{ p.city or '—' }}</td>
+              <td>Tier {{ p.kyc_tier or 0 }}</td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (p.created_at or '')[:10] }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7"><div class="empty"><div class="emoji">🤝</div>Aucun partenaire.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
   {% elif section == 'audit' %}
     <div class="card">
       <div class="card-header"><h2>📜 Mouvements de fonds (reconciliation)</h2></div>

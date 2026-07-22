@@ -18,6 +18,10 @@ logger = logging.getLogger("sendbid.seed")
 # (\u00e9vite de remettre les credentials seed apr\u00e8s chaque restart).
 IS_PROD = os.environ.get("ENVIRONMENT", "development").lower() == "production"
 
+# Si true, ne crée pas les comptes de démo (Aïcha Demo, agents fictifs, Mamadou Sow PayBID).
+# À utiliser en production quand on veut une base propre sans données de test.
+SKIP_DEMO_DATA = os.environ.get("SKIP_DEMO_DATA", "").lower() in ("true", "1", "yes")
+
 
 async def seed_demo_data():
     # Indexes — on ignore les erreurs si l'index existe déjà avec des doublons
@@ -99,53 +103,54 @@ async def seed_demo_data():
                 {"$set": update_set},
             )
 
-    # Demo client
-    existing_demo = await db.users.find_one({"email": DEMO_CLIENT_EMAIL})
-    if not existing_demo:
-        demo_id = gen_id()
-        await db.users.insert_one({
-            "id": demo_id, "profile_id": "SB100001", "email": DEMO_CLIENT_EMAIL,
-            "phone": "+33612345678", "full_name": "Aïcha Demo",
-            "password_hash": hash_password(DEMO_CLIENT_PASSWORD),
-            "pin_hash": hash_password(DEMO_CLIENT_PIN),
-            "pin_attempts": 0, "pin_locked_until": None,
-            "email_verified": True, "phone_verified": True,
-            "kyc_tier": 1, "kyc_status": "verified",
-            "loyalty_level": "Silver", "loyalty_points": 250,
-            "biometric_enabled": False, "biometric_token": None,
-            "avatar_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-            "language": "fr", "theme": "light",
-            "notif_prefs": {"push": True, "email": True, "sms": False},
-            "created_at": iso(now_utc()),
-        })
-        await db.wallets.insert_one({"id": gen_id(), "user_id": demo_id, "balance": 1250.50, "currency": "EUR", "created_at": iso(now_utc())})
-        await db.wallet_tx.insert_many([
-            {"id": gen_id(), "user_id": demo_id, "type": "recharge", "amount": 500.0, "currency": "EUR", "counterparty": "Agent Paris 11", "note": "Recharge agent", "created_at": iso(now_utc() - timedelta(days=3))},
-            {"id": gen_id(), "user_id": demo_id, "type": "transfer_escrow", "amount": -200.0, "currency": "EUR", "counterparty": "Mariam Diallo", "note": "Transfert vers Sénégal", "created_at": iso(now_utc() - timedelta(days=2))},
-            {"id": gen_id(), "user_id": demo_id, "type": "p2p_in", "amount": 100.0, "currency": "EUR", "counterparty": "Karim B.", "note": "Cadeau", "created_at": iso(now_utc() - timedelta(days=1))},
-        ])
-        await db.beneficiaries.insert_many([
-            {"id": gen_id(), "user_id": demo_id, "full_name": "Mariam Diallo", "phone": "+221770000001", "country": "SN", "currency": "XOF", "relation": "Mère", "bank_name": None, "bank_account": None, "momo_operator": "Wave", "momo_number": "+221770000001", "created_at": iso(now_utc())},
-            {"id": gen_id(), "user_id": demo_id, "full_name": "Ibrahim Ouattara", "phone": "+22507000002", "country": "CI", "currency": "XOF", "relation": "Frère", "bank_name": "SGBCI", "bank_account": "CI1234567890", "momo_operator": None, "momo_number": None, "created_at": iso(now_utc())},
-            {"id": gen_id(), "user_id": demo_id, "full_name": "Fatou Ndiaye", "phone": "+221770000003", "country": "SN", "currency": "XOF", "relation": "Soeur", "bank_name": None, "bank_account": None, "momo_operator": "Orange Money", "momo_number": "+221770000003", "created_at": iso(now_utc())},
-        ])
-        await db.payment_methods.insert_many([
-            {"id": gen_id(), "user_id": demo_id, "type": "card", "label": "Visa", "last4": "4242", "operator": None, "created_at": iso(now_utc())},
-            {"id": gen_id(), "user_id": demo_id, "type": "paypal", "label": "PayPal", "last4": None, "operator": None, "created_at": iso(now_utc())},
-        ])
-        await db.notifications.insert_many([
-            {"id": gen_id(), "user_id": demo_id, "title": "Bienvenue sur SENDBID", "body": "Votre compte est vérifié. Envoyez votre premier transfert !", "type": "info", "read": False, "created_at": iso(now_utc() - timedelta(hours=2))},
-            {"id": gen_id(), "user_id": demo_id, "title": "Recharge réussie", "body": "+500 EUR sur votre wallet SendBID", "type": "success", "read": True, "created_at": iso(now_utc() - timedelta(days=3))},
-        ])
-    else:
-        if not IS_PROD:
-            await db.users.update_one(
-                {"email": DEMO_CLIENT_EMAIL},
-                {"$set": {
-                    "password_hash": hash_password(DEMO_CLIENT_PASSWORD),
-                    "pin_hash": hash_password(DEMO_CLIENT_PIN),
-                }},
-            )
+    # Demo client (désactivable en production via SKIP_DEMO_DATA)
+    if not SKIP_DEMO_DATA:
+        existing_demo = await db.users.find_one({"email": DEMO_CLIENT_EMAIL})
+        if not existing_demo:
+            demo_id = gen_id()
+            await db.users.insert_one({
+                "id": demo_id, "profile_id": "SB100001", "email": DEMO_CLIENT_EMAIL,
+                "phone": "+33612345678", "full_name": "Aïcha Demo",
+                "password_hash": hash_password(DEMO_CLIENT_PASSWORD),
+                "pin_hash": hash_password(DEMO_CLIENT_PIN),
+                "pin_attempts": 0, "pin_locked_until": None,
+                "email_verified": True, "phone_verified": True,
+                "kyc_tier": 1, "kyc_status": "verified",
+                "loyalty_level": "Silver", "loyalty_points": 250,
+                "biometric_enabled": False, "biometric_token": None,
+                "avatar_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
+                "language": "fr", "theme": "light",
+                "notif_prefs": {"push": True, "email": True, "sms": False},
+                "created_at": iso(now_utc()),
+            })
+            await db.wallets.insert_one({"id": gen_id(), "user_id": demo_id, "balance": 1250.50, "currency": "EUR", "created_at": iso(now_utc())})
+            await db.wallet_tx.insert_many([
+                {"id": gen_id(), "user_id": demo_id, "type": "recharge", "amount": 500.0, "currency": "EUR", "counterparty": "Agent Paris 11", "note": "Recharge agent", "created_at": iso(now_utc() - timedelta(days=3))},
+                {"id": gen_id(), "user_id": demo_id, "type": "transfer_escrow", "amount": -200.0, "currency": "EUR", "counterparty": "Mariam Diallo", "note": "Transfert vers Sénégal", "created_at": iso(now_utc() - timedelta(days=2))},
+                {"id": gen_id(), "user_id": demo_id, "type": "p2p_in", "amount": 100.0, "currency": "EUR", "counterparty": "Karim B.", "note": "Cadeau", "created_at": iso(now_utc() - timedelta(days=1))},
+            ])
+            await db.beneficiaries.insert_many([
+                {"id": gen_id(), "user_id": demo_id, "full_name": "Mariam Diallo", "phone": "+221770000001", "country": "SN", "currency": "XOF", "relation": "Mère", "bank_name": None, "bank_account": None, "momo_operator": "Wave", "momo_number": "+221770000001", "created_at": iso(now_utc())},
+                {"id": gen_id(), "user_id": demo_id, "full_name": "Ibrahim Ouattara", "phone": "+22507000002", "country": "CI", "currency": "XOF", "relation": "Frère", "bank_name": "SGBCI", "bank_account": "CI1234567890", "momo_operator": None, "momo_number": None, "created_at": iso(now_utc())},
+                {"id": gen_id(), "user_id": demo_id, "full_name": "Fatou Ndiaye", "phone": "+221770000003", "country": "SN", "currency": "XOF", "relation": "Soeur", "bank_name": None, "bank_account": None, "momo_operator": "Orange Money", "momo_number": "+221770000003", "created_at": iso(now_utc())},
+            ])
+            await db.payment_methods.insert_many([
+                {"id": gen_id(), "user_id": demo_id, "type": "card", "label": "Visa", "last4": "4242", "operator": None, "created_at": iso(now_utc())},
+                {"id": gen_id(), "user_id": demo_id, "type": "paypal", "label": "PayPal", "last4": None, "operator": None, "created_at": iso(now_utc())},
+            ])
+            await db.notifications.insert_many([
+                {"id": gen_id(), "user_id": demo_id, "title": "Bienvenue sur SENDBID", "body": "Votre compte est vérifié. Envoyez votre premier transfert !", "type": "info", "read": False, "created_at": iso(now_utc() - timedelta(hours=2))},
+                {"id": gen_id(), "user_id": demo_id, "title": "Recharge réussie", "body": "+500 EUR sur votre wallet SendBID", "type": "success", "read": True, "created_at": iso(now_utc() - timedelta(days=3))},
+            ])
+        else:
+            if not IS_PROD:
+                await db.users.update_one(
+                    {"email": DEMO_CLIENT_EMAIL},
+                    {"$set": {
+                        "password_hash": hash_password(DEMO_CLIENT_PASSWORD),
+                        "pin_hash": hash_password(DEMO_CLIENT_PIN),
+                    }},
+                )
 
     # === COMPTES WEB PANELS — Admin / Agent / Superagent ===
     # Comptes seedés pour accéder aux panels web /admin, /agent, /superagent
@@ -179,140 +184,143 @@ async def seed_demo_data():
         await db.users.update_one({"_id": user["_id"]}, {"$set": {"full_name": new_name}})
         logger.info(f"[seed] Renamed user {user.get('email')} from {user['full_name']} to {new_name}")
 
-    # Demo PAYBID agent (linked user + agent profile)
-    if not await db.users.find_one({"email": "agent@paybid.app"}):
-        agent_user_id = gen_id()
-        agent_profile_id = gen_id()
-        await db.users.insert_one({
-            "id": agent_user_id, "profile_id": "PB100001", "email": "agent@paybid.app",
-            "phone": "+221770000099", "full_name": "Mamadou Sow",
-            "password_hash": hash_password("Agent@123!"),
-            "pin_hash": hash_password("123456"),
-            "pin_attempts": 0, "pin_locked_until": None,
-            "email_verified": True, "phone_verified": True,
-            "kyc_tier": 2, "kyc_status": "verified",
-            "loyalty_level": "Gold", "loyalty_points": 1500,
-            "biometric_enabled": False, "biometric_token": None,
-            "avatar_url": "https://i.pravatar.cc/150?img=12",
-            "language": "fr", "theme": "light",
-            "notif_prefs": {"push": True, "email": True, "sms": True},
-            "role": "agent",
-            "agent_id": agent_profile_id,
-            "city": "Dakar",
-            "created_at": iso(now_utc()),
-        })
-        # Agent profile
-        await db.agents.insert_one({
-            "id": agent_profile_id,
-            "user_id": agent_user_id,
-            "full_name": "Mamadou Sow",
-            "city": "Dakar",
-            "country_code": "SN",
-            "address": "Plateau, 12 Rue Wagane Diouf",
-            "lat": 14.6928, "lng": -17.4467,
-            "rating": 4.8,
-            "transfers_count": 287,
-            "avatar_url": "https://i.pravatar.cc/150?img=12",
-            "floo_balance": 4250.00,
-            "wallet_balance": 4250.00,
-            "cash_capacity": 8000.0,
-            "negative_claims": 0,
-            "gamification_points": 850,
-            "days_active": 412,
-            "available": True,
-            "suspended": False,
-            "has_overdue_transfer": False,
-            "delivery_modes": ["cash", "bank", "momo"],
-            "kyc_tier": 3,
-            "phone": "+221770000099",
-            "created_at": iso(now_utc()),
-        })
-        # Wallet for agent earnings (FCFA)
-        await db.wallets.insert_one({"id": gen_id(), "user_id": agent_user_id, "balance": 4250.0, "currency": "EUR", "created_at": iso(now_utc())})
-
-    # Seeded agents (with realistic city geocoordinates for Maps integration)
-    if await db.agents.count_documents({}) == 0:
-        city_coords = {
-            "Dakar": (14.6928, -17.4467), "Abidjan": (5.3600, -4.0083),
-            "Bamako": (12.6392, -8.0029), "Yaoundé": (3.8480, 11.5021),
-            "Casablanca": (33.5731, -7.5898), "Lagos": (6.5244, 3.3792),
-            "Accra": (5.6037, -0.1870), "Ouagadougou": (12.3714, -1.5197),
-        }
-        cities = list(city_coords.keys())
-        names = ["Mamadou Sow", "Awa Traoré", "Yaya Koné", "Sandra Mballa", "Karim El Idrissi", "Chinwe Okafor", "Kwame Asante", "Abdoulaye Ouédraogo", "Aminata Cissé", "Issa Sidibé"]
-        agents_to_seed = []
-        for i in range(20):
-            city = random.choice(cities)
-            base_lat, base_lng = city_coords[city]
-            # tiny offset so agents aren't all on the same pixel
-            lat = base_lat + random.uniform(-0.05, 0.05)
-            lng = base_lng + random.uniform(-0.05, 0.05)
-            agents_to_seed.append({
-                "id": gen_id(),
-                "full_name": random.choice(names),
-                "city": city,
-                "lat": round(lat, 6),
-                "lng": round(lng, 6),
-                "rating": round(random.uniform(4.0, 5.0), 2),
-                "transfers_count": random.randint(50, 500),
-                "avatar_url": f"https://i.pravatar.cc/150?img={i+1}",
-                "floo_balance": round(random.uniform(500, 5000), 2),
+    # Demo PAYBID agent (linked user + agent profile) — désactivable via SKIP_DEMO_DATA
+    if not SKIP_DEMO_DATA:
+        if not await db.users.find_one({"email": "agent@paybid.app"}):
+            agent_user_id = gen_id()
+            agent_profile_id = gen_id()
+            await db.users.insert_one({
+                "id": agent_user_id, "profile_id": "PB100001", "email": "agent@paybid.app",
+                "phone": "+221770000099", "full_name": "Mamadou Sow",
+                "password_hash": hash_password("Agent@123!"),
+                "pin_hash": hash_password("123456"),
+                "pin_attempts": 0, "pin_locked_until": None,
+                "email_verified": True, "phone_verified": True,
+                "kyc_tier": 2, "kyc_status": "verified",
+                "loyalty_level": "Gold", "loyalty_points": 1500,
+                "biometric_enabled": False, "biometric_token": None,
+                "avatar_url": "https://i.pravatar.cc/150?img=12",
+                "language": "fr", "theme": "light",
+                "notif_prefs": {"push": True, "email": True, "sms": True},
+                "role": "agent",
+                "agent_id": agent_profile_id,
+                "city": "Dakar",
                 "created_at": iso(now_utc()),
             })
-        await db.agents.insert_many(agents_to_seed)
+            # Agent profile
+            await db.agents.insert_one({
+                "id": agent_profile_id,
+                "user_id": agent_user_id,
+                "full_name": "Mamadou Sow",
+                "city": "Dakar",
+                "country_code": "SN",
+                "address": "Plateau, 12 Rue Wagane Diouf",
+                "lat": 14.6928, "lng": -17.4467,
+                "rating": 4.8,
+                "transfers_count": 287,
+                "avatar_url": "https://i.pravatar.cc/150?img=12",
+                "floo_balance": 4250.00,
+                "wallet_balance": 4250.00,
+                "cash_capacity": 8000.0,
+                "negative_claims": 0,
+                "gamification_points": 850,
+                "days_active": 412,
+                "available": True,
+                "suspended": False,
+                "has_overdue_transfer": False,
+                "delivery_modes": ["cash", "bank", "momo"],
+                "kyc_tier": 3,
+                "phone": "+221770000099",
+                "created_at": iso(now_utc()),
+            })
+            # Wallet for agent earnings (FCFA)
+            await db.wallets.insert_one({"id": gen_id(), "user_id": agent_user_id, "balance": 4250.0, "currency": "EUR", "created_at": iso(now_utc())})
 
-    # === Seed dédié agents CM (KYC tier 3, disponibles) — idempotent par profile_id ===
-    # Permet de tester la livraison cash réelle sur le corridor Cameroun.
-    for a in [
-        {
-            "id": gen_id(), "full_name": "Patrick Mbarga", "profile_id": "PB100002",
-            "country_code": "CM", "country": "CM", "city": "Douala",
-            "lat": 4.0511, "lng": 9.7679, "rating": 4.8, "transfers_count": 312,
-            "avatar_url": "https://i.pravatar.cc/150?img=21",
-            "wallet_balance": 4500.0, "cash_capacity": 2500.0,
-            "available": True, "kyc_tier": 3, "kyc_status": "verified",
-            "suspended": False, "has_overdue_transfer": False,
-            "negative_claims": 0, "gamification_points": 850, "days_active": 420,
-            "floo_balance": 3200.0, "phone": "+237699112233",
-            "agency_name": "Mbarga Cash Express",
-            "agency_address": "Avenue de la Liberté, Akwa, Douala",
-            "created_at": iso(now_utc()),
-        },
-        {
-            "id": gen_id(), "full_name": "Esther Ngassa", "profile_id": "PB100003",
-            "country_code": "CM", "country": "CM", "city": "Yaoundé",
-            "lat": 3.8480, "lng": 11.5021, "rating": 4.9, "transfers_count": 478,
-            "avatar_url": "https://i.pravatar.cc/150?img=22",
-            "wallet_balance": 6200.0, "cash_capacity": 3500.0,
-            "available": True, "kyc_tier": 3, "kyc_status": "verified",
-            "suspended": False, "has_overdue_transfer": False,
-            "negative_claims": 0, "gamification_points": 1240, "days_active": 580,
-            "floo_balance": 4900.0, "phone": "+237688445566",
-            "agency_name": "Ngassa Money Hub",
-            "agency_address": "Carrefour Bastos, Yaoundé",
-            "created_at": iso(now_utc()),
-        },
-    ]:
-        await db.agents.update_one({"profile_id": a["profile_id"]}, {"$set": a}, upsert=True)
-    else:
-        # Backfill lat/lng on existing agents missing them (idempotent)
-        city_coords = {
-            "Dakar": (14.6928, -17.4467), "Abidjan": (5.3600, -4.0083),
-            "Bamako": (12.6392, -8.0029), "Yaoundé": (3.8480, 11.5021),
-            "Casablanca": (33.5731, -7.5898), "Lagos": (6.5244, 3.3792),
-            "Accra": (5.6037, -0.1870), "Ouagadougou": (12.3714, -1.5197),
-        }
-        async for ag in db.agents.find({"$or": [{"lat": None}, {"lat": {"$exists": False}}]}):
-            city = ag.get("city")
-            if city in city_coords:
+    # Seeded agents (with realistic city geocoordinates for Maps integration)
+    # Désactivable en production via SKIP_DEMO_DATA.
+    if not SKIP_DEMO_DATA:
+        if await db.agents.count_documents({}) == 0:
+            city_coords = {
+                "Dakar": (14.6928, -17.4467), "Abidjan": (5.3600, -4.0083),
+                "Bamako": (12.6392, -8.0029), "Yaoundé": (3.8480, 11.5021),
+                "Casablanca": (33.5731, -7.5898), "Lagos": (6.5244, 3.3792),
+                "Accra": (5.6037, -0.1870), "Ouagadougou": (12.3714, -1.5197),
+            }
+            cities = list(city_coords.keys())
+            names = ["Mamadou Sow", "Awa Traoré", "Yaya Koné", "Sandra Mballa", "Karim El Idrissi", "Chinwe Okafor", "Kwame Asante", "Abdoulaye Ouédraogo", "Aminata Cissé", "Issa Sidibé"]
+            agents_to_seed = []
+            for i in range(20):
+                city = random.choice(cities)
                 base_lat, base_lng = city_coords[city]
-                await db.agents.update_one(
-                    {"id": ag["id"]},
-                    {"$set": {
-                        "lat": round(base_lat + random.uniform(-0.05, 0.05), 6),
-                        "lng": round(base_lng + random.uniform(-0.05, 0.05), 6),
-                    }},
-                )
+                # tiny offset so agents aren't all on the same pixel
+                lat = base_lat + random.uniform(-0.05, 0.05)
+                lng = base_lng + random.uniform(-0.05, 0.05)
+                agents_to_seed.append({
+                    "id": gen_id(),
+                    "full_name": random.choice(names),
+                    "city": city,
+                    "lat": round(lat, 6),
+                    "lng": round(lng, 6),
+                    "rating": round(random.uniform(4.0, 5.0), 2),
+                    "transfers_count": random.randint(50, 500),
+                    "avatar_url": f"https://i.pravatar.cc/150?img={i+1}",
+                    "floo_balance": round(random.uniform(500, 5000), 2),
+                    "created_at": iso(now_utc()),
+                })
+            await db.agents.insert_many(agents_to_seed)
+
+        # === Seed dédié agents CM (KYC tier 3, disponibles) — idempotent par profile_id ===
+        # Permet de tester la livraison cash réelle sur le corridor Cameroun.
+        for a in [
+            {
+                "id": gen_id(), "full_name": "Patrick Mbarga", "profile_id": "PB100002",
+                "country_code": "CM", "country": "CM", "city": "Douala",
+                "lat": 4.0511, "lng": 9.7679, "rating": 4.8, "transfers_count": 312,
+                "avatar_url": "https://i.pravatar.cc/150?img=21",
+                "wallet_balance": 4500.0, "cash_capacity": 2500.0,
+                "available": True, "kyc_tier": 3, "kyc_status": "verified",
+                "suspended": False, "has_overdue_transfer": False,
+                "negative_claims": 0, "gamification_points": 850, "days_active": 420,
+                "floo_balance": 3200.0, "phone": "+237699112233",
+                "agency_name": "Mbarga Cash Express",
+                "agency_address": "Avenue de la Liberté, Akwa, Douala",
+                "created_at": iso(now_utc()),
+            },
+            {
+                "id": gen_id(), "full_name": "Esther Ngassa", "profile_id": "PB100003",
+                "country_code": "CM", "country": "CM", "city": "Yaoundé",
+                "lat": 3.8480, "lng": 11.5021, "rating": 4.9, "transfers_count": 478,
+                "avatar_url": "https://i.pravatar.cc/150?img=22",
+                "wallet_balance": 6200.0, "cash_capacity": 3500.0,
+                "available": True, "kyc_tier": 3, "kyc_status": "verified",
+                "suspended": False, "has_overdue_transfer": False,
+                "negative_claims": 0, "gamification_points": 1240, "days_active": 580,
+                "floo_balance": 4900.0, "phone": "+237688445566",
+                "agency_name": "Ngassa Money Hub",
+                "agency_address": "Carrefour Bastos, Yaoundé",
+                "created_at": iso(now_utc()),
+            },
+        ]:
+            await db.agents.update_one({"profile_id": a["profile_id"]}, {"$set": a}, upsert=True)
+        else:
+            # Backfill lat/lng on existing agents missing them (idempotent)
+            city_coords = {
+                "Dakar": (14.6928, -17.4467), "Abidjan": (5.3600, -4.0083),
+                "Bamako": (12.6392, -8.0029), "Yaoundé": (3.8480, 11.5021),
+                "Casablanca": (33.5731, -7.5898), "Lagos": (6.5244, 3.3792),
+                "Accra": (5.6037, -0.1870), "Ouagadougou": (12.3714, -1.5197),
+            }
+            async for ag in db.agents.find({"$or": [{"lat": None}, {"lat": {"$exists": False}}]}):
+                city = ag.get("city")
+                if city in city_coords:
+                    base_lat, base_lng = city_coords[city]
+                    await db.agents.update_one(
+                        {"id": ag["id"]},
+                        {"$set": {
+                            "lat": round(base_lat + random.uniform(-0.05, 0.05), 6),
+                            "lng": round(base_lng + random.uniform(-0.05, 0.05), 6),
+                        }},
+                    )
 
     # Seed corridors (dynamic destinations) — idempotent
     # Loads ALL 250 ISO 3166-1 countries from data/countries.json (capital + major cities).

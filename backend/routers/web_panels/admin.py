@@ -33,37 +33,120 @@ async def admin_dashboard(request: Request):
 
 
 @router.get("/web/admin/users", response_class=HTMLResponse)
-async def admin_users(request: Request):
+async def admin_users(
+    request: Request,
+    page: int = 1,
+    limit: int = 20,
+    search: str = "",
+    role: str = "",
+    network: str = "",
+):
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
-    users = await db.users.find({}, {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0}).sort("created_at", -1).to_list(200)
-    # Coerce datetime fields to ISO string for the template
+
+    q: dict = {}
+    if search:
+        q["$or"] = [
+            {"email": {"$regex": search, "$options": "i"}},
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"phone": {"$regex": search}},
+        ]
+    if role:
+        q["role"] = role
+    if network:
+        if network == "paybid":
+            q["email"] = {"$regex": r"@paybid\.app$"}
+        elif network == "sendbid":
+            q["email"] = {"$regex": r"@sendbid\.app$"}
+
+    total = await db.users.count_documents(q)
+    skip = max(0, (page - 1) * limit)
+    users = await db.users.find(
+        q,
+        {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0},
+    ).sort("created_at", -1).skip(skip).to_list(limit)
+
     for u in users:
         ca = u.get("created_at")
         if isinstance(ca, _dt.datetime):
             u["created_at"] = ca.isoformat()
-    ctx = _panel_base_ctx(request, "admin", user, section="users", section_title="Utilisateurs", users=users)
+
+    pages = max(1, (total + limit - 1) // limit)
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="users", section_title="Utilisateurs",
+        users=users, total=total, page=page, pages=pages, limit=limit,
+        search=search, role=role, network=network,
+    )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
 @router.get("/web/admin/agents", response_class=HTMLResponse)
-async def admin_agents(request: Request):
+async def admin_agents(
+    request: Request,
+    page: int = 1,
+    limit: int = 20,
+    search: str = "",
+    status: str = "",
+    country: str = "",
+):
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
-    agents = await db.agents.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
-    ctx = _panel_base_ctx(request, "admin", user, section="agents", section_title="Agents", agents=agents)
+
+    q: dict = {}
+    if status:
+        q["status"] = status
+    if country:
+        q["country"] = country.upper()
+    if search:
+        q["$or"] = [
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"city": {"$regex": search, "$options": "i"}},
+        ]
+
+    total = await db.agents.count_documents(q)
+    skip = max(0, (page - 1) * limit)
+    agents = await db.agents.find(q, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
+
+    pages = max(1, (total + limit - 1) // limit)
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="agents", section_title="Agents",
+        agents=agents, total=total, page=page, pages=pages, limit=limit,
+        search=search, status=status, country=country,
+    )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
 @router.get("/web/admin/transfers", response_class=HTMLResponse)
-async def admin_transfers(request: Request):
+async def admin_transfers(
+    request: Request,
+    page: int = 1,
+    limit: int = 20,
+    status: str = "",
+    country: str = "",
+):
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
-    transfers = await db.transfers.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
-    ctx = _panel_base_ctx(request, "admin", user, section="transfers", section_title="Transferts", transfers=transfers)
+
+    q: dict = {}
+    if status:
+        q["status"] = status
+    if country:
+        q["destination_country"] = country.upper()
+
+    total = await db.transfers.count_documents(q)
+    skip = max(0, (page - 1) * limit)
+    transfers = await db.transfers.find(q, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
+
+    pages = max(1, (total + limit - 1) // limit)
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="transfers", section_title="Transferts",
+        transfers=transfers, total=total, page=page, pages=pages, limit=limit,
+        status=status, country=country,
+    )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
@@ -147,3 +230,82 @@ async def admin_verify_linked_account(request: Request, account_id: str, action:
         {"$set": {"status": new_status, "verified_at": iso(now_utc()), "verified_by": "admin", "verification_note": "Action manuelle admin"}},
     )
     return RedirectResponse(url=f"{_url_prefix()}/admin/linked-accounts", status_code=303)
+
+
+@router.get("/web/admin/kyc", response_class=HTMLResponse)
+async def admin_kyc(request: Request):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    # Utilisateurs en attente de KYC (tier < 2 ou status pending)
+    pending_users = await db.users.find(
+        {"$or": [{"kyc_status": "pending"}, {"kyc_tier": {"$lt": 2}}]},
+        {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0},
+    ).sort("created_at", -1).to_list(100)
+    for u in pending_users:
+        ca = u.get("created_at")
+        if isinstance(ca, _dt.datetime):
+            u["created_at"] = ca.isoformat()
+    # Sessions de vérification récentes
+    sessions = await db.kyc_sessions.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    user_ids = [s.get("user_id") for s in sessions if s.get("user_id")]
+    users_map = {}
+    if user_ids:
+        async for u in db.users.find({"id": {"$in": user_ids}}, {"_id": 0, "id": 1, "full_name": 1, "email": 1}):
+            users_map[u["id"]] = u
+    for s in sessions:
+        u = users_map.get(s.get("user_id"), {})
+        s["user_name"] = u.get("full_name")
+        s["user_email"] = u.get("email")
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="kyc", section_title="KYC",
+        pending_users=pending_users, kyc_sessions=sessions,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.get("/web/admin/support", response_class=HTMLResponse)
+async def admin_support(request: Request):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    # Tickets ouverts avec dernier message
+    tickets = await db.support_tickets.find({}, {"_id": 0}).sort("updated_at", -1).to_list(100)
+    user_ids = [t.get("user_id") for t in tickets if t.get("user_id")]
+    users_map = {}
+    if user_ids:
+        async for u in db.users.find({"id": {"$in": user_ids}}, {"_id": 0, "id": 1, "full_name": 1, "email": 1, "phone": 1}):
+            users_map[u["id"]] = u
+    enriched = []
+    for t in tickets:
+        u = users_map.get(t.get("user_id"), {})
+        last_msg = await db.support_messages.find_one(
+            {"ticket_id": t["id"]}, {"_id": 0, "text": 1, "sender": 1, "created_at": 1},
+            sort=[("created_at", -1)],
+        )
+        enriched.append({**t, "user_name": u.get("full_name"), "user_email": u.get("email"), "last_message": last_msg})
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="support", section_title="Support",
+        tickets=enriched,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.get("/web/admin/partners", response_class=HTMLResponse)
+async def admin_partners(request: Request):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    partners = await db.users.find(
+        {"role": "partner_admin"},
+        {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0},
+    ).sort("created_at", -1).to_list(100)
+    for p in partners:
+        ca = p.get("created_at")
+        if isinstance(ca, _dt.datetime):
+            p["created_at"] = ca.isoformat()
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="partners", section_title="Partenaires",
+        partners=partners,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)

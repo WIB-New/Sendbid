@@ -70,6 +70,13 @@
   .pill-info, .pill-AGENT_ASSIGNED, .pill-PROCESSING { background: #DBEAFE; color: #1E40AF; }
   .pill-neutral { background: #F1F5F9; color: #475569; }
 
+  /* Filters & pagination */
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+  .filters input, .filters select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--surface); min-width: 160px; }
+  .filters input:focus, .filters select:focus { outline: none; border-color: var(--primary); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 18px; font-size: 13px; color: var(--text-muted); }
+
   /* Login page */
   .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
   .login-card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 100%; max-width: 420px; }

@@ -31,6 +31,8 @@ services:
       DEMO_CLIENT_EMAIL: ${DEMO_CLIENT_EMAIL}
       DEMO_CLIENT_PASSWORD: ${DEMO_CLIENT_PASSWORD}
       DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
+      # Si true, ne crée pas Aïcha Demo, Mamadou Sow, agents fictifs (production propre)
+      SKIP_DEMO_DATA: ${SKIP_DEMO_DATA:-false}
 
       # ── CORS ──
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://sendbid.app,https://api.sendbid.app,https://admin.sendbid.app}
