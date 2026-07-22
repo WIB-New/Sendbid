@@ -309,3 +309,35 @@ async def admin_partners(request: Request):
         partners=partners,
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.get("/web/admin/rates", response_class=HTMLResponse)
+async def admin_rates(request: Request):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    corridors = await db.corridors.find({"active": True}, {"_id": 0}).sort("country_name", 1).to_list(300)
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="rates", section_title="Taux de change",
+        corridors=corridors,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.post("/web/admin/rates/{country_code}", response_class=HTMLResponse)
+async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: str = Form(...), fx_margin_percent: str = Form(...)):
+    user = await _resolve_session("admin", request)
+    if not user:
+        return _login_page(request, "admin")
+    try:
+        await db.corridors.update_one(
+            {"country_code": country_code.upper()},
+            {"$set": {
+                "fx_rate_eur": float(fx_rate_eur),
+                "fx_margin_percent": float(fx_margin_percent),
+                "updated_at": iso(now_utc()),
+            }},
+        )
+    except ValueError:
+        pass
+    return RedirectResponse(url=f"{_url_prefix()}/admin/rates", status_code=303)

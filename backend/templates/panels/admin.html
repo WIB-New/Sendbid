@@ -13,6 +13,7 @@
   <a href="{{ url_prefix }}/admin/linked-accounts" class="{% if section == 'linked-accounts' %}active{% endif %}"><span class="nav-icon">🔗</span>Comptes liés</a>
   <a href="{{ url_prefix }}/admin/support" class="{% if section == 'support' %}active{% endif %}"><span class="nav-icon">🎧</span>Support</a>
   <a href="{{ url_prefix }}/admin/partners" class="{% if section == 'partners' %}active{% endif %}"><span class="nav-icon">🤝</span>Partenaires</a>
+  <a href="{{ url_prefix }}/admin/rates" class="{% if section == 'rates' %}active{% endif %}"><span class="nav-icon">💱</span>Taux de change</a>
   <a href="{{ url_prefix }}/admin/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon">📜</span>Audit logs</a>
 {% endblock %}
 
@@ -335,6 +336,34 @@
             </tr>
           {% else %}
             <tr><td colspan="7"><div class="empty"><div class="emoji">🤝</div>Aucun partenaire.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% elif section == 'rates' %}
+    <div class="card">
+      <div class="card-header"><h2>💱 Taux de change par corridor ({{ corridors|length }})</h2></div>
+      <table>
+        <thead><tr><th>Pays</th><th>Devise</th><th>Taux EUR</th><th>Marge (%)</th><th>Mode de remise</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for c in corridors %}
+            <tr>
+              <td><b>{{ c.country_name or c.country_code }}</b> <span style="font-size:13px">{{ c.flag or '' }}</span></td>
+              <td>{{ c.currency or '—' }}</td>
+              <td>{{ c.fx_rate_eur or 1.0 }}</td>
+              <td>{{ c.fx_margin_percent or 1.5 }}%</td>
+              <td><span class="pill pill-neutral">{{ (c.delivery_modes or ['cash', 'bank', 'momo'])|join(', ') }}</span></td>
+              <td>
+                <form method="post" action="{{ url_prefix }}/admin/rates/{{ c.country_code }}" style="display:flex; gap:6px; align-items:center">
+                  <input type="text" name="fx_rate_eur" value="{{ c.fx_rate_eur or 1.0 }}" style="width:80px" required>
+                  <input type="text" name="fx_margin_percent" value="{{ c.fx_margin_percent or 1.5 }}" style="width:60px" required>
+                  <button type="submit" class="btn btn-sm" style="background:#047857;color:white">OK</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">💱</div>Aucun corridor.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
