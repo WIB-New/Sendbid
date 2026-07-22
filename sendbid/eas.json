@@ -7,6 +7,7 @@
     "preview": {
       "distribution": "internal",
       "node": "22.18.0",
+      "cache": { "disabled": true },
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "sendbid",
@@ -17,6 +18,7 @@
     "preview-paybid": {
       "distribution": "internal",
       "node": "22.18.0",
+      "cache": { "disabled": true },
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "paybid",
@@ -27,6 +29,7 @@
     "production": {
       "distribution": "store",
       "node": "22.18.0",
+      "cache": { "disabled": true },
       "android": { "buildType": "app-bundle" },
       "env": {
         "APP_VARIANT": "sendbid",
@@ -37,6 +40,7 @@
     "production-paybid": {
       "distribution": "store",
       "node": "22.18.0",
+      "cache": { "disabled": true },
       "android": { "buildType": "app-bundle" },
       "env": {
         "APP_VARIANT": "paybid",
