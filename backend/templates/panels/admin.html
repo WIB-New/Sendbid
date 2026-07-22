@@ -1,6 +1,6 @@
 {% extends 'panels/_base.html' %}
 {% block page_title %}{{ section_title or 'Tableau de bord' }}{% endblock %}
-{% block page_subtitle %}Données en temps réel de la plateforme SendBID.{% endblock %}
+{% block page_subtitle %}Données en temps réel du réseau SendBID (expéditeurs) et PayBID (agents).{% endblock %}
 
 {% block sidebar_nav %}
   <a href="{{ url_prefix }}/admin" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
@@ -73,12 +73,22 @@
     <div class="card">
       <div class="card-header"><h2>Tous les utilisateurs ({{ users|length }})</h2></div>
       <table>
-        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Rôle</th><th>KYC</th><th>Créé</th></tr></thead>
+        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Réseau</th><th>Rôle</th><th>KYC</th><th>Créé</th></tr></thead>
         <tbody>
           {% for u in users %}
-            <tr><td><b>{{ u.full_name or '—' }}</b></td><td>{{ u.email or '—' }}</td><td>{{ u.phone or '—' }}</td><td><span class="pill pill-neutral">{{ u.role or 'user' }}</span></td><td>{{ u.kyc_tier or 'T0' }}</td><td style="color:var(--text-muted); font-size:13px">{{ (u.created_at or '')[:10] }}</td></tr>
+            {% set email = (u.email or '') %}
+            {% set is_paybid = email.endswith('@paybid.app') %}
+            <tr>
+              <td><b>{{ u.full_name or '—' }}</b></td>
+              <td>{{ u.email or '—' }}</td>
+              <td>{{ u.phone or '—' }}</td>
+              <td><span class="pill pill-{{ 'info' if is_paybid else 'ok' }}">{{ 'PayBID' if is_paybid else 'SendBID' }}</span></td>
+              <td><span class="pill pill-neutral">{{ u.role or 'user' }}</span></td>
+              <td>{{ u.kyc_tier or 'T0' }}</td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (u.created_at or '')[:10] }}</td>
+            </tr>
           {% else %}
-            <tr><td colspan="6"><div class="empty"><div class="emoji">👥</div>Aucun utilisateur.</div></td></tr>
+            <tr><td colspan="7"><div class="empty"><div class="emoji">👥</div>Aucun utilisateur.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
