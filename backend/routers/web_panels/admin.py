@@ -38,7 +38,7 @@ async def admin_users(
     page: int = 1,
     limit: int = 20,
     search: str = "",
-    role: str = "",
+    role_filter: str = "",
     network: str = "",
 ):
     user = await _resolve_session("admin", request)
@@ -52,8 +52,8 @@ async def admin_users(
             {"full_name": {"$regex": search, "$options": "i"}},
             {"phone": {"$regex": search}},
         ]
-    if role:
-        q["role"] = role
+    if role_filter:
+        q["role"] = role_filter
     if network:
         if network == "paybid":
             q["email"] = {"$regex": r"@paybid\.app$"}
@@ -76,7 +76,7 @@ async def admin_users(
     ctx = _panel_base_ctx(
         request, "admin", user, section="users", section_title="Utilisateurs",
         users=users, total=total, page=page, pages=pages, limit=limit,
-        search=search, role=role, network=network,
+        search=search, role_filter=role_filter, network=network,
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 

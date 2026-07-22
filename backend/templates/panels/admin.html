@@ -78,14 +78,14 @@
       <div class="card-header"><h2>Utilisateurs ({{ total }})</h2></div>
       <form method="get" action="{{ url_prefix }}/admin/users" class="filters">
         <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, téléphone…">
-        <select name="role">
+        <select name="role_filter">
           <option value="">Tous les rôles</option>
-          <option value="user" {% if role == 'user' %}selected{% endif %}>User</option>
-          <option value="agent" {% if role == 'agent' %}selected{% endif %}>Agent</option>
-          <option value="super_agent" {% if role == 'super_agent' %}selected{% endif %}>Super-Agent</option>
-          <option value="partner_admin" {% if role == 'partner_admin' %}selected{% endif %}>Partenaire</option>
-          <option value="admin" {% if role == 'admin' %}selected{% endif %}>Admin</option>
-          <option value="super_admin" {% if role == 'super_admin' %}selected{% endif %}>Super-Admin</option>
+          <option value="user" {% if role_filter == 'user' %}selected{% endif %}>User</option>
+          <option value="agent" {% if role_filter == 'agent' %}selected{% endif %}>Agent</option>
+          <option value="super_agent" {% if role_filter == 'super_agent' %}selected{% endif %}>Super-Agent</option>
+          <option value="partner_admin" {% if role_filter == 'partner_admin' %}selected{% endif %}>Partenaire</option>
+          <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="super_admin" {% if role_filter == 'super_admin' %}selected{% endif %}>Super-Admin</option>
         </select>
         <select name="network">
           <option value="">Tous les réseaux</option>
@@ -117,9 +117,9 @@
       </table>
       {% if pages > 1 %}
       <div class="pagination">
-        {% if page > 1 %}<a href="{{ url_prefix }}/admin/users?page={{ page - 1 }}&limit={{ limit }}&search={{ search }}&role={{ role }}&network={{ network }}" class="btn btn-sm btn-ghost">← Précédent</a>{% endif %}
+        {% if page > 1 %}<a href="{{ url_prefix }}/admin/users?page={{ page - 1 }}&limit={{ limit }}&search={{ search }}&role_filter={{ role_filter }}&network={{ network }}" class="btn btn-sm btn-ghost">← Précédent</a>{% endif %}
         <span>Page {{ page }} / {{ pages }}</span>
-        {% if page < pages %}<a href="{{ url_prefix }}/admin/users?page={{ page + 1 }}&limit={{ limit }}&search={{ search }}&role={{ role }}&network={{ network }}" class="btn btn-sm btn-ghost">Suivant →</a>{% endif %}
+        {% if page < pages %}<a href="{{ url_prefix }}/admin/users?page={{ page + 1 }}&limit={{ limit }}&search={{ search }}&role_filter={{ role_filter }}&network={{ network }}" class="btn btn-sm btn-ghost">Suivant →</a>{% endif %}
       </div>
       {% endif %}
     </div>
