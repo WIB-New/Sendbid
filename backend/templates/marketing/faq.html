@@ -1,5 +1,5 @@
 {% extends 'partials/base.html' %}
-{% block title %}FAQ — SendFloo{% endblock %}
+{% block title %}FAQ — SendBID{% endblock %}
 {% block extra_css %}
   .page-hero { padding: 80px 24px 40px; background: radial-gradient(ellipse at top, rgba(4,212,111,0.15), transparent 60%), var(--bg); text-align: center; }
   .faq-cat { margin-bottom: 48px; }
@@ -17,7 +17,7 @@
   <div class="container">
     <span class="eyebrow">FAQ</span>
     <h1 class="serif">Questions fréquentes</h1>
-    <p class="lead" style="margin-top:16px">Tout ce que vous voulez savoir sur SendFloo, l'enchère inverse et nos agents.</p>
+    <p class="lead" style="margin-top:16px">Tout ce que vous voulez savoir sur SendBID, l'enchère inverse et nos agents.</p>
   </div>
 </section>
 
@@ -27,13 +27,13 @@
       <h2 class="serif">🚀 Général</h2>
       <details><summary>Qu'est-ce qu'une enchère inverse ?</summary><p>C'est un mécanisme où les vendeurs (ici, les agents de transfert) se livrent concurrence pour offrir le meilleur prix. Vous soumettez votre demande de transfert, et pendant 30 secondes, tous les agents disponibles dans le corridor de destination proposent leurs frais. Le moins-disant l'emporte généralement, mais vous gardez le contrôle du choix final.</p></details>
       <details><summary>Combien de temps prend un transfert ?</summary><p>L'enchère dure 30 secondes. Après sélection de l'agent, le transfert est confirmé instantanément et généralement livré en moins d'une heure (souvent en quelques minutes pour les retraits cash en agence ou Mobile Money).</p></details>
-      <details><summary>Dans quels pays SendFloo est-il disponible ?</summary><p>SendFloo couvre 250+ pays et territoires. Les corridors les plus utilisés incluent : France→Cameroun, France→Sénégal, France→Côte d'Ivoire, UK→Nigéria, USA→Mexique, France→Maroc, et bien d'autres. Consultez la liste complète dans l'app.</p></details>
-      <details><summary>SendFloo est-il régulé ?</summary><p>Oui. Nous opérons avec un agrément EMI (Electronic Money Institution) en Union Européenne et respectons les obligations PSAN, LCB-FT et KYC. Nos agents sont également contrôlés et leur statut de conformité vérifié à plusieurs niveaux.</p></details>
+      <details><summary>Dans quels pays SendBID est-il disponible ?</summary><p>SendBID couvre 250+ pays et territoires. Les corridors les plus utilisés incluent : France→Cameroun, France→Sénégal, France→Côte d'Ivoire, UK→Nigéria, USA→Mexique, France→Maroc, et bien d'autres. Consultez la liste complète dans l'app.</p></details>
+      <details><summary>SendBID est-il régulé ?</summary><p>Oui. Nous opérons avec un agrément EMI (Electronic Money Institution) en Union Européenne et respectons les obligations PSAN, LCB-FT et KYC. Nos agents sont également contrôlés et leur statut de conformité vérifié à plusieurs niveaux.</p></details>
     </div>
 
     <div class="faq-cat">
       <h2 class="serif">💳 Paiements et frais</h2>
-      <details><summary>Comment fonctionnent les frais ?</summary><p>Vous payez deux choses : (1) un faible frais SendFloo fixe (~0,8%), et (2) le frais de l'agent qui a gagné l'enchère (1,2 à 3,5% typiquement). Aucun frais caché. Le taux de change appliqué est le taux interbancaire + une marge transparente.</p></details>
+      <details><summary>Comment fonctionnent les frais ?</summary><p>Vous payez deux choses : (1) un faible frais SendBID fixe (~0,8%), et (2) le frais de l'agent qui a gagné l'enchère (1,2 à 3,5% typiquement). Aucun frais caché. Le taux de change appliqué est le taux interbancaire + une marge transparente.</p></details>
       <details><summary>Quels moyens de paiement acceptés ?</summary><p>Carte bancaire (Visa/Mastercard/Amex via Stripe), PayPal, Mobile Money (MTN, Orange, Wave, Moov), virement SEPA. Les paiements sont 100% in-app grâce à notre WebBrowser embarqué.</p></details>
       <details><summary>Y a-t-il un montant maximum ?</summary><p>Les limites dépendent de votre niveau KYC : Tier 1 (€500/jour, €2 000/mois), Tier 2 (€5 000/jour, €20 000/mois), Tier 3 (€20 000/jour, €100 000/mois). Le passage entre tiers est rapide et 100% en ligne.</p></details>
       <details><summary>Est-ce que je peux annuler un transfert ?</summary><p>Oui, jusqu'à ce que l'agent ait initié le retrait/dépôt. Après, l'opération est irréversible mais vous pouvez contacter notre support 24/7 en cas de problème.</p></details>
@@ -42,7 +42,7 @@
     <div class="faq-cat">
       <h2 class="serif">🔒 Sécurité</h2>
       <details><summary>Mes données sont-elles sécurisées ?</summary><p>Toutes les données sensibles (KYC, paiements) sont chiffrées en transit (TLS 1.3) et au repos (AES-256). Nous appliquons les standards PCI-DSS et RGPD. Aucune donnée bancaire n'est stockée sur nos serveurs (tokenées chez Stripe).</p></details>
-      <details><summary>Comment fonctionne la biométrie ?</summary><p>SendFloo utilise Face ID / Touch ID via les API natives iOS et Android. Aucune donnée biométrique ne quitte votre appareil — nous validons simplement le « oui/non » du système. Vous pouvez aussi utiliser un PIN comme fallback.</p></details>
+      <details><summary>Comment fonctionne la biométrie ?</summary><p>SendBID utilise Face ID / Touch ID via les API natives iOS et Android. Aucune donnée biométrique ne quitte votre appareil — nous validons simplement le « oui/non » du système. Vous pouvez aussi utiliser un PIN comme fallback.</p></details>
       <details><summary>Que se passe-t-il si je perds mon téléphone ?</summary><p>Connectez-vous depuis un autre appareil et révoquez la session perdue dans Paramètres → Sessions. Votre wallet est protégé par le mot de passe + biométrie/PIN, donc les fonds restent inaccessibles à quiconque sans vos identifiants.</p></details>
     </div>
 

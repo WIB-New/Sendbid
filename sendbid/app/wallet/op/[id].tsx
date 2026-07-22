@@ -139,7 +139,7 @@ export default function WalletOperationDetail() {
   const rateApp = () => {
     const storeUrl = Platform.OS === "ios"
       ? "https://apps.apple.com/app/sendbid/id0000000000"
-      : "https://play.google.com/store/apps/details?id=app.sendbid.sendfloo";
+      : "https://play.google.com/store/apps/details?id=com.sendbid.app";
     if (Platform.OS === "web" && typeof window !== "undefined") window.open(storeUrl, "_blank");
     else Linking.openURL(storeUrl);
   };

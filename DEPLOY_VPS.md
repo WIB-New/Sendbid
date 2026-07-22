@@ -13,7 +13,7 @@ Dans le panel DNS de LWS pour `sendbid.app` :
 Type  Name      Value            TTL
 A     @         <IP_VPS>         3600
 A     www       <IP_VPS>         3600
-A     sendfloo  <IP_VPS>         3600
+A     sendbid  <IP_VPS>         3600
 A     api       <IP_VPS>         3600
 ```
 
@@ -142,10 +142,10 @@ server {
   }
 }
 
-# Sous-domaine sendfloo : panels web
+# Sous-domaine sendbid : panels web
 server {
   listen 80;
-  server_name sendfloo.sendbid.app;
+  server_name sendbid.sendbid.app;
 
   # Toutes les routes vont vers le backend (panels HTML + API)
   location / {
@@ -173,7 +173,7 @@ nginx -t && systemctl reload nginx
 ## 8. SSL Let's Encrypt
 
 ```bash
-certbot --nginx -d sendbid.app -d www.sendbid.app -d sendfloo.sendbid.app \
+certbot --nginx -d sendbid.app -d www.sendbid.app -d sendbid.sendbid.app \
   --non-interactive --agree-tos --email <votre@email>
 # Auto-renouvellement déjà configuré via systemd timer
 ```
@@ -184,10 +184,10 @@ certbot --nginx -d sendbid.app -d www.sendbid.app -d sendfloo.sendbid.app \
 # Tester routes
 curl -I https://sendbid.app/                              # → 200
 curl -I https://sendbid.app/api/health                    # → 200 (si endpoint health existe)
-curl -I https://sendfloo.sendbid.app/                     # → 200 (landing panels)
-curl -I https://sendfloo.sendbid.app/admin                # → 200 (panel admin)
-curl -I https://sendfloo.sendbid.app/agent                # → 200
-curl -I https://sendfloo.sendbid.app/superagent           # → 200
+curl -I https://sendbid.sendbid.app/                     # → 200 (landing panels)
+curl -I https://sendbid.sendbid.app/admin                # → 200 (panel admin)
+curl -I https://sendbid.sendbid.app/agent                # → 200
+curl -I https://sendbid.sendbid.app/superagent           # → 200
 
 # Logs
 pm2 logs sendbid-backend
@@ -208,7 +208,7 @@ cd ../frontend && yarn install && npx expo export --platform web --output-dir di
 
 ## 🔐 Sécurité production
 
-- Changez tous les mots de passe seedés (admin@sendfloo, agent@sendfloo, etc.)
+- Changez tous les mots de passe seedés (admin@sendbid, agent@sendbid, etc.)
 - Activez backups MongoDB quotidiens (`mongodump` + cron + S3)
 - Configurez fail2ban pour SSH
 - Activez monitoring (Netdata ou similaire)

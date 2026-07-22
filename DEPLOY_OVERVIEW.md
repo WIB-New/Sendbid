@@ -1,4 +1,4 @@
-# 🚀 État du déploiement VPS — SendFloo / SendBID
+# 🚀 État du déploiement VPS — SendBID / SendBID
 
 > Document de suivi du déploiement sur VPS LWS `vps121136.serveur-vps.net` (`195.110.35.155`).
 > Dernière mise à jour : déploiement initial terminé, en attente de la mise à jour DNS.
@@ -21,18 +21,18 @@
 | Backend lancé via pm2 | ✅ | `sendbid-backend` running, listen 0.0.0.0:8001 |
 | Seed DB | ✅ | Admin, agent, superagent, client + extras créés en base `sendbid_prod` |
 | Frontend Expo build | ✅ | `npx expo export --platform web --output-dir dist` (134 routes générées) |
-| Nginx config | ✅ | 3 server blocks : sendbid.app → 301 redir, sendfloo.* → marketing+panels, default_server → 444 |
-| URL prefix dynamique | ✅ | Sur `sendfloo.*` les liens sont propres (`/pricing`), sur `/api/web/*` ils gardent le préfixe |
+| Nginx config | ✅ | 3 server blocks : sendbid.app → 301 redir, sendbid.* → marketing+panels, default_server → 444 |
+| URL prefix dynamique | ✅ | Sur `sendbid.*` les liens sont propres (`/pricing`), sur `/api/web/*` ils gardent le préfixe |
 | Firewall ufw | ✅ | OpenSSH + Nginx Full autorisés |
 | pm2 startup | ✅ | Auto-restart au boot configuré (`pm2 save`) |
 
 ### Test interne (curl avec Host header)
 ```
-✅ Host: sendfloo.sendbid.app → / → HTTP 200 (landing 23 KB, "SendFloo" inside)
-✅ Host: sendfloo.sendbid.app → /pricing → HTTP 200 (URLs propres /features /admin /agent)
-✅ Host: sendfloo.sendbid.app → /admin → HTTP 200 (formulaire login)
-✅ Host: sendbid.app → / → HTTP 301 Location: https://sendfloo.sendbid.app/
-✅ Externe : curl -H "Host: sendfloo.sendbid.app" http://195.110.35.155/ → HTTP 200 OK
+✅ Host: sendbid.sendbid.app → / → HTTP 200 (landing 23 KB, "SendBID" inside)
+✅ Host: sendbid.sendbid.app → /pricing → HTTP 200 (URLs propres /features /admin /agent)
+✅ Host: sendbid.sendbid.app → /admin → HTTP 200 (formulaire login)
+✅ Host: sendbid.app → / → HTTP 301 Location: https://sendbid.sendbid.app/
+✅ Externe : curl -H "Host: sendbid.sendbid.app" http://195.110.35.155/ → HTTP 200 OK
 ```
 
 ---
@@ -47,22 +47,22 @@ Le DNS actuel pointe vers **`149.202.61.20`** (ancien hébergeur). Pour que le d
 |------|-----|--------|-----|
 | A | `@` | `195.110.35.155` | 3600 |
 | A | `www` | `195.110.35.155` | 3600 |
-| A | `sendfloo` | `195.110.35.155` | 3600 |
+| A | `sendbid` | `195.110.35.155` | 3600 |
 | A | `api` | `195.110.35.155` | 3600 |
 
 > ⏱️ **Propagation** : 5-60 minutes typiquement (TTL 3600s).
-> Vous pouvez vérifier avec : `dig sendfloo.sendbid.app +short` (devrait renvoyer `195.110.35.155`).
+> Vous pouvez vérifier avec : `dig sendbid.sendbid.app +short` (devrait renvoyer `195.110.35.155`).
 
 ---
 
 ## 🔐 Étape finale (à exécuter une fois DNS propagé)
 
-Une fois `dig sendfloo.sendbid.app` retourne `195.110.35.155`, lancez la commande SSL :
+Une fois `dig sendbid.sendbid.app` retourne `195.110.35.155`, lancez la commande SSL :
 
 ```bash
 ssh root@195.110.35.155
 certbot --nginx \
-  -d sendbid.app -d www.sendbid.app -d sendfloo.sendbid.app -d api.sendbid.app \
+  -d sendbid.app -d www.sendbid.app -d sendbid.sendbid.app -d api.sendbid.app \
   --non-interactive --agree-tos --email contact@sendbid.app --redirect
 ```
 
@@ -78,25 +78,25 @@ Certbot va automatiquement :
 
 ```bash
 # Marketing public
-curl -I https://sendfloo.sendbid.app/             # 200
-curl -I https://sendfloo.sendbid.app/pricing      # 200
-curl -I https://sendfloo.sendbid.app/faq          # 200
+curl -I https://sendbid.sendbid.app/             # 200
+curl -I https://sendbid.sendbid.app/pricing      # 200
+curl -I https://sendbid.sendbid.app/faq          # 200
 
 # Panels (avant login → 200 avec formulaire login)
-curl -I https://sendfloo.sendbid.app/admin        # 200
-curl -I https://sendfloo.sendbid.app/agent        # 200
-curl -I https://sendfloo.sendbid.app/superagent   # 200
+curl -I https://sendbid.sendbid.app/admin        # 200
+curl -I https://sendbid.sendbid.app/agent        # 200
+curl -I https://sendbid.sendbid.app/superagent   # 200
 
 # Redirect principal
-curl -I https://sendbid.app/                      # 301 → https://sendfloo.sendbid.app/
+curl -I https://sendbid.app/                      # 301 → https://sendbid.sendbid.app/
 
 # API mobile
 curl https://sendbid.app/api/corridors | head     # JSON pays
 
 # Login admin via curl
-curl -c /tmp/c.txt -X POST https://sendfloo.sendbid.app/admin/login \
+curl -c /tmp/c.txt -X POST https://sendbid.sendbid.app/admin/login \
   -d "email=admin@sendbid.app&password=Admin@123!"
-curl -b /tmp/c.txt https://sendfloo.sendbid.app/admin
+curl -b /tmp/c.txt https://sendbid.sendbid.app/admin
 ```
 
 ---
@@ -188,4 +188,4 @@ En cas de problème, vérifier dans cet ordre :
 2. `systemctl status nginx mongod`
 3. `tail -20 /var/log/nginx/error.log`
 4. `curl -v http://127.0.0.1:8001/api/web/` (backend direct)
-5. `curl -v -H "Host: sendfloo.sendbid.app" http://127.0.0.1/` (via nginx)
+5. `curl -v -H "Host: sendbid.sendbid.app" http://127.0.0.1/` (via nginx)

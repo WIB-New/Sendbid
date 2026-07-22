@@ -1,5 +1,5 @@
 # SENDBID + PAYBID Frontend — Expo Web static build derrière nginx
-# Build : docker build --build-arg EXPO_PUBLIC_BACKEND_URL=https://api.sendfloo.sendbid.app -t sendbid-frontend ./frontend
+# Build : docker build --build-arg EXPO_PUBLIC_BACKEND_URL=https://api.sendbid.app -t sendbid-frontend ./frontend
 # Run   : docker run -p 8080:80 sendbid-frontend
 
 # ===== Stage 1 : build du bundle Expo Web =====

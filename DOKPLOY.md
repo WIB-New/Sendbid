@@ -1,6 +1,6 @@
 # Guide Dokploy — Déploiement SendBID / PayBID
 
-> Ce guide explique étape par étape comment déployer le projet sur Dokploy avec les domaines `sendbid.app` et `sendfloo.sendbid.app`.
+> Ce guide explique étape par étape comment déployer le projet sur Dokploy avec les domaines `sendbid.app` et `sendbid.sendbid.app`.
 
 ---
 
@@ -11,7 +11,7 @@
 - Votre nom de domaine `sendbid.app` pointe vers `149.202.61.20`
 - Les sous-domaines suivants configurés en DNS type A vers `149.202.61.20` :
   - `sendbid.app`
-  - `sendfloo.sendbid.app`
+  - `sendbid.sendbid.app`
   - `api.sendbid.app`
   - `admin.sendbid.app`
 
@@ -50,7 +50,7 @@ Copier-coller le contenu du fichier `env-example.txt` (à la racine du projet) e
 ```env
 BACKEND_HOST=api.sendbid.app
 ADMIN_HOST=admin.sendbid.app
-FRONTEND_HOST=sendfloo.sendbid.app
+FRONTEND_HOST=sendbid.sendbid.app
 PUBLIC_BACKEND_URL=https://api.sendbid.app
 EXPO_PUBLIC_BACKEND_URL=https://api.sendbid.app
 
@@ -68,7 +68,7 @@ DEMO_CLIENT_EMAIL=demo@sendbid.app
 DEMO_CLIENT_PASSWORD=Demo@2026!
 DEMO_CLIENT_PIN=123456
 
-ALLOWED_ORIGINS=https://sendfloo.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
+ALLOWED_ORIGINS=https://sendbid.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
 ```
 
 ### Variables optionnelles (mais recommandées)
@@ -122,7 +122,7 @@ Les labels suivants sont déjà configurés :
 - traefik.http.routers.sendbid-api.rule=Host(`api.sendbid.app`) || Host(`admin.sendbid.app`)
 
 # Frontend
-- traefik.http.routers.sendbid-frontend.rule=Host(`sendfloo.sendbid.app`) || Host(`sendbid.app`)
+- traefik.http.routers.sendbid-frontend.rule=Host(`sendbid.sendbid.app`) || Host(`sendbid.app`)
 ```
 
 ### Étapes dans Dokploy :
@@ -131,7 +131,7 @@ Les labels suivants sont déjà configurés :
 2. Onglet **Domains**
 3. Ajouter les domaines suivants (Dokploy génère automatiquement les certificats Let's Encrypt) :
    - `sendbid.app`
-   - `sendfloo.sendbid.app`
+   - `sendbid.sendbid.app`
    - `api.sendbid.app`
    - `admin.sendbid.app`
 4. S'assurer que HTTPS est activé (certificat auto-généré par Dokploy/Traefik)
@@ -164,7 +164,7 @@ Résultat attendu : `{"status":"ok"}` ou similaire.
 Ouvrir dans un navigateur :
 
 ```
-https://sendfloo.sendbid.app
+https://sendbid.sendbid.app
 ```
 
 ### Panel admin
@@ -298,7 +298,7 @@ docker compose -f /path/to/docker-compose.yml restart backend
 
 | Service | URL publique |
 | --- | --- |
-| Frontend web | `https://sendfloo.sendbid.app` |
-| Domaine principal | `https://sendbid.app` → redirige vers `https://sendfloo.sendbid.app` |
+| Frontend web | `https://sendbid.sendbid.app` |
+| Domaine principal | `https://sendbid.app` → redirige vers `https://sendbid.sendbid.app` |
 | Backend API | `https://api.sendbid.app` |
 | Panel admin | `https://admin.sendbid.app/api/web/admin` |

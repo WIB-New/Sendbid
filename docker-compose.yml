@@ -33,7 +33,7 @@ services:
       DEMO_CLIENT_PIN: ${DEMO_CLIENT_PIN}
 
       # ── CORS ──
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://sendfloo.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://sendbid.app,https://api.sendbid.app,https://admin.sendbid.app}
 
       # ── Stripe (paiements) ──
       STRIPE_API_KEY: ${STRIPE_API_KEY:-}

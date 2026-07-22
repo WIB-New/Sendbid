@@ -1,5 +1,5 @@
 """
-Backend tests for SendFloo Marketing Website + Web Panels (Jinja2 SSR).
+Backend tests for SendBID Marketing Website + Web Panels (Jinja2 SSR).
 Also covers a small regression suite for core mobile APIs.
 
 All tests use localhost:8001 per main agent's instruction.

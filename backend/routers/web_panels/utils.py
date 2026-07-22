@@ -61,16 +61,12 @@ def _current_year() -> int:
 def _url_prefix(request: Request) -> str:
     """
     Retourne le pr\u00e9fixe d'URL \u00e0 utiliser pour les liens internes :
-    - Sur sendfloo.sendbid.app    -> '' (URLs propres : /pricing, /admin, ...)
-    - Sur sendbid.app/api/web/... -> '/api/web' (URLs internes Emergent)
-
-    D\u00e9tection via le header Host. Le sous-domaine d\u00e9di\u00e9 (sendfloo.*) signifie
-    que nginx fait d\u00e9j\u00e0 le rewrite vers /api/web/, donc on doit produire
-    des liens sans pr\u00e9fixe pour l'utilisateur.
+    - Sur sendbid.app / admin.sendbid.app / panel.sendbid.app -> '' (URLs propres : /pricing, /admin, ...)
+    - Sur api.sendbid.app / api/web/... -> '/api/web' (URLs internes API)
     """
     host = (request.headers.get("host") or "").lower()
-    # Sous-domaine d\u00e9di\u00e9 : URLs propres
-    if host.startswith("sendfloo.") or host.startswith("panel.") or host.startswith("admin."):
+    # Public marketing site + admin/panel subdomains : URLs propres
+    if host in ("sendbid.app", "www.sendbid.app") or host.startswith("panel.") or host.startswith("admin."):
         return ""
     return "/api/web"
 

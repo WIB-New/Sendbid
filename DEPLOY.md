@@ -45,7 +45,7 @@ Exemple minimal requis :
 ```env
 BACKEND_HOST=api.sendbid.app
 ADMIN_HOST=admin.sendbid.app
-FRONTEND_HOST=sendfloo.sendbid.app
+FRONTEND_HOST=sendbid.sendbid.app
 PUBLIC_BACKEND_URL=https://api.sendbid.app
 EXPO_PUBLIC_BACKEND_URL=https://api.sendbid.app
 
@@ -61,7 +61,7 @@ DEMO_CLIENT_EMAIL=demo@sendbid.app
 DEMO_CLIENT_PASSWORD=Demo@2026!
 DEMO_CLIENT_PIN=123456
 
-ALLOWED_ORIGINS=https://sendfloo.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
+ALLOWED_ORIGINS=https://sendbid.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
 ```
 
 ---
@@ -100,7 +100,7 @@ Cela lance :
 curl https://api.sendbid.app/api/health
 
 # Frontend web
-# Ouvrir https://sendfloo.sendbid.app dans un navigateur
+# Ouvrir https://sendbid.sendbid.app dans un navigateur
 
 # Panel admin
 # Ouvrir https://admin.sendbid.app/api/web/admin dans un navigateur
@@ -233,10 +233,10 @@ npx eas build --platform android --profile preview-paybid --non-interactive
 
 | Service | URL |
 | --- | --- |
-| Frontend web | `https://sendfloo.sendbid.app` |
+| Frontend web | `https://sendbid.sendbid.app` |
 | Backend API | `https://api.sendbid.app` |
 | Panel admin | `https://admin.sendbid.app/api/web/admin` |
-| Redirection principal | `https://sendbid.app` → `https://sendfloo.sendbid.app` |
+| Redirection principal | `https://sendbid.app` → `https://sendbid.sendbid.app` |
 
 ---
 

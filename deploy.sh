@@ -38,6 +38,6 @@ else
 fi
 
 echo "=== Deploiement termine ==="
-echo "Frontend web : https://${FRONTEND_HOST:-sendfloo.sendbid.app}"
+echo "Frontend web : https://${FRONTEND_HOST:-sendbid.sendbid.app}"
 echo "Backend API  : ${PUBLIC_BACKEND_URL:-https://api.sendbid.app}"
 echo "Panel admin  : https://${ADMIN_HOST:-admin.sendbid.app}/api/web/admin"

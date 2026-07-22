@@ -6,7 +6,7 @@
 # ── URLs et domaines ──
 BACKEND_HOST=api.sendbid.app
 ADMIN_HOST=admin.sendbid.app
-FRONTEND_HOST=sendfloo.sendbid.app
+FRONTEND_HOST=sendbid.sendbid.app
 PUBLIC_BACKEND_URL=https://api.sendbid.app
 EXPO_PUBLIC_BACKEND_URL=https://api.sendbid.app
 
@@ -29,7 +29,7 @@ DEMO_CLIENT_PASSWORD=Demo@2026!
 DEMO_CLIENT_PIN=123456
 
 # ── CORS ──
-ALLOWED_ORIGINS=https://sendfloo.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
+ALLOWED_ORIGINS=https://sendbid.sendbid.app,https://api.sendbid.app,https://admin.sendbid.app
 
 # ── Stripe (paiements carte) ──
 STRIPE_API_KEY=sk_test_...
