@@ -440,8 +440,8 @@ async def seed_demo_data():
         )
         logger.info("[seed] demo agent PIN/password restored (agent@paybid.app)")
 
-    # Cleanup demo data in production
-    if IS_PROD and SKIP_DEMO_DATA:
+    # Cleanup demo data when SKIP_DEMO_DATA is enabled
+    if SKIP_DEMO_DATA:
         protected = {ADMIN_EMAIL, SUPER_ADMIN_EMAIL}
         demo_emails = [
             "partner@sendbid.app", "superagent@sendbid.app",
@@ -461,15 +461,17 @@ async def seed_demo_data():
                 await db.payment_methods.delete_many({"user_id": {"$in": demo_user_ids}})
                 await db.notifications.delete_many({"user_id": {"$in": demo_user_ids}})
                 await db.linked_accounts.delete_many({"user_id": {"$in": demo_user_ids}})
-                logger.info(f"[seed] removed {len(demo_user_ids)} demo users in production")
-            demo_profile_ids = ["PB100001", "PB100002", "PB100003"]
-            await db.agents.delete_many({
-                "$or": [
-                    {"profile_id": {"$in": demo_profile_ids}},
-                    {"id": {"$in": agent_ids_from_users}},
-                ]
-            })
-            logger.info("[seed] removed demo agent profiles in production")
+                logger.info(f"[seed] removed {len(demo_user_ids)} demo users")
+        demo_profile_ids = ["PB100001", "PB100002", "PB100003"]
+        demo_full_names = ["Mamadou Sow", "Patrick Mbarga", "Esther Ngassa"]
+        await db.agents.delete_many({
+            "$or": [
+                {"profile_id": {"$in": demo_profile_ids}},
+                {"full_name": {"$in": demo_full_names}},
+                {"id": {"$in": agent_ids_from_users}},
+            ]
+        })
+        logger.info("[seed] removed demo agent profiles")
 
     # Test credentials file
     Path("/app/memory").mkdir(parents=True, exist_ok=True)
