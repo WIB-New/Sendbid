@@ -440,6 +440,37 @@ async def seed_demo_data():
         )
         logger.info("[seed] demo agent PIN/password restored (agent@paybid.app)")
 
+    # Cleanup demo data in production
+    if IS_PROD and SKIP_DEMO_DATA:
+        protected = {ADMIN_EMAIL, SUPER_ADMIN_EMAIL}
+        demo_emails = [
+            "partner@sendbid.app", "superagent@sendbid.app",
+            "admin@sendbid.app", "agent@sendbid.app", "agent@paybid.app",
+            DEMO_CLIENT_EMAIL,
+        ]
+        demo_emails = [e for e in demo_emails if e and e not in protected]
+        if demo_emails:
+            demo_users = await db.users.find({"email": {"$in": demo_emails}}, {"id": 1, "agent_id": 1}).to_list(1000)
+            demo_user_ids = [u["id"] for u in demo_users]
+            agent_ids_from_users = [u["agent_id"] for u in demo_users if u.get("agent_id")]
+            if demo_user_ids:
+                await db.users.delete_many({"id": {"$in": demo_user_ids}})
+                await db.wallets.delete_many({"user_id": {"$in": demo_user_ids}})
+                await db.wallet_tx.delete_many({"user_id": {"$in": demo_user_ids}})
+                await db.beneficiaries.delete_many({"user_id": {"$in": demo_user_ids}})
+                await db.payment_methods.delete_many({"user_id": {"$in": demo_user_ids}})
+                await db.notifications.delete_many({"user_id": {"$in": demo_user_ids}})
+                await db.linked_accounts.delete_many({"user_id": {"$in": demo_user_ids}})
+                logger.info(f"[seed] removed {len(demo_user_ids)} demo users in production")
+            demo_profile_ids = ["PB100001", "PB100002", "PB100003"]
+            await db.agents.delete_many({
+                "$or": [
+                    {"profile_id": {"$in": demo_profile_ids}},
+                    {"id": {"$in": agent_ids_from_users}},
+                ]
+            })
+            logger.info("[seed] removed demo agent profiles in production")
+
     # Test credentials file
     Path("/app/memory").mkdir(parents=True, exist_ok=True)
     creds = f"""# SENDBID — Test Credentials
