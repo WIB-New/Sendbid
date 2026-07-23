@@ -27,3 +27,11 @@ if [ -f "$GRADLE_PROPS" ]; then
 else
   echo "Warning: $GRADLE_PROPS not found. Skipping post-install patch."
 fi
+
+# EAS images sometimes inject -XX:MaxPermSize in the user's Gradle properties
+USER_GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+if [ -f "$USER_GRADLE_PROPS" ]; then
+  echo "Patching $USER_GRADLE_PROPS to remove MaxPermSize..."
+  sed -i 's/-XX:MaxPermSize=[^ ]*//g' "$USER_GRADLE_PROPS"
+  echo "$USER_GRADLE_PROPS updated."
+fi
