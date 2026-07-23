@@ -4,19 +4,27 @@ set -e
 JDK17=/usr/lib/jvm/java-17-openjdk-amd64
 
 if [ ! -d "$JDK17" ]; then
-  echo "Installing OpenJDK 17..."
+  echo "OpenJDK 17 not found at $JDK17, installing..."
   apt-get update -qq
   apt-get install -y -qq openjdk-17-jdk-headless
+  if [ ! -d "$JDK17" ]; then
+    # Some images install under a slightly different path; symlink to the expected one
+    INSTALLED=$(find /usr/lib/jvm -maxdepth 1 -type d -name '*java-17*' | head -n 1)
+    if [ -z "$INSTALLED" ]; then
+      echo "ERROR: OpenJDK 17 installation failed"
+      exit 1
+    fi
+    ln -s "$INSTALLED" "$JDK17"
+  fi
 fi
 
 echo "Switching to OpenJDK 17..."
 update-alternatives --set java "$JDK17/bin/java" || true
 update-alternatives --set javac "$JDK17/bin/javac" || true
 
-# Configure Gradle to use JDK 17
-mkdir -p android
-echo "" >> android/gradle.properties
-echo "# EAS Java 17 override" >> android/gradle.properties
-echo "org.gradle.java.home=$JDK17" >> android/gradle.properties
-
-echo "JAVA_HOME set to $JDK17"
+if [ -d "$JDK17" ]; then
+  echo "JAVA_HOME will be $JDK17"
+else
+  echo "ERROR: $JDK17 does not exist after install"
+  exit 1
+fi
