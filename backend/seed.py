@@ -7,6 +7,7 @@ from pathlib import Path
 
 from core.config import (
     ADMIN_EMAIL, ADMIN_PASSWORD,
+    SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD,
     DEMO_CLIENT_EMAIL, DEMO_CLIENT_PASSWORD, DEMO_CLIENT_PIN,
 )
 from core.db import db, now_utc, iso
@@ -71,8 +72,9 @@ async def seed_demo_data():
         logger.info("[seed] admin password reset")
 
     # Extra admin roles (super_admin, partner_admin, super_agent)
+    # Le super-admin est configurable via les variables d'environnement SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD
     extra_admins = [
-        {"email": "superadmin@sendbid.app", "pwd": "SuperAdmin@123!", "role": "super_admin", "name": "Super-Admin SENDBID", "pid": "SBSUPER"},
+        {"email": SUPER_ADMIN_EMAIL, "pwd": SUPER_ADMIN_PASSWORD, "role": "super_admin", "name": "Super-Admin SENDBID", "pid": "SBSUPER"},
         {"email": "partner@sendbid.app",    "pwd": "Partner@123!",    "role": "partner_admin", "name": "Partenaire Demo",    "pid": "SBPART"},
         {"email": "superagent@sendbid.app", "pwd": "Super@123!",      "role": "super_agent",   "name": "Super-Agent Demo",   "pid": "SBSAGT"},
     ]

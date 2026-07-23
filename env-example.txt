@@ -21,9 +21,11 @@ QR_HMAC_SECRET=votre_qr_hmac_secret_tres_long
 # ── Environnement ──
 ENVIRONMENT=production
 
-# ── Admin & comptes de demo ──
+# ── Admin & super-admin ──
 ADMIN_EMAIL=admin@sendbid.app
 ADMIN_PASSWORD=VotreMotDePasseAdmin123!
+SUPER_ADMIN_EMAIL=superadmin@sendbid.app
+SUPER_ADMIN_PASSWORD=VotreMotDePasseSuperAdmin123!
 DEMO_CLIENT_EMAIL=demo@sendbid.app
 DEMO_CLIENT_PASSWORD=Demo@2026!
 DEMO_CLIENT_PIN=123456

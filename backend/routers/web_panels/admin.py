@@ -207,6 +207,12 @@ async def admin_user_set_password(request: Request, user_id: str, password: str 
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
+    if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut modifier le mot de passe d'un compte personnel",
+            status_code=303,
+        )
     if len(password) < 6:
         return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Le mot de passe doit faire au moins 6 caractères", status_code=303)
     await db.users.update_one(
@@ -221,6 +227,12 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
+    if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut modifier le PIN d'un compte personnel",
+            status_code=303,
+        )
     if len(pin) != 6 or not pin.isdigit():
         return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Le PIN doit être 6 chiffres", status_code=303)
     await db.users.update_one(
@@ -525,6 +537,11 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
+    if not _require_super_admin(user):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/rates?message=Seul le super-admin peut modifier les taux de change",
+            status_code=303,
+        )
     try:
         await db.corridors.update_one(
             {"country_code": country_code.upper()},
@@ -536,4 +553,4 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
         )
     except ValueError:
         pass
-    return RedirectResponse(url=f"{_url_prefix()}/admin/rates", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix()}/admin/rates?message=Taux mis à jour", status_code=303)

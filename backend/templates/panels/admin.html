@@ -226,6 +226,12 @@
         <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Créer</button>
       </form>
     </div>
+    {% else %}
+    <div class="card" style="border-left:4px solid #F59E0B">
+      <div class="card-header"><h2>🛡️ Droits limités</h2></div>
+      <p>Vous êtes connecté en tant qu’<b>admin</b>. Seul le <b>super-admin</b> peut créer des membres du personnel, modifier leurs accès ou gérer les taux de change.</p>
+      <p>Pour ajouter un admin, connectez-vous avec le compte super-admin configuré dans les variables d’environnement (<code>SUPER_ADMIN_EMAIL</code>).</p>
+    </div>
     {% endif %}
 
   {% elif section == 'agents' %}
@@ -460,11 +466,15 @@
               <td>{{ c.fx_margin_percent or 1.5 }}%</td>
               <td><span class="pill pill-neutral">{{ (c.delivery_modes or ['cash', 'bank', 'momo'])|join(', ') }}</span></td>
               <td>
+                {% if user.role == 'super_admin' %}
                 <form method="post" action="{{ url_prefix }}/admin/rates/{{ c.country_code }}" style="display:flex; gap:6px; align-items:center">
                   <input type="text" name="fx_rate_eur" value="{{ c.fx_rate_eur or 1.0 }}" style="width:80px" required>
                   <input type="text" name="fx_margin_percent" value="{{ c.fx_margin_percent or 1.5 }}" style="width:60px" required>
                   <button type="submit" class="btn btn-sm" style="background:#047857;color:white">OK</button>
                 </form>
+                {% else %}
+                <span style="font-size:12px;color:var(--text-muted)">Lecture seule — super-admin</span>
+                {% endif %}
               </td>
             </tr>
           {% else %}
