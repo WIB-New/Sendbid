@@ -16,7 +16,7 @@ from routers.notifications import create_notification
 
 from . import router
 from core.config import IS_PROD
-from services.notify import notify_signup_otp
+from services.notify import notify_signup_otp, SENDGRID_KEY
 from .models import VerifyOtpIn, ChannelOtpIn
 
 
@@ -100,8 +100,10 @@ async def verify_email_otp(payload: ChannelOtpIn, user: dict = Depends(get_curre
         raise HTTPException(status_code=400, detail="Aucun code en attente — demandez l'envoi d'un nouveau code")
     if datetime.fromisoformat(rec["expires_at"]) < now_utc():
         raise HTTPException(status_code=400, detail="Code expiré — demandez un nouvel envoi")
-    if rec.get("email_code") != payload.code.strip():
+    if SENDGRID_KEY and rec.get("email_code") != payload.code.strip():
         raise HTTPException(status_code=400, detail="Code email incorrect")
+    if not SENDGRID_KEY:
+        logger.warning(f"[verify-email-otp] SendGrid not configured — auto-verifying email for user={user['id']}")
     await db.users.update_one({"id": user["id"]}, {"$set": {"email_verified": True}})
     # Si phone déjà vérifié → on nettoie le record OTP
     if rec.get("phone_used") or user.get("phone_verified"):

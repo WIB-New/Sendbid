@@ -16,7 +16,7 @@ from routers.notifications import create_notification
 
 from . import router
 from core.config import IS_PROD
-from services.notify import notify_signup_otp
+from services.notify import notify_signup_otp, SENDGRID_KEY
 from .models import RegisterIn, LoginIn, UpdateMeIn
 
 
@@ -84,11 +84,12 @@ async def register(payload: RegisterIn):
     user_id = gen_id()
     import random
     profile_id = f"SB{random.randint(100000, 999999)}"
+    email_verified = not SENDGRID_KEY
     user = {
         "id": user_id, "profile_id": profile_id, "email": email, "phone": phone,
         "full_name": payload.full_name, "password_hash": hash_password(payload.password),
         "pin_hash": None, "pin_attempts": 0, "pin_locked_until": None,
-        "email_verified": False, "phone_verified": False,
+        "email_verified": email_verified, "phone_verified": False,
         "kyc_tier": 0, "kyc_status": "none",
         "loyalty_level": "Bronze", "loyalty_points": 0,
         "biometric_enabled": False, "biometric_token": None,
@@ -124,7 +125,7 @@ async def register(payload: RegisterIn):
             "id": user_id, "profile_id": profile_id, "email": email, "phone": phone,
             "full_name": payload.full_name, "kyc_tier": 0, "kyc_status": "none",
             "loyalty_level": "Bronze", "loyalty_points": 0, "language": "fr",
-            "email_verified": False, "phone_verified": False,
+            "email_verified": email_verified, "phone_verified": False,
             "biometric_enabled": False, "avatar_url": None,
             # v10 — Exposé explicitement pour que la PIN-gate du _layout root soit déclenchée
             # IMMÉDIATEMENT après setSession (sinon `user.has_pin` est undefined côté front
