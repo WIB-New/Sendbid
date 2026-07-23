@@ -5,6 +5,7 @@
 {% block sidebar_nav %}
   <a href="{{ url_prefix }}/admin" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
   <a href="{{ url_prefix }}/admin/users" class="{% if section == 'users' %}active{% endif %}"><span class="nav-icon">👥</span>Utilisateurs</a>
+  <a href="{{ url_prefix }}/admin/personnel" class="{% if section == 'personnel' %}active{% endif %}"><span class="nav-icon">🛡️</span>Personnel</a>
   <a href="{{ url_prefix }}/admin/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👨‍💼</span>Agents</a>
   <a href="{{ url_prefix }}/admin/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts</a>
   <a href="{{ url_prefix }}/admin/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
@@ -78,15 +79,6 @@
       <div class="card-header"><h2>Utilisateurs ({{ total }})</h2></div>
       <form method="get" action="{{ url_prefix }}/admin/users" class="filters">
         <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, téléphone…">
-        <select name="role_filter">
-          <option value="">Tous les rôles</option>
-          <option value="user" {% if role_filter == 'user' %}selected{% endif %}>User</option>
-          <option value="agent" {% if role_filter == 'agent' %}selected{% endif %}>Agent</option>
-          <option value="super_agent" {% if role_filter == 'super_agent' %}selected{% endif %}>Super-Agent</option>
-          <option value="partner_admin" {% if role_filter == 'partner_admin' %}selected{% endif %}>Partenaire</option>
-          <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
-          <option value="super_admin" {% if role_filter == 'super_admin' %}selected{% endif %}>Super-Admin</option>
-        </select>
         <select name="network">
           <option value="">Tous les réseaux</option>
           <option value="sendbid" {% if network == 'sendbid' %}selected{% endif %}>SendBID</option>
@@ -176,6 +168,65 @@
         </form>
       </div>
     </div>
+
+  {% elif section == 'personnel' %}
+    <div class="card">
+      <div class="card-header"><h2>Personnel ({{ total }})</h2></div>
+      {% if message %}
+        <div class="error-box {{ 'message-success' if 'créé' in message or 'mis à jour' in message else 'message-error' }}">{{ message }}</div>
+      {% endif %}
+      <form method="get" action="{{ url_prefix }}/admin/personnel" class="filters">
+        <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, téléphone…">
+        <select name="role_filter">
+          <option value="">Tous les rôles</option>
+          <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="super_admin" {% if role_filter == 'super_admin' %}selected{% endif %}>Super-Admin</option>
+        </select>
+        <button type="submit" class="btn btn-sm">Filtrer</button>
+        <a href="{{ url_prefix }}/admin/personnel" class="btn btn-sm btn-ghost">Réinitialiser</a>
+      </form>
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Rôle</th><th>Créé</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for s in staff %}
+            <tr>
+              <td><b>{{ s.full_name or '—' }}</b></td>
+              <td>{{ s.email or '—' }}</td>
+              <td>{{ s.phone or '—' }}</td>
+              <td><span class="pill pill-{{ 'err' if s.role == 'super_admin' else 'info' }}">{{ s.role or '—' }}</span></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (s.created_at or '')[:10] }}</td>
+              <td><a href="{{ url_prefix }}/admin/users/{{ s.id }}" class="btn btn-sm">Gérer</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6"><div class="empty"><div class="emoji">🛡️</div>Aucun membre du personnel.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if pages > 1 %}
+      <div class="pagination">
+        {% if page > 1 %}<a href="{{ url_prefix }}/admin/personnel?page={{ page - 1 }}&limit={{ limit }}&search={{ search }}&role_filter={{ role_filter }}" class="btn btn-sm btn-ghost">← Précédent</a>{% endif %}
+        <span>Page {{ page }} / {{ pages }}</span>
+        {% if page < pages %}<a href="{{ url_prefix }}/admin/personnel?page={{ page + 1 }}&limit={{ limit }}&search={{ search }}&role_filter={{ role_filter }}" class="btn btn-sm btn-ghost">Suivant →</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if user.role == 'super_admin' %}
+    <div class="card">
+      <div class="card-header"><h2>➕ Créer un membre du personnel</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/personnel/create" class="filters" style="flex-wrap:wrap">
+        <input type="text" name="full_name" placeholder="Nom complet" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="phone" placeholder="Téléphone" required>
+        <input type="password" name="password" placeholder="Mot de passe (min 6 caractères)" required minlength="6">
+        <select name="role" required>
+          <option value="admin">Admin</option>
+          <option value="super_admin">Super-Admin</option>
+        </select>
+        <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Créer</button>
+      </form>
+    </div>
+    {% endif %}
 
   {% elif section == 'agents' %}
     <div class="card">

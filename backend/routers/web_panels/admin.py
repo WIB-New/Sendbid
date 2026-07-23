@@ -6,7 +6,7 @@ from fastapi import Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from core.db import db, now_utc, iso, clean_doc
-from core.security import verify_password, create_access_token
+from core.security import verify_password, create_access_token, hash_password, gen_id
 
 from . import router, templates
 import datetime as _dt
@@ -17,6 +17,11 @@ from .utils import (
 
 
 logger = logging.getLogger("sendbid.web_panels.admin")
+
+
+def _require_super_admin(admin: dict) -> bool:
+    """Vérifie que l'admin connecté est un super-admin."""
+    return (admin.get("role") == "super_admin")
 
 
 @router.get("/web/admin", response_class=HTMLResponse)
@@ -45,14 +50,15 @@ async def admin_users(
     if not user:
         return _login_page(request, "admin")
 
-    q: dict = {}
+    # Utilisateurs de l'application uniquement (pas le personnel admin)
+    q: dict = {"role": {"$nin": ["admin", "super_admin"]}}
     if search:
         q["$or"] = [
             {"email": {"$regex": search, "$options": "i"}},
             {"full_name": {"$regex": search, "$options": "i"}},
             {"phone": {"$regex": search}},
         ]
-    if role_filter:
+    if role_filter and role_filter not in {"admin", "super_admin"}:
         q["role"] = role_filter
     if network:
         if network == "paybid":
@@ -105,6 +111,97 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
+@router.get("/web/admin/personnel", response_class=HTMLResponse)
+async def admin_personnel(
+    request: Request,
+    page: int = 1,
+    limit: int = 20,
+    search: str = "",
+    role_filter: str = "",
+    message: str = "",
+):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+
+    q: dict = {"role": {"$in": ["admin", "super_admin"]}}
+    if search:
+        q["$or"] = [
+            {"email": {"$regex": search, "$options": "i"}},
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"phone": {"$regex": search}},
+        ]
+    if role_filter in {"admin", "super_admin"}:
+        q["role"] = role_filter
+
+    total = await db.users.count_documents(q)
+    skip = max(0, (page - 1) * limit)
+    staff = await db.users.find(
+        q,
+        {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0},
+    ).sort("created_at", -1).skip(skip).to_list(limit)
+
+    for s in staff:
+        ca = s.get("created_at")
+        if isinstance(ca, _dt.datetime):
+            s["created_at"] = ca.isoformat()
+
+    pages = max(1, (total + limit - 1) // limit)
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="personnel", section_title="Personnel",
+        staff=staff, total=total, page=page, pages=pages, limit=limit,
+        search=search, role_filter=role_filter, message=message,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.post("/web/admin/personnel/create", response_class=HTMLResponse)
+async def admin_create_personnel(
+    request: Request,
+    full_name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    password: str = Form(...),
+    role: str = Form("admin"),
+):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _require_super_admin(admin):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/personnel?message=Seul le super-admin peut créer du personnel",
+            status_code=303,
+        )
+    if role not in {"admin", "super_admin"}:
+        role = "admin"
+    if len(password) < 6:
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/personnel?message=Le mot de passe doit faire au moins 6 caractères",
+            status_code=303,
+        )
+    if await db.users.find_one({"email": email}):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/personnel?message=Cet email est déjà utilisé",
+            status_code=303,
+        )
+    await db.users.insert_one({
+        "id": gen_id(),
+        "full_name": full_name,
+        "email": email,
+        "phone": phone,
+        "role": role,
+        "password_hash": hash_password(password),
+        "kyc_status": "verified",
+        "kyc_tier": 2,
+        "created_at": iso(now_utc()),
+        "updated_at": iso(now_utc()),
+    })
+    return RedirectResponse(
+        url=f"{_url_prefix()}/admin/personnel?message=Membre du personnel créé",
+        status_code=303,
+    )
+
+
 @router.post("/web/admin/users/{user_id}/set-password", response_class=HTMLResponse)
 async def admin_user_set_password(request: Request, user_id: str, password: str = Form(...)):
     admin = await _resolve_session("admin", request)
@@ -140,16 +237,21 @@ async def admin_user_toggle_status(request: Request, user_id: str):
         return _login_page(request, "admin")
     if user_id == admin.get("id"):
         return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Impossible de modifier votre propre compte", status_code=303)
-    target = await db.users.find_one({"id": user_id}, {"_id": 0, "suspended": 1})
-    if target:
-        new_status = not target.get("suspended", False)
-        label = "suspendu" if new_status else "réactivé"
-        await db.users.update_one(
-            {"id": user_id},
-            {"$set": {"suspended": new_status, "updated_at": iso(now_utc())}},
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "suspended": 1, "role": 1})
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix()}/admin/users", status_code=303)
+    if target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut modifier un compte personnel",
+            status_code=303,
         )
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Compte {label}", status_code=303)
-    return RedirectResponse(url=f"{_url_prefix()}/admin/users", status_code=303)
+    new_status = not target.get("suspended", False)
+    label = "suspendu" if new_status else "réactivé"
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"suspended": new_status, "updated_at": iso(now_utc())}},
+    )
+    return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Compte {label}", status_code=303)
 
 
 @router.post("/web/admin/users/{user_id}/delete", response_class=HTMLResponse)
@@ -159,6 +261,12 @@ async def admin_user_delete(request: Request, user_id: str):
         return _login_page(request, "admin")
     if user_id == admin.get("id"):
         return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Impossible de supprimer votre propre compte", status_code=303)
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
+    if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
+        return RedirectResponse(
+            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut supprimer un compte personnel",
+            status_code=303,
+        )
     await db.users.delete_one({"id": user_id})
     await db.wallets.delete_many({"user_id": user_id})
     await db.wallet_tx.delete_many({"user_id": user_id})
