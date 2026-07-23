@@ -16,7 +16,7 @@ from routers.notifications import create_notification
 
 from . import router
 from core.config import IS_PROD
-from services.notify import notify_signup_otp, SENDGRID_KEY
+from services.notify import notify_signup_otp, send_sms
 from .models import VerifyOtpIn, ChannelOtpIn
 
 
@@ -100,17 +100,31 @@ async def verify_email_otp(payload: ChannelOtpIn, user: dict = Depends(get_curre
         raise HTTPException(status_code=400, detail="Aucun code en attente — demandez l'envoi d'un nouveau code")
     if datetime.fromisoformat(rec["expires_at"]) < now_utc():
         raise HTTPException(status_code=400, detail="Code expiré — demandez un nouvel envoi")
-    if SENDGRID_KEY and rec.get("email_code") != payload.code.strip():
+    if rec.get("email_code") != payload.code.strip():
         raise HTTPException(status_code=400, detail="Code email incorrect")
-    if not SENDGRID_KEY:
-        logger.warning(f"[verify-email-otp] SendGrid not configured — auto-verifying email for user={user['id']}")
     await db.users.update_one({"id": user["id"]}, {"$set": {"email_verified": True}})
-    # Si phone déjà vérifié → on nettoie le record OTP
-    if rec.get("phone_used") or user.get("phone_verified"):
-        await db.otp_codes.delete_one({"user_id": user["id"]})
+
+    # L'email est vérifié : on envoie automatiquement le SMS pour la vérification téléphone
+    if not user.get("phone_verified"):
+        new_phone_code = gen_otp()
+        await db.otp_codes.update_one(
+            {"user_id": user["id"]},
+            {"$set": {
+                "phone_code": new_phone_code,
+                "email_used": True,
+                "expires_at": iso(now_utc() + timedelta(minutes=3)),
+                "created_at": iso(now_utc()),
+            }},
+        )
+        try:
+            await send_sms(user["phone"], f"SENDBID — Votre code de vérification : {new_phone_code}\nValide 3 minutes. Ne le partagez jamais.")
+            logger.info(f"[verify-email-otp] phone code sent user={user['id']}")
+        except Exception as e:
+            logger.warning(f"[verify-email-otp] sms send: {e}")
     else:
-        # Marque email comme consommé sans détruire le code phone
-        await db.otp_codes.update_one({"user_id": user["id"]}, {"$set": {"email_used": True}})
+        # Email était le dernier canal restant
+        await db.otp_codes.delete_one({"user_id": user["id"]})
+
     return {"ok": True, "email_verified": True}
 
 

@@ -98,21 +98,28 @@ def _strip_html(s: str) -> str:
 
 
 # ---------------- High-level templates ----------------
-async def notify_signup_otp(email: str, phone: str, email_code: str, phone_code: str, full_name: str = "") -> dict:
-    """Send signup verification OTPs via both email + SMS (parallel).
+async def notify_signup_otp(email: str, phone: str, email_code: str, phone_code: str, full_name: str = "", with_email: bool = True, with_sms: bool = True) -> dict:
+    """Send signup verification OTPs via email and/or SMS (parallel).
     Returns {'email': bool, 'sms': bool} indicating delivery results.
     """
-    email_html = _render_otp_email(email_code, full_name)
-    sms_body = f"SENDBID — Votre code de vérification : {phone_code}\nValide 3 minutes. Ne le partagez jamais."
-
     if not IS_PROD:
         logger.info(f"[OTP] DEV email={email_code} phone={phone_code}")
 
-    email_ok, sms_ok = await asyncio.gather(
-        send_email(email, "SENDBID — Vérifiez votre email", email_html),
-        send_sms(phone, sms_body),
-        return_exceptions=False,
-    )
+    email_ok, sms_ok = False, False
+    if with_email and with_sms:
+        email_html = _render_otp_email(email_code, full_name)
+        sms_body = f"SENDBID — Votre code de vérification : {phone_code}\nValide 3 minutes. Ne le partagez jamais."
+        email_ok, sms_ok = await asyncio.gather(
+            send_email(email, "SENDBID — Vérifiez votre email", email_html),
+            send_sms(phone, sms_body),
+            return_exceptions=False,
+        )
+    elif with_email:
+        email_html = _render_otp_email(email_code, full_name)
+        email_ok = await send_email(email, "SENDBID — Vérifiez votre email", email_html)
+    elif with_sms:
+        sms_body = f"SENDBID — Votre code de vérification : {phone_code}\nValide 3 minutes. Ne le partagez jamais."
+        sms_ok = await send_sms(phone, sms_body)
     return {"email": bool(email_ok), "sms": bool(sms_ok)}
 
 
