@@ -6,6 +6,7 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "image": "latest",
       "node": "22.18.0",
       "cache": { "disabled": true },
       "android": { "buildType": "apk" },
@@ -17,6 +18,7 @@
     },
     "preview-paybid": {
       "distribution": "internal",
+      "image": "latest",
       "node": "22.18.0",
       "cache": { "disabled": true },
       "android": { "buildType": "apk" },
@@ -28,6 +30,7 @@
     },
     "production": {
       "distribution": "store",
+      "image": "latest",
       "node": "22.18.0",
       "cache": { "disabled": true },
       "android": { "buildType": "app-bundle" },
@@ -39,6 +42,7 @@
     },
     "production-paybid": {
       "distribution": "store",
+      "image": "latest",
       "node": "22.18.0",
       "cache": { "disabled": true },
       "android": { "buildType": "app-bundle" },
