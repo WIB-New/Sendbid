@@ -13,7 +13,8 @@
         "APP_VARIANT": "paybid",
         "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
         "EXPO_PUBLIC_APP_VARIANT": "paybid",
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+        "GRADLE_OPTS": "-XX:MaxMetaspaceSize=1g -Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=1g -Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8' -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false"
       }
     },
     "production": {
@@ -25,7 +26,8 @@
         "APP_VARIANT": "paybid",
         "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
         "EXPO_PUBLIC_APP_VARIANT": "paybid",
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+        "GRADLE_OPTS": "-XX:MaxMetaspaceSize=1g -Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=1g -Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8' -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false"
       }
     }
   },
