@@ -21,7 +21,8 @@ IS_PROD = os.environ.get("ENVIRONMENT", "development").lower() == "production"
 
 # Si true, ne crée pas les comptes de démo (Aïcha Demo, agents fictifs, Mamadou Sow PayBID).
 # À utiliser en production quand on veut une base propre sans données de test.
-SKIP_DEMO_DATA = os.environ.get("SKIP_DEMO_DATA", "").lower() in ("true", "1", "yes")
+# En production (ENVIRONMENT=production), SKIP_DEMO_DATA est true par défaut.
+SKIP_DEMO_DATA = os.environ.get("SKIP_DEMO_DATA", "true" if IS_PROD else "false").lower() in ("true", "1", "yes")
 
 
 async def seed_demo_data():
@@ -75,9 +76,12 @@ async def seed_demo_data():
     # Le super-admin est configurable via les variables d'environnement SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD
     extra_admins = [
         {"email": SUPER_ADMIN_EMAIL, "pwd": SUPER_ADMIN_PASSWORD, "role": "super_admin", "name": "Super-Admin SENDBID", "pid": "SBSUPER"},
-        {"email": "partner@sendbid.app",    "pwd": "Partner@123!",    "role": "partner_admin", "name": "Partenaire Demo",    "pid": "SBPART"},
-        {"email": "superagent@sendbid.app", "pwd": "Super@123!",      "role": "super_agent",   "name": "Super-Agent Demo",   "pid": "SBSAGT"},
     ]
+    if not SKIP_DEMO_DATA:
+        extra_admins.extend([
+            {"email": "partner@sendbid.app",    "pwd": "Partner@123!",    "role": "partner_admin", "name": "Partenaire Demo",    "pid": "SBPART"},
+            {"email": "superagent@sendbid.app", "pwd": "Super@123!",      "role": "super_agent",   "name": "Super-Agent Demo",   "pid": "SBSAGT"},
+        ])
     for a in extra_admins:
         existing = await db.users.find_one({"email": a["email"]})
         if not existing:
@@ -156,29 +160,30 @@ async def seed_demo_data():
 
     # === COMPTES WEB PANELS — Admin / Agent / Superagent ===
     # Comptes seedés pour accéder aux panels web /admin, /agent, /superagent
-    # Mots de passe forts par défaut — à changer en production
-    for cfg in [
-        {"email": "admin@sendbid.app", "password": "Admin@SendBID2026!", "role": "super_admin", "name": "Admin SendBID", "profile_id": "ADM-001"},
-        {"email": "agent@sendbid.app", "password": "Agent@SendBID2026!", "role": "agent", "name": "Agent SendBID", "profile_id": "AGT-001"},
-        {"email": "superagent@sendbid.app", "password": "SuperAgent@SendBID2026!", "role": "super_agent", "name": "Superagent SendBID", "profile_id": "SAG-001"},
-    ]:
-        if not await db.users.find_one({"email": cfg["email"]}):
-            await db.users.insert_one({
-                "id": gen_id(), "profile_id": cfg["profile_id"], "email": cfg["email"],
-                "phone": "+33700000000", "full_name": cfg["name"],
-                "password_hash": hash_password(cfg["password"]),
-                "pin_hash": hash_password("000000"),
-                "pin_attempts": 0, "pin_locked_until": None,
-                "email_verified": True, "phone_verified": True,
-                "kyc_tier": 3, "kyc_status": "verified",
-                "role": cfg["role"], "is_admin": cfg["role"] in ("super_admin", "admin"),
-                "biometric_enabled": False, "biometric_token": None,
-                "country": "FR", "city": "Paris",
-                "default_currency": "EUR", "secondary_currency": "USD",
-                "language": "fr", "theme": "light",
-                "created_at": now_utc(), "updated_at": now_utc(),
-            })
-            logger.info(f"[seed] Web panel account created: {cfg['email']} ({cfg['role']})")
+    # Désactivables en production via SKIP_DEMO_DATA (comptes de démo).
+    if not SKIP_DEMO_DATA:
+        for cfg in [
+            {"email": "admin@sendbid.app", "password": "Admin@SendBID2026!", "role": "super_admin", "name": "Admin SendBID", "profile_id": "ADM-001"},
+            {"email": "agent@sendbid.app", "password": "Agent@SendBID2026!", "role": "agent", "name": "Agent SendBID", "profile_id": "AGT-001"},
+            {"email": "superagent@sendbid.app", "password": "SuperAgent@SendBID2026!", "role": "super_agent", "name": "Superagent SendBID", "profile_id": "SAG-001"},
+        ]:
+            if not await db.users.find_one({"email": cfg["email"]}):
+                await db.users.insert_one({
+                    "id": gen_id(), "profile_id": cfg["profile_id"], "email": cfg["email"],
+                    "phone": "+33700000000", "full_name": cfg["name"],
+                    "password_hash": hash_password(cfg["password"]),
+                    "pin_hash": hash_password("000000"),
+                    "pin_attempts": 0, "pin_locked_until": None,
+                    "email_verified": True, "phone_verified": True,
+                    "kyc_tier": 3, "kyc_status": "verified",
+                    "role": cfg["role"], "is_admin": cfg["role"] in ("super_admin", "admin"),
+                    "biometric_enabled": False, "biometric_token": None,
+                    "country": "FR", "city": "Paris",
+                    "default_currency": "EUR", "secondary_currency": "USD",
+                    "language": "fr", "theme": "light",
+                    "created_at": now_utc(), "updated_at": now_utc(),
+                })
+                logger.info(f"[seed] Web panel account created: {cfg['email']} ({cfg['role']})")
 
     # Migration: rename legacy SendFloo branded accounts to SendBID on existing DBs
     async for user in db.users.find({"full_name": {"$regex": "SendFloo", "$options": "i"}}):
