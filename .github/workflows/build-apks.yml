@@ -24,7 +24,7 @@ jobs:
           node-version: 22
 
       - name: Install EAS CLI
-        run: npm install --global eas-cli
+        run: npm install --global eas-cli@latest
 
       - name: Verify Expo authentication
         env:

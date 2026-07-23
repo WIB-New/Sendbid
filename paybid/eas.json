@@ -6,9 +6,9 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "image": "latest",
       "node": "22.18.0",
       "cache": { "disabled": true },
+      "preInstallCommand": "bash scripts/eas-pre-install.sh",
       "android": { "buildType": "apk" },
       "env": {
         "APP_VARIANT": "paybid",
@@ -18,9 +18,9 @@
     },
     "production": {
       "distribution": "store",
-      "image": "latest",
       "node": "22.18.0",
       "cache": { "disabled": true },
+      "preInstallCommand": "bash scripts/eas-pre-install.sh",
       "android": { "buildType": "app-bundle" },
       "env": {
         "APP_VARIANT": "paybid",
