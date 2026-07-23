@@ -97,7 +97,7 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
         {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0},
     )
     if not target:
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users", status_code=303)
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
     ca = target.get("created_at")
     if isinstance(ca, _dt.datetime):
         target["created_at"] = ca.isoformat()
@@ -169,19 +169,19 @@ async def admin_create_personnel(
         return _login_page(request, "admin")
     if not _require_super_admin(admin):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/personnel?message=Seul le super-admin peut créer du personnel",
+            url=f"{_url_prefix(request)}/admin/personnel?message=Seul le super-admin peut créer du personnel",
             status_code=303,
         )
     if role not in {"admin", "super_admin"}:
         role = "admin"
     if len(password) < 6:
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/personnel?message=Le mot de passe doit faire au moins 6 caractères",
+            url=f"{_url_prefix(request)}/admin/personnel?message=Le mot de passe doit faire au moins 6 caractères",
             status_code=303,
         )
     if await db.users.find_one({"email": email}):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/personnel?message=Cet email est déjà utilisé",
+            url=f"{_url_prefix(request)}/admin/personnel?message=Cet email est déjà utilisé",
             status_code=303,
         )
     await db.users.insert_one({
@@ -197,7 +197,7 @@ async def admin_create_personnel(
         "updated_at": iso(now_utc()),
     })
     return RedirectResponse(
-        url=f"{_url_prefix()}/admin/personnel?message=Membre du personnel créé",
+        url=f"{_url_prefix(request)}/admin/personnel?message=Membre du personnel créé",
         status_code=303,
     )
 
@@ -210,16 +210,16 @@ async def admin_user_set_password(request: Request, user_id: str, password: str 
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut modifier le mot de passe d'un compte personnel",
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut modifier le mot de passe d'un compte personnel",
             status_code=303,
         )
     if len(password) < 6:
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Le mot de passe doit faire au moins 6 caractères", status_code=303)
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Le mot de passe doit faire au moins 6 caractères", status_code=303)
     await db.users.update_one(
         {"id": user_id},
         {"$set": {"password_hash": hash_password(password), "updated_at": iso(now_utc())}},
     )
-    return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Mot de passe mis à jour", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Mot de passe mis à jour", status_code=303)
 
 
 @router.post("/web/admin/users/{user_id}/set-pin", response_class=HTMLResponse)
@@ -230,16 +230,16 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut modifier le PIN d'un compte personnel",
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut modifier le PIN d'un compte personnel",
             status_code=303,
         )
     if len(pin) != 6 or not pin.isdigit():
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Le PIN doit être 6 chiffres", status_code=303)
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Le PIN doit être 6 chiffres", status_code=303)
     await db.users.update_one(
         {"id": user_id},
         {"$set": {"pin_hash": hash_password(pin), "pin_attempts": 0, "pin_locked_until": None, "updated_at": iso(now_utc())}},
     )
-    return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=PIN mis à jour", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=PIN mis à jour", status_code=303)
 
 
 @router.post("/web/admin/users/{user_id}/toggle-status", response_class=HTMLResponse)
@@ -248,13 +248,13 @@ async def admin_user_toggle_status(request: Request, user_id: str):
     if not admin:
         return _login_page(request, "admin")
     if user_id == admin.get("id"):
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Impossible de modifier votre propre compte", status_code=303)
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de modifier votre propre compte", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "suspended": 1, "role": 1})
     if not target:
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users", status_code=303)
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
     if target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut modifier un compte personnel",
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut modifier un compte personnel",
             status_code=303,
         )
     new_status = not target.get("suspended", False)
@@ -263,7 +263,7 @@ async def admin_user_toggle_status(request: Request, user_id: str):
         {"id": user_id},
         {"$set": {"suspended": new_status, "updated_at": iso(now_utc())}},
     )
-    return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Compte {label}", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Compte {label}", status_code=303)
 
 
 @router.post("/web/admin/users/{user_id}/delete", response_class=HTMLResponse)
@@ -272,11 +272,11 @@ async def admin_user_delete(request: Request, user_id: str):
     if not admin:
         return _login_page(request, "admin")
     if user_id == admin.get("id"):
-        return RedirectResponse(url=f"{_url_prefix()}/admin/users/{user_id}?message=Impossible de supprimer votre propre compte", status_code=303)
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de supprimer votre propre compte", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/users/{user_id}?message=Seul le super-admin peut supprimer un compte personnel",
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut supprimer un compte personnel",
             status_code=303,
         )
     await db.users.delete_one({"id": user_id})
@@ -286,7 +286,7 @@ async def admin_user_delete(request: Request, user_id: str):
     await db.payment_methods.delete_many({"user_id": user_id})
     await db.notifications.delete_many({"user_id": user_id})
     await db.linked_accounts.delete_many({"user_id": user_id})
-    return RedirectResponse(url=f"{_url_prefix()}/admin/users?message=Utilisateur supprimé", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/users?message=Utilisateur supprimé", status_code=303)
 
 
 @router.get("/web/admin/agents", response_class=HTMLResponse)
@@ -437,7 +437,7 @@ async def admin_verify_linked_account(request: Request, account_id: str, action:
         {"id": account_id},
         {"$set": {"status": new_status, "verified_at": iso(now_utc()), "verified_by": "admin", "verification_note": "Action manuelle admin"}},
     )
-    return RedirectResponse(url=f"{_url_prefix()}/admin/linked-accounts", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/linked-accounts", status_code=303)
 
 
 @router.get("/web/admin/kyc", response_class=HTMLResponse)
@@ -539,7 +539,7 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
         return _login_page(request, "admin")
     if not _require_super_admin(user):
         return RedirectResponse(
-            url=f"{_url_prefix()}/admin/rates?message=Seul le super-admin peut modifier les taux de change",
+            url=f"{_url_prefix(request)}/admin/rates?message=Seul le super-admin peut modifier les taux de change",
             status_code=303,
         )
     try:
@@ -553,4 +553,4 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
         )
     except ValueError:
         pass
-    return RedirectResponse(url=f"{_url_prefix()}/admin/rates?message=Taux mis à jour", status_code=303)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/rates?message=Taux mis à jour", status_code=303)
