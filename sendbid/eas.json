@@ -13,7 +13,8 @@
       "env": {
         "APP_VARIANT": "sendbid",
         "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
-        "EXPO_PUBLIC_APP_VARIANT": "sendbid"
+        "EXPO_PUBLIC_APP_VARIANT": "sendbid",
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
       }
     },
     "preview-paybid": {
@@ -25,7 +26,8 @@
       "env": {
         "APP_VARIANT": "paybid",
         "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
-        "EXPO_PUBLIC_APP_VARIANT": "paybid"
+        "EXPO_PUBLIC_APP_VARIANT": "paybid",
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
       }
     },
     "production": {
@@ -37,7 +39,8 @@
       "env": {
         "APP_VARIANT": "sendbid",
         "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
-        "EXPO_PUBLIC_APP_VARIANT": "sendbid"
+        "EXPO_PUBLIC_APP_VARIANT": "sendbid",
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
       }
     },
     "production-paybid": {
@@ -49,7 +52,8 @@
       "env": {
         "APP_VARIANT": "paybid",
         "EXPO_PUBLIC_BACKEND_URL": "https://api.sendbid.app",
-        "EXPO_PUBLIC_APP_VARIANT": "paybid"
+        "EXPO_PUBLIC_APP_VARIANT": "paybid",
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
       }
     }
   },
