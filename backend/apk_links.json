@@ -1,10 +1,10 @@
 {
   "sendbid": {
-    "status": "building",
-    "url": ""
+    "status": "ready",
+    "url": "https://expo.dev/artifacts/eas/owpPcifIjk-b1P52PP4_4LRfbPz4Qwk_A98ISVPjmqI.apk"
   },
   "paybid": {
-    "status": "building",
-    "url": ""
+    "status": "ready",
+    "url": "https://expo.dev/artifacts/eas/u7pG8orY79epA993NZxdq0TI_p4z75Cjz7iXc6zNVlI.apk"
   }
 }
