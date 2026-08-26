@@ -1,6 +1,7 @@
-# SendBID / PayBID - Guide de demarrage
+# SendBID / PayBID - Guide de demarrage propre et professionnel
 
 ## 1. Lancer le Backend
+
 
 ```bash
 cd backend
