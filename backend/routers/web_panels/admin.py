@@ -728,8 +728,8 @@ async def admin_moderate_agent(request: Request, agent_id: str, action: str = Fo
         from services.admin_notify import notify_admin_action
         action_labels = {
             "approve": ("Votre compte agent a été approuvé", "Félicitations ! Votre compte agent est maintenant actif. Vous pouvez recevoir des transferts."),
-            "reject": ("Votre compte agent a été rejeté", f"Votre demande d'agent a été rejetée. {('Raison: ' + reason) if reason else 'Contactez le support pour plus d'informations.'}"),
-            "suspend": ("Votre compte agent a été suspendu", f"Votre compte agent a été suspendu. {('Raison: ' + reason) if reason else 'Contactez le support pour plus d'informations.'}"),
+            "reject": ("Votre compte agent a été rejeté", f"Votre demande d'agent a été rejetée. {('Raison: ' + reason) if reason else \"Contactez le support pour plus d'informations.\"}"),
+            "suspend": ("Votre compte agent a été suspendu", f"Votre compte agent a été suspendu. {('Raison: ' + reason) if reason else \"Contactez le support pour plus d'informations.\"}"),
             "reactivate": ("Votre compte agent a été réactivé", "Votre compte agent est de nouveau actif."),
         }
         if action in action_labels and agent_doc and agent_doc.get("user_id"):
