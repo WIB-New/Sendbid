@@ -3,19 +3,21 @@
 {% block page_subtitle %}Données en temps réel du réseau SendBID (expéditeurs) et PayBID (agents).{% endblock %}
 
 {% block sidebar_nav %}
-  <a href="{{ url_prefix }}/admin" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon">📊</span>Tableau de bord</a>
-  <a href="{{ url_prefix }}/admin/users" class="{% if section == 'users' %}active{% endif %}"><span class="nav-icon">👥</span>Utilisateurs</a>
-  <a href="{{ url_prefix }}/admin/personnel" class="{% if section == 'personnel' %}active{% endif %}"><span class="nav-icon">🛡️</span>Personnel</a>
-  <a href="{{ url_prefix }}/admin/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon">👨‍💼</span>Agents</a>
-  <a href="{{ url_prefix }}/admin/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon">💸</span>Transferts</a>
-  <a href="{{ url_prefix }}/admin/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon">⚡</span>Enchères live</a>
-  <a href="{{ url_prefix }}/admin/kyc" class="{% if section == 'kyc' %}active{% endif %}"><span class="nav-icon">🛡️</span>KYC</a>
-  <a href="{{ url_prefix }}/admin/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon">💳</span>Wallets</a>
-  <a href="{{ url_prefix }}/admin/linked-accounts" class="{% if section == 'linked-accounts' %}active{% endif %}"><span class="nav-icon">🔗</span>Comptes liés</a>
-  <a href="{{ url_prefix }}/admin/support" class="{% if section == 'support' %}active{% endif %}"><span class="nav-icon">🎧</span>Support</a>
-  <a href="{{ url_prefix }}/admin/partners" class="{% if section == 'partners' %}active{% endif %}"><span class="nav-icon">🤝</span>Partenaires</a>
-  <a href="{{ url_prefix }}/admin/rates" class="{% if section == 'rates' %}active{% endif %}"><span class="nav-icon">💱</span>Taux de change</a>
-  <a href="{{ url_prefix }}/admin/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon">📜</span>Audit logs</a>
+  {% set rp = sidebar_role_path or 'admin' %}
+  <a href="{{ url_prefix }}/{{ rp }}" class="{% if section == 'dashboard' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>Tableau de bord</a>
+  <a href="{{ url_prefix }}/{{ rp }}/users" class="{% if section == 'users' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Utilisateurs</a>
+  <a href="{{ url_prefix }}/{{ rp }}/personnel" class="{% if section == 'personnel' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Personnel</a>
+  <a href="{{ url_prefix }}/{{ rp }}/agents" class="{% if section == 'agents' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-3V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M9 7V5h6v2"/></svg></span>Agents</a>
+  <a href="{{ url_prefix }}/{{ rp }}/transfers" class="{% if section == 'transfers' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>Transferts</a>
+  <a href="{{ url_prefix }}/{{ rp }}/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>Enchères live</a>
+  <a href="{{ url_prefix }}/{{ rp }}/kyc" class="{% if section == 'kyc' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>KYC</a>
+  <a href="{{ url_prefix }}/{{ rp }}/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span>Wallets</a>
+  <a href="{{ url_prefix }}/{{ rp }}/linked-accounts" class="{% if section == 'linked-accounts' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>Comptes liés</a>
+  <a href="{{ url_prefix }}/{{ rp }}/support" class="{% if section == 'support' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>Support</a>
+  <a href="{{ url_prefix }}/{{ rp }}/partners" class="{% if section == 'partners' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Partenaires</a>
+  <a href="{{ url_prefix }}/{{ rp }}/rates" class="{% if section == 'rates' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 14l3 3-3 3"/></svg></span>Taux de change</a>
+  <a href="{{ url_prefix }}/{{ rp }}/services" class="{% if section == 'services' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="9" rx="1"/></svg></span>Services</a>
+  <a href="{{ url_prefix }}/{{ rp }}/audit" class="{% if section == 'audit' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></span>Audit logs</a>
 {% endblock %}
 
 {% block content %}
@@ -48,7 +50,7 @@
           </tbody>
         </table>
       {% else %}
-        <div class="empty"><div class="emoji">📥</div>Aucun transfert pour le moment.</div>
+        <div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/></svg></div>Aucun transfert pour le moment.</div>
       {% endif %}
     </div>
 
@@ -71,12 +73,16 @@
           </tbody>
         </table>
       {% else %}
-        <div class="empty"><div class="emoji">👥</div>Aucun agent enregistré.</div>
+        <div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Aucun agent enregistré.</div>
       {% endif %}
     </div>
   {% elif section == 'users' %}
     <div class="card">
-      <div class="card-header"><h2>Utilisateurs ({{ total }})</h2></div>
+      <div class="card-header"><h2>Utilisateurs ({{ total }})</h2>
+        <div class="actions">
+          <a href="{{ url_prefix }}/admin/export/users" class="btn btn-sm btn-ghost"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/></svg>Export CSV</a>
+        </div>
+      </div>
       <form method="get" action="{{ url_prefix }}/admin/users" class="filters">
         <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, téléphone…">
         <select name="network">
@@ -104,7 +110,7 @@
               <td><a href="{{ url_prefix }}/admin/users/{{ u.id }}" class="btn btn-sm">Gérer</a></td>
             </tr>
           {% else %}
-            <tr><td colspan="8"><div class="empty"><div class="emoji">👥</div>Aucun utilisateur.</div></td></tr>
+            <tr><td colspan="8"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Aucun utilisateur.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -169,6 +175,135 @@
       </div>
     </div>
 
+    {% if wallet %}
+    <div class="card">
+      <div class="card-header"><h2>💳 Wallet</h2></div>
+      <table>
+        <tbody>
+          <tr><th style="width:160px">Balance EUR</th><td><b>{{ '{:,.2f}'.format(wallet.balance or 0).replace(',', ' ') }} €</b></td></tr>
+          <tr><th>Devises</th><td>{{ (wallet.currencies or ['EUR'])|join(', ') }}</td></tr>
+          <tr><th>Dernière activité</th><td>{{ (wallet.updated_at or '')[:16].replace('T', ' ') }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if wallet_tx %}
+    <div class="card">
+      <div class="card-header"><h2>📊 Transactions wallet ({{ wallet_tx|length }})</h2></div>
+      <table>
+        <thead><tr><th>Type</th><th>Montant</th><th>Devise</th><th>Note</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for tx in wallet_tx %}
+            <tr>
+              <td><span class="pill pill-neutral">{{ tx.type or '—' }}</span></td>
+              <td><b>{{ '{:,.2f}'.format(tx.amount or 0).replace(',', ' ') }}</b></td>
+              <td>{{ tx.currency or 'EUR' }}</td>
+              <td style="font-size:13px;color:var(--text-muted)">{{ tx.note or '—' }}</td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (tx.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if user_transfers %}
+    <div class="card">
+      <div class="card-header"><h2>💸 Transferts ({{ user_transfers|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for t in user_transfers %}
+            <tr>
+              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td>{{ t.destination_country or '—' }} · {{ t.destination_city or '' }}</td>
+              <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td><span class="pill pill-{{ t.status }}">{{ t.status or 'N/A' }}</span></td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+              <td><a href="{{ url_prefix }}/admin/transfers/{{ t.id }}" class="btn btn-sm">Voir</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if beneficiaries %}
+    <div class="card">
+      <div class="card-header"><h2>👥 Bénéficiaires ({{ beneficiaries|length }})</h2></div>
+      <table>
+        <thead><tr><th>Nom</th><th>Pays</th><th>Ville</th><th>Téléphone</th><th>Mode remise</th></tr></thead>
+        <tbody>
+          {% for b in beneficiaries %}
+            <tr>
+              <td><b>{{ b.full_name or b.name or '—' }}</b></td>
+              <td>{{ b.country or '—' }}</td>
+              <td>{{ b.city or '—' }}</td>
+              <td>{{ b.phone or '—' }}</td>
+              <td><span class="pill pill-neutral">{{ b.delivery_mode or 'cash' }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if linked_accounts %}
+    <div class="card">
+      <div class="card-header"><h2>🔗 Comptes liés ({{ linked_accounts|length }})</h2></div>
+      <table>
+        <thead><tr><th>Type</th><th>Banque / Opérateur</th><th>Identifiant</th><th>Statut</th></tr></thead>
+        <tbody>
+          {% for a in linked_accounts %}
+            <tr>
+              <td><span class="pill pill-neutral">{{ a.type }}</span></td>
+              <td>{{ a.bank_name or a.operator or '—' }}</td>
+              <td><code>{{ a.identifier or '—' }}</code></td>
+              <td><span class="pill pill-{{ a.status }}">{{ a.status or 'N/A' }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if tickets %}
+    <div class="card">
+      <div class="card-header"><h2>🎧 Tickets de support ({{ tickets|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Statut</th><th>Créé</th><th>Mise à jour</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for t in tickets %}
+            <tr>
+              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td><span class="pill pill-{{ 'ok' if t.status == 'closed' else 'warn' }}">{{ t.status or 'open' }}</span></td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (t.updated_at or '')[:10] }}</td>
+              <td><a href="{{ url_prefix }}/admin/support/{{ t.id }}" class="btn btn-sm">Voir</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header"><h2>📨 Envoyer une notification</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/notify" class="filters" style="flex-direction:column;gap:12px">
+        <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap">
+          <input type="text" name="subject" placeholder="Sujet" required style="flex:1;min-width:200px">
+          <select name="channel">
+            <option value="email">Email</option>
+            <option value="sms">SMS</option>
+            <option value="both">Email + SMS</option>
+          </select>
+        </div>
+        <textarea name="body" placeholder="Message…" required style="width:100%;min-height:80px;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px"></textarea>
+        <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Envoyer</button>
+      </form>
+    </div>
+
   {% elif section == 'personnel' %}
     <div class="card">
       <div class="card-header"><h2>Personnel ({{ total }})</h2></div>
@@ -213,7 +348,7 @@
 
     {% if user.role == 'super_admin' %}
     <div class="card">
-      <div class="card-header"><h2>➕ Créer un membre du personnel</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M12 5v14M5 12h14"/></svg>Créer un membre du personnel</h2></div>
       <form method="post" action="{{ url_prefix }}/admin/personnel/create" class="filters" style="flex-wrap:wrap">
         <input type="text" name="full_name" placeholder="Nom complet" required>
         <input type="email" name="email" placeholder="Email" required>
@@ -228,7 +363,7 @@
     </div>
     {% else %}
     <div class="card" style="border-left:4px solid #F59E0B">
-      <div class="card-header"><h2>🛡️ Droits limités</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Droits limités</h2></div>
       <p>Vous êtes connecté en tant qu’<b>admin</b>. Seul le <b>super-admin</b> peut créer des membres du personnel, modifier leurs accès ou gérer les taux de change.</p>
       <p>Pour ajouter un admin, connectez-vous avec le compte super-admin configuré dans les variables d’environnement (<code>SUPER_ADMIN_EMAIL</code>).</p>
     </div>
@@ -236,7 +371,12 @@
 
   {% elif section == 'agents' %}
     <div class="card">
-      <div class="card-header"><h2>Agents ({{ total }})</h2></div>
+      <div class="card-header"><h2>Agents ({{ total }})</h2>
+        <div class="actions">
+          <a href="{{ url_prefix }}/admin/export/agents" class="btn btn-sm btn-ghost"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/></svg>Export CSV</a>
+        </div>
+      </div>
+      {% if message %}<div class="error-box message-success">{{ message }}</div>{% endif %}
       <form method="get" action="{{ url_prefix }}/admin/agents" class="filters">
         <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, email, ville…">
         <select name="status">
@@ -251,21 +391,47 @@
         <a href="{{ url_prefix }}/admin/agents" class="btn btn-sm btn-ghost">Réinitialiser</a>
       </form>
       <table>
-        <thead><tr><th>Nom</th><th>Email</th><th>Pays / Ville</th><th>Statut</th><th>Tier</th><th>Note</th><th>Transferts</th><th>Disponible</th></tr></thead>
+        <thead><tr><th>Nom</th><th>Email</th><th>Pays / Ville</th><th>Statut</th><th>Tier</th><th>Note</th><th>Transferts</th><th>Disponible</th><th>Actions</th></tr></thead>
         <tbody>
           {% for a in agents %}
             <tr>
-              <td><b>{{ a.full_name or '—' }}</b></td>
+              <td><a href="{{ url_prefix }}/admin/agents/{{ a.id }}" style="color:var(--text);text-decoration:none"><b>{{ a.full_name or '—' }}</b></a></td>
               <td>{{ a.email or '—' }}</td>
               <td>{{ a.country or '—' }} · {{ a.city or '—' }}</td>
               <td><span class="pill pill-{{ a.status }}">{{ a.status or 'N/A' }}</span></td>
               <td>{{ a.tier or 'silver' }}</td>
               <td>{{ '{:.1f}'.format(a.rating or 0) }} ★</td>
               <td>{{ a.transfers_count or 0 }}</td>
-              <td>{% if a.available %}🟢 En ligne{% else %}🔴 Hors ligne{% endif %}</td>
+              <td>{% if a.available %}<span style="color:#10b981">● En ligne</span>{% else %}<span style="color:#ef4444">● Hors ligne</span>{% endif %}</td>
+              <td style="display:flex;gap:4px;flex-wrap:wrap">
+                {% if a.status != 'approved' %}
+                <form method="post" action="{{ url_prefix }}/admin/agents/{{ a.id }}/moderate" style="display:inline">
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn btn-sm" style="background:#047857;color:white;padding:4px 10px;font-size:11px">✓ Approuver</button>
+                </form>
+                {% endif %}
+                {% if a.status != 'suspended' %}
+                <form method="post" action="{{ url_prefix }}/admin/agents/{{ a.id }}/moderate" style="display:inline">
+                  <input type="hidden" name="action" value="suspend">
+                  <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C;padding:4px 10px;font-size:11px">⏸ Suspendre</button>
+                </form>
+                {% endif %}
+                {% if a.status == 'suspended' %}
+                <form method="post" action="{{ url_prefix }}/admin/agents/{{ a.id }}/moderate" style="display:inline">
+                  <input type="hidden" name="action" value="reactivate">
+                  <button type="submit" class="btn btn-sm" style="background:#047857;color:white;padding:4px 10px;font-size:11px">↻ Réactiver</button>
+                </form>
+                {% endif %}
+                {% if a.status != 'rejected' %}
+                <form method="post" action="{{ url_prefix }}/admin/agents/{{ a.id }}/moderate" style="display:inline" onsubmit="return confirm('Rejeter cet agent ?')">
+                  <input type="hidden" name="action" value="reject">
+                  <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C;padding:4px 10px;font-size:11px">✕ Rejeter</button>
+                </form>
+                {% endif %}
+              </td>
             </tr>
           {% else %}
-            <tr><td colspan="8"><div class="empty"><div class="emoji">👨‍💼</div>Aucun agent.</div></td></tr>
+            <tr><td colspan="9"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-3V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M9 7V5h6v2"/></svg></div>Aucun agent.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -279,7 +445,12 @@
     </div>
   {% elif section == 'transfers' %}
     <div class="card">
-      <div class="card-header"><h2>Transferts ({{ total }})</h2></div>
+      <div class="card-header"><h2>Transferts ({{ total }})</h2>
+        <div class="actions">
+          <a href="{{ url_prefix }}/admin/export/transfers" class="btn btn-sm btn-ghost"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/></svg>Export CSV</a>
+        </div>
+      </div>
+      {% if message %}<div class="error-box message-success">{{ message }}</div>{% endif %}
       <form method="get" action="{{ url_prefix }}/admin/transfers" class="filters">
         <select name="status">
           <option value="">Tous les statuts</option>
@@ -295,20 +466,21 @@
         <a href="{{ url_prefix }}/admin/transfers" class="btn btn-sm btn-ghost">Réinitialiser</a>
       </form>
       <table>
-        <thead><tr><th>ID</th><th>Expéditeur</th><th>Bénéficiaire</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+        <thead><tr><th>ID</th><th>Expéditeur</th><th>Bénéficiaire</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th><th>Action</th></tr></thead>
         <tbody>
           {% for t in transfers %}
             <tr>
-              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td><a href="{{ url_prefix }}/admin/transfers/{{ t.id }}" style="color:var(--text);text-decoration:none"><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></a></td>
               <td>{{ t.sender_name or '—' }}</td>
               <td>{{ (t.beneficiary or {}).full_name or (t.beneficiary or {}).name or '—' }}</td>
               <td>{{ t.destination_country or '—' }} · {{ t.destination_city or '' }}</td>
               <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
               <td><span class="pill pill-{{ t.status }}">{{ t.status or 'N/A' }}</span></td>
               <td style="color:var(--text-muted); font-size:13px">{{ (t.created_at or '')[:16].replace('T', ' ') }}</td>
+              <td><a href="{{ url_prefix }}/admin/transfers/{{ t.id }}" class="btn btn-sm">Voir</a></td>
             </tr>
           {% else %}
-            <tr><td colspan="7"><div class="empty"><div class="emoji">💸</div>Aucun transfert.</div></td></tr>
+            <tr><td colspan="8"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>Aucun transfert.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -322,7 +494,7 @@
     </div>
   {% elif section == 'auctions' %}
     <div class="card">
-      <div class="card-header"><h2>⚡ Enchères en cours ({{ auctions|length }})</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Enchères en cours ({{ auctions|length }})</h2></div>
       <table>
         <thead><tr><th>Transfert</th><th>Montant</th><th>Destination</th><th>Bids reçus</th><th>Meilleur frais</th><th>Début</th></tr></thead>
         <tbody>
@@ -336,16 +508,17 @@
               <td style="color:var(--text-muted); font-size:13px">{{ (a.created_at or '')[:16].replace('T', ' ') }}</td>
             </tr>
           {% else %}
-            <tr><td colspan="6"><div class="empty"><div class="emoji">⚡</div>Aucune enchère live actuellement.</div></td></tr>
+            <tr><td colspan="6"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>Aucune enchère live actuellement.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% elif section == 'kyc' %}
+    {% if message %}<div class="error-box message-success" style="margin-bottom:16px">{{ message }}</div>{% endif %}
     <div class="card">
-      <div class="card-header"><h2>🛡️ Utilisateurs en attente KYC ({{ pending_users|length }})</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Utilisateurs en attente KYC ({{ pending_users|length }})</h2></div>
       <table>
-        <thead><tr><th>Nom</th><th>Email</th><th>Réseau</th><th>Rôle</th><th>KYC actuel</th><th>Statut</th><th>Inscrit</th></tr></thead>
+        <thead><tr><th>Nom</th><th>Email</th><th>Réseau</th><th>Rôle</th><th>KYC actuel</th><th>Statut</th><th>Inscrit</th><th>Actions</th></tr></thead>
         <tbody>
           {% for u in pending_users %}
             {% set email = (u.email or '') %}
@@ -358,9 +531,24 @@
               <td>Tier {{ u.kyc_tier or 0 }}</td>
               <td><span class="pill pill-warn">{{ u.kyc_status or 'none' }}</span></td>
               <td style="color:var(--text-muted); font-size:13px">{{ (u.created_at or '')[:10] }}</td>
+              <td style="display:flex;gap:4px;flex-wrap:wrap">
+                <form method="post" action="{{ url_prefix }}/admin/kyc/{{ u.id }}/action" style="display:inline">
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn btn-sm" style="background:#047857;color:white;padding:4px 10px;font-size:11px">✓ T2</button>
+                </form>
+                <form method="post" action="{{ url_prefix }}/admin/kyc/{{ u.id }}/action" style="display:inline">
+                  <input type="hidden" name="action" value="tier3">
+                  <button type="submit" class="btn btn-sm" style="background:#1E40AF;color:white;padding:4px 10px;font-size:11px">✓ T3</button>
+                </form>
+                <form method="post" action="{{ url_prefix }}/admin/kyc/{{ u.id }}/action" style="display:inline" onsubmit="return confirm('Rejeter ce KYC ?')">
+                  <input type="hidden" name="action" value="reject">
+                  <input type="text" name="reason" placeholder="Raison" style="width:100px;padding:4px 8px;font-size:11px;border:1px solid var(--border);border-radius:6px">
+                  <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C;padding:4px 10px;font-size:11px">✕ Rejeter</button>
+                </form>
+              </td>
             </tr>
           {% else %}
-            <tr><td colspan="7"><div class="empty"><div class="emoji">🛡️</div>Aucun utilisateur en attente KYC.</div></td></tr>
+            <tr><td colspan="8"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>Aucun utilisateur en attente KYC.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -381,7 +569,7 @@
               <td style="color:var(--text-muted); font-size:13px">{{ (s.created_at or '')[:10] }}</td>
             </tr>
           {% else %}
-            <tr><td colspan="6"><div class="empty"><div class="emoji">🛡️</div>Aucune session KYC.</div></td></tr>
+            <tr><td colspan="6"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>Aucune session KYC.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -402,16 +590,16 @@
               <td style="color:var(--text-muted); font-size:13px">{{ (w.updated_at or '')[:10] }}</td>
             </tr>
           {% else %}
-            <tr><td colspan="5"><div class="empty"><div class="emoji">💳</div>Aucun wallet.</div></td></tr>
+            <tr><td colspan="5"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>Aucun wallet.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% elif section == 'support' %}
     <div class="card">
-      <div class="card-header"><h2>🎧 Tickets de support ({{ tickets|length }})</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Tickets de support ({{ tickets|length }})</h2></div>
       <table>
-        <thead><tr><th>Utilisateur</th><th>Email</th><th>Statut</th><th>Dernier message</th><th>Expéditeur</th><th>Mise à jour</th></tr></thead>
+        <thead><tr><th>Utilisateur</th><th>Email</th><th>Statut</th><th>Dernier message</th><th>Expéditeur</th><th>Mise à jour</th><th>Action</th></tr></thead>
         <tbody>
           {% for t in tickets %}
             <tr>
@@ -421,9 +609,10 @@
               <td style="max-width:260px; font-size:13px; color:var(--text-muted)">{{ t.last_message.text[:80] if t.last_message else '—' }}</td>
               <td><span class="pill pill-neutral">{{ t.last_message.sender or '—' if t.last_message else '—' }}</span></td>
               <td style="color:var(--text-muted); font-size:13px">{{ (t.updated_at or t.created_at or '')[:16].replace('T', ' ') }}</td>
+              <td><a href="{{ url_prefix }}/admin/support/{{ t.id }}" class="btn btn-sm">Ouvrir</a></td>
             </tr>
           {% else %}
-            <tr><td colspan="6"><div class="empty"><div class="emoji">🎧</div>Aucun ticket de support.</div></td></tr>
+            <tr><td colspan="7"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>Aucun ticket de support.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -431,7 +620,7 @@
 
   {% elif section == 'partners' %}
     <div class="card">
-      <div class="card-header"><h2>🤝 Partenaires ({{ partners|length }})</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Partenaires ({{ partners|length }})</h2></div>
       <table>
         <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Pays</th><th>Ville</th><th>KYC</th><th>Créé</th></tr></thead>
         <tbody>
@@ -446,7 +635,7 @@
               <td style="color:var(--text-muted); font-size:13px">{{ (p.created_at or '')[:10] }}</td>
             </tr>
           {% else %}
-            <tr><td colspan="7"><div class="empty"><div class="emoji">🤝</div>Aucun partenaire.</div></td></tr>
+            <tr><td colspan="7"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Aucun partenaire.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -454,7 +643,7 @@
 
   {% elif section == 'rates' %}
     <div class="card">
-      <div class="card-header"><h2>💱 Taux de change par corridor ({{ corridors|length }})</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 14l3 3-3 3"/></svg>Taux de change par corridor ({{ corridors|length }})</h2></div>
       <table>
         <thead><tr><th>Pays</th><th>Devise</th><th>Taux EUR</th><th>Marge (%)</th><th>Mode de remise</th><th>Action</th></tr></thead>
         <tbody>
@@ -478,7 +667,7 @@
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="6"><div class="empty"><div class="emoji">💱</div>Aucun corridor.</div></td></tr>
+            <tr><td colspan="6"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 14l3 3-3 3"/></svg></div>Aucun corridor.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -486,21 +675,21 @@
 
   {% elif section == 'audit' %}
     <div class="card">
-      <div class="card-header"><h2>📜 Mouvements de fonds (reconciliation)</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>Mouvements de fonds (reconciliation)</h2></div>
       <table>
         <thead><tr><th>Type</th><th>Devise</th><th>Total</th><th>Occurrences</th></tr></thead>
         <tbody>
           {% for m in movements %}
             <tr><td><span class="pill pill-neutral">{{ m.type }}</span></td><td>{{ m.currency }}</td><td><b>{{ '{:,.2f}'.format(m.total or 0).replace(',', ' ') }}</b></td><td>{{ m.count }}</td></tr>
           {% else %}
-            <tr><td colspan="4"><div class="empty"><div class="emoji">📜</div>Aucun mouvement enregistré.</div></td></tr>
+            <tr><td colspan="4"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></div>Aucun mouvement enregistré.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% elif section == 'linked-accounts' %}
     <div class="card">
-      <div class="card-header"><h2>🔗 Comptes liés ({{ accounts|length }})</h2></div>
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Comptes liés ({{ accounts|length }})</h2></div>
       <table>
         <thead><tr><th>Utilisateur</th><th>Type</th><th>Banque / Opérateur</th><th>Identifiant</th><th>Pays</th><th>Statut</th><th>Date</th><th>Action</th></tr></thead>
         <tbody>
@@ -529,10 +718,288 @@
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="8"><div class="empty"><div class="emoji">🔗</div>Aucun compte lié.</div></td></tr>
+            <tr><td colspan="8"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>Aucun compte lié.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+  {% elif section == 'transfer-detail' %}
+    <div class="card">
+      <div class="card-header">
+        <h2>Transfert {{ transfer.id[:8] if transfer.id else '' }}</h2>
+        <a href="{{ url_prefix }}/admin/transfers" class="btn btn-ghost btn-sm">← Retour</a>
+      </div>
+      {% if message %}<div class="error-box message-success" style="margin-bottom:16px">{{ message }}</div>{% endif %}
+      <table>
+        <tbody>
+          <tr><th style="width:160px">ID</th><td><code>{{ transfer.id }}</code></td></tr>
+          <tr><th>Statut</th><td><span class="pill pill-{{ transfer.status }}">{{ transfer.status or 'N/A' }}</span></td></tr>
+          <tr><th>Expéditeur</th><td>{{ transfer.sender_name or '—' }}</td></tr>
+          <tr><th>Utilisateur</th><td>{% if t_user %}{{ t_user.full_name or '—' }} ({{ t_user.email or '—' }}){% else %}—{% endif %}</td></tr>
+          <tr><th>Bénéficiaire</th><td>{{ (transfer.beneficiary or {}).full_name or (transfer.beneficiary or {}).name or '—' }}</td></tr>
+          <tr><th>Destination</th><td>{{ transfer.destination_country or '—' }} · {{ transfer.destination_city or '—' }}</td></tr>
+          <tr><th>Montant envoyé</th><td><b>{{ '{:,.2f}'.format(transfer.send_amount or 0).replace(',', ' ') }} {{ transfer.send_currency or 'EUR' }}</b></td></tr>
+          <tr><th>Montant reçu</th><td>{{ '{:,.2f}'.format(transfer.receive_amount or 0).replace(',', ' ') }} {{ transfer.receive_currency or '—' }}</td></tr>
+          <tr><th>Frais</th><td>{{ '{:,.2f}'.format(transfer.fee_amount or 0).replace(',', ' ') }} € ({{ transfer.fee_percent or 0 }}%)</td></tr>
+          <tr><th>Mode de remise</th><td>{{ transfer.delivery_mode or 'cash' }}</td></tr>
+          <tr><th>Agent assigné</th><td>{% if agent %}<a href="{{ url_prefix }}/admin/agents/{{ agent.id }}"><b>{{ agent.full_name or '—' }}</b></a> — {{ agent.country or '' }} · {{ agent.city or '' }}{% else %}Non assigné{% endif %}</td></tr>
+          <tr><th>Date création</th><td>{{ (transfer.created_at or '')[:16].replace('T', ' ') }}</td></tr>
+          <tr><th>Dernière MAJ</th><td>{{ (transfer.updated_at or '')[:16].replace('T', ' ') }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    {% if bids %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Bids reçus ({{ bids|length }})</h2></div>
+      <table>
+        <thead><tr><th>Agent</th><th>Frais (%)</th><th>Frais (€)</th><th>Délai</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for b in bids %}
+            <tr>
+              <td><b>{{ b.agent_name or b.agent_id[:8] or '—' }}</b></td>
+              <td><b>{{ '{:.2f}'.format(b.bid_fee_percent or 0) }}%</b></td>
+              <td>{{ '{:,.2f}'.format(b.bid_fee_amount or 0).replace(',', ' ') }} €</td>
+              <td>{{ b.eta_minutes or '—' }} min</td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (b.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if wallet_tx %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Transactions wallet liées ({{ wallet_tx|length }})</h2></div>
+      <table>
+        <thead><tr><th>Type</th><th>Montant</th><th>Devise</th><th>Note</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for tx in wallet_tx %}
+            <tr>
+              <td><span class="pill pill-neutral">{{ tx.type or '—' }}</span></td>
+              <td><b>{{ '{:,.2f}'.format(tx.amount or 0).replace(',', ' ') }}</b></td>
+              <td>{{ tx.currency or 'EUR' }}</td>
+              <td style="font-size:13px;color:var(--text-muted)">{{ tx.note or '—' }}</td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (tx.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Actions sur le transfert</h2></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        {% if transfer.status not in ['COMPLETED', 'CANCELLED', 'REFUNDED'] %}
+        <form method="post" action="{{ url_prefix }}/admin/transfers/{{ transfer.id }}/action" style="display:inline">
+          <input type="hidden" name="action" value="complete">
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white">✓ Marquer complété</button>
+        </form>
+        <form method="post" action="{{ url_prefix }}/admin/transfers/{{ transfer.id }}/action" style="display:inline">
+          <input type="hidden" name="action" value="process">
+          <button type="submit" class="btn btn-sm" style="background:#1E40AF;color:white">⏳ En traitement</button>
+        </form>
+        <form method="post" action="{{ url_prefix }}/admin/transfers/{{ transfer.id }}/action" style="display:inline" onsubmit="return confirm('Annuler ce transfert ?')">
+          <input type="hidden" name="action" value="cancel">
+          <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C">✕ Annuler</button>
+        </form>
+        <form method="post" action="{{ url_prefix }}/admin/transfers/{{ transfer.id }}/action" style="display:inline" onsubmit="return confirm('Rembourser ce transfert ? Le montant sera crédité au wallet de l\'utilisateur.')">
+          <input type="hidden" name="action" value="refund">
+          <input type="text" name="reason" placeholder="Raison (optionnel)" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;width:200px">
+          <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C">↩ Rembourser</button>
+        </form>
+        {% else %}
+        <span style="color:var(--text-muted)">Aucune action disponible — statut: {{ transfer.status }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+  {% elif section == 'agent-detail' %}
+    <div class="card">
+      <div class="card-header">
+        <h2>Agent — {{ agent.full_name or agent.id }}</h2>
+        <a href="{{ url_prefix }}/admin/agents" class="btn btn-ghost btn-sm">← Retour</a>
+      </div>
+      {% if message %}<div class="error-box message-success" style="margin-bottom:16px">{{ message }}</div>{% endif %}
+      <table>
+        <tbody>
+          <tr><th style="width:160px">ID</th><td><code>{{ agent.id }}</code></td></tr>
+          <tr><th>Email</th><td>{{ agent.email or '—' }}</td></tr>
+          <tr><th>Téléphone</th><td>{{ agent.phone or '—' }}</td></tr>
+          <tr><th>Pays</th><td>{{ agent.country or '—' }}</td></tr>
+          <tr><th>Ville</th><td>{{ agent.city or '—' }}</td></tr>
+          <tr><th>Statut</th><td><span class="pill pill-{{ agent.status }}">{{ agent.status or 'N/A' }}</span></td></tr>
+          <tr><th>Tier</th><td>{{ agent.tier or 'silver' }}</td></tr>
+          <tr><th>Note</th><td>{{ '{:.1f}'.format(agent.rating or 0) }} ★</td></tr>
+          <tr><th>Transferts</th><td>{{ agent.transfers_count or 0 }}</td></tr>
+          <tr><th>Disponible</th><td>{% if agent.available %}<span style="color:#10b981">● En ligne</span>{% else %}<span style="color:#ef4444">● Hors ligne</span>{% endif %}</td></tr>
+          <tr><th>Profil ID</th><td>{{ agent.profile_id or '—' }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Actions</h2></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        {% if agent.status != 'approved' %}
+        <form method="post" action="{{ url_prefix }}/admin/agents/{{ agent.id }}/moderate" style="display:inline">
+          <input type="hidden" name="action" value="approve">
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white">✓ Approuver</button>
+        </form>
+        {% endif %}
+        {% if agent.status != 'suspended' %}
+        <form method="post" action="{{ url_prefix }}/admin/agents/{{ agent.id }}/moderate" style="display:inline">
+          <input type="hidden" name="action" value="suspend">
+          <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C">⏸ Suspendre</button>
+        </form>
+        {% endif %}
+        {% if agent.status == 'suspended' %}
+        <form method="post" action="{{ url_prefix }}/admin/agents/{{ agent.id }}/moderate" style="display:inline">
+          <input type="hidden" name="action" value="reactivate">
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white">↻ Réactiver</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if floats %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>Floats ({{ floats|length }})</h2></div>
+      <table>
+        <thead><tr><th>Devise</th><th>Balance</th><th>Réservé</th><th>Disponible</th><th>Dernière MAJ</th></tr></thead>
+        <tbody>
+          {% for f in floats %}
+            <tr>
+              <td><b>{{ f.currency or '—' }}</b></td>
+              <td>{{ '{:,.2f}'.format(f.balance or 0).replace(',', ' ') }}</td>
+              <td>{{ '{:,.2f}'.format(f.reserved or 0).replace(',', ' ') }}</td>
+              <td>{{ '{:,.2f}'.format((f.balance or 0) - (f.reserved or 0)).replace(',', ' ') }}</td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (f.updated_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if movements %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>Mouvements récents ({{ movements|length }})</h2></div>
+      <table>
+        <thead><tr><th>Type</th><th>Montant</th><th>Devise</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for m in movements %}
+            <tr>
+              <td><span class="pill pill-neutral">{{ m.type or '—' }}</span></td>
+              <td><b>{{ '{:,.2f}'.format(m.amount_signed or m.amount or 0).replace(',', ' ') }}</b></td>
+              <td>{{ m.currency or '—' }}</td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (m.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if transfers %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Transferts assignés ({{ transfers|length }})</h2></div>
+      <table>
+        <thead><tr><th>ID</th><th>Destination</th><th>Montant</th><th>Statut</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for t in transfers %}
+            <tr>
+              <td><code style="font-size:12px">{{ t.id[:8] if t.id else '—' }}</code></td>
+              <td>{{ t.destination_country or '—' }} · {{ t.destination_city or '' }}</td>
+              <td><b>{{ '{:,.2f}'.format(t.send_amount or 0).replace(',', ' ') }} €</b></td>
+              <td><span class="pill pill-{{ t.status }}">{{ t.status or 'N/A' }}</span></td>
+              <td style="color:var(--text-muted);font-size:13px">{{ (t.created_at or '')[:10] }}</td>
+              <td><a href="{{ url_prefix }}/admin/transfers/{{ t.id }}" class="btn btn-sm">Voir</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+  {% elif section == 'support-detail' %}
+    <div class="card">
+      <div class="card-header">
+        <h2>Ticket {{ ticket.id[:8] if ticket.id else '' }}</h2>
+        <div style="display:flex;gap:8px">
+          {% if ticket.status != 'closed' %}
+          <form method="post" action="{{ url_prefix }}/admin/support/{{ ticket.id }}/close" onsubmit="return confirm('Fermer ce ticket ?')">
+            <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C">Fermer le ticket</button>
+          </form>
+          {% endif %}
+          <a href="{{ url_prefix }}/admin/support" class="btn btn-ghost btn-sm">← Retour</a>
+        </div>
+      </div>
+      {% if message %}<div class="error-box message-success" style="margin-bottom:16px">{{ message }}</div>{% endif %}
+      <table>
+        <tbody>
+          <tr><th style="width:120px">Statut</th><td><span class="pill pill-{{ 'ok' if ticket.status == 'closed' else 'warn' }}">{{ ticket.status or 'open' }}</span></td></tr>
+          {% if t_user %}
+          <tr><th>Utilisateur</th><td><b>{{ t_user.full_name or '—' }}</b> — {{ t_user.email or '—' }} — {{ t_user.phone or '—' }}</td></tr>
+          {% endif %}
+          <tr><th>Créé</th><td>{{ (ticket.created_at or '')[:16].replace('T', ' ') }}</td></tr>
+          <tr><th>Mise à jour</th><td>{{ (ticket.updated_at or '')[:16].replace('T', ' ') }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversation ({{ messages|length }} messages)</h2></div>
+      <div style="display:flex;flex-direction:column;gap:12px;max-height:500px;overflow-y:auto;padding:8px">
+        {% for m in messages %}
+          <div style="display:flex;flex-direction:column;align-items:{{ 'flex-end' if m.sender in ('admin', 'bot') else 'flex-start' }};max-width:70%;margin-{{ 'left' if m.sender in ('admin', 'bot') else 'right' }}:auto">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">
+              {% if m.sender == 'admin' %}Admin{% elif m.sender == 'bot' %}Bot{% else %}Utilisateur{% endif %} — {{ (m.created_at or '')[:16].replace('T', ' ') }}
+            </div>
+            <div style="padding:10px 14px;border-radius:12px;background:{{ '#3D52D5' if m.sender == 'admin' else ('#1E2A78' if m.sender == 'bot' else 'var(--surface-2)') }};color:{{ 'white' if m.sender in ('admin', 'bot') else 'var(--text)' }}">
+              {{ m.text or '' }}
+            </div>
+          </div>
+        {% else %}
+          <div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>Aucun message.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if ticket.status != 'closed' %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>Répondre</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/support/{{ ticket.id }}/reply" style="display:flex;flex-direction:column;gap:12px">
+        <textarea name="text" placeholder="Votre réponse…" required style="width:100%;min-height:80px;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px"></textarea>
+        <button type="submit" class="btn btn-sm" style="background:#047857;color:white;align-self:flex-start">Envoyer la réponse</button>
+      </form>
+    </div>
+    {% endif %}
+
+  {% elif section == 'services' %}
+    <div class="card">
+      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="9" rx="1"/></svg>Statut des services</h2></div>
+      <table>
+        <thead><tr><th>Service</th><th>Statut</th><th>Détail</th></tr></thead>
+        <tbody>
+          {% for s in services %}
+            <tr>
+              <td><b>{{ s.name }}</b></td>
+              <td>
+                {% if s.status == 'ok' %}<span class="pill pill-ok">✓ OK</span>
+                {% elif s.status == 'warning' %}<span class="pill pill-warn">⚠ Warning</span>
+                {% else %}<span class="pill pill-err">✕ Erreur</span>{% endif %}
+              </td>
+              <td style="font-size:13px;color:var(--text-muted)">{{ s.detail }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3"><div class="empty">Aucun service à vérifier.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
   {% endif %}
 {% endblock %}

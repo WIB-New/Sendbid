@@ -104,9 +104,23 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
     ua = target.get("updated_at")
     if isinstance(ua, _dt.datetime):
         target["updated_at"] = ua.isoformat()
+    # Enrich: user's transfers
+    user_transfers = await db.transfers.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
+    # User wallet
+    wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0})
+    # Wallet transactions
+    wallet_tx = await db.wallet_tx.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
+    # Support tickets
+    tickets = await db.support_tickets.find({"user_id": user_id}, {"_id": 0}).sort("updated_at", -1).to_list(10)
+    # Linked accounts
+    linked_accounts = await db.linked_accounts.find({"user_id": user_id, "status": {"$ne": "deleted"}}, {"_id": 0}).sort("created_at", -1).to_list(20)
+    # Beneficiaries
+    beneficiaries = await db.beneficiaries.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
     ctx = _panel_base_ctx(
         request, "admin", admin, section="user-detail", section_title="Détail utilisateur",
         target=target, message=message,
+        user_transfers=user_transfers, wallet=wallet, wallet_tx=wallet_tx,
+        tickets=tickets, linked_accounts=linked_accounts, beneficiaries=beneficiaries,
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
@@ -554,3 +568,307 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
     except ValueError:
         pass
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/rates?message=Taux mis à jour", status_code=303)
+
+
+# ── Agent moderation ────────────────────────────────────────────────────────
+@router.post("/web/admin/agents/{agent_id}/moderate", response_class=HTMLResponse)
+async def admin_moderate_agent(request: Request, agent_id: str, action: str = Form(...), reason: str = Form("")):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    status_map = {
+        "approve": "approved", "reject": "rejected",
+        "suspend": "suspended", "reactivate": "approved",
+    }
+    new_status = status_map.get(action)
+    if not new_status:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/agents?message=Action inconnue", status_code=303)
+    await db.agents.update_one(
+        {"id": agent_id},
+        {"$set": {
+            "status": new_status,
+            "moderated_at": iso(now_utc()),
+            "moderated_by": admin.get("id"),
+            "moderation_reason": reason or None,
+        }},
+    )
+    label = {"approved": "approuvé", "rejected": "rejeté", "suspended": "suspendu"}.get(new_status, new_status)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/agents?message=Agent {label}", status_code=303)
+
+
+# ── Agent detail ────────────────────────────────────────────────────────────
+@router.get("/web/admin/agents/{agent_id}", response_class=HTMLResponse)
+async def admin_agent_detail(request: Request, agent_id: str, message: str = ""):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    agent = await db.agents.find_one({"id": agent_id}, {"_id": 0})
+    if not agent:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/agents", status_code=303)
+    # Floats
+    floats = await db.agent_floats.find({"agent_id": agent_id}, {"_id": 0}).to_list(50)
+    # Recent movements
+    movements = await db.agent_float_movements.find({"agent_id": agent_id}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    # Assigned transfers
+    transfers = await db.transfers.find({"winning_agent_id": agent_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="agent-detail", section_title=f"Agent — {agent.get('full_name') or agent_id}",
+        agent=agent, floats=floats, movements=movements, transfers=transfers, message=message,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+# ── Transfer detail ─────────────────────────────────────────────────────────
+@router.get("/web/admin/transfers/{transfer_id}", response_class=HTMLResponse)
+async def admin_transfer_detail(request: Request, transfer_id: str, message: str = ""):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    transfer = await db.transfers.find_one({"id": transfer_id}, {"_id": 0})
+    if not transfer:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers", status_code=303)
+    # Bids
+    bids = await db.bids.find({"transfer_id": transfer_id}, {"_id": 0}).sort("bid_fee_percent", 1).to_list(50)
+    # Agent info
+    agent = None
+    if transfer.get("winning_agent_id"):
+        agent = await db.agents.find_one({"id": transfer["winning_agent_id"]}, {"_id": 0})
+    # User info
+    user = None
+    if transfer.get("user_id"):
+        user = await db.users.find_one({"id": transfer["user_id"]}, {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0})
+    # Wallet transactions for this transfer
+    wallet_tx = await db.wallet_tx.find({"transfer_id": transfer_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="transfer-detail", section_title=f"Transfert — {transfer_id[:8]}",
+        transfer=transfer, bids=bids, agent=agent, t_user=user, wallet_tx=wallet_tx, message=message,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+# ── Transfer actions ────────────────────────────────────────────────────────
+@router.post("/web/admin/transfers/{transfer_id}/action", response_class=HTMLResponse)
+async def admin_transfer_action(request: Request, transfer_id: str, action: str = Form(...), reason: str = Form("")):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    transfer = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "user_id": 1})
+    if not transfer:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers", status_code=303)
+    allowed = {"cancel": "CANCELLED", "refund": "REFUNDED", "complete": "COMPLETED", "process": "PROCESSING"}
+    new_status = allowed.get(action)
+    if not new_status:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers/{transfer_id}?message=Action inconnue", status_code=303)
+    update_set = {
+        "status": new_status,
+        "updated_at": iso(now_utc()),
+        "admin_action": action,
+        "admin_action_by": admin.get("id"),
+        "admin_action_reason": reason or None,
+        "admin_action_at": iso(now_utc()),
+    }
+    await db.transfers.update_one({"id": transfer_id}, {"$set": update_set})
+    # If refund, credit user wallet back
+    if action == "refund" and transfer.get("user_id"):
+        wallet = await db.wallets.find_one({"user_id": transfer["user_id"]})
+        if wallet:
+            await db.wallets.update_one(
+                {"user_id": transfer["user_id"]},
+                {"$inc": {"balance": transfer.get("send_amount", 0)}, "$set": {"updated_at": iso(now_utc())}},
+            )
+            await db.wallet_tx.insert_one({
+                "id": gen_id(), "user_id": transfer["user_id"], "transfer_id": transfer_id,
+                "type": "refund", "amount": transfer.get("send_amount", 0), "currency": "EUR",
+                "created_at": iso(now_utc()), "note": f"Remboursement admin ({reason or 'N/A'})",
+            })
+    label = {"CANCELLED": "annulé", "REFUNDED": "remboursé", "COMPLETED": "complété", "PROCESSING": "en traitement"}.get(new_status, new_status)
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers/{transfer_id}?message=Transfert {label}", status_code=303)
+
+
+# ── KYC actions ─────────────────────────────────────────────────────────────
+@router.post("/web/admin/kyc/{user_id}/action", response_class=HTMLResponse)
+async def admin_kyc_action(request: Request, user_id: str, action: str = Form(...), reason: str = Form("")):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if action == "approve":
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"kyc_status": "verified", "kyc_tier": 2, "kyc_verified_at": iso(now_utc()), "kyc_verified_by": admin.get("id"), "updated_at": iso(now_utc())}},
+        )
+        msg = "KYC approuvé — Tier 2 attribué"
+    elif action == "reject":
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"kyc_status": "rejected", "kyc_rejection_reason": reason or None, "kyc_reviewed_at": iso(now_utc()), "kyc_reviewed_by": admin.get("id"), "updated_at": iso(now_utc())}},
+        )
+        msg = f"KYC rejeté{(' — ' + reason) if reason else ''}"
+    elif action == "tier3":
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"kyc_status": "verified", "kyc_tier": 3, "kyc_verified_at": iso(now_utc()), "kyc_verified_by": admin.get("id"), "updated_at": iso(now_utc())}},
+        )
+        msg = "KYC approuvé — Tier 3 attribué"
+    else:
+        msg = "Action inconnue"
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/kyc?message={msg}", status_code=303)
+
+
+# ── Support detail ──────────────────────────────────────────────────────────
+@router.get("/web/admin/support/{ticket_id}", response_class=HTMLResponse)
+async def admin_support_detail(request: Request, ticket_id: str, message: str = ""):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    ticket = await db.support_tickets.find_one({"id": ticket_id}, {"_id": 0})
+    if not ticket:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/support", status_code=303)
+    messages = await db.support_messages.find({"ticket_id": ticket_id}, {"_id": 0}).sort("created_at", 1).to_list(200)
+    user = None
+    if ticket.get("user_id"):
+        user = await db.users.find_one({"id": ticket["user_id"]}, {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0})
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="support-detail", section_title=f"Ticket — {ticket_id[:8]}",
+        ticket=ticket, messages=messages, t_user=user, message=message,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.post("/web/admin/support/{ticket_id}/reply", response_class=HTMLResponse)
+async def admin_support_reply(request: Request, ticket_id: str, text: str = Form(...)):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    ticket = await db.support_tickets.find_one({"id": ticket_id})
+    if not ticket:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/support", status_code=303)
+    await db.support_messages.insert_one({
+        "id": gen_id(), "ticket_id": ticket_id,
+        "sender": "admin", "text": text.strip(),
+        "created_at": iso(now_utc()),
+    })
+    await db.support_tickets.update_one({"id": ticket_id}, {"$set": {"updated_at": iso(now_utc()), "status": "open"}})
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/support/{ticket_id}?message=Réponse envoyée", status_code=303)
+
+
+@router.post("/web/admin/support/{ticket_id}/close", response_class=HTMLResponse)
+async def admin_support_close(request: Request, ticket_id: str):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    await db.support_tickets.update_one({"id": ticket_id}, {"$set": {"status": "closed", "closed_at": iso(now_utc())}})
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/support?message=Ticket fermé", status_code=303)
+
+
+# ── User detail enrichment ──────────────────────────────────────────────────
+# (the existing admin_user_detail route is enriched with additional data below)
+
+
+# ── Admin send notification to user ─────────────────────────────────────────
+@router.post("/web/admin/users/{user_id}/notify", response_class=HTMLResponse)
+async def admin_notify_user(request: Request, user_id: str, subject: str = Form(...), body: str = Form(...), channel: str = Form("email")):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "phone": 1, "full_name": 1})
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Utilisateur introuvable", status_code=303)
+    sent = {"email": False, "sms": False}
+    try:
+        from services.notify import send_email, send_sms
+        if channel in ("email", "both"):
+            sent["email"] = await send_email(target.get("email", ""), subject, f"<p>{body}</p>", plain=body)
+        if channel in ("sms", "both"):
+            sms_body = f"SENDBID — {subject}: {body[:100]}"
+            sent["sms"] = await send_sms(target.get("phone", ""), sms_body)
+    except Exception as e:
+        logger.warning(f"[admin notify] {e}")
+    # Also create in-app notification
+    await db.notifications.insert_one({
+        "id": gen_id(), "user_id": user_id,
+        "type": "admin_message", "title": subject, "body": body,
+        "read": False, "created_at": iso(now_utc()),
+    })
+    msg_parts = []
+    if sent["email"]: msg_parts.append("email envoyé")
+    if sent["sms"]: msg_parts.append("SMS envoyé")
+    msg_parts.append("notification in-app créée")
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message={', '.join(msg_parts)}", status_code=303)
+
+
+# ── Service status ──────────────────────────────────────────────────────────
+@router.get("/web/admin/services", response_class=HTMLResponse)
+async def admin_services(request: Request):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    import os as _os
+    services = []
+    # MongoDB
+    try:
+        await db.command("ping")
+        services.append({"name": "MongoDB", "status": "ok", "detail": "Connecté"})
+    except Exception as e:
+        services.append({"name": "MongoDB", "status": "error", "detail": str(e)[:100]})
+    # Twilio
+    twilio_sid = _os.getenv("TWILIO_ACCOUNT_SID", "")
+    twilio_from = _os.getenv("TWILIO_FROM_NUMBER", "")
+    if twilio_sid and twilio_from:
+        services.append({"name": "Twilio (SMS)", "status": "ok", "detail": f"SID={twilio_sid[:8]}… From={twilio_from}"})
+    else:
+        services.append({"name": "Twilio (SMS)", "status": "error", "detail": "Variables manquantes"})
+    # SendGrid
+    sg_key = _os.getenv("SENDGRID_API_KEY", "")
+    sg_from = _os.getenv("SENDGRID_FROM_EMAIL", "")
+    if sg_key:
+        services.append({"name": "SendGrid (Email)", "status": "ok", "detail": f"From={sg_from}"})
+    else:
+        services.append({"name": "SendGrid (Email)", "status": "error", "detail": "SENDGRID_API_KEY manquant"})
+    # Stripe
+    stripe_key = _os.getenv("STRIPE_API_KEY", "")
+    if stripe_key:
+        services.append({"name": "Stripe (Paiement)", "status": "ok", "detail": f"Key={stripe_key[:8]}…"})
+    else:
+        services.append({"name": "Stripe (Paiement)", "status": "warning", "detail": "Non configuré"})
+    # PayPal
+    pp_id = _os.getenv("PAYPAL_CLIENT_ID", "")
+    if pp_id:
+        services.append({"name": "PayPal", "status": "ok", "detail": f"Client ID={pp_id[:8]}…"})
+    else:
+        services.append({"name": "PayPal", "status": "warning", "detail": "Non configuré"})
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="services", section_title="Statut des services",
+        services=services,
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+# ── Export CSV ──────────────────────────────────────────────────────────────
+@router.get("/web/admin/export/{entity}")
+async def admin_export_csv(request: Request, entity: str):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    import csv
+    import io
+    from fastapi.responses import StreamingResponse
+    output = io.StringIO()
+    writer = csv.writer(output)
+    if entity == "users":
+        writer.writerow(["ID", "Nom", "Email", "Téléphone", "Rôle", "KYC Tier", "KYC Statut", "Suspendu", "Créé"])
+        async for u in db.users.find({}, {"_id": 0, "password_hash": 0, "pin_hash": 0, "biometric_token": 0}).sort("created_at", -1):
+            writer.writerow([u.get("id", ""), u.get("full_name", ""), u.get("email", ""), u.get("phone", ""), u.get("role", "user"), u.get("kyc_tier", 0), u.get("kyc_status", "none"), u.get("suspended", False), (u.get("created_at") or "")[:10]])
+    elif entity == "transfers":
+        writer.writerow(["ID", "Expéditeur", "Bénéficiaire", "Destination", "Montant", "Devise", "Statut", "Date"])
+        async for t in db.transfers.find({}, {"_id": 0}).sort("created_at", -1):
+            ben = (t.get("beneficiary") or {})
+            writer.writerow([t.get("id", ""), t.get("sender_name", ""), ben.get("full_name", ben.get("name", "")), t.get("destination_country", ""), t.get("send_amount", 0), t.get("send_currency", "EUR"), t.get("status", ""), (t.get("created_at") or "")[:16]])
+    elif entity == "agents":
+        writer.writerow(["ID", "Nom", "Email", "Pays", "Ville", "Statut", "Tier", "Note", "Transferts", "Disponible"])
+        async for a in db.agents.find({}, {"_id": 0}).sort("created_at", -1):
+            writer.writerow([a.get("id", ""), a.get("full_name", ""), a.get("email", ""), a.get("country", ""), a.get("city", ""), a.get("status", ""), a.get("tier", ""), a.get("rating", 0), a.get("transfers_count", 0), a.get("available", False)])
+    else:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin", status_code=303)
+    output.seek(0)
+    headers = {"Content-Disposition": f"attachment; filename={entity}_export.csv"}
+    return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers=headers)

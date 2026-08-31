@@ -21,7 +21,7 @@
   .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0.85; transition: all 0.2s; }
   .sidebar-nav a:hover { background: rgba(255,255,255,0.1); opacity: 1; }
   .sidebar-nav a.active { background: rgba(255,255,255,0.18); opacity: 1; font-weight: 600; }
-  .sidebar-nav .nav-icon { width: 18px; text-align: center; }
+  .sidebar-nav .nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .sidebar-bottom { margin-top: auto; padding: 16px 8px; border-top: 1px solid rgba(255,255,255,0.15); margin-top: 24px; }
   .sidebar-user { font-size: 13px; opacity: 0.85; }
   .sidebar-user b { display: block; font-size: 14px; opacity: 1; margin-bottom: 2px; }
@@ -53,9 +53,9 @@
   .btn { padding: 8px 16px; background: var(--primary); color: white; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; }
   .btn:hover { background: var(--primary-dark); }
   .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--bg); }
   .btn-success { background: #047857; color: white; }
   .btn-danger { background: #B91C1C; color: white; }
+  .btn-ghost:hover { background: var(--bg); }
 
   /* Table */
   table { width: 100%; border-collapse: collapse; }
@@ -68,7 +68,7 @@
   .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
   .pill-ok, .pill-COMPLETED, .pill-approved, .pill-active { background: #D1FAE5; color: #047857; }
   .pill-warn, .pill-pending_verification, .pill-pending, .pill-BIDDING { background: #FEF3C7; color: #92400E; }
-  .pill-err, .pill-rejected, .pill-FAILED, .pill-CANCELLED, .pill-suspended { background: #FEE2E2; color: #B91C1C; }
+  .pill-err, .pill-rejected, .pill-FAILED, .pill-CANCELLED, .pill-suspended, .pill-REFUNDED { background: #FEE2E2; color: #B91C1C; }
   .pill-info, .pill-AGENT_ASSIGNED, .pill-PROCESSING { background: #DBEAFE; color: #1E40AF; }
   .pill-neutral { background: #F1F5F9; color: #475569; }
 
@@ -129,10 +129,12 @@
         <div class="form-group"><label>Mot de passe</label><input type="password" name="password" required autocomplete="current-password"></div>
         <button type="submit" class="login-btn">Se connecter</button>
       </form>
+      {% if not is_prod %}
       <div class="hint">
         <b>Démo</b>
         {% if role == 'admin' %}admin@sendbid.app / Admin@123!{% elif role == 'agent' %}agent@paybid.app / Agent@123!{% else %}superagent@sendbid.app / Super@123!{% endif %}
       </div>
+      {% endif %}
     </div>
   </div>
 {% else %}

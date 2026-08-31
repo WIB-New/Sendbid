@@ -44,6 +44,27 @@ async def panel_login(role: str, request: Request, email: str = Form(...), passw
         samesite="lax",
         path="/",
     )
+    # If super_admin logs in via superadmin panel, also set admin cookie
+    # so admin routes work when superadmin redirects to them.
+    if role == "superadmin" and user.get("role") == "super_admin":
+        resp.set_cookie(
+            key=COOKIE_PREFIX + "admin",
+            value=token,
+            max_age=12 * 3600,
+            httponly=True,
+            samesite="lax",
+            path="/",
+        )
+    # If partner_admin logs in via partner panel, also set admin cookie.
+    if role == "partner" and user.get("role") == "partner_admin":
+        resp.set_cookie(
+            key=COOKIE_PREFIX + "admin",
+            value=token,
+            max_age=12 * 3600,
+            httponly=True,
+            samesite="lax",
+            path="/",
+        )
     return resp
 
 
@@ -54,4 +75,6 @@ async def panel_logout(role: str, request: Request):
     prefix = _url_prefix(request)
     resp = RedirectResponse(url=f"{prefix}/{role}" or f"/{role}", status_code=303)
     resp.delete_cookie(COOKIE_PREFIX + role, path="/")
+    if role in ("superadmin", "partner"):
+        resp.delete_cookie(COOKIE_PREFIX + "admin", path="/")
     return resp

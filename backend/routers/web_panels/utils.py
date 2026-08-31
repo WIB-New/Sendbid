@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 
 from core.db import db, now_utc, iso, clean_doc
 from core.security import verify_password, create_access_token, decode_token
+from core.config import IS_PROD
 
 # templates est défini dans __init__.py et ré-importé ici. On ne le ré-instancie pas.
 from . import router, templates
@@ -82,6 +83,7 @@ def _marketing_ctx(request: Request, active: str = "", extra: Optional[dict] = N
         "active": active,
         "current_year": _current_year(),
         "url_prefix": _url_prefix(request),
+        "is_prod": IS_PROD,
     }
     if extra:
         ctx.update(extra)
@@ -122,6 +124,7 @@ def _panel_base_ctx(request: Request, role: str, user: Optional[dict] = None, **
         "user": user,
         "current_year": _current_year(),
         "url_prefix": _url_prefix(request),
+        "is_prod": IS_PROD,
     }
     ctx.update(extra)
     return ctx

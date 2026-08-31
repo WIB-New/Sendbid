@@ -18,7 +18,7 @@ logger = logging.getLogger("sendbid.twilio")
 
 TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-TWILIO_FROM = os.getenv("TWILIO_FROM_PHONE", "")
+TWILIO_FROM = os.getenv("TWILIO_FROM_NUMBER", "")
 
 LOOKUPS_BASE = "https://lookups.twilio.com/v2/PhoneNumbers"
 MESSAGES_BASE = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_SID}/Messages.json"

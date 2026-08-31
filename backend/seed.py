@@ -61,16 +61,17 @@ async def seed_demo_data():
                 "biometric_enabled": False, "biometric_token": None,
                 "avatar_url": None, "language": "fr", "theme": "light",
                 "notif_prefs": {"push": True, "email": True, "sms": False},
-                "role": "admin", "created_at": iso(now_utc()),
+                "role": "super_admin" if ADMIN_EMAIL.lower() == SUPER_ADMIN_EMAIL.lower() else "admin", "created_at": iso(now_utc()),
             })
         except Exception as e:
             logger.warning(f"[seed] admin insert skipped: {e}")
     elif os.getenv("RESET_ADMIN_PASSWORD", "").lower() == "true":
+        _reset_role = "super_admin" if ADMIN_EMAIL.lower() == SUPER_ADMIN_EMAIL.lower() else "admin"
         await db.users.update_one(
             {"email": ADMIN_EMAIL},
-            {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": "admin", "is_admin": True}},
+            {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": _reset_role, "is_admin": True}},
         )
-        logger.info("[seed] admin password reset")
+        logger.info(f"[seed] admin password reset (role={_reset_role})")
 
     # Extra admin roles (super_admin, partner_admin, super_agent)
     # Le super-admin est configurable via les variables d'environnement SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD
@@ -101,8 +102,11 @@ async def seed_demo_data():
                 logger.warning(f"[seed] extra admin {a['email']} insert skipped: {e}")
         else:
             # Force role alignment (always safe). Password ONLY in dev to allow rotation in prod.
+            # BUT: if this email is the same as ADMIN_EMAIL, the admin was already created with
+            # ADMIN_PASSWORD — don't overwrite that password with the super_admin default.
             update_set = {"role": a["role"]}
-            if not IS_PROD:
+            same_as_admin = a["email"].lower() == ADMIN_EMAIL.lower()
+            if not IS_PROD and not same_as_admin:
                 update_set["password_hash"] = hash_password(a["pwd"])
             await db.users.update_one(
                 {"email": a["email"]},
