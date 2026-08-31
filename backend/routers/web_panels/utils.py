@@ -62,17 +62,21 @@ def _current_year() -> int:
 def _url_prefix(request: Request) -> str:
     """
     Retourne le prefix d'URL a utiliser pour les liens internes :
-    - Sur sendbid.app / admin.sendbid.app / panel.sendbid.app -> '' (URLs propres : /pricing, /admin, ...)
-    - Sur api.sendbid.app / api/web/... -> '/api/web' (URLs internes API)
+    - Sur admin.sendbid.app / panel.sendbid.app -> '' (Traefik addprefix gère le /api/web)
+    - Sur sendbid.app -> '/api/web' (pas de middleware addprefix pour ce host)
+    - Sur api.sendbid.app -> '/api/web'
     """
-    # Check request path first - if we're under /api/web, use that as prefix
+    host = (request.headers.get("host") or "").lower()
+    # admin/panel subdomains: Traefik adds /api/web automatically, so we use clean URLs
+    if host.startswith("admin.") or host.startswith("panel."):
+        return ""
+    # sendbid.app main domain: no Traefik addprefix, so we need /api/web prefix
+    if host in ("sendbid.app", "www.sendbid.app"):
+        return "/api/web"
+    # api.sendbid.app or direct access: check if path already has /api/web
     raw_path = request.url.path or ""
     if raw_path.startswith("/api/web"):
         return "/api/web"
-    host = (request.headers.get("host") or "").lower()
-    # Public marketing site + admin/panel subdomains : URLs propres
-    if host in ("sendbid.app", "www.sendbid.app") or host.startswith("panel.") or host.startswith("admin."):
-        return ""
     return "/api/web"
 
 
