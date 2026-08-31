@@ -244,7 +244,7 @@ async def admin_user_set_password(request: Request, user_id: str, password: str 
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
-    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1, "email": 1, "full_name": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut modifier le mot de passe d'un compte personnel",
@@ -278,7 +278,7 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
-    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1, "email": 1, "full_name": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut modifier le PIN d'un compte personnel",
@@ -1079,4 +1079,74 @@ async def admin_export_csv(request: Request, entity: str):
         return RedirectResponse(url=f"{_url_prefix(request)}/admin", status_code=303)
     output.seek(0)
     headers = {"Content-Disposition": f"attachment; filename={entity}_export.csv"}
+    return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers=headers)
+
+
+@router.get("/web/admin/users/{user_id}/statement")
+async def admin_user_statement(request: Request, user_id: str):
+    """Export CSV du relevé de transactions d'un client spécifique."""
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "full_name": 1, "phone": 1})
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
+    import csv
+    import io
+    from fastapi.responses import StreamingResponse
+    output = io.StringIO()
+    writer = csv.writer(output)
+    # Header
+    writer.writerow([f"Relevé de transactions — {target.get('full_name') or target.get('email', user_id)}"])
+    writer.writerow([f"Date export: {iso(now_utc())}"])
+    writer.writerow([])
+    # Section 1: Transferts
+    writer.writerow(["=== TRANSFERTS ==="])
+    writer.writerow(["ID", "Date", "Bénéficiaire", "Destination", "Montant envoyé", "Devise", "Frais", "Statut", "Agent"])
+    async for t in db.transfers.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1):
+        ben = (t.get("beneficiary") or {})
+        agent_name = ""
+        if t.get("winning_agent_id"):
+            ag = await db.agents.find_one({"id": t["winning_agent_id"]}, {"_id": 0, "full_name": 1})
+            agent_name = (ag or {}).get("full_name", "")
+        writer.writerow([
+            t.get("id", "")[:12],
+            (t.get("created_at") or "")[:16].replace("T", " "),
+            ben.get("full_name", ben.get("name", "")),
+            f"{t.get('destination_country', '')} {t.get('destination_city', '')}",
+            t.get("send_amount", 0),
+            t.get("send_currency", "EUR"),
+            t.get("fee_amount", 0),
+            t.get("status", ""),
+            agent_name,
+        ])
+    writer.writerow([])
+    # Section 2: Transactions wallet
+    writer.writerow(["=== TRANSACTIONS WALLET ==="])
+    writer.writerow(["ID", "Date", "Type", "Montant", "Devise", "Note"])
+    async for w in db.wallet_tx.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1):
+        writer.writerow([
+            w.get("id", "")[:12],
+            (w.get("created_at") or "")[:16].replace("T", " "),
+            w.get("type", ""),
+            w.get("amount", 0),
+            w.get("currency", "EUR"),
+            w.get("note", ""),
+        ])
+    writer.writerow([])
+    # Section 3: Comptes liés
+    writer.writerow(["=== COMPTES LIÉS ==="])
+    writer.writerow(["Type", "Banque/Opérateur", "Identifiant", "Pays", "Statut", "Date"])
+    async for la in db.linked_accounts.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1):
+        writer.writerow([
+            la.get("type", ""),
+            la.get("bank_name", la.get("operator", "")),
+            la.get("identifier", ""),
+            la.get("country", ""),
+            la.get("status", ""),
+            (la.get("created_at") or "")[:10],
+        ])
+    output.seek(0)
+    safe_name = (target.get("full_name") or target.get("email", user_id)).replace(" ", "_").replace("/", "_")
+    headers = {"Content-Disposition": f"attachment; filename=releve_{safe_name}.csv"}
     return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers=headers)

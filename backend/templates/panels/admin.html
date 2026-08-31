@@ -242,7 +242,10 @@
     <div class="card">
       <div class="card-header">
         <h2>Détail de {{ target.full_name or target.email }}</h2>
-        <a href="{{ url_prefix }}/admin/users" class="btn btn-ghost btn-sm">← Retour</a>
+        <div style="display:flex;gap:8px">
+          <a href="{{ url_prefix }}/admin/users/{{ target.id }}/statement" class="btn btn-sm" style="background:#0F4C81;color:white">📄 Relevé CSV</a>
+          <a href="{{ url_prefix }}/admin/users" class="btn btn-ghost btn-sm">← Retour</a>
+        </div>
       </div>
       {% if message %}<div class="error-box" style="background:#D1FAE5;color:#047857;margin-bottom:16px">{{ message }}</div>{% endif %}
       <table>
