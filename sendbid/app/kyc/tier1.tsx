@@ -10,6 +10,7 @@ import { useAuth } from "../../src/store";
 import { colors, spacing } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 export default function KycTier1() {
   const { t } = useTranslation();
   const colors = useThemedColors();
@@ -29,6 +30,7 @@ export default function KycTier1() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
+  const toast = useToast();
 
   const submit = async () => {
     setLoading(true);
@@ -39,12 +41,8 @@ export default function KycTier1() {
       await refreshMe();
       const msg = "KYC validé — votre niveau est passé à Silver !";
       setOkMsg(msg);
-      // Sur web, Alert.alert est silencieux. On affiche un message inline + on revient.
-      if (Platform.OS === "web") {
-        setTimeout(() => router.back(), 800);
-      } else {
-        Alert.alert("KYC validé", "Votre niveau est passé à Silver !", [{ text: "OK", onPress: () => router.back() }]);
-      }
+      toast.success({ title: "KYC validé", message: "Votre niveau est passé à Silver !" });
+      setTimeout(() => router.back(), 1500);
     } catch (e: any) {
       setErr(apiError(e));
     } finally {

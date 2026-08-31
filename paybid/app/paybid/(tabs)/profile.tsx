@@ -30,12 +30,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TText } from "../../../src/components/TText";
-import { api } from "../../../src/api";
+import { api, apiError } from "../../../src/api";
 import { useAuth } from "../../../src/store";
 import { AgentLevelBadge } from "../../../src/components/AgentLevelBadge";
 // theme hook intentionally not imported here — `paybidColors` is used statically.
 import { paybidColors } from "../../../src/paybidTheme";
 import { useLocale } from "../../../src/i18n";
+import { useToast } from "../../../src/components/Toast";
 import { spacing, radii } from "../../../src/theme";
 
 const SOCIALS: { icon: keyof typeof Ionicons.glyphMap; url: string }[] = [
@@ -52,6 +53,7 @@ export default function PaybidProfile() {
   const [me, setMe] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [togglingAvail, setTogglingAvail] = useState(false);
+  const toast = useToast();
 
   const load = useCallback(async () => {
     try {
@@ -90,9 +92,10 @@ export default function PaybidProfile() {
     setTogglingAvail(true);
     try {
       await api.post("/agent/availability", { available: next });
+      toast.success({ title: "Profil mis à jour" });
       await load();
     } catch (e: any) {
-      Alert.alert("Erreur", e?.response?.data?.detail || "Impossible de basculer");
+      toast.error({ title: "Erreur", message: e?.response?.data?.detail || "Impossible de basculer" });
     } finally {
       setTogglingAvail(false);
     }

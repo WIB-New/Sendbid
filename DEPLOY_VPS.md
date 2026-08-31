@@ -140,6 +140,14 @@ server {
     proxy_read_timeout 300s;
     client_max_body_size 50M;
   }
+
+  # Download APK routes — proxy to backend
+  location /download/ {
+    proxy_pass http://127.0.0.1:8001/api/web/download/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
 }
 
 # Sous-domaine sendbid : panels web

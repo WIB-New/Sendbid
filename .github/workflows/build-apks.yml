@@ -5,7 +5,11 @@ on:
     branches:
       - franc2
     paths-ignore:
+      - 'backend/**'
       - 'backend/apk_links.json'
+      - '.github/**'
+      - 'DEPLOY_VPS.md'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:

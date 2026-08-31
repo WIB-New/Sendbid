@@ -16,11 +16,17 @@ module.exports = ({ config }) => ({
   scheme: "paybid",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  splash: {
+    image: "./assets/images/splash-image.png",
+    resizeMode: "contain",
+    backgroundColor: "#994A26",
+  },
   updates: {
     enabled: false,
   },
   extra: {
     ...config?.extra,
+    appVariant: "paybid",
     eas: { projectId: "12851403-ae70-4e23-8cdd-f65e1405d270" },
   },
   ios: {

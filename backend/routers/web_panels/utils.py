@@ -192,10 +192,15 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
     ]):
         vol_7d = float(x.get("v") or 0)
 
-    # ── Float ──
+    # ── Float (converti en EUR pour cohérence) ──
+    _FX_TO_EUR = {"XOF": 655.957, "XAF": 655.957, "MAD": 10.85, "USD": 1.08,
+                   "GBP": 0.86, "CAD": 1.47, "CHF": 0.94, "NGN": 1750.0, "GHS": 17.5}
     total_float = 0.0
     async for x in db.agent_floats.aggregate([{"$group": {"_id": "$currency", "t": {"$sum": "$balance"}}}]):
-        total_float += float(x.get("t") or 0)
+        cur = (x.get("_id") or "EUR").upper()
+        raw = float(x.get("t") or 0)
+        rate = _FX_TO_EUR.get(cur, 1.0)
+        total_float += raw / rate if rate else raw
 
     # ── KYC pending ──
     kyc_pending = await db.users.count_documents({"kyc_status": "pending", **scope_users})

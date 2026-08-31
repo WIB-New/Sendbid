@@ -8,6 +8,8 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
+
 export default function AdminAgents() {
   const { t } = useTranslation();
   const colors = useThemedColors();
@@ -15,6 +17,7 @@ export default function AdminAgents() {
   const [refreshing, setRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selected, setSelected] = useState<any>(null);
+  const toast = useToast();
 
   const load = async () => {
     setRefreshing(true);
@@ -23,7 +26,7 @@ export default function AdminAgents() {
       if (statusFilter !== "all") params.status = statusFilter;
       const { data } = await api.get("/admin/agents", { params });
       setItems(data.items || []);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
     setRefreshing(false);
   };
   useEffect(() => { load(); }, [statusFilter]);
@@ -36,7 +39,7 @@ export default function AdminAgents() {
       await api.post("/admin/agents/moderate", { agent_id: selected.id, action });
       setSelected(null);
       await load();
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
   };
 
   const STATUSES = [

@@ -320,9 +320,26 @@ async def _run_fallback(transfer_id: str, send_amount: float, client_fee_pct: fl
     else:
         await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "EXPIRED"}})
         await manager.broadcast(transfer_id, {"event": "auction_expired"})
+        # Refund user wallet — le débit a eu lieu au confirm, on reverse le montant total
+        refund_amount = float(transfer.get("total_amount") or transfer.get("send_amount") or 0)
+        if refund_amount > 0:
+            await db.wallets.update_one(
+                {"user_id": transfer.get("user_id")},
+                {"$inc": {"balance": refund_amount}},
+            )
+            await db.wallet_tx.insert_one({
+                "id": gen_id(), "user_id": transfer.get("user_id"),
+                "type": "transfer_refund", "amount": refund_amount,
+                "currency": "EUR",
+                "counterparty": "Plateforme SendBID",
+                "note": f"Remboursement transfert {transfer_id[:8].upper()} — aucun agent disponible",
+                "transfer_id": transfer_id,
+                "status": "completed",
+                "created_at": iso(now_utc()),
+            })
         try:
-            await create_notification(transfer.get("user_id"), "Enchère expirée",
-                                      "Aucun agent disponible pour ce transfert. Vous pouvez relancer avec des frais plus attractifs.")
+            await create_notification(transfer.get("user_id"), "Enchère expirée — remboursement",
+                                      f"Aucun agent disponible pour ce transfert. {refund_amount:.2f} EUR remboursés sur votre wallet. Vous pouvez relancer avec des frais plus attractifs.")
         except Exception:
             pass
 
@@ -384,6 +401,25 @@ async def retry_auction(transfer_id: str, user: dict = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Enchère non éligible à une relance")
     if transfer.get("agent_id"):
         raise HTTPException(status_code=409, detail="Un agent a déjà été assigné")
+    # Si le transfert était EXPIRED, le wallet a été remboursé — on re-débite avant de relancer
+    if transfer.get("status") == "EXPIRED":
+        total = float(transfer.get("total_amount") or transfer.get("send_amount") or 0)
+        if total > 0:
+            debited = await db.wallets.find_one_and_update(
+                {"user_id": user["id"], "balance": {"$gte": total}},
+                {"$inc": {"balance": -total}},
+                return_document=True,
+            )
+            if not debited:
+                raise HTTPException(status_code=400, detail="Solde insuffisant pour relancer le transfert")
+            await db.wallet_tx.insert_one({
+                "id": gen_id(), "user_id": user["id"], "type": "transfer_escrow",
+                "amount": -total, "currency": debited.get("currency", "EUR"),
+                "counterparty": transfer.get("beneficiary", {}).get("full_name", ""),
+                "note": f"Relance transfert vers {transfer.get('destination_country')}",
+                "transfer_id": transfer_id,
+                "created_at": iso(now_utc()),
+            })
     await db.bids.delete_many({"transfer_id": transfer_id})
     await db.transfers.update_one({"id": transfer_id}, {"$set": {"status": "BIDDING", "auction_round": 0}})
     await start_auction(transfer_id)

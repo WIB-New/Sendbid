@@ -11,6 +11,7 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 /**
  * KYC Personnes morales — Wizard 3 niveaux.
  * Niveau 1 : infos de base — Niveau 2 : docs légaux — Niveau 3 : représentant légal.
@@ -24,6 +25,7 @@ export default function KycCorporate() {
   const [status, setStatus] = useState<any>(null);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   // L1
   const [legalName, setLegalName] = useState("");
@@ -57,7 +59,7 @@ export default function KycCorporate() {
   }, []);
 
   const submitL1 = async () => {
-    if (!legalName || !regNum || !cEmail || !cPhone) { Alert.alert("Champs requis", "Raison sociale, numéro d'enregistrement, email et téléphone sont obligatoires."); return; }
+    if (!legalName || !regNum || !cEmail || !cPhone) { toast.warning({ title: "Champs requis", message: "Raison sociale, numéro d'enregistrement, email et téléphone sont obligatoires." }); return; }
     setBusy(true);
     try {
       await api.post("/kyc/corporate/level1", {
@@ -66,11 +68,11 @@ export default function KycCorporate() {
         activity_code: activityCode, contact_email: cEmail, contact_phone: cPhone,
       });
       setStep(2);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); } finally { setBusy(false); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); } finally { setBusy(false); }
   };
 
   const submitL2 = async () => {
-    if (!kbisUploaded || !statutesUploaded) { Alert.alert("Documents requis", "Kbis et statuts sont obligatoires."); return; }
+    if (!kbisUploaded || !statutesUploaded) { toast.warning({ title: "Documents requis", message: "Kbis et statuts sont obligatoires." }); return; }
     setBusy(true);
     try {
       await api.post("/kyc/corporate/level2", {
@@ -78,11 +80,11 @@ export default function KycCorporate() {
         ubos: uboName ? [{ full_name: uboName, ownership_pct: 100 }] : [],
       });
       setStep(3);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); } finally { setBusy(false); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); } finally { setBusy(false); }
   };
 
   const submitL3 = async () => {
-    if (!repName || !repDob || !idUploaded || !selfieUploaded) { Alert.alert("Champs requis", "Nom, date de naissance, ID et selfie sont obligatoires."); return; }
+    if (!repName || !repDob || !idUploaded || !selfieUploaded) { toast.warning({ title: "Champs requis", message: "Nom, date de naissance, ID et selfie sont obligatoires." }); return; }
     setBusy(true);
     try {
       await api.post("/kyc/corporate/level3", {
@@ -92,8 +94,9 @@ export default function KycCorporate() {
         id_front_url: "demo://id-front.jpg", selfie_url: "demo://selfie.jpg",
         address_proof_url: "demo://address.pdf",
       });
-      Alert.alert("Vérification soumise", "Votre dossier entreprise est validé. Plafond annuel : 500 000 €", [{ text: "OK", onPress: () => router.back() }]);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); } finally { setBusy(false); }
+      toast.success({ title: "Vérification soumise", message: "Votre dossier entreprise est validé. Plafond annuel : 500 000 €", duration: 5000 });
+      setTimeout(() => router.back(), 1500);
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); } finally { setBusy(false); }
   };
 
   return (

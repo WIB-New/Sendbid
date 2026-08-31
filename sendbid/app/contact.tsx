@@ -9,6 +9,7 @@ import { Button } from "../src/components/Button";
 import { Input } from "../src/components/Input";
 import { colors, spacing, radii } from "../src/theme";
 import { useTranslation } from "../src/i18n";
+import { useToast } from "../src/components/Toast";
 
 // Nous contacter v4.0 — "41 Nous contacter" : grille 4 canaux + formulaire contact
 const CHANNELS = [
@@ -24,6 +25,7 @@ export default function Contact() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   const tap = (c: any) => {
     if (c.action === "chat") {
@@ -38,7 +40,7 @@ export default function Contact() {
     setBusy(true);
     setTimeout(() => {
       setBusy(false);
-      Alert.alert("Message envoyé", "Nous vous répondrons sous 24h par email.");
+      toast.success({ title: "Message envoyé", message: "Nous vous répondrons sous 24h par email." });
       setSubject(""); setMessage("");
     }, 800);
   };

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Dimensions, FlatList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,6 +46,7 @@ export default function PaybidOnboarding() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const flatRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
 
   const finish = async () => {
     await AsyncStorage.setItem("paybid_onboarded", "1");
@@ -91,7 +92,7 @@ export default function PaybidOnboarding() {
       />
 
       {/* Dots + boutons */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(20, insets.bottom + 16) }]}>
         {/* Dots */}
         <View style={styles.dots}>
           {STEPS.map((_, i) => (
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
   footer: {
     position: "absolute", bottom: 0, left: 0, right: 0,
     backgroundColor: paybidColors.neutrals.background,
-    paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: 40,
+    paddingHorizontal: spacing.xl, paddingTop: spacing.lg,
     borderTopLeftRadius: radii.xxl, borderTopRightRadius: radii.xxl,
   },
   dots: { flexDirection: "row", justifyContent: "center", gap: 8, marginBottom: spacing.lg },

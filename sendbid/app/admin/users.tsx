@@ -7,6 +7,8 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
+
 export default function AdminUsers() {
   const { t } = useTranslation();
   const colors = useThemedColors();
@@ -14,6 +16,7 @@ export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const toast = useToast();
 
   const load = async () => {
     setRefreshing(true);
@@ -22,7 +25,7 @@ export default function AdminUsers() {
       if (search.trim().length >= 2) params.search = search.trim();
       const { data } = await api.get("/admin/users", { params });
       setItems(data.items || []);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
     setRefreshing(false);
   };
   useEffect(() => { load(); }, []);

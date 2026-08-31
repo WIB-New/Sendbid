@@ -10,8 +10,7 @@ import { useAuth } from "../src/store";
 import { useTranslation } from "../src/i18n";
 
 /**
- * Splash v4.0 — Dark navy gradient + diamond logo + "SENDBID" +
- * slogan italique "Transférez. Simplement." + 3 dots animés + progress bar.
+ * Splash v4.0 — PayBID agent app branding.
  */
 export default function Splash() {
   const { t } = useTranslation();
@@ -45,7 +44,7 @@ export default function Splash() {
     if (!hydrated) return;
     const t = setTimeout(() => {
       const isAgent = (user as any)?.role === "agent";
-      router.replace(user ? (isAgent ? ("/paybid/(tabs)" as any) : "/(tabs)") : "/onboarding");
+      router.replace(user ? (isAgent ? ("/paybid/(tabs)" as any) : "/paybid/login") : "/paybid/onboarding");
     }, 1700);
     return () => clearTimeout(t);
   }, [hydrated, user, router]);
@@ -53,16 +52,16 @@ export default function Splash() {
   const progressWidth = progress.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] });
 
   return (
-    <LinearGradient colors={["#022a6b", "#022a6b", "#022a6b"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient colors={["#994A26", "#C4622D", "#E8823A"]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <View style={styles.center}>
         <View style={styles.logoBox}>
           <SendBidLogo size={88} />
         </View>
         <TText variant="display" weight="extraBold" color="white" style={{ marginTop: spacing.xl, letterSpacing: 2 }}>
-          SENDBID
+          PAYBID
         </TText>
         <TText variant="body" color="rgba(255,255,255,0.85)" style={{ marginTop: 6, fontStyle: "italic" }}>
-          Transférez. Simplement.
+          Accept. Deliver. Earn.
         </TText>
 
         <View style={styles.dotsRow}>
@@ -94,8 +93,8 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(255,255,255,0.14)",
   },
   dotsRow: { flexDirection: "row", gap: 10, marginTop: spacing.xxl },
-  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#10B981" },
+  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#F59E0B" },
   progressWrap: { paddingHorizontal: spacing.xxl, paddingBottom: 56 },
   progressTrack: { height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.12)", overflow: "hidden" },
-  progressFill: { height: 4, backgroundColor: "#10B981", borderRadius: 2 },
+  progressFill: { height: 4, backgroundColor: "#F59E0B", borderRadius: 2 },
 });

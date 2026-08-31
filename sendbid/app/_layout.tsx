@@ -41,6 +41,7 @@ import { registerForPushAndSync } from "../src/push";
 import { colors } from "../src/theme";
 import { useThemeStore } from "../src/hooks/useThemeMode";
 import { ThemeProvider } from "../src/themeContext";
+import { ToastProvider } from "../src/components/Toast";
 // PinBiometryModal et StripeProvider non disponibles dans cette version
 const PinBiometryModal = (_: any) => null;
 const StripeProvider = ({ children }: any) => children;
@@ -275,6 +276,7 @@ export default function RootLayout() {
       urlScheme="sendbid"
     >
       <ThemeProvider>
+      <ToastProvider>
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <Stack key={locale} screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: colors.neutrals.background } }} />
@@ -285,6 +287,7 @@ export default function RootLayout() {
           onCancel={handlePinCancel}
         />
       </SafeAreaProvider>
+      </ToastProvider>
       </ThemeProvider>
     </StripeProvider>
   );

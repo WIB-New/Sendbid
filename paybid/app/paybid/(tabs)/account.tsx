@@ -15,6 +15,7 @@ import { useAuth } from "../../../src/store";
 import { paybidColors } from "../../../src/paybidTheme";
 import { spacing, radii, shadows } from "../../../src/theme";
 import { formatMoney, maskMoney } from "../../../src/utils/money";
+import { useToast } from "../../../src/components/Toast";
 
 export default function PaybidAccount() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function PaybidAccount() {
   const [encoursLoading, setEncoursLoading] = useState(false);
   const [newEncours, setNewEncours] = useState({ montant: "", motif: "", echeance: "" });
   const [encoursTab, setEncoursTab] = useState<"list"|"new">("list");
+  const toast = useToast();
 
   const isSuperAgent = (user as any)?.role === "super_agent"
     || (user as any)?.agent_type === "super_agent"
@@ -96,21 +98,21 @@ export default function PaybidAccount() {
 
   const submitEncours = async () => {
     const val = parseFloat(newEncours.montant);
-    if (!val || isNaN(val) || val <= 0) { Alert.alert("Montant invalide"); return; }
-    if (!newEncours.motif.trim()) { Alert.alert("Motif requis"); return; }
+    if (!val || isNaN(val) || val <= 0) { toast.warning({ title: "Montant invalide" }); return; }
+    if (!newEncours.motif.trim()) { toast.warning({ title: "Motif requis" }); return; }
     try {
       await api.post("/agent/encours", { amount: val, motif: newEncours.motif, echeance: newEncours.echeance });
       setNewEncours({ montant: "", motif: "", echeance: "" });
       setEncoursTab("list");
       openEncoursModal();
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
   };
 
   const solderEncours = async (id: string, partial?: number) => {
     try {
       await api.post(`/agent/encours/${id}/solder`, partial ? { amount: partial } : {});
       openEncoursModal();
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
   };
 
   // Alerte À Verser Siège

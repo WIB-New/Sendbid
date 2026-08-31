@@ -69,9 +69,10 @@ async def complete_transfer(transfer_id: str, payload: CompleteIn, user: dict = 
             {"$set": {"status": "AGENT_ASSIGNED"}, "$unset": {"completed_at": ""}},
         )
         raise HTTPException(status_code=400, detail=msg)
-    # Credit agent earnings
+    # Credit agent earnings (80% net — company keeps 20% per _commission_breakdown)
     fee_pct = (t.get("selected_bid") or {}).get("bid_fee_percent", 0)
-    earned = round((fee_pct / 100.0) * t.get("send_amount", 0), 2)
+    full_fee = round((fee_pct / 100.0) * t.get("send_amount", 0), 2)
+    earned = round(full_fee * 0.80, 2)
     await db.wallets.update_one({"user_id": user["id"]}, {"$inc": {"balance": earned}})
     await db.wallet_tx.insert_one({
         "id": gen_id(), "user_id": user["id"], "type": "agent_earnings",

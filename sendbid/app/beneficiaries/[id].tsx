@@ -10,6 +10,7 @@ import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation, useLocale } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 export default function BeneficiaryDetail() {
   const { t } = useTranslation();
   useLocale((st) => st.locale);
@@ -24,6 +25,7 @@ export default function BeneficiaryDetail() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [relation, setRelation] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     api.get(`/beneficiaries/${id}`)
@@ -35,7 +37,7 @@ export default function BeneficiaryDetail() {
         setCity(r.data?.city || "");
         setRelation(r.data?.relation || "");
       })
-      .catch(() => Alert.alert("Erreur", "Impossible de charger le bénéficiaire"));
+      .catch(() => toast.error({ title: "Erreur", message: "Impossible de charger le bénéficiaire" }));
   }, [id]);
 
   const save = async () => {
@@ -46,7 +48,7 @@ export default function BeneficiaryDetail() {
       setB(r.data);
       setEdit(false);
     } catch (e: any) {
-      Alert.alert("Erreur", e?.response?.data?.detail || "Échec de la mise à jour");
+      toast.error({ title: "Erreur", message: e?.response?.data?.detail || "Échec de la mise à jour" });
     } finally { setBusy(false); }
   };
 
@@ -56,7 +58,7 @@ export default function BeneficiaryDetail() {
         await api.delete(`/beneficiaries/${id}`);
         router.back();
       } catch (e: any) {
-        Alert.alert("Erreur", e?.response?.data?.detail || "Échec de la suppression");
+        toast.error({ title: "Erreur", message: e?.response?.data?.detail || "Échec de la suppression" });
       }
     };
     if (Platform.OS === "web") {

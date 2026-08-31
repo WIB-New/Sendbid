@@ -8,6 +8,7 @@ import { useAuth } from "../src/store";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
 import { useTranslation } from "../src/i18n";
+import { useToast } from "../src/components/Toast";
 
 const TIERS = [
   {
@@ -33,6 +34,7 @@ export default function Limits() {
   const currentTier = user?.kyc_tier ?? 0;
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   useEffect(() => {
     api.get("/limits/upgrade-request/status")
@@ -49,8 +51,7 @@ export default function Limits() {
         await api.post("/limits/upgrade-request").catch(() => {});
         setHasPendingRequest(true);
       } catch {}
-      if (Platform.OS === "web") (window as any).alert(successMsg);
-      else Alert.alert("Demande enregistrée", successMsg);
+      toast.success({ title: "Demande enregistrée", message: successMsg, duration: 5000 });
     };
     if (Platform.OS === "web") {
       if ((window as any).confirm(confirmMsg)) await submit();

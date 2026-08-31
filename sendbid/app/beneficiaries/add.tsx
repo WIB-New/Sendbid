@@ -11,6 +11,7 @@ import { flagEmoji } from "../../src/utils/dialCodes";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation, useLocale } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 // v6.4 — Bénéficiaire enrichi : Country/City autocomplete (pas de texte libre),
 // IBAN/RIB pour Bank, Opérateur+Téléphone pour MoMo, boutons Relation compacts.
 const RELATIONS = ["Famille", "Ami", "Conjoint", "Enfant", "Parent", "Collègue", "Autre"];
@@ -44,6 +45,7 @@ export default function AddBeneficiary() {
   useLocale((st) => st.locale);
   const colors = useThemedColors();
   const router = useRouter();
+  const toast = useToast();
   const [corridors, setCorridors] = useState<Corridor[]>([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -99,19 +101,19 @@ export default function AddBeneficiary() {
 
   const submit = async () => {
     if (!firstName || !lastName || !country || !phone) {
-      Alert.alert("Champs requis", "Prénom, nom, pays et téléphone sont obligatoires.");
+      toast.warning({ title: "Champs requis", message: "Prénom, nom, pays et téléphone sont obligatoires." });
       return;
     }
     if (!city) {
-      Alert.alert("Ville requise", "Sélectionnez la ville du bénéficiaire.");
+      toast.warning({ title: "Ville requise", message: "Sélectionnez la ville du bénéficiaire." });
       return;
     }
     if (defaultMode === "bank" && (!iban || !bankName)) {
-      Alert.alert("Coordonnées bancaires", "IBAN et nom de la banque sont requis pour un virement bancaire.");
+      toast.warning({ title: "Coordonnées bancaires", message: "IBAN et nom de la banque sont requis pour un virement bancaire." });
       return;
     }
     if (defaultMode === "momo" && (!momoOperator || !momoPhone)) {
-      Alert.alert("Mobile Money", "Opérateur et numéro de téléphone sont requis.");
+      toast.warning({ title: "Mobile Money", message: "Opérateur et numéro de téléphone sont requis." });
       return;
     }
     setBusy(true);
@@ -136,7 +138,7 @@ export default function AddBeneficiary() {
       });
       router.back();
     } catch (e: any) {
-      Alert.alert("Erreur", apiError(e));
+      toast.error({ title: "Erreur", message: apiError(e) });
     } finally { setBusy(false); }
   };
 

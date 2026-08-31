@@ -12,6 +12,7 @@ import { useAuth } from "../../src/store";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 type Session = {
   session_id: string;
   verification_url: string;
@@ -30,6 +31,7 @@ export default function KycTier2() {
   const [open, setOpen] = useState(false);
   const [polling, setPolling] = useState(false);
   const pollTimer = useRef<any>(null);
+  const toast = useToast();
 
   useEffect(() => () => {
     if (pollTimer.current) clearTimeout(pollTimer.current);
@@ -60,11 +62,8 @@ export default function KycTier2() {
       if (data.approved && data.promoted !== undefined) {
         setPolling(false);
         await refreshMe();
-        Alert.alert(
-          "KYC validé ✓",
-          "Niveau Gold débloqué !",
-          [{ text: "OK", onPress: () => router.back() }],
-        );
+        toast.success({ title: "KYC validé", message: "Niveau Gold débloqué !" });
+        setTimeout(() => router.back(), 1500);
         return;
       }
       const status = (data.status || "").toLowerCase();
@@ -87,7 +86,8 @@ export default function KycTier2() {
         await api.post("/kyc/tier2/complete", { session_id: session.session_id });
         await refreshMe();
         setOpen(false);
-        Alert.alert("KYC validé", "Niveau Gold débloqué !", [{ text: "OK", onPress: () => router.back() }]);
+        toast.success({ title: "KYC validé", message: "Niveau Gold débloqué !" });
+        setTimeout(() => router.back(), 1500);
       } catch (e: any) {
         setError(apiError(e));
       }

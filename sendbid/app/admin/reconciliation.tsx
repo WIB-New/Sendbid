@@ -7,6 +7,7 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 const TYPE_LABEL: Record<string, string> = {
   declare: "Déclarations float",
   cashin: "Encaissements",
@@ -28,6 +29,7 @@ export default function AdminReco() {
   const [items, setItems] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [kpis, setKpis] = useState<any>(null);
+  const toast = useToast();
 
   const load = async () => {
     setRefreshing(true);
@@ -38,7 +40,7 @@ export default function AdminReco() {
       ]);
       setItems(reco.movements || []);
       setKpis(k);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
     setRefreshing(false);
   };
   useEffect(() => { load(); }, []);

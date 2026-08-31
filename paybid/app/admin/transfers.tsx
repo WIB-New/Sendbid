@@ -8,6 +8,7 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 const STATUSES = [
   { k: "all", l: "Tous" },
   { k: "BIDDING", l: "Offre" },
@@ -24,6 +25,7 @@ export default function AdminTransfers() {
   const [status, setStatus] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const toast = useToast();
 
   const load = async () => {
     setRefreshing(true);
@@ -32,7 +34,7 @@ export default function AdminTransfers() {
       if (status !== "all") params.status = status;
       const { data } = await api.get("/admin/transfers", { params });
       setItems(data.items || []);
-    } catch (e: any) { Alert.alert("Erreur", apiError(e)); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: apiError(e) }); }
     setRefreshing(false);
   };
   useEffect(() => { load(); }, [status]);

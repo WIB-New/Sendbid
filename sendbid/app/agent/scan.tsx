@@ -9,6 +9,7 @@ import { api } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 /**
  * AGENT QR SCAN — preview view (PAYBID wireframe).
  * Lets a payer-agent scan a client's signed QR token to validate a withdrawal.
@@ -26,6 +27,7 @@ export default function AgentScan() {
   const [scanning, setScanning] = useState(true);
   const [result, setResult] = useState<any>(null);
   const lineY = useRef(new Animated.Value(0)).current;
+  const toast = useToast();
 
   // Pulsing scan line
   useEffect(() => {
@@ -105,7 +107,7 @@ export default function AgentScan() {
           icon="flashlight-outline"
           variant="ghost"
           style={{ flex: 1 }}
-          onPress={() => Alert.alert("Lampe torche", "Disponible avec PAYBID natif")}
+          onPress={() => toast.info({ title: "Lampe torche", message: "Disponible avec PAYBID natif" })}
         />
       </View>
 
@@ -138,7 +140,7 @@ export default function AgentScan() {
             <View style={{ flexDirection: "row", gap: 8, marginTop: spacing.lg, width: "100%" }}>
               <Button title="Re-scanner" variant="outline" onPress={reset} style={{ flex: 1 }} />
               {result?.ok ? (
-                <Button title="Confirmer remise" icon="checkmark" onPress={() => { Alert.alert("Confirmé", "Fonds remis (démo)"); reset(); router.back(); }} style={{ flex: 1 }} />
+                <Button title="Confirmer remise" icon="checkmark" onPress={() => { toast.success({ title: "Confirmé", message: "Fonds remis (démo)" }); reset(); router.back(); }} style={{ flex: 1 }} />
               ) : null}
             </View>
           </View>

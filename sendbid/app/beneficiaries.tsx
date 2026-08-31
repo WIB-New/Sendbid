@@ -9,12 +9,14 @@ import { Button } from "../src/components/Button";
 import { api } from "../src/api";
 import { colors, spacing, radii } from "../src/theme";
 import { useTranslation } from "../src/i18n";
+import { useToast } from "../src/components/Toast";
 
 // Bénéficiaires v4.0 — "25 Bénéficiaires" : header navy + search + filtres pays + favoris en haut + liste cartes
 export default function Beneficiaries() {
   const { t } = useTranslation();
   const router = useRouter();
   const [list, setList] = useState<any[]>([]);
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [country, setCountry] = useState<string | null>(null);
 
@@ -38,12 +40,18 @@ export default function Beneficiaries() {
     try {
       await api.post(`/beneficiaries/${b.id}/toggle-favorite`);
       load();
-    } catch (e: any) { Alert.alert("Erreur", e?.message || ""); }
+    } catch (e: any) { toast.error({ title: "Erreur", message: e?.message || "Une erreur est survenue." }); }
   };
   const remove = (b: any) => {
     Alert.alert(b.full_name, "Supprimer ce bénéficiaire ?", [
       { text: "Annuler" },
-      { text: "Supprimer", style: "destructive", onPress: async () => { await api.delete(`/beneficiaries/${b.id}`); load(); } },
+      { text: "Supprimer", style: "destructive", onPress: async () => {
+        try {
+          await api.delete(`/beneficiaries/${b.id}`);
+          toast.success({ title: "Bénéficiaire supprimé" });
+          load();
+        } catch (e: any) { toast.error({ title: "Erreur", message: e?.response?.data?.detail || "Échec de la suppression" }); }
+      } },
     ]);
   };
 

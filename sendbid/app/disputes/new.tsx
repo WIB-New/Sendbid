@@ -10,6 +10,7 @@ import { api, apiError } from "../../src/api";
 import { colors, spacing, radii } from "../../src/theme";
 import { useThemedColors } from "../../src/themeContext";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 const REASONS = [
   { key: "not_received", label: "Fonds non reçus" },
   { key: "wrong_amount", label: "Montant incorrect" },
@@ -28,21 +29,22 @@ export default function NewDispute() {
   const [reason, setReason] = useState<string>("not_received");
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     api.get("/transfers").then((r) => setTransfers(r.data || [])).catch(() => {});
   }, []);
 
   const submit = async () => {
-    if (!transferId) { Alert.alert("Transfert requis", "Sélectionnez le transfert concerné."); return; }
-    if (description.trim().length < 10) { Alert.alert("Description trop courte", "Décrivez le problème en au moins 10 caractères."); return; }
+    if (!transferId) { toast.warning({ title: "Transfert requis", message: "Sélectionnez le transfert concerné." }); return; }
+    if (description.trim().length < 10) { toast.warning({ title: "Description trop courte", message: "Décrivez le problème en au moins 10 caractères." }); return; }
     setBusy(true);
     try {
       await api.post("/disputes", { transfer_id: transferId, reason, description });
-      Alert.alert("Litige ouvert", "Notre équipe vous répondra sous 24h.");
+      toast.success({ title: "Litige ouvert", message: "Notre équipe vous répondra sous 24h." });
       router.back();
     } catch (e: any) {
-      Alert.alert("Erreur", apiError(e));
+      toast.error({ title: "Erreur", message: apiError(e) });
     } finally { setBusy(false); }
   };
 

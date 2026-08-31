@@ -7,7 +7,8 @@
   .feat-row.reverse { direction: rtl; }
   .feat-row.reverse > * { direction: ltr; }
   @media (max-width: 880px) { .feat-row, .feat-row.reverse { grid-template-columns: 1fr; direction: ltr; padding: 40px 0; } }
-  .feat-visual { background: linear-gradient(135deg, var(--surface), var(--surface-2)); border-radius: 24px; padding: 40px; min-height: 320px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 84px; }
+  .feat-visual { background: linear-gradient(135deg, var(--surface), var(--surface-2)); border-radius: 24px; padding: 40px; min-height: 320px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+  .feat-visual svg { width: 72px; height: 72px; stroke: var(--emerald); }
   .feat-content .eyebrow { margin-bottom: 12px; }
   .feat-content h2 { font-size: 32px; margin-bottom: 14px; }
   .feat-content p { font-size: 17px; color: var(--text-muted); margin-bottom: 16px; }
@@ -27,7 +28,7 @@
   <div class="container">
     <div class="feat-row">
       <div class="feat-content">
-        <span class="eyebrow">⚡ Innovation</span>
+        <span class="eyebrow">Innovation</span>
         <h2 class="serif">Enchère inverse 30 secondes</h2>
         <p>Notre algorithme exclusif diffuse votre demande à tous les agents disponibles dans le corridor concerné. Pendant 30 secondes, ils biddènt sur leurs frais. Le meilleur prix gagne.</p>
         <ul class="feat-list">
@@ -37,12 +38,12 @@
           <li>Possibilité de « next round » si vous voulez relancer</li>
         </ul>
       </div>
-      <div class="feat-visual">⏱️</div>
+      <div class="feat-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
     </div>
 
     <div class="feat-row reverse">
       <div class="feat-content">
-        <span class="eyebrow">🔒 Sécurité</span>
+        <span class="eyebrow">Securite</span>
         <h2 class="serif">Biométrie native + KYC 3 niveaux</h2>
         <p>Face ID, Touch ID, PIN, OTP : chaque transaction sensible est verrouillée. Le KYC est gradué selon le volume : plus vous envoyez, plus la validation est forte.</p>
         <ul class="feat-list">
@@ -52,12 +53,12 @@
           <li>Audit logs complets et réconciliation automatique</li>
         </ul>
       </div>
-      <div class="feat-visual">👁️</div>
+      <div class="feat-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     </div>
 
     <div class="feat-row">
       <div class="feat-content">
-        <span class="eyebrow">💳 Paiements</span>
+        <span class="eyebrow">Paiements</span>
         <h2 class="serif">Stripe + PayPal + Mobile Money</h2>
         <p>Rechargez votre wallet FlooMoney depuis la méthode de votre choix. 100% in-app grâce à notre WebBrowser embarqué — jamais de redirection externe.</p>
         <ul class="feat-list">
@@ -67,12 +68,12 @@
           <li>Wallet multi-devises EUR / USD / XAF / XOF</li>
         </ul>
       </div>
-      <div class="feat-visual">💳</div>
+      <div class="feat-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
     </div>
 
     <div class="feat-row reverse">
       <div class="feat-content">
-        <span class="eyebrow">🌍 International</span>
+        <span class="eyebrow">International</span>
         <h2 class="serif">250+ pays, 7 langues, RTL inclus</h2>
         <p>SendBID est disponible en français, anglais, espagnol, allemand, italien, portugais et arabe (avec support RTL natif). Le mode sombre est inclus partout.</p>
         <ul class="feat-list">
@@ -82,12 +83,12 @@
           <li>Conversion multi-devises temps réel</li>
         </ul>
       </div>
-      <div class="feat-visual">🌍</div>
+      <div class="feat-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
     </div>
 
     <div class="feat-row">
       <div class="feat-content">
-        <span class="eyebrow">👥 Écosystème agent</span>
+        <span class="eyebrow">Ecosysteme agent</span>
         <h2 class="serif">PayBID : l'app métier des pros</h2>
         <p>Les agents disposent d'une app spécialement conçue : float multi-devises, comptabilité automatique, programme fidélité, panel web compagnon.</p>
         <ul class="feat-list">
@@ -97,7 +98,7 @@
           <li>Super-Agent : gestion d'un réseau d'agents</li>
         </ul>
       </div>
-      <div class="feat-visual">👥</div>
+      <div class="feat-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
     </div>
   </div>
 </section>

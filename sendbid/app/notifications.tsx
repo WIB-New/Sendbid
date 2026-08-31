@@ -13,9 +13,18 @@ const TYPE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   success: "checkmark-circle-outline",
   warning: "alert-circle-outline",
   error: "close-circle-outline",
+  transfer: "paper-plane-outline",
+  kyc: "shield-checkmark-outline",
+  loyalty: "trophy-outline",
+  payment: "card-outline",
+  security: "lock-closed-outline",
+  auction_invite: "calendar-outline",
+  agent_assigned: "person-add-outline",
 };
 const TYPE_COLOR: Record<string, string> = {
   info: "#3B82F6", success: "#10B981", warning: "#F59E0B", error: "#EF4444",
+  transfer: "#6366F1", kyc: "#8B5CF6", loyalty: "#F59E0B", payment: "#10B981", security: "#EF4444",
+  auction_invite: "#F59E0B", agent_assigned: "#10B981",
 };
 
 export default function Notifications() {

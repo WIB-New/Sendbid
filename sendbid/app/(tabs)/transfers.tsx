@@ -10,6 +10,7 @@ import { StatusChip } from "../../src/components/StatusChip";
 import { api } from "../../src/api";
 import { colors, spacing, radii, shadows } from "../../src/theme";
 import { useTranslation } from "../../src/i18n";
+import { useToast } from "../../src/components/Toast";
 
 const CATEGORIES = [
   { key: "all", label: "Tous" },
@@ -37,6 +38,7 @@ export default function Transfers() {
   const [list, setList] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const toast = useToast();
 
   const [showAll, setShowAll] = useState(false);
 
@@ -183,6 +185,7 @@ function TransferGroupedList({ transfers, showAll, onShowAll, onRefresh, refresh
   transfers: any[]; showAll: boolean; onShowAll: () => void;
   onRefresh: () => void; refreshing: boolean; onPress: (id: string) => void;
 }) {
+  const toast = useToast();
   const STATUS_LABELS: Record<string, string> = {
     DRAFT: "Brouillon", BIDDING: "Enchères", AGENT_ASSIGNED: "Assigné",
     PROCESSING: "En transit", PROCESSING_BANK: "En transit", PROCESSING_MOMO: "En transit",
@@ -289,7 +292,7 @@ function TransferGroupedList({ transfers, showAll, onShowAll, onRefresh, refresh
                       style={styles.codeStrip}
                       onPress={async () => {
                         await Clipboard.setStringAsync(item.withdrawal_code);
-                        Alert.alert("Copié !", `Code ${item.withdrawal_code} copié dans le presse-papier.`);
+                        toast.success({ title: "Copié !", message: `Code ${item.withdrawal_code} copié dans le presse-papier.`, duration: 2500 });
                       }}
                     >
                       <Ionicons name="key-outline" size={13} color="#065F46" />
