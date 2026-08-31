@@ -61,10 +61,14 @@ def _current_year() -> int:
 
 def _url_prefix(request: Request) -> str:
     """
-    Retourne le pr\u00e9fixe d'URL \u00e0 utiliser pour les liens internes :
+    Retourne le prefix d'URL a utiliser pour les liens internes :
     - Sur sendbid.app / admin.sendbid.app / panel.sendbid.app -> '' (URLs propres : /pricing, /admin, ...)
     - Sur api.sendbid.app / api/web/... -> '/api/web' (URLs internes API)
     """
+    # Check request path first - if we're under /api/web, use that as prefix
+    raw_path = request.url.path or ""
+    if raw_path.startswith("/api/web"):
+        return "/api/web"
     host = (request.headers.get("host") or "").lower()
     # Public marketing site + admin/panel subdomains : URLs propres
     if host in ("sendbid.app", "www.sendbid.app") or host.startswith("panel.") or host.startswith("admin."):

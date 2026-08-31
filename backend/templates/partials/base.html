@@ -37,13 +37,18 @@
   .nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,46,0.88); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--border); }
   .nav-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .logo { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
-  .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--navy-light), var(--emerald)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--navy-light), var(--emerald)); display: flex; align-items: center; justify-content: center; }
+  .logo-mark svg { width: 18px; height: 18px; }
+  .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .icon-sm { width: 14px; height: 14px; flex-shrink: 0; }
+  .icon-lg { width: 24px; height: 24px; flex-shrink: 0; }
   .nav-links { display: flex; gap: 6px; align-items: center; }
   .nav-links a { padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; }
   .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255,255,255,0.06); }
   .nav-cta { padding: 10px 18px; background: var(--emerald); color: #001a0a !important; border-radius: 999px; font-weight: 700; font-size: 13px; }
   .nav-cta:hover { background: var(--emerald-dark) !important; transform: translateY(-1px); }
-  .burger { display: none; background: none; border: 0; color: white; font-size: 24px; cursor: pointer; }
+  .burger { display: none; background: none; border: 0; color: white; cursor: pointer; padding: 4px; }
+  .burger svg { width: 24px; height: 24px; }
   @media (max-width: 880px) {
     .nav-links { position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; padding: 16px 24px; background: var(--bg); border-bottom: 1px solid var(--border); display: none; }
     .nav-links.open { display: flex; }
@@ -104,17 +109,19 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="{{ url_prefix }}/" class="logo">
-      <div class="logo-mark">💸</div>
+      <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
       SendBID
     </a>
-    <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <div class="nav-links" id="navLinks">
       <a href="{{ url_prefix }}/" class="{% if active == 'home' %}active{% endif %}">Accueil</a>
       <a href="{{ url_prefix }}/features" class="{% if active == 'features' %}active{% endif %}">Fonctionnalités</a>
       <a href="{{ url_prefix }}/pricing" class="{% if active == 'pricing' %}active{% endif %}">Tarifs</a>
       <a href="{{ url_prefix }}/about" class="{% if active == 'about' %}active{% endif %}">À propos</a>
       <a href="{{ url_prefix }}/faq" class="{% if active == 'faq' %}active{% endif %}">FAQ</a>
-      <a href="{{ url_prefix }}/download" class="nav-cta">📱 Télécharger</a>
+      <a href="{{ url_prefix }}/download" class="nav-cta"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Télécharger</a>
     </div>
   </div>
 </nav>
@@ -125,7 +132,7 @@
   <div class="footer-inner">
     <div class="footer-grid">
       <div class="footer-col">
-        <div class="logo" style="margin-bottom:14px"><div class="logo-mark">💸</div>SendBID</div>
+        <div class="logo" style="margin-bottom:14px"><div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>SendBID</div>
         <p style="color:var(--text-muted); font-size:14px; max-width:320px;">L'enchère inversée temps réel pour des transferts d'argent justes, rapides et sécurisés dans 250+ pays.</p>
       </div>
       <div class="footer-col">
@@ -144,14 +151,14 @@
       </div>
       <div class="footer-col">
         <h4>Espaces pro</h4>
-        <a href="{{ url_prefix }}/admin">🛡️ Admin</a>
-        <a href="{{ url_prefix }}/agent">👤 Agent</a>
-        <a href="{{ url_prefix }}/superagent">⭐ Super-Agent</a>
+        <a href="{{ url_prefix }}/admin">Admin</a>
+        <a href="{{ url_prefix }}/agent">Agent</a>
+        <a href="{{ url_prefix }}/superagent">Super-Agent</a>
       </div>
     </div>
     <div class="footer-bottom">
       <div>© {{ current_year }} SendBID · Tous droits réservés.</div>
-      <div>Made with ♥ in France · 🇫🇷 🇨🇲 🇸🇳 🇨🇮</div>
+      <div>Made with care in France · France · Cameroun · Sénégal · Côte d'Ivoire</div>
     </div>
   </div>
 </footer>
