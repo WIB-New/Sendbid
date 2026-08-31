@@ -22,14 +22,130 @@
 
 {% block content %}
   {% if section == 'dashboard' or not section %}
-    <div class="stats">
-      <div class="stat"><div class="stat-label">Utilisateurs</div><div class="stat-value">{{ kpis.users.total }}</div><div class="stat-sub up">↗ +{{ kpis.users.new_30d or 0 }} sur 30j</div></div>
-      <div class="stat"><div class="stat-label">Agents actifs</div><div class="stat-value">{{ kpis.agents.active }}</div><div class="stat-sub">{{ kpis.agents.pending }} en attente</div></div>
-      <div class="stat"><div class="stat-label">Transferts totaux</div><div class="stat-value">{{ kpis.transfers.total }}</div><div class="stat-sub up">{{ kpis.transfers.completed }} complétés</div></div>
-      <div class="stat"><div class="stat-label">En cours</div><div class="stat-value">{{ kpis.transfers.in_progress }}</div><div class="stat-sub">temps moyen 3min</div></div>
-      <div class="stat"><div class="stat-label">Volume €</div><div class="stat-value">{{ '{:,.0f}'.format(kpis.transfers.volume_eur).replace(',', ' ') }} €</div><div class="stat-sub">cumulé</div></div>
-      <div class="stat"><div class="stat-label">Float déclaré</div><div class="stat-value">{{ '{:,.0f}'.format(kpis.float.total_declared).replace(',', ' ') }}</div><div class="stat-sub">multi-devises EUR equiv.</div></div>
+    <!-- Smart Alerts -->
+    {% if kpis.alerts %}
+    <div class="card" style="border-left:4px solid var(--role-color,#0F4C81); margin-bottom:16px;">
+      <div class="card-header"><h2>🔔 Alertes intelligentes</h2></div>
+      <div style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
+        {% for alert in kpis.alerts %}
+          <a href="{{ url_prefix }}/{{ rp }}/{{ alert.link }}" style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; text-decoration:none;
+            {% if alert.level == 'error' %}background:#FEE2E2; color:#991B1B;
+            {% elif alert.level == 'warning' %}background:#FEF3C7; color:#92400E;
+            {% else %}background:#DBEAFE; color:#1E40AF;{% endif %}">
+            <span style="font-size:18px; flex-shrink:0;">
+              {% if alert.icon == 'user-clock' %}⏰{% elif alert.icon == 'shield-check' %}🛡️{% elif alert.icon == 'message-square' %}💬{% elif alert.icon == 'alert-triangle' %}⚠️{% elif alert.icon == 'user-x' %}🚫{% else %}ℹ️{% endif %}
+            </span>
+            <span style="font-size:14px; font-weight:500;">{{ alert.message }}</span>
+            <span style="margin-left:auto; font-size:12px; opacity:0.7;">→</span>
+          </a>
+        {% endfor %}
+      </div>
     </div>
+    {% endif %}
+
+    <!-- Enhanced KPIs -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Utilisateurs</div>
+        <div class="stat-value">{{ kpis.users.total }}</div>
+        <div class="stat-sub up">↗ +{{ kpis.users.new_7d or 0 }} sur 7j · +{{ kpis.users.new_1d or 0 }} aujourd'hui</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Agents actifs</div>
+        <div class="stat-value">{{ kpis.agents.active }}</div>
+        <div class="stat-sub">{{ kpis.agents.pending }} en attente{% if kpis.agents.suspended %} · {{ kpis.agents.suspended }} suspendus{% endif %}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Transferts (7j)</div>
+        <div class="stat-value">{{ kpis.transfers.count_7d or 0 }}</div>
+        <div class="stat-sub up">{{ kpis.transfers.count_1d or 0 }} aujourd'hui · {{ kpis.transfers.completed }} complétés (total)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">En cours</div>
+        <div class="stat-value">{{ kpis.transfers.in_progress }}</div>
+        <div class="stat-sub{% if kpis.transfers.failed %} style="color:#B91C1C{% endif %}">{% if kpis.transfers.failed %}{{ kpis.transfers.failed }} échoués{% else %}temps moyen 3min{% endif %}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Volume € (7j)</div>
+        <div class="stat-value">{{ '{:,.0f}'.format(kpis.transfers.volume_7d or 0).replace(',', ' ') }} €</div>
+        <div class="stat-sub">cumulé: {{ '{:,.0f}'.format(kpis.transfers.volume_eur or 0).replace(',', ' ') }} €</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Float déclaré</div>
+        <div class="stat-value">{{ '{:,.0f}'.format(kpis.float.total_declared or 0).replace(',', ' ') }}</div>
+        <div class="stat-sub">multi-devises EUR equiv.</div>
+      </div>
+    </div>
+
+    <!-- Two-column layout: trends + corridors -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;" class="dashboard-grid">
+      <!-- Daily volume trend -->
+      <div class="card">
+        <div class="card-header"><h2>📈 Volume des transferts (7 jours)</h2></div>
+        {% if kpis.daily_volume %}
+          <div style="padding:16px 8px;">
+            {% set max_vol = (kpis.daily_volume | map(attribute='volume') | max) or 1 %}
+            {% for d in kpis.daily_volume %}
+              {% set pct = (d.volume / max_vol * 100) | round(1) if max_vol > 0 else 0 %}
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <span style="font-size:12px; color:var(--text-muted); width:70px; flex-shrink:0;">{{ d.date[5:] }}</span>
+                <div style="flex:1; background:#F1F5F9; border-radius:6px; height:24px; position:relative; overflow:hidden;">
+                  <div style="background:linear-gradient(90deg, var(--role-color,#0F4C81), var(--role-color-dark,#10B981)); height:100%; width:{{ pct }}%; border-radius:6px; transition:width 0.3s;"></div>
+                </div>
+                <span style="font-size:12px; font-weight:600; width:80px; text-align:right; flex-shrink:0;">{{ '{:,.0f}'.format(d.volume).replace(',', ' ') }} €</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty">Aucune donnée de volume sur les 7 derniers jours.</div>
+        {% endif %}
+      </div>
+
+      <!-- Top corridors -->
+      <div class="card">
+        <div class="card-header"><h2>🌍 Top corridors (30j)</h2></div>
+        {% if kpis.top_corridors %}
+          <table>
+            <thead><tr><th>Pays</th><th>Transferts</th><th>Volume</th></tr></thead>
+            <tbody>
+              {% for c in kpis.top_corridors %}
+                <tr>
+                  <td><b>{{ c.country }}</b></td>
+                  <td>{{ c.count }}</td>
+                  <td><b>{{ '{:,.0f}'.format(c.volume).replace(',', ' ') }} €</b></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="empty">Aucun transfert sur les 30 derniers jours.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent audit activity -->
+    {% if kpis.recent_audit %}
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <h2>🔒 Activité récente du personnel</h2>
+        <a href="{{ url_prefix }}/{{ rp }}/audit" class="btn btn-ghost">Voir tout →</a>
+      </div>
+      <table>
+        <thead><tr><th>Action</th><th>Cible</th><th>Par</th><th>Rôle</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for log in kpis.recent_audit %}
+            <tr>
+              <td><span class="pill pill-{% if 'delete' in log.action or 'suspend' in log.action or 'reject' in log.action %}CANCELLED{% elif 'approve' in log.action or 'reactivate' in log.action %}COMPLETED{% else %}PROCESSING{% endif %}">{{ log.action }}</span></td>
+              <td>{{ log.target_type }}: {{ log.target_name or log.target_id[:8] }}</td>
+              <td>{{ log.actor_name or log.actor_id[:8] }}</td>
+              <td><span class="pill pill-neutral">{{ log.actor_role }}</span></td>
+              <td style="color:var(--text-muted); font-size:13px">{{ (log.created_at or '')[:16].replace('T', ' ') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
 
     <div class="card">
       <div class="card-header"><h2>Derniers transferts</h2><a href="{{ url_prefix }}/admin/transfers" class="btn btn-ghost">Voir tout →</a></div>
@@ -674,15 +790,71 @@
     </div>
 
   {% elif section == 'audit' %}
+    <!-- Real audit logs -->
     <div class="card">
-      <div class="card-header"><h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>Mouvements de fonds (reconciliation)</h2></div>
+      <div class="card-header">
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>Journal d'audit ({{ total_logs }})</h2>
+      </div>
+      <form method="get" action="{{ url_prefix }}/{{ rp }}/audit" class="filters">
+        <select name="actor_role">
+          <option value="">Tous les rôles</option>
+          <option value="super_admin" {% if actor_role == 'super_admin' %}selected{% endif %}>Super-Admin</option>
+          <option value="admin" {% if actor_role == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="partner_admin" {% if actor_role == 'partner_admin' %}selected{% endif %}>Partenaire</option>
+        </select>
+        <select name="target_type">
+          <option value="">Toutes les cibles</option>
+          <option value="user" {% if target_type == 'user' %}selected{% endif %}>Utilisateur</option>
+          <option value="agent" {% if target_type == 'agent' %}selected{% endif %}>Agent</option>
+          <option value="transfer" {% if target_type == 'transfer' %}selected{% endif %}>Transfert</option>
+          <option value="kyc" {% if target_type == 'kyc' %}selected{% endif %}>KYC</option>
+          <option value="linked_account" {% if target_type == 'linked_account' %}selected{% endif %}>Compte lié</option>
+          <option value="rate" {% if target_type == 'rate' %}selected{% endif %}>Taux</option>
+          <option value="personnel" {% if target_type == 'personnel' %}selected{% endif %}>Personnel</option>
+        </select>
+        <button type="submit" class="btn btn-sm">Filtrer</button>
+        <a href="{{ url_prefix }}/{{ rp }}/audit" class="btn btn-sm btn-ghost">Réinitialiser</a>
+      </form>
+      {% if audit_logs %}
+        <table>
+          <thead><tr><th>Action</th><th>Cible</th><th>Nom cible</th><th>Effectué par</th><th>Rôle</th><th>IP</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for log in audit_logs %}
+              <tr>
+                <td><span class="pill pill-{% if 'delete' in log.action or 'suspend' in log.action or 'reject' in log.action %}CANCELLED{% elif 'approve' in log.action or 'reactivate' in log.action %}COMPLETED{% else %}PROCESSING{% endif %}">{{ log.action }}</span></td>
+                <td>{{ log.target_type }}</td>
+                <td>{{ log.target_name or log.target_id[:8] or '—' }}</td>
+                <td>{{ log.actor_name or log.actor_id[:8] or '—' }}</td>
+                <td><span class="pill pill-neutral">{{ log.actor_role }}</span></td>
+                <td style="color:var(--text-muted); font-size:12px;">{{ log.ip_address or '—' }}</td>
+                <td style="color:var(--text-muted); font-size:13px">{{ (log.created_at or '')[:16].replace('T', ' ') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if pages > 1 %}
+          <div class="pagination" style="margin-top:16px; display:flex; gap:8px; align-items:center; justify-content:center;">
+            {% for p in range(1, pages + 1) %}
+              <a href="{{ url_prefix }}/{{ rp }}/audit?page={{ p }}&actor_role={{ actor_role }}&target_type={{ target_type }}"
+                 class="btn btn-sm {% if p == page %}{% else %}btn-ghost{% endif %}">{{ p }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></div>Aucune action enregistrée dans le journal d'audit.</div>
+      {% endif %}
+    </div>
+
+    <!-- Float movements (reconciliation) -->
+    <div class="card">
+      <div class="card-header"><h2>Mouvements de fonds (reconciliation)</h2></div>
       <table>
         <thead><tr><th>Type</th><th>Devise</th><th>Total</th><th>Occurrences</th></tr></thead>
         <tbody>
           {% for m in movements %}
             <tr><td><span class="pill pill-neutral">{{ m.type }}</span></td><td>{{ m.currency }}</td><td><b>{{ '{:,.2f}'.format(m.total or 0).replace(',', ' ') }}</b></td><td>{{ m.count }}</td></tr>
           {% else %}
-            <tr><td colspan="4"><div class="empty"><div class="emoji"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></div>Aucun mouvement enregistré.</div></td></tr>
+            <tr><td colspan="4"><div class="empty">Aucun mouvement enregistré.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -1002,4 +1174,22 @@
     </div>
 
   {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  @media (max-width: 768px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .stats {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+  @media (max-width: 480px) {
+    .stats {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
 {% endblock %}

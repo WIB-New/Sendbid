@@ -7,6 +7,7 @@ Rôles :
 - agent_admin : lecture seule sur son équipe (super_agent dashboard)
 """
 from typing import Optional
+from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -53,18 +54,33 @@ async def admin_kpis(user: dict = Depends(get_current_user)):
             scope_transfers["winning_agent_id"] = {"$in": own_agent_ids}
 
     total_users = await db.users.count_documents(scope_users)
+    cutoff_7d = iso(now_utc() - timedelta(days=7))
+    cutoff_1d = iso(now_utc() - timedelta(days=1))
+    new_users_7d = await db.users.count_documents({**scope_users, "created_at": {"$gte": cutoff_7d}})
+    new_users_1d = await db.users.count_documents({**scope_users, "created_at": {"$gte": cutoff_1d}})
+    suspended_users = await db.users.count_documents({**scope_users, "suspended": True})
     total_agents = await db.agents.count_documents(scope_agents)
     active_agents = await db.agents.count_documents({**scope_agents, "status": "approved", "available": True})
     pending_agents = await db.agents.count_documents({**scope_agents, "status": "pending_verification"})
+    suspended_agents = await db.agents.count_documents({**scope_agents, "status": "suspended"})
     total_transfers = await db.transfers.count_documents(scope_transfers)
     completed_transfers = await db.transfers.count_documents({**scope_transfers, "status": "COMPLETED"})
     in_progress = await db.transfers.count_documents({**scope_transfers, "status": {"$in": ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"]}})
+    failed = await db.transfers.count_documents({**scope_transfers, "status": {"$in": ["FAILED", "CANCELLED", "REFUNDED"]}})
+    transfers_7d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_7d}})
+    transfers_1d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_1d}})
     # Volume EUR agrégé — respect du scope
     match_vol: dict = {**scope_transfers, "status": "COMPLETED"}
     pipeline = [{"$match": match_vol}, {"$group": {"_id": None, "vol": {"$sum": "$send_amount"}}}]
     vol = 0.0
     async for x in db.transfers.aggregate(pipeline):
         vol = float(x.get("vol") or 0)
+    vol_7d = 0.0
+    async for x in db.transfers.aggregate([
+        {"$match": {**match_vol, "created_at": {"$gte": cutoff_7d}}},
+        {"$group": {"_id": None, "vol": {"$sum": "$send_amount"}}},
+    ]):
+        vol_7d = float(x.get("vol") or 0)
     # Float total déclaré — respecte le scope agents pour super-agent/partner
     total_float = 0.0
     float_match: dict = {}
@@ -75,11 +91,22 @@ async def admin_kpis(user: dict = Depends(get_current_user)):
     float_pipeline = [{"$match": float_match}, {"$group": {"_id": "$currency", "total": {"$sum": "$balance"}}}] if float_match else [{"$group": {"_id": "$currency", "total": {"$sum": "$balance"}}}]
     async for x in db.agent_floats.aggregate(float_pipeline):
         total_float += float(x.get("total") or 0)
+    # Smart alerts
+    alerts = []
+    if pending_agents > 0:
+        alerts.append({"level": "warning", "message": f"{pending_agents} agent(s) en attente de validation"})
+    if failed > 0:
+        alerts.append({"level": "error", "message": f"{failed} transfert(s) échoué(s) / annulé(s)"})
+    if suspended_users > 0:
+        alerts.append({"level": "info", "message": f"{suspended_users} compte(s) suspendu(s)"})
     return {
-        "users": {"total": total_users},
-        "agents": {"total": total_agents, "active": active_agents, "pending": pending_agents},
-        "transfers": {"total": total_transfers, "completed": completed_transfers, "in_progress": in_progress, "volume_eur": round(vol, 2)},
+        "users": {"total": total_users, "new_7d": new_users_7d, "new_1d": new_users_1d, "suspended": suspended_users},
+        "agents": {"total": total_agents, "active": active_agents, "pending": pending_agents, "suspended": suspended_agents},
+        "transfers": {"total": total_transfers, "completed": completed_transfers, "in_progress": in_progress,
+                      "failed": failed, "volume_eur": round(vol, 2), "volume_7d": round(vol_7d, 2),
+                      "count_7d": transfers_7d, "count_1d": transfers_1d},
         "float": {"total_declared": total_float},
+        "alerts": alerts,
         "scope": {"role": role, "filtered": bool(scope_transfers or scope_agents)},
     }
 
@@ -126,6 +153,18 @@ async def moderate_agent(payload: AgentModerationIn, user: dict = Depends(get_cu
     )
     if upd.matched_count == 0:
         raise HTTPException(status_code=404, detail="Agent introuvable")
+    # Audit log
+    try:
+        from core.audit import log_action
+        await log_action(
+            actor_id=user.get("id", ""), actor_role=user.get("role", ""),
+            actor_name=user.get("full_name") or user.get("email", ""),
+            action=f"agent_{payload.action}", target_type="agent",
+            target_id=payload.agent_id,
+            details={"reason": payload.reason} if payload.reason else {},
+        )
+    except Exception:
+        pass
     return {"ok": True, "status": new_status}
 
 

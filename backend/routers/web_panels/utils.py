@@ -142,32 +142,134 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
     scope_transfers = scope_transfers or {}
     scope_agents = scope_agents or {}
     scope_users = scope_users or {}
+    now = now_utc()
+    cutoff_30d = iso(now - _dt.timedelta(days=30))
+    cutoff_7d = iso(now - _dt.timedelta(days=7))
+    cutoff_1d = iso(now - _dt.timedelta(days=1))
+
+    # ── Users ──
     total_users = await db.users.count_documents(scope_users)
-    # Nouveaux users 30 derniers jours
-    cutoff = iso(now_utc() - _dt.timedelta(days=30))
-    new_users_30d = await db.users.count_documents({**scope_users, "created_at": {"$gte": cutoff}})
+    new_users_30d = await db.users.count_documents({**scope_users, "created_at": {"$gte": cutoff_30d}})
+    new_users_7d = await db.users.count_documents({**scope_users, "created_at": {"$gte": cutoff_7d}})
+    new_users_1d = await db.users.count_documents({**scope_users, "created_at": {"$gte": cutoff_1d}})
+    suspended_users = await db.users.count_documents({**scope_users, "suspended": True})
+
+    # ── Agents ──
     total_agents = await db.agents.count_documents(scope_agents)
     active_agents = await db.agents.count_documents({**scope_agents, "status": "approved", "available": True})
     pending_agents = await db.agents.count_documents({**scope_agents, "status": "pending_verification"})
+    suspended_agents = await db.agents.count_documents({**scope_agents, "status": "suspended"})
+
+    # ── Transfers ──
     total_transfers = await db.transfers.count_documents(scope_transfers)
     completed = await db.transfers.count_documents({**scope_transfers, "status": "COMPLETED"})
     in_progress = await db.transfers.count_documents(
         {**scope_transfers, "status": {"$in": ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"]}}
     )
+    failed = await db.transfers.count_documents({**scope_transfers, "status": {"$in": ["FAILED", "CANCELLED", "REFUNDED"]}})
+    transfers_7d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_7d}})
+    transfers_1d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_1d}})
+
+    # Volume EUR
     vol = 0.0
     async for x in db.transfers.aggregate([
         {"$match": {**scope_transfers, "status": "COMPLETED"}},
         {"$group": {"_id": None, "v": {"$sum": "$send_amount"}}},
     ]):
         vol = float(x.get("v") or 0)
+    vol_7d = 0.0
+    async for x in db.transfers.aggregate([
+        {"$match": {**scope_transfers, "status": "COMPLETED", "created_at": {"$gte": cutoff_7d}}},
+        {"$group": {"_id": None, "v": {"$sum": "$send_amount"}}},
+    ]):
+        vol_7d = float(x.get("v") or 0)
+
+    # ── Float ──
     total_float = 0.0
     async for x in db.agent_floats.aggregate([{"$group": {"_id": "$currency", "t": {"$sum": "$balance"}}}]):
         total_float += float(x.get("t") or 0)
+
+    # ── KYC pending ──
+    kyc_pending = await db.users.count_documents({"kyc_status": "pending", **scope_users})
+
+    # ── Support tickets open ──
+    open_tickets = await db.support_tickets.count_documents({"status": {"$in": ["open", "pending"]}})
+
+    # ── Smart alerts ──
+    alerts: list[dict] = []
+    if pending_agents > 0:
+        alerts.append({"level": "warning", "icon": "user-clock", "message": f"{pending_agents} agent(s) en attente de validation", "link": "agents"})
+    if kyc_pending > 0:
+        alerts.append({"level": "info", "icon": "shield-check", "message": f"{kyc_pending} KYC en attente de revue", "link": "kyc"})
+    if open_tickets > 0:
+        alerts.append({"level": "warning", "icon": "message-square", "message": f"{open_tickets} ticket(s) de support ouvert(s)", "link": "support"})
+    if failed > 0:
+        alerts.append({"level": "error", "icon": "alert-triangle", "message": f"{failed} transfert(s) échoué(s) / annulé(s)", "link": "transfers"})
+    if suspended_users > 0:
+        alerts.append({"level": "info", "icon": "user-x", "message": f"{suspended_users} compte(s) utilisateur(s) suspendu(s)", "link": "users"})
+    if suspended_agents > 0:
+        alerts.append({"level": "info", "icon": "user-x", "message": f"{suspended_agents} agent(s) suspendu(s)", "link": "agents"})
+
+    # ── Transfer volume trend (last 7 days, daily) ──
+    daily_volume: list[dict] = []
+    async for x in db.transfers.aggregate([
+        {"$match": {**scope_transfers, "status": "COMPLETED", "created_at": {"$gte": cutoff_7d}}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": {"$dateFromString": {"dateString": "$created_at"}}}},
+            "volume": {"$sum": "$send_amount"},
+            "count": {"$sum": 1},
+        }},
+        {"$sort": {"_id": 1}},
+    ]):
+        daily_volume.append({"date": x["_id"], "volume": round(float(x.get("volume") or 0), 2), "count": x.get("count", 0)})
+
+    # ── Top corridors (last 30 days) ──
+    top_corridors: list[dict] = []
+    async for x in db.transfers.aggregate([
+        {"$match": {**scope_transfers, "created_at": {"$gte": cutoff_30d}}},
+        {"$group": {
+            "_id": "$destination_country",
+            "count": {"$sum": 1},
+            "volume": {"$sum": "$send_amount"},
+        }},
+        {"$sort": {"count": -1}},
+        {"$limit": 5},
+    ]):
+        top_corridors.append({
+            "country": x["_id"] or "—",
+            "count": x["count"],
+            "volume": round(float(x.get("volume") or 0), 2),
+        })
+
+    # ── Recent audit logs ──
+    recent_audit: list[dict] = []
+    try:
+        async for entry in db.audit_logs.find({}, {"_id": 0}).sort("created_at", -1).to_list(8):
+            recent_audit.append(entry)
+    except Exception:
+        pass  # Collection may not exist yet
+
     return {
-        "users": {"total": total_users, "new_30d": new_users_30d},
-        "agents": {"total": total_agents, "active": active_agents, "pending": pending_agents},
-        "transfers": {"total": total_transfers, "completed": completed, "in_progress": in_progress, "volume_eur": round(vol, 2)},
+        "users": {
+            "total": total_users, "new_30d": new_users_30d, "new_7d": new_users_7d,
+            "new_1d": new_users_1d, "suspended": suspended_users,
+        },
+        "agents": {
+            "total": total_agents, "active": active_agents, "pending": pending_agents,
+            "suspended": suspended_agents,
+        },
+        "transfers": {
+            "total": total_transfers, "completed": completed, "in_progress": in_progress,
+            "failed": failed, "volume_eur": round(vol, 2), "volume_7d": round(vol_7d, 2),
+            "count_7d": transfers_7d, "count_1d": transfers_1d,
+        },
         "float": {"total_declared": round(total_float, 2)},
+        "kyc_pending": kyc_pending,
+        "open_tickets": open_tickets,
+        "alerts": alerts,
+        "daily_volume": daily_volume,
+        "top_corridors": top_corridors,
+        "recent_audit": recent_audit,
     }
 
 

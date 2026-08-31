@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from core.db import db, now_utc, iso, clean_doc
 from core.security import verify_password, create_access_token, hash_password, gen_id
+from core.audit import log_action, get_recent_logs
 
 from . import router, templates
 import datetime as _dt
@@ -14,6 +15,23 @@ from .utils import (
     _safe_date, _current_year, _url_prefix, _u, _marketing_ctx,
     _resolve_session, _panel_base_ctx, _login_page, _admin_kpis,
 )
+
+
+def _client_ip(request: Request) -> str:
+    """Extract client IP from request, handling proxies."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else ""
+
+
+def _actor_info(admin: dict) -> dict:
+    """Extract actor info for audit logging."""
+    return {
+        "actor_id": admin.get("id", ""),
+        "actor_role": admin.get("role", ""),
+        "actor_name": admin.get("full_name") or admin.get("email", ""),
+    }
 
 
 logger = logging.getLogger("sendbid.web_panels.admin")
@@ -210,6 +228,11 @@ async def admin_create_personnel(
         "created_at": iso(now_utc()),
         "updated_at": iso(now_utc()),
     })
+    # Audit log
+    await log_action(**_actor_info(admin), action="create_personnel", target_type="personnel",
+        target_id=email, target_name=full_name,
+        details={"role": role, "email": email},
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
     return RedirectResponse(
         url=f"{_url_prefix(request)}/admin/personnel?message=Membre du personnel créé",
         status_code=303,
@@ -233,6 +256,20 @@ async def admin_user_set_password(request: Request, user_id: str, password: str 
         {"id": user_id},
         {"$set": {"password_hash": hash_password(password), "updated_at": iso(now_utc())}},
     )
+    # Audit log + email notification
+    await log_action(**_actor_info(admin), action="set_password", target_type="user",
+        target_id=user_id, target_name=target.get("full_name") or target.get("email", ""),
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+    try:
+        from services.admin_notify import notify_admin_action
+        await notify_admin_action(
+            user_email=target.get("email", ""), user_name=target.get("full_name", ""),
+            action_label="Votre mot de passe a été réinitialisé",
+            detail="Un administrateur a réinitialisé votre mot de passe. Si vous n'êtes pas à l'origine de cette action, contactez le support immédiatement.",
+            actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+        )
+    except Exception as e:
+        logger.warning(f"[admin set_password] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Mot de passe mis à jour", status_code=303)
 
 
@@ -253,6 +290,20 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
         {"id": user_id},
         {"$set": {"pin_hash": hash_password(pin), "pin_attempts": 0, "pin_locked_until": None, "updated_at": iso(now_utc())}},
     )
+    # Audit log + email notification
+    await log_action(**_actor_info(admin), action="set_pin", target_type="user",
+        target_id=user_id, target_name=target.get("full_name") or target.get("email", ""),
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+    try:
+        from services.admin_notify import notify_admin_action
+        await notify_admin_action(
+            user_email=target.get("email", ""), user_name=target.get("full_name", ""),
+            action_label="Votre code PIN a été réinitialisé",
+            detail="Un administrateur a réinitialisé votre code PIN de sécurité.",
+            actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+        )
+    except Exception as e:
+        logger.warning(f"[admin set_pin] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=PIN mis à jour", status_code=303)
 
 
@@ -273,10 +324,31 @@ async def admin_user_toggle_status(request: Request, user_id: str):
         )
     new_status = not target.get("suspended", False)
     label = "suspendu" if new_status else "réactivé"
+    action_verb = "suspend" if new_status else "reactivate"
     await db.users.update_one(
         {"id": user_id},
         {"$set": {"suspended": new_status, "updated_at": iso(now_utc())}},
     )
+    # Audit log + email notification
+    full_target = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "full_name": 1})
+    await log_action(**_actor_info(admin), action=action_verb, target_type="user",
+        target_id=user_id, target_name=(full_target or {}).get("full_name") or (full_target or {}).get("email", ""),
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+    try:
+        from services.admin_notify import notify_admin_action
+        if new_status:
+            action_label = "Votre compte a été suspendu"
+            detail = "Votre compte a été suspendu par un administrateur. Pour plus d'informations, contactez notre support."
+        else:
+            action_label = "Votre compte a été réactivé"
+            detail = "Votre compte est de nouveau actif. Vous pouvez vous connecter normalement."
+        await notify_admin_action(
+            user_email=(full_target or {}).get("email", ""), user_name=(full_target or {}).get("full_name", ""),
+            action_label=action_label, detail=detail,
+            actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+        )
+    except Exception as e:
+        logger.warning(f"[admin toggle_status] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Compte {label}", status_code=303)
 
 
@@ -293,6 +365,8 @@ async def admin_user_delete(request: Request, user_id: str):
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut supprimer un compte personnel",
             status_code=303,
         )
+    # Fetch user info before deletion for audit + email
+    full_target = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "full_name": 1, "phone": 1})
     await db.users.delete_one({"id": user_id})
     await db.wallets.delete_many({"user_id": user_id})
     await db.wallet_tx.delete_many({"user_id": user_id})
@@ -300,6 +374,20 @@ async def admin_user_delete(request: Request, user_id: str):
     await db.payment_methods.delete_many({"user_id": user_id})
     await db.notifications.delete_many({"user_id": user_id})
     await db.linked_accounts.delete_many({"user_id": user_id})
+    # Audit log + email notification
+    await log_action(**_actor_info(admin), action="delete", target_type="user",
+        target_id=user_id, target_name=(full_target or {}).get("full_name") or (full_target or {}).get("email", ""),
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+    try:
+        from services.admin_notify import notify_admin_action
+        await notify_admin_action(
+            user_email=(full_target or {}).get("email", ""), user_name=(full_target or {}).get("full_name", ""),
+            action_label="Votre compte a été supprimé",
+            detail="Votre compte et toutes les données associées ont été supprimés conformément à nos politiques.",
+            actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+        )
+    except Exception as e:
+        logger.warning(f"[admin delete] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/users?message=Utilisateur supprimé", status_code=303)
 
 
@@ -403,10 +491,17 @@ async def admin_wallets(request: Request):
 
 
 @router.get("/web/admin/audit", response_class=HTMLResponse)
-async def admin_audit(request: Request):
+async def admin_audit(request: Request, page: int = 1, limit: int = 50, actor_role: str = "", target_type: str = ""):
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
+    # Real audit logs from audit_logs collection
+    audit_logs = await get_recent_logs(limit=limit, skip=max(0, (page - 1) * limit), actor_role=actor_role, target_type=target_type)
+    total_logs = await db.audit_logs.count_documents({} if not actor_role and not target_type else {
+        **({"actor_role": actor_role} if actor_role else {}),
+        **({"target_type": target_type} if target_type else {}),
+    })
+    # Also keep float movements summary
     movements = []
     async for x in db.agent_float_movements.aggregate([
         {"$group": {
@@ -415,7 +510,10 @@ async def admin_audit(request: Request):
         }},
     ]):
         movements.append({"type": x["_id"]["type"], "currency": x["_id"]["currency"], "total": x["total"], "count": x["count"]})
-    ctx = _panel_base_ctx(request, "admin", user, section="audit", section_title="Audit logs", movements=movements)
+    pages = max(1, (total_logs + limit - 1) // limit)
+    ctx = _panel_base_ctx(request, "admin", user, section="audit", section_title="Audit logs",
+        audit_logs=audit_logs, total_logs=total_logs, page=page, pages=pages,
+        movements=movements, actor_role=actor_role, target_type=target_type)
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
@@ -451,6 +549,28 @@ async def admin_verify_linked_account(request: Request, account_id: str, action:
         {"id": account_id},
         {"$set": {"status": new_status, "verified_at": iso(now_utc()), "verified_by": "admin", "verification_note": "Action manuelle admin"}},
     )
+    # Audit log
+    account_doc = await db.linked_accounts.find_one({"id": account_id}, {"_id": 0, "user_id": 1, "bank_name": 1})
+    if account_doc and account_doc.get("user_id"):
+        acc_user = await db.users.find_one({"id": account_doc["user_id"]}, {"_id": 0, "email": 1, "full_name": 1})
+        await log_action(**_actor_info(user), action=f"linked_account_{action}", target_type="linked_account",
+            target_id=account_id, target_name=account_doc.get("bank_name", ""),
+            ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+        try:
+            from services.admin_notify import notify_admin_action
+            if action == "approve":
+                lbl = "Votre compte bancaire lié a été vérifié"
+                det = f"Votre compte bancaire ({account_doc.get('bank_name', 'N/A')}) a été approuvé et est maintenant actif."
+            else:
+                lbl = "Votre compte bancaire lié a été rejeté"
+                det = f"La vérification de votre compte bancaire ({account_doc.get('bank_name', 'N/A')}) a été rejetée. Contactez le support."
+            await notify_admin_action(
+                user_email=(acc_user or {}).get("email", ""), user_name=(acc_user or {}).get("full_name", ""),
+                action_label=lbl, detail=det,
+                actor_name=user.get("full_name") or user.get("email", "l'équipe"),
+            )
+        except Exception as e:
+            logger.warning(f"[admin verify_linked_account] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/linked-accounts", status_code=303)
 
 
@@ -565,6 +685,11 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
                 "updated_at": iso(now_utc()),
             }},
         )
+        # Audit log
+        await log_action(**_actor_info(user), action="update_rate", target_type="rate",
+            target_id=country_code.upper(), target_name=country_code.upper(),
+            details={"fx_rate_eur": float(fx_rate_eur), "fx_margin_percent": float(fx_margin_percent)},
+            ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
     except ValueError:
         pass
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/rates?message=Taux mis à jour", status_code=303)
@@ -592,6 +717,32 @@ async def admin_moderate_agent(request: Request, agent_id: str, action: str = Fo
             "moderation_reason": reason or None,
         }},
     )
+    # Audit log
+    agent_doc = await db.agents.find_one({"id": agent_id}, {"_id": 0, "full_name": 1, "email": 1, "user_id": 1})
+    await log_action(**_actor_info(admin), action=f"agent_{action}", target_type="agent",
+        target_id=agent_id, target_name=(agent_doc or {}).get("full_name") or (agent_doc or {}).get("email", ""),
+        details={"reason": reason} if reason else {},
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+    # Notify agent by email
+    try:
+        from services.admin_notify import notify_admin_action
+        action_labels = {
+            "approve": ("Votre compte agent a été approuvé", "Félicitations ! Votre compte agent est maintenant actif. Vous pouvez recevoir des transferts."),
+            "reject": ("Votre compte agent a été rejeté", f"Votre demande d'agent a été rejetée. {('Raison: ' + reason) if reason else 'Contactez le support pour plus d'informations.'}"),
+            "suspend": ("Votre compte agent a été suspendu", f"Votre compte agent a été suspendu. {('Raison: ' + reason) if reason else 'Contactez le support pour plus d'informations.'}"),
+            "reactivate": ("Votre compte agent a été réactivé", "Votre compte agent est de nouveau actif."),
+        }
+        if action in action_labels and agent_doc and agent_doc.get("user_id"):
+            agent_user = await db.users.find_one({"id": agent_doc["user_id"]}, {"_id": 0, "email": 1, "full_name": 1})
+            label, detail = action_labels[action]
+            await notify_admin_action(
+                user_email=(agent_user or {}).get("email", ""), user_name=(agent_user or {}).get("full_name", ""),
+                action_label=label, detail=detail,
+                actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+                app_brand="PAYBID",
+            )
+    except Exception as e:
+        logger.warning(f"[admin moderate_agent] notify failed: {e}")
     label = {"approved": "approuvé", "rejected": "rejeté", "suspended": "suspendu"}.get(new_status, new_status)
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/agents?message=Agent {label}", status_code=303)
 
@@ -668,6 +819,12 @@ async def admin_transfer_action(request: Request, transfer_id: str, action: str 
         "admin_action_at": iso(now_utc()),
     }
     await db.transfers.update_one({"id": transfer_id}, {"$set": update_set})
+    # Audit log
+    t_doc = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "send_amount": 1, "send_currency": 1, "destination_country": 1})
+    await log_action(**_actor_info(admin), action=f"transfer_{action}", target_type="transfer",
+        target_id=transfer_id, target_name=f"{transfer_id[:8]}",
+        details={"new_status": new_status, "reason": reason} if reason else {"new_status": new_status},
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
     # If refund, credit user wallet back
     if action == "refund" and transfer.get("user_id"):
         wallet = await db.wallets.find_one({"user_id": transfer["user_id"]})
@@ -682,6 +839,26 @@ async def admin_transfer_action(request: Request, transfer_id: str, action: str 
                 "created_at": iso(now_utc()), "note": f"Remboursement admin ({reason or 'N/A'})",
             })
     label = {"CANCELLED": "annulé", "REFUNDED": "remboursé", "COMPLETED": "complété", "PROCESSING": "en traitement"}.get(new_status, new_status)
+    # Notify user by email
+    try:
+        from services.admin_notify import notify_admin_action
+        if transfer.get("user_id"):
+            t_user = await db.users.find_one({"id": transfer["user_id"]}, {"_id": 0, "email": 1, "full_name": 1})
+            action_labels = {
+                "cancel": ("Votre transfert a été annulé", f"Le transfert {transfer_id[:8]} a été annulé{(' — ' + reason) if reason else ''}."),
+                "refund": ("Votre transfert a été remboursé", f"Le transfert {transfer_id[:8]} a été remboursé. Le montant a été crédité sur votre wallet."),
+                "complete": ("Votre transfert est complété", f"Le transfert {transfer_id[:8]} est maintenant marqué comme complété."),
+                "process": ("Votre transfert est en traitement", f"Le transfert {transfer_id[:8]} est en cours de traitement."),
+            }
+            if action in action_labels and t_user:
+                lbl, det = action_labels[action]
+                await notify_admin_action(
+                    user_email=t_user.get("email", ""), user_name=t_user.get("full_name", ""),
+                    action_label=lbl, detail=det,
+                    actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+                )
+    except Exception as e:
+        logger.warning(f"[admin transfer_action] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers/{transfer_id}?message=Transfert {label}", status_code=303)
 
 
@@ -697,20 +874,46 @@ async def admin_kyc_action(request: Request, user_id: str, action: str = Form(..
             {"$set": {"kyc_status": "verified", "kyc_tier": 2, "kyc_verified_at": iso(now_utc()), "kyc_verified_by": admin.get("id"), "updated_at": iso(now_utc())}},
         )
         msg = "KYC approuvé — Tier 2 attribué"
+        audit_action = "kyc_approve"
+        notify_label = "Votre vérification KYC a été approuvée"
+        notify_detail = "Votre identité a été vérifiée. Vous avez maintenant accès à toutes les fonctionnalités de transfert (Tier 2)."
     elif action == "reject":
         await db.users.update_one(
             {"id": user_id},
             {"$set": {"kyc_status": "rejected", "kyc_rejection_reason": reason or None, "kyc_reviewed_at": iso(now_utc()), "kyc_reviewed_by": admin.get("id"), "updated_at": iso(now_utc())}},
         )
         msg = f"KYC rejeté{(' — ' + reason) if reason else ''}"
+        audit_action = "kyc_reject"
+        notify_label = "Votre vérification KYC a été rejetée"
+        notify_detail = f"Votre demande de vérification KYC a été rejetée{(' — ' + reason) if reason else ''}. Vous pouvez soumettre à nouveau vos documents."
     elif action == "tier3":
         await db.users.update_one(
             {"id": user_id},
             {"$set": {"kyc_status": "verified", "kyc_tier": 3, "kyc_verified_at": iso(now_utc()), "kyc_verified_by": admin.get("id"), "updated_at": iso(now_utc())}},
         )
         msg = "KYC approuvé — Tier 3 attribué"
+        audit_action = "kyc_tier3"
+        notify_label = "Votre compte a été élevé au Tier 3"
+        notify_detail = "Votre compte a été vérifié au niveau Tier 3. Vous bénéficiez de limites de transfert étendues."
     else:
         msg = "Action inconnue"
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/kyc?message={msg}", status_code=303)
+    # Audit log
+    kyc_user = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "full_name": 1})
+    await log_action(**_actor_info(admin), action=audit_action, target_type="kyc",
+        target_id=user_id, target_name=(kyc_user or {}).get("full_name") or (kyc_user or {}).get("email", ""),
+        details={"reason": reason} if reason else {},
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
+    # Email notification
+    try:
+        from services.admin_notify import notify_admin_action
+        await notify_admin_action(
+            user_email=(kyc_user or {}).get("email", ""), user_name=(kyc_user or {}).get("full_name", ""),
+            action_label=notify_label, detail=notify_detail,
+            actor_name=admin.get("full_name") or admin.get("email", "l'équipe"),
+        )
+    except Exception as e:
+        logger.warning(f"[admin kyc_action] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/kyc?message={msg}", status_code=303)
 
 
@@ -789,6 +992,11 @@ async def admin_notify_user(request: Request, user_id: str, subject: str = Form(
         "type": "admin_message", "title": subject, "body": body,
         "read": False, "created_at": iso(now_utc()),
     })
+    # Audit log
+    await log_action(**_actor_info(admin), action="notify_user", target_type="user",
+        target_id=user_id, target_name=target.get("full_name") or target.get("email", ""),
+        details={"subject": subject, "channel": channel},
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""))
     msg_parts = []
     if sent["email"]: msg_parts.append("email envoyé")
     if sent["sms"]: msg_parts.append("SMS envoyé")
