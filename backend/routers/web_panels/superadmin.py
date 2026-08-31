@@ -24,8 +24,8 @@ async def superadmin_dashboard(request: Request):
     recent_transfers = await db.transfers.find({}, {"_id": 0}).sort("created_at", -1).to_list(10)
     recent_agents = await db.agents.find({}, {"_id": 0}).sort("created_at", -1).to_list(8)
     ctx = _panel_base_ctx(request, "superadmin", user, section="dashboard",
-                          kpis=kpis, recent_transfers=recent_transfers, recent_agents=recent_agents)
-    ctx["sidebar_role_path"] = "superadmin"
+                          kpis=kpis, recent_transfers=recent_transfers, recent_agents=recent_agents,
+                          sidebar_role_path="superadmin")
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 

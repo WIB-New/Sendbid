@@ -114,6 +114,9 @@ async def _resolve_session(role: str, request: Request) -> Optional[dict]:
 
 def _panel_base_ctx(request: Request, role: str, user: Optional[dict] = None, **extra) -> dict:
     color, color_dark = ROLE_COLORS.get(role, ("#3D52D5", "#1E2A78"))
+    prefix = _url_prefix(request)
+    role_path = extra.get("sidebar_role_path") or role
+    base_url = (prefix + "/" + role_path).replace("//", "/")
     ctx = {
         "request": request,
         "role": role,
@@ -123,7 +126,8 @@ def _panel_base_ctx(request: Request, role: str, user: Optional[dict] = None, **
         "role_color_dark": color_dark,
         "user": user,
         "current_year": _current_year(),
-        "url_prefix": _url_prefix(request),
+        "url_prefix": prefix,
+        "base_url": base_url,
         "is_prod": IS_PROD,
     }
     ctx.update(extra)
