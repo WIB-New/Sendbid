@@ -1259,7 +1259,7 @@
         </form>
       </div>
       <table>
-        <thead><tr><th>Date</th><th>Client</th><th>Montant</th><th>Frais</th><th>Total</th><th>IBAN</th><th>Titulaire</th><th>Statut</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Date</th><th>Client</th><th>Montant</th><th>Frais</th><th>Total</th><th>IBAN</th><th>Titulaire</th><th>Statut</th><th>Mode</th><th>Actions</th></tr></thead>
         <tbody>
           {% for p in payouts %}
             <tr>
@@ -1276,6 +1276,7 @@
                 {% elif p.status == 'REJECTED' %}<span class="pill pill-err">Rejeté</span>
                 {% else %}<span class="pill pill-neutral">{{ p.status }}</span>{% endif %}
               </td>
+              <td style="font-size:12px; color:var(--text-muted)">{{ p.provider or 'manuel' }}</td>
               <td style="display:flex;gap:4px;flex-wrap:wrap">
                 {% if p.status == 'PENDING' %}
                 <form method="post" action="{{ url_prefix }}/admin/payouts/{{ p.id }}/action" style="display:inline" onsubmit="return confirm('Confirmer le paiement ?')">
@@ -1292,7 +1293,7 @@
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="9"><div class="empty">Aucune demande de retrait trouvée.</div></td></tr>
+            <tr><td colspan="10"><div class="empty">Aucune demande de retrait trouvée.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>

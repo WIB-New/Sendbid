@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from core.db import db, now_utc, iso, clean_doc
 from core.security import verify_password, create_access_token, hash_password, gen_id
 from core.audit import log_action, get_recent_logs
+from services.payouts import execute_bank_payout, PayoutError
 
 from . import router, templates
 import datetime as _dt
@@ -1483,19 +1484,31 @@ async def admin_payout_action(request: Request, payout_id: str, action: str = Fo
     user_id = payout.get("user_id")
 
     if action == "approve":
+        try:
+            payout_result = await execute_bank_payout(payout)
+        except PayoutError as exc:
+            return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message={exc}", status_code=303)
         await db.payout_requests.update_one(
             {"id": payout_id},
-            {"$set": {"status": "PAID", "paid_at": iso(now_utc()), "paid_by": admin.get("id"), "updated_at": iso(now_utc())}},
+            {"$set": {
+                "status": "PAID",
+                "paid_at": iso(now_utc()),
+                "paid_by": admin.get("id"),
+                "provider": payout_result.get("provider"),
+                "provider_ref": payout_result.get("provider_ref"),
+                "provider_note": payout_result.get("note"),
+                "updated_at": iso(now_utc()),
+            }},
         )
         if tx_id:
             await db.wallet_tx.update_one({"id": tx_id}, {"$set": {"status": "COMPLETED", "updated_at": iso(now_utc())}})
         await create_notification(
             user_id,
             "Virement validé",
-            f"Votre virement de {payout.get('amount', 0):.2f} EUR a été traité. Le crédit arrivera sous D+1/D+3.",
+            f"Votre virement de {payout.get('amount', 0):.2f} EUR a été traité ({payout_result.get('provider', 'manuel')}).",
             "wallet",
         )
-        msg = "Paiement approuvé"
+        msg = f"Paiement approuvé ({payout_result.get('provider', 'manuel')})"
     elif action == "reject":
         await db.payout_requests.update_one(
             {"id": payout_id},
