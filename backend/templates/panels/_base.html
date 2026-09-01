@@ -147,14 +147,14 @@
   <!-- DASHBOARD -->
   <div class="layout">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo"><div class="sidebar-logo-mark">💸</div>SendBID</div>
+      <div class="sidebar-logo"><div class="sidebar-logo-mark" style="font-size:14px; font-weight:800; color:white;">SB</div>SendBID</div>
       <div class="sidebar-role">{{ role_display }}</div>
       <nav class="sidebar-nav">
         {% block sidebar_nav %}{% endblock %}
       </nav>
       <div class="sidebar-bottom">
         <div class="sidebar-user"><b>{{ user.full_name or user.email }}</b>{{ user.role or 'user' }}</div>
-        {% if role == 'admin' %}
+        {% if user.role in ('admin', 'super_admin') %}
         <a href="{{ url_prefix }}/admin/users/{{ user.id }}" style="display:block; margin:8px 0; padding:8px 0; font-size:12px; opacity:0.9; color:white; text-decoration:none;">Mon compte / modifier mon PIN</a>
         {% endif %}
         <form method="POST" action="{{ url_prefix }}/{{ role }}/logout" style="display:inline"><button type="submit" class="logout-btn">↪ Se déconnecter</button></form>

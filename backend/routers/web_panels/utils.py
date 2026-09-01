@@ -173,12 +173,14 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
     suspended_agents = await db.agents.count_documents({**scope_agents, "status": "suspended"})
 
     # ── Transfers ──
+    total_transfers = await db.transfers.count_documents(scope_transfers)
     completed = await db.transfers.count_documents({**scope_transfers, "status": "COMPLETED"})
     in_progress = await db.transfers.count_documents(
         {**scope_transfers, "status": {"$in": ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"]}}
     )
     failed = await db.transfers.count_documents({**scope_transfers, "status": {"$in": ["FAILED", "CANCELLED", "REFUNDED"]}})
     transfers_7d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_7d}})
+    transfers_1d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_1d}})
 
     # Volume EUR (converti depuis send_currency pour cohérence)
     _FX_TO_EUR = {"XOF": 655.957, "XAF": 655.957, "MAD": 10.85, "USD": 1.08,
