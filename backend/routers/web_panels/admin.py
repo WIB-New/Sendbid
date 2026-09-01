@@ -182,6 +182,7 @@ async def admin_wallet_adjust(
     user_id: str,
     action: str = Form(...),
     amount: str = Form(...),
+    sender: str = Form(""),
     reason: str = Form(""),
     admin_password: str = Form(""),
 ):
@@ -236,12 +237,12 @@ async def admin_wallet_adjust(
         inc = -value
         signed = -value
         tx_type = "admin_debit"
-        label = f"Débit admin — {reason or 'Ajustement'}"
+        label = f"Débit admin — {reason or 'Ajustement'}" + (f" (ref: {sender})" if sender else "")
     elif action == "credit":
         inc = value
         signed = value
         tx_type = "admin_credit"
-        label = f"Crédit admin — {reason or 'Ajustement'}"
+        label = f"Crédit admin — {reason or 'Ajustement'}" + (f" (ref: {sender})" if sender else "")
     else:
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action inconnue",
@@ -261,18 +262,40 @@ async def admin_wallet_adjust(
         actor_id=admin["id"], actor_role=admin.get("role", "admin"), actor_name=admin.get("full_name") or admin.get("email"),
         action=f"wallet_{action}", target_type="user", target_id=user_id,
         target_name=target.get("full_name") or target.get("email"),
-        details={"amount": value, "reason": reason},
+        details={"amount": value, "reason": reason, "sender": sender or "Admin"},
         ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""),
     )
-    # Notification client
+    # Notification client (in-app + email)
+    user_name = target.get("full_name") or "client"
+    sign = "+" if action == "credit" else "-"
+    notice_body = (
+        f"Bonjour {user_name},\n\n"
+        f"Opération : { 'Crédit' if action == 'credit' else 'Débit' } de {sign}{value:.2f} EUR.\n"
+        f"Motif : {reason or 'Ajustement'}\n"
+    )
+    if sender:
+        notice_body += f"Référence / expéditeur : {sender}\n"
+    notice_body += f"\nMerci pour votre confiance,\nL'équipe SendBID"
     try:
         from routers.notifications import create_notification
         await create_notification(
             user_id,
-            f"Ajustement de wallet",
-            f"Votre wallet a été { 'crédité' if action == 'credit' else 'débité' } de {value:.2f} EUR. Motif : {reason or 'Ajustement'}",
+            f"{'Crédit' if action == 'credit' else 'Débit'} wallet",
+            f"{sign}{value:.2f} EUR — {reason or 'Ajustement'}" + (f" (ref: {sender})" if sender else ""),
             "wallet",
         )
+    except Exception:
+        pass
+    try:
+        from services.notify import send_email
+        subject = f"Opération sur votre wallet SendBID"
+        html = f"<p>Bonjour {user_name},</p><p>Votre wallet a été {'crédité' if action == 'credit' else 'débité'} de <b>{sign}{value:.2f} EUR</b>.</p>"
+        if reason:
+            html += f"<p><b>Motif :</b> {reason}</p>"
+        if sender:
+            html += f"<p><b>Référence / expéditeur :</b> {sender}</p>"
+        html += "<p>Merci pour votre confiance,<br>L'équipe SendBID</p>"
+        await send_email(target.get("email", ""), subject, html, plain=notice_body)
     except Exception:
         pass
     return RedirectResponse(
