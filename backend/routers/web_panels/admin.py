@@ -42,6 +42,37 @@ def _require_super_admin(admin: dict) -> bool:
     return (admin.get("role") == "super_admin")
 
 
+# Carte des permissions par rôle. Clé = action métier, valeur = rôles autorisés.
+ROLE_PERMISSIONS = {
+    "manage_personnel": {"super_admin"},
+    "manage_rates": {"super_admin"},
+    "wallet_adjust": {"super_admin", "admin"},
+    "toggle_user_status": {"super_admin", "admin"},
+    "set_user_password": {"super_admin", "admin"},
+    "set_user_pin": {"super_admin", "admin"},
+    "delete_user": {"super_admin", "admin"},  # avec restriction supplémentaire sur staff
+    "approve_kyc": {"super_admin", "admin"},
+    "approve_linked_account": {"super_admin", "admin"},
+    "manage_agents": {"super_admin", "admin"},
+    "manage_transfers": {"super_admin", "admin"},
+    "send_notification": {"super_admin", "admin"},
+    "manage_partners": {"super_admin", "admin"},
+    "manage_services": {"super_admin", "admin"},
+    "view_audit": {"super_admin", "admin"},
+    "reply_support": {"super_admin", "admin"},
+}
+
+
+def _can(admin: dict, action: str) -> bool:
+    """Vérifie que l'admin est autorisé à effectuer une action donnée."""
+    return admin.get("role") in ROLE_PERMISSIONS.get(action, set())
+
+
+def _admin_perms(admin: dict) -> dict:
+    """Dictionnaire de flags de permission pour le template."""
+    return {action: _can(admin, action) for action in ROLE_PERMISSIONS}
+
+
 @router.get("/web/admin", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
     user = await _resolve_session("admin", request)
@@ -140,6 +171,7 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
         target=target, message=message,
         user_transfers=user_transfers, wallet=wallet, wallet_tx=wallet_tx,
         tickets=tickets, linked_accounts=linked_accounts, beneficiaries=beneficiaries,
+        perms=_admin_perms(admin),
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
@@ -157,8 +189,7 @@ async def admin_wallet_adjust(
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
-    # Seul super_admin ou admin peut faire un ajustement de wallet
-    if admin.get("role") not in {"admin", "super_admin"}:
+    if not _can(admin, "wallet_adjust"):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Accès refusé pour cette opération",
             status_code=303,
@@ -290,6 +321,7 @@ async def admin_personnel(
         request, "admin", admin, section="personnel", section_title="Personnel",
         staff=staff, total=total, page=page, pages=pages, limit=limit,
         search=search, role_filter=role_filter, message=message,
+        perms=_admin_perms(admin),
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
@@ -306,7 +338,7 @@ async def admin_create_personnel(
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
-    if not _require_super_admin(admin):
+    if not _can(admin, "manage_personnel"):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/personnel?message=Seul le super-admin peut créer du personnel",
             status_code=303,
@@ -351,6 +383,8 @@ async def admin_user_set_password(request: Request, user_id: str, password: str 
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "set_user_password"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1, "email": 1, "full_name": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
@@ -385,6 +419,8 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "set_user_pin"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1, "email": 1, "full_name": 1})
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
@@ -419,6 +455,8 @@ async def admin_user_toggle_status(request: Request, user_id: str):
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "toggle_user_status"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
     if user_id == admin.get("id"):
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de modifier votre propre compte", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "suspended": 1, "role": 1})
@@ -464,6 +502,8 @@ async def admin_user_delete(request: Request, user_id: str):
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "delete_user"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
     if user_id == admin.get("id"):
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de supprimer votre propre compte", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
@@ -659,6 +699,8 @@ async def admin_verify_linked_account(request: Request, account_id: str, action:
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
+    if not _can(user, "approve_linked_account"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/linked-accounts?message=Action non autorisée", status_code=303)
     new_status = "active" if action == "approve" else "rejected"
     await db.linked_accounts.update_one(
         {"id": account_id},
@@ -786,7 +828,7 @@ async def admin_update_rate(request: Request, country_code: str, fx_rate_eur: st
     user = await _resolve_session("admin", request)
     if not user:
         return _login_page(request, "admin")
-    if not _require_super_admin(user):
+    if not _can(user, "manage_rates"):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/rates?message=Seul le super-admin peut modifier les taux de change",
             status_code=303,
@@ -816,6 +858,8 @@ async def admin_moderate_agent(request: Request, agent_id: str, action: str = Fo
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "manage_agents"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/agents?message=Action non autorisée", status_code=303)
     status_map = {
         "approve": "approved", "reject": "rejected",
         "suspend": "suspended", "reactivate": "approved",
@@ -920,6 +964,8 @@ async def admin_transfer_action(request: Request, transfer_id: str, action: str 
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "manage_transfers"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers/{transfer_id}?message=Action non autorisée", status_code=303)
     transfer = await db.transfers.find_one({"id": transfer_id}, {"_id": 0, "status": 1, "user_id": 1})
     if not transfer:
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/transfers", status_code=303)
@@ -985,6 +1031,8 @@ async def admin_kyc_action(request: Request, user_id: str, action: str = Form(..
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "approve_kyc"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/kyc?message=Action non autorisée", status_code=303)
     if action == "approve":
         await db.users.update_one(
             {"id": user_id},
@@ -1059,6 +1107,8 @@ async def admin_support_reply(request: Request, ticket_id: str, text: str = Form
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "reply_support"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/support/{ticket_id}?message=Action non autorisée", status_code=303)
     ticket = await db.support_tickets.find_one({"id": ticket_id})
     if not ticket:
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/support", status_code=303)
@@ -1076,6 +1126,8 @@ async def admin_support_close(request: Request, ticket_id: str):
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "reply_support"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/support?message=Action non autorisée", status_code=303)
     await db.support_tickets.update_one({"id": ticket_id}, {"$set": {"status": "closed", "closed_at": iso(now_utc())}})
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/support?message=Ticket fermé", status_code=303)
 
@@ -1090,6 +1142,8 @@ async def admin_notify_user(request: Request, user_id: str, subject: str = Form(
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
+    if not _can(admin, "send_notification"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "phone": 1, "full_name": 1})
     if not target:
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Utilisateur introuvable", status_code=303)
