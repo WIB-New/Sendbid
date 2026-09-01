@@ -212,20 +212,6 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
         rate = _FX_TO_EUR.get(cur, 1.0)
         total_float += raw / rate if rate else raw
 
-    # ── PayBID metrics (agent earnings + company commission) ──
-    paybid_completed = await db.transfers.count_documents({**scope_transfers, "status": "COMPLETED", "agent_id": {"$ne": None}})
-    total_agent_earnings = 0.0
-    async for x in db.wallet_tx.aggregate([
-        {"$match": {"type": "agent_earnings"}},
-        {"$group": {"_id": None, "v": {"$sum": "$amount"}}},
-    ]):
-        total_agent_earnings = float(x.get("v") or 0)
-    total_company_commission = 0.0
-    async for t in db.transfers.find({**scope_transfers, "status": "COMPLETED", "agent_id": {"$ne": None}}, {"_id": 0, "send_amount": 1, "selected_bid": 1}):
-        fee_pct = (t.get("selected_bid") or {}).get("bid_fee_percent", 0) or 0
-        full_fee = (fee_pct / 100.0) * (t.get("send_amount") or 0)
-        total_company_commission += full_fee * 0.20
-
     # ── KYC pending ──
     kyc_pending = await db.users.count_documents({"kyc_status": "pending", **scope_users})
 
@@ -299,11 +285,6 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
             "total": total_transfers, "completed": completed, "in_progress": in_progress,
             "failed": failed, "volume_eur": round(vol, 2), "volume_7d": round(vol_7d, 2),
             "count_7d": transfers_7d, "count_1d": transfers_1d,
-        },
-        "paybid": {
-            "completed": paybid_completed,
-            "agent_earnings": round(total_agent_earnings, 2),
-            "company_commission": round(total_company_commission, 2),
         },
         "float": {"total_declared": round(total_float, 2)},
         "kyc_pending": kyc_pending,
