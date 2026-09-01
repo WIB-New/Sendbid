@@ -184,7 +184,7 @@ async def admin_wallet_adjust(
     amount: str = Form(...),
     sender: str = Form(""),
     reason: str = Form(""),
-    admin_password: str = Form(""),
+    target_pin: str = Form(""),
 ):
     """Crédite ou débite le wallet d'un client depuis le dashboard admin."""
     admin = await _resolve_session("admin", request)
@@ -195,10 +195,14 @@ async def admin_wallet_adjust(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Accès refusé pour cette opération",
             status_code=303,
         )
-    # Vérification du mot de passe admin pour opération sensible
-    if not admin_password or not verify_password(admin_password, admin.get("password_hash", "")):
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1, "email": 1, "pin_hash": 1})
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
+
+    # Vérification du PIN du client pour opération sensible
+    if not target_pin or not verify_password(target_pin, target.get("pin_hash", "")):
         return RedirectResponse(
-            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Mot de passe admin invalide",
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=PIN client incorrect",
             status_code=303,
         )
     try:
@@ -213,10 +217,6 @@ async def admin_wallet_adjust(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Le montant doit être positif",
             status_code=303,
         )
-
-    target = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1, "email": 1})
-    if not target:
-        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
 
     wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0})
     if not wallet:

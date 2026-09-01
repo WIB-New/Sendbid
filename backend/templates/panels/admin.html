@@ -333,8 +333,8 @@
           </label>
         </div>
         <label style="display:flex; flex-direction:column; gap:4px; max-width:340px;">
-          <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Confirmer avec votre mot de passe admin</span>
-          <input type="password" name="admin_password" placeholder="Votre mot de passe" required autocomplete="off">
+          <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Code PIN du client (6 chiffres)</span>
+          <input type="password" name="target_pin" placeholder="Saisir le PIN du client" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="off">
         </label>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <button type="submit" class="btn btn-sm btn-success">Valider l'opération</button>
