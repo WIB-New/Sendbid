@@ -13,6 +13,7 @@
   <a href="{{ base_url }}/auctions" class="{% if section == 'auctions' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>Enchères live</a>
   <a href="{{ base_url }}/kyc" class="{% if section == 'kyc' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>KYC</a>
   <a href="{{ base_url }}/wallets" class="{% if section == 'wallets' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span>Wallets</a>
+  <a href="{{ base_url }}/payouts" class="{% if section == 'payouts' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><path d="M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg></span>Demandes de retrait</a>
   <a href="{{ base_url }}/linked-accounts" class="{% if section == 'linked-accounts' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>Comptes liés</a>
   <a href="{{ base_url }}/support" class="{% if section == 'support' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>Support</a>
   <a href="{{ base_url }}/partners" class="{% if section == 'partners' %}active{% endif %}"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Partenaires</a>
@@ -1250,6 +1251,63 @@
             </tr>
           {% else %}
             <tr><td colspan="3"><div class="empty">Aucun service à vérifier.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% elif section == 'payouts' %}
+    {% if message %}<div class="error-box message-success" style="margin-bottom:16px">{{ message }}</div>{% endif %}
+    <div class="card">
+      <div class="card-header" style="align-items:flex-start;flex-direction:column;gap:8px">
+        <h2>Demandes de retrait bancaire ({{ payouts|length }})</h2>
+        <form method="get" action="{{ url_prefix }}/admin/payouts" class="filters" style="width:100%">
+          <select name="status">
+            <option value="">Tous les statuts</option>
+            <option value="PENDING" {% if status == 'PENDING' %}selected{% endif %}>En attente</option>
+            <option value="PAID" {% if status == 'PAID' %}selected{% endif %}>Payé</option>
+            <option value="REJECTED" {% if status == 'REJECTED' %}selected{% endif %}>Rejeté</option>
+          </select>
+          <input type="text" name="search" value="{{ search }}" placeholder="Titulaire, IBAN, ID">
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Filtrer</button>
+          <a href="{{ url_prefix }}/admin/payouts" class="btn btn-sm btn-ghost">Réinitialiser</a>
+        </form>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Client</th><th>Montant</th><th>Frais</th><th>Total</th><th>IBAN</th><th>Titulaire</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for p in payouts %}
+            <tr>
+              <td style="color:var(--text-muted); font-size:13px">{{ (p.created_at or '')[:16].replace('T', ' ') }}</td>
+              <td>{{ p.user_name or p.user_email or '—' }}</td>
+              <td><b>{{ '{:,.2f}'.format(p.amount or 0).replace(',', ' ') }} €</b></td>
+              <td>{{ '{:,.2f}'.format(p.fee or 0).replace(',', ' ') }} €</td>
+              <td>{{ '{:,.2f}'.format((p.amount or 0) + (p.fee or 0)).replace(',', ' ') }} €</td>
+              <td style="font-family:monospace; font-size:12px">{{ p.iban or '—' }}</td>
+              <td>{{ p.holder or '—' }}</td>
+              <td>
+                {% if p.status == 'PENDING' %}<span class="pill pill-warn">En attente</span>
+                {% elif p.status == 'PAID' %}<span class="pill pill-ok">Payé</span>
+                {% elif p.status == 'REJECTED' %}<span class="pill pill-err">Rejeté</span>
+                {% else %}<span class="pill pill-neutral">{{ p.status }}</span>{% endif %}
+              </td>
+              <td style="display:flex;gap:4px;flex-wrap:wrap">
+                {% if p.status == 'PENDING' %}
+                <form method="post" action="{{ url_prefix }}/admin/payouts/{{ p.id }}/action" style="display:inline" onsubmit="return confirm('Confirmer le paiement ?')">
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn btn-sm" style="background:#047857;color:white;padding:4px 10px;font-size:11px">Valider</button>
+                </form>
+                <form method="post" action="{{ url_prefix }}/admin/payouts/{{ p.id }}/action" style="display:inline" onsubmit="return confirm('Rejeter et rembourser le client ?')">
+                  <input type="hidden" name="action" value="reject">
+                  <button type="submit" class="btn btn-sm btn-ghost" style="color:#B91C1C;border-color:#B91C1C;padding:4px 10px;font-size:11px">Rejeter</button>
+                </form>
+                {% else %}
+                <span style="font-size:12px;color:var(--text-muted)">Traité</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="9"><div class="empty">Aucune demande de retrait trouvée.</div></td></tr>
           {% endfor %}
         </tbody>
       </table>

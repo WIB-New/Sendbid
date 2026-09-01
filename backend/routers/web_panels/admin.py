@@ -1431,3 +1431,111 @@ async def admin_user_statement(request: Request, user_id: str):
     safe_name = (target.get("full_name") or target.get("email", user_id)).replace(" ", "_").replace("/", "_")
     headers = {"Content-Disposition": f"attachment; filename=releve_{safe_name}.csv"}
     return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers=headers)
+
+
+@router.get("/web/admin/payouts", response_class=HTMLResponse)
+async def admin_payouts(request: Request, status: Optional[str] = "", search: str = ""):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _can(admin, "view_audit"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin?message=Action non autorisée", status_code=303)
+    q: dict = {}
+    if status:
+        q["status"] = status.upper()
+    if search:
+        q["$or"] = [
+            {"holder": {"$regex": search, "$options": "i"}},
+            {"iban": {"$regex": search, "$options": "i"}},
+            {"payout_id": search},
+        ]
+    payouts = await db.payout_requests.find(q, {"_id": 0}).sort("created_at", -1).to_list(100)
+    # Enrich with user names
+    user_ids = list({p["user_id"] for p in payouts})
+    users = {u["id"]: u async for u in db.users.find({"id": {"$in": user_ids}}, {"_id": 0, "id": 1, "full_name": 1, "email": 1})}
+    enriched = []
+    for p in payouts:
+        u = users.get(p["user_id"], {})
+        p_enriched = {**p, "user_name": u.get("full_name"), "user_email": u.get("email")}
+        enriched.append(p_enriched)
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="payouts", section_title="Demandes de retrait",
+        payouts=enriched, status=status, search=search, perms=_admin_perms(admin),
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
+@router.post("/web/admin/payouts/{payout_id}/action", response_class=HTMLResponse)
+async def admin_payout_action(request: Request, payout_id: str, action: str = Form(...)):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _can(admin, "wallet_adjust"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message=Action non autorisée", status_code=303)
+    payout = await db.payout_requests.find_one({"id": payout_id}, {"_id": 0})
+    if not payout:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message=Demande introuvable", status_code=303)
+    if payout.get("status") != "PENDING":
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message=Cette demande a déjà été traitée", status_code=303)
+
+    tx_id = payout.get("wallet_tx_id")
+    total = (payout.get("amount") or 0) + (payout.get("fee") or 0)
+    user_id = payout.get("user_id")
+
+    if action == "approve":
+        await db.payout_requests.update_one(
+            {"id": payout_id},
+            {"$set": {"status": "PAID", "paid_at": iso(now_utc()), "paid_by": admin.get("id"), "updated_at": iso(now_utc())}},
+        )
+        if tx_id:
+            await db.wallet_tx.update_one({"id": tx_id}, {"$set": {"status": "COMPLETED", "updated_at": iso(now_utc())}})
+        await create_notification(
+            user_id,
+            "Virement validé",
+            f"Votre virement de {payout.get('amount', 0):.2f} EUR a été traité. Le crédit arrivera sous D+1/D+3.",
+            "wallet",
+        )
+        msg = "Paiement approuvé"
+    elif action == "reject":
+        await db.payout_requests.update_one(
+            {"id": payout_id},
+            {"$set": {"status": "REJECTED", "rejected_at": iso(now_utc()), "rejected_by": admin.get("id"), "updated_at": iso(now_utc())}},
+        )
+        if tx_id:
+            await db.wallet_tx.update_one({"id": tx_id}, {"$set": {"status": "REFUNDED", "updated_at": iso(now_utc())}})
+        # Rembourser le wallet
+        await db.wallets.update_one({"user_id": user_id}, {"$inc": {"balance": total}})
+        refund_tx = {
+            "id": gen_id(),
+            "user_id": user_id,
+            "type": "payout_refund",
+            "amount": total,
+            "amount_signed": total,
+            "currency": "EUR",
+            "note": f"Remboursement rejet retrait {payout_id[:8].upper()}",
+            "status": "completed",
+            "created_at": iso(now_utc()),
+        }
+        await db.wallet_tx.insert_one(refund_tx)
+        await create_notification(
+            user_id,
+            "Virement refusé",
+            f"Votre demande de virement de {payout.get('amount', 0):.2f} EUR a été refusée. Le montant a été recrédité.",
+            "wallet",
+        )
+        msg = "Paiement rejeté et remboursé"
+    else:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message=Action inconnue", status_code=303)
+
+    # Audit log
+    await log_action(
+        **_actor_info(admin),
+        action=f"payout_{action}",
+        target_type="payout",
+        target_id=payout_id,
+        target_name=payout.get("holder", ""),
+        details={"amount": payout.get("amount"), "currency": "EUR", "iban": payout.get("iban")},
+        ip_address=_client_ip(request),
+        user_agent=request.headers.get("user-agent", ""),
+    )
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message={msg}", status_code=303)
