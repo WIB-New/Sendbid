@@ -1447,7 +1447,7 @@ async def admin_payouts(request: Request, status: Optional[str] = "", search: st
         q["$or"] = [
             {"holder": {"$regex": search, "$options": "i"}},
             {"iban": {"$regex": search, "$options": "i"}},
-            {"payout_id": search},
+            {"id": search},
         ]
     payouts = await db.payout_requests.find(q, {"_id": 0}).sort("created_at", -1).to_list(100)
     # Enrich with user names
