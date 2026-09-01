@@ -286,7 +286,7 @@
 
     <div class="card">
       <div class="card-header"><h2>Mot de passe</h2></div>
-      {% if perms.set_user_password %}
+      {% if perms.set_user_password and (target.role not in ('admin','super_admin') or user.role == 'super_admin' or target.id == user.id) %}
       <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/set-password" class="filters">
         <input type="password" name="password" placeholder="Nouveau mot de passe (min 6 caractères)" required minlength="6" style="min-width:300px">
         <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Mettre à jour</button>
@@ -298,7 +298,7 @@
 
     <div class="card">
       <div class="card-header"><h2>Code PIN</h2></div>
-      {% if perms.set_user_pin %}
+      {% if perms.set_user_pin and (target.role not in ('admin','super_admin') or user.role == 'super_admin' or target.id == user.id) %}
       <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/set-pin" class="filters">
         <input type="text" name="pin" placeholder="Nouveau PIN (6 chiffres)" required pattern="\d{6}" maxlength="6" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="min-width:200px">
         <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Mettre à jour</button>

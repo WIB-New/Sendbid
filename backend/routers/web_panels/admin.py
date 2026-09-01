@@ -531,6 +531,14 @@ async def admin_user_toggle_status(request: Request, user_id: str):
             status_code=303,
         )
     new_status = not target.get("suspended", False)
+    # Empêcher de suspendre le dernier super-admin
+    if new_status and target.get("role") == "super_admin":
+        remaining = await db.users.count_documents({"role": "super_admin", "suspended": {"$ne": True}})
+        if remaining <= 1:
+            return RedirectResponse(
+                url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de suspendre le dernier super-admin actif",
+                status_code=303,
+            )
     label = "suspendu" if new_status else "réactivé"
     action_verb = "suspend" if new_status else "reactivate"
     await db.users.update_one(
