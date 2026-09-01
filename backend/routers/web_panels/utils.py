@@ -218,6 +218,9 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
     # ── Support tickets open ──
     open_tickets = await db.support_tickets.count_documents({"status": {"$in": ["open", "pending"]}})
 
+    # ── Pending bank payouts ──
+    pending_payouts = await db.payout_requests.count_documents({"status": "PENDING"})
+
     # ── Smart alerts ──
     alerts: list[dict] = []
     if pending_agents > 0:
@@ -226,6 +229,8 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
         alerts.append({"level": "info", "icon": "shield-check", "message": f"{kyc_pending} KYC en attente de revue", "link": "kyc"})
     if open_tickets > 0:
         alerts.append({"level": "warning", "icon": "message-square", "message": f"{open_tickets} ticket(s) de support ouvert(s)", "link": "support"})
+    if pending_payouts > 0:
+        alerts.append({"level": "error", "icon": "credit-card", "message": f"{pending_payouts} demande(s) de retrait bancaire en attente", "link": "payouts"})
     if failed > 0:
         alerts.append({"level": "error", "icon": "alert-triangle", "message": f"{failed} transfert(s) échoué(s) / annulé(s)", "link": "transfers"})
     if suspended_users > 0:

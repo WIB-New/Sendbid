@@ -894,7 +894,7 @@ async def admin_reconciliation(request: Request):
     # Derniers mouvements bruts
     recent = await db.agent_float_movements.find({}, {"_id": 0}).sort("created_at", -1).to_list(50)
     ctx = _panel_base_ctx(
-        request, "admin", admin, section="reconciliation", section_title="Reconciliation",
+        request, "admin", admin, section="reconciliation", section_title="Caisse agents",
         movements=movements, floats=floats, recent=recent, perms=_admin_perms(admin),
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
