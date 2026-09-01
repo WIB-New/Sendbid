@@ -59,15 +59,17 @@ async def get_recent_logs(limit: int = 100, skip: int = 0, actor_role: str = "",
         q["actor_role"] = actor_role
     if target_type:
         q["target_type"] = target_type
-    logs = []
-    async for entry in db.audit_logs.find(q, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit):
-        logs.append(entry)
-    return logs
+    try:
+        return await db.audit_logs.find(q, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
+    except Exception as exc:
+        logger.warning("[audit] get_recent_logs failed: %s", exc)
+        return []
 
 
 async def get_logs_for_target(target_id: str, limit: int = 50) -> list[dict]:
     """Fetch all audit log entries for a specific target (e.g. a user account)."""
-    logs = []
-    async for entry in db.audit_logs.find({"target_id": target_id}, {"_id": 0}).sort("created_at", -1).to_list(limit):
-        logs.append(entry)
-    return logs
+    try:
+        return await db.audit_logs.find({"target_id": target_id}, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    except Exception as exc:
+        logger.warning("[audit] get_logs_for_target failed: %s", exc)
+        return []

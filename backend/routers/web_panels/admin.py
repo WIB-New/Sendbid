@@ -144,6 +144,112 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
+@router.post("/web/admin/users/{user_id}/wallet-adjust", response_class=HTMLResponse)
+async def admin_wallet_adjust(
+    request: Request,
+    user_id: str,
+    action: str = Form(...),
+    amount: str = Form(...),
+    reason: str = Form(""),
+    admin_password: str = Form(""),
+):
+    """Crédite ou débite le wallet d'un client depuis le dashboard admin."""
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    # Seul super_admin ou admin peut faire un ajustement de wallet
+    if admin.get("role") not in {"admin", "super_admin"}:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Accès refusé pour cette opération",
+            status_code=303,
+        )
+    # Vérification du mot de passe admin pour opération sensible
+    if not admin_password or not verify_password(admin_password, admin.get("password_hash", "")):
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Mot de passe admin invalide",
+            status_code=303,
+        )
+    try:
+        value = float(amount.replace(",", "."))
+    except ValueError:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Montant invalide",
+            status_code=303,
+        )
+    if value <= 0:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Le montant doit être positif",
+            status_code=303,
+        )
+
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1, "email": 1})
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
+
+    wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0})
+    if not wallet:
+        # Créer un wallet si inexistant
+        await db.wallets.insert_one({
+            "user_id": user_id, "balance": 0.0, "currency": "EUR",
+            "currencies": ["EUR"], "created_at": iso(now_utc()), "updated_at": iso(now_utc()),
+        })
+
+    if action == "debit":
+        # Vérifier solde suffisant
+        current = (await db.wallets.find_one({"user_id": user_id}, {"_id": 0, "balance": 1})).get("balance", 0)
+        if current < value:
+            return RedirectResponse(
+                url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Solde insuffisant pour le débit",
+                status_code=303,
+            )
+        inc = -value
+        signed = -value
+        tx_type = "admin_debit"
+        label = f"Débit admin — {reason or 'Ajustement'}"
+    elif action == "credit":
+        inc = value
+        signed = value
+        tx_type = "admin_credit"
+        label = f"Crédit admin — {reason or 'Ajustement'}"
+    else:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action inconnue",
+            status_code=303,
+        )
+
+    await db.wallets.update_one({"user_id": user_id}, {"$inc": {"balance": inc}, "$set": {"updated_at": iso(now_utc())}})
+    await db.wallet_tx.insert_one({
+        "id": gen_id(), "user_id": user_id, "type": tx_type,
+        "amount": signed, "amount_signed": signed, "currency": "EUR",
+        "counterparty": admin.get("full_name") or admin.get("email", "Admin"),
+        "note": label,
+        "status": "completed",
+        "created_at": iso(now_utc()),
+    })
+    await log_action(
+        actor_id=admin["id"], actor_role=admin.get("role", "admin"), actor_name=admin.get("full_name") or admin.get("email"),
+        action=f"wallet_{action}", target_type="user", target_id=user_id,
+        target_name=target.get("full_name") or target.get("email"),
+        details={"amount": value, "reason": reason},
+        ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""),
+    )
+    # Notification client
+    try:
+        from routers.notifications import create_notification
+        await create_notification(
+            user_id,
+            f"Ajustement de wallet",
+            f"Votre wallet a été { 'crédité' if action == 'credit' else 'débité' } de {value:.2f} EUR. Motif : {reason or 'Ajustement'}",
+            "wallet",
+        )
+    except Exception:
+        pass
+    return RedirectResponse(
+        url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Ajustement effectué : {value:.2f} EUR { 'crédités' if action == 'credit' else 'débités' }",
+        status_code=303,
+    )
+
+
 @router.get("/web/admin/personnel", response_class=HTMLResponse)
 async def admin_personnel(
     request: Request,
@@ -366,6 +472,14 @@ async def admin_user_delete(request: Request, user_id: str):
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut supprimer un compte personnel",
             status_code=303,
         )
+    # Protect the last super_admin from deletion
+    if target and target.get("role") == "super_admin":
+        remaining = await db.users.count_documents({"role": "super_admin"})
+        if remaining <= 1:
+            return RedirectResponse(
+                url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de supprimer le dernier super-admin",
+                status_code=303,
+            )
     # Fetch user info before deletion for audit + email
     full_target = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "full_name": 1, "phone": 1})
     await db.users.delete_one({"id": user_id})

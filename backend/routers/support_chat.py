@@ -29,6 +29,12 @@ class SendMsgIn(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
 
 
+class OperationRequestIn(BaseModel):
+    subject: str = Field(..., min_length=1, max_length=200)
+    details: str = Field(..., min_length=1, max_length=2000)
+    category: str = Field(default="operations")
+
+
 # --- Bot FAQ (simple pattern-match) ----------------------------------------
 FAQ_PATTERNS = [
     (["bonjour", "salut", "hello", "hi", "bjr"],
@@ -135,6 +141,35 @@ async def send_message(payload: SendMsgIn, user: dict = Depends(get_current_user
     user_msg.pop("_id", None)
     bot_msg.pop("_id", None)
     return {"ticket_id": t["id"], "user_message": user_msg, "bot_reply": bot_msg}
+
+
+@router.post("/operations-request")
+async def operations_request(payload: OperationRequestIn, user: dict = Depends(get_current_user)):
+    """Demande d'opération spéciale (PayBID agent / SendBID client → back-office)."""
+    t = await _get_or_create_ticket(user["id"])
+    # Tag as operations request
+    await db.support_tickets.update_one(
+        {"id": t["id"]},
+        {"$set": {"category": payload.category or "operations", "subject": payload.subject, "updated_at": iso(now_utc())}},
+    )
+    # User message with subject and details
+    await db.support_messages.insert_one({
+        "id": gen_id(),
+        "ticket_id": t["id"],
+        "sender": "user",
+        "text": f"[{payload.subject}]\n{payload.details}",
+        "created_at": iso(now_utc()),
+    })
+    # Bot acknowledge
+    await db.support_messages.insert_one({
+        "id": gen_id(),
+        "ticket_id": t["id"],
+        "sender": "bot",
+        "text": "Votre demande a été transmise au back-office. Un opérateur va l'étudier sous peu.",
+        "created_at": iso(now_utc()),
+    })
+    t.pop("_id", None)
+    return {"ticket_id": t["id"], "status": t["status"]}
 
 
 @router.post("/close")
