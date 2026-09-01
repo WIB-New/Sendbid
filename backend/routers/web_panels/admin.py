@@ -250,6 +250,8 @@ async def admin_wallet_adjust(
         )
 
     await db.wallets.update_one({"user_id": user_id}, {"$inc": {"balance": inc}, "$set": {"updated_at": iso(now_utc())}})
+    new_wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0, "balance": 1})
+    new_balance = (new_wallet or {}).get("balance", 0.0)
     await db.wallet_tx.insert_one({
         "id": gen_id(), "user_id": user_id, "type": tx_type,
         "amount": signed, "amount_signed": signed, "currency": "EUR",
@@ -268,34 +270,42 @@ async def admin_wallet_adjust(
     # Notification client (in-app + email)
     user_name = target.get("full_name") or "client"
     sign = "+" if action == "credit" else "-"
-    notice_body = (
+    op_label = "Crédit" if action == "credit" else "Débit"
+    operation_sentence = f"{op_label} de {sign}{value:.2f} EUR effectué sur votre wallet."
+    plain = (
         f"Bonjour {user_name},\n\n"
-        f"Opération : { 'Crédit' if action == 'credit' else 'Débit' } de {sign}{value:.2f} EUR.\n"
-        f"Motif : {reason or 'Ajustement'}\n"
+        f"{operation_sentence}\n"
+        f"Solde actuel : {new_balance:.2f} EUR\n"
     )
+    if reason:
+        plain += f"Motif : {reason}\n"
     if sender:
-        notice_body += f"Référence / expéditeur : {sender}\n"
-    notice_body += f"\nMerci pour votre confiance,\nL'équipe SendBID"
+        plain += f"Référence opération : {sender}\n"
+    plain += f"\nCette opération a été réalisée par notre équipe. Pour toute question, contactez le support.\n\nCordialement,\nL'équipe SendBID"
     try:
         from routers.notifications import create_notification
         await create_notification(
             user_id,
-            f"{'Crédit' if action == 'credit' else 'Débit'} wallet",
-            f"{sign}{value:.2f} EUR — {reason or 'Ajustement'}" + (f" (ref: {sender})" if sender else ""),
+            f"{op_label} wallet",
+            f"{operation_sentence} Solde : {new_balance:.2f} EUR.",
             "wallet",
         )
     except Exception:
         pass
     try:
         from services.notify import send_email
-        subject = f"Opération sur votre wallet SendBID"
-        html = f"<p>Bonjour {user_name},</p><p>Votre wallet a été {'crédité' if action == 'credit' else 'débité'} de <b>{sign}{value:.2f} EUR</b>.</p>"
+        subject = f"Opération de {op_label.lower()} sur votre wallet"
+        html = (
+            f"<p>Bonjour {user_name},</p>"
+            f"<p>{operation_sentence}</p>"
+            f"<p><b>Nouveau solde :</b> {new_balance:.2f} EUR</p>"
+        )
         if reason:
             html += f"<p><b>Motif :</b> {reason}</p>"
         if sender:
-            html += f"<p><b>Référence / expéditeur :</b> {sender}</p>"
-        html += "<p>Merci pour votre confiance,<br>L'équipe SendBID</p>"
-        await send_email(target.get("email", ""), subject, html, plain=notice_body)
+            html += f"<p><b>Référence opération :</b> {sender}</p>"
+        html += "<p>Cette opération a été réalisée par notre équipe. Pour toute question, contactez le support.</p><p>Cordialement,<br>L'équipe SendBID</p>"
+        await send_email(target.get("email", ""), subject, html, plain=plain)
     except Exception:
         pass
     return RedirectResponse(
