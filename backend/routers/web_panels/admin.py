@@ -861,6 +861,45 @@ async def admin_support(request: Request):
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
+@router.get("/web/admin/reconciliation", response_class=HTMLResponse)
+async def admin_reconciliation(request: Request):
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _can(admin, "view_audit"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin?message=Action non autorisée", status_code=303)
+    # Agrégation des mouvements de float par type et devise
+    movements = []
+    async for x in db.agent_float_movements.aggregate([
+        {"$group": {
+            "_id": {"type": "$type", "currency": "$currency"},
+            "total": {"$sum": "$amount_signed"},
+            "count": {"$sum": 1},
+        }},
+        {"$sort": {"_id.type": 1, "_id.currency": 1}},
+    ]):
+        movements.append({
+            "type": x["_id"]["type"],
+            "currency": x["_id"]["currency"],
+            "total": x["total"],
+            "count": x["count"],
+        })
+    # Solde des caisses par devise
+    floats = []
+    async for x in db.agent_floats.aggregate([
+        {"$group": {"_id": "$currency", "balance": {"$sum": "$balance"}}},
+        {"$sort": {"_id": 1}},
+    ]):
+        floats.append({"currency": x.get("_id") or "EUR", "balance": x.get("balance") or 0})
+    # Derniers mouvements bruts
+    recent = await db.agent_float_movements.find({}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    ctx = _panel_base_ctx(
+        request, "admin", admin, section="reconciliation", section_title="Reconciliation",
+        movements=movements, floats=floats, recent=recent, perms=_admin_perms(admin),
+    )
+    return templates.TemplateResponse("panels/admin.html", ctx)
+
+
 @router.get("/web/admin/partners", response_class=HTMLResponse)
 async def admin_partners(request: Request):
     user = await _resolve_session("admin", request)
