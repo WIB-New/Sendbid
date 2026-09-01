@@ -76,11 +76,32 @@
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header"><h2>Opérations PayBID</h2></div>
+      <div class="stats-grid" style="padding:16px;">
+        <div class="stat">
+          <div class="stat-label">Transferts complétés</div>
+          <div class="stat-value">{{ kpis.paybid.completed or 0 }}</div>
+          <div class="stat-sub">avec un agent</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Gains agents</div>
+          <div class="stat-value">{{ '{:,.0f}'.format(kpis.paybid.agent_earnings or 0).replace(',', ' ') }} €</div>
+          <div class="stat-sub">cumulé net (80%)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Commission entreprise</div>
+          <div class="stat-value">{{ '{:,.0f}'.format(kpis.paybid.company_commission or 0).replace(',', ' ') }} €</div>
+          <div class="stat-sub">revenus SendBID (20%)</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Two-column layout: trends + corridors -->
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;" class="dashboard-grid">
       <!-- Daily volume trend -->
       <div class="card">
-        <div class="card-header"><h2>📈 Volume des transferts (7 jours)</h2></div>
+        <div class="card-header"><h2>Volume des transferts (7 jours)</h2></div>
         {% if kpis.daily_volume %}
           <div style="padding:16px 8px;">
             {% set max_vol = (kpis.daily_volume | map(attribute='volume') | max) or 1 %}
