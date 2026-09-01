@@ -73,6 +73,20 @@ def _admin_perms(admin: dict) -> dict:
     return {action: _can(admin, action) for action in ROLE_PERMISSIONS}
 
 
+async def _user_local_currency(user: dict) -> tuple[str, float]:
+    """Devise locale d'un utilisateur et taux EUR->locale via son corridor."""
+    country = (user.get("country") or "").upper()
+    if not country:
+        return "EUR", 1.0
+    corridor = await db.corridors.find_one(
+        {"country_code": country},
+        {"_id": 0, "currency": 1, "fx_rate_eur": 1},
+    )
+    if not corridor:
+        return "EUR", 1.0
+    return corridor.get("currency", "EUR"), float(corridor.get("fx_rate_eur") or 1.0)
+
+
 @router.get("/web/admin", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
     user = await _resolve_session("admin", request)
@@ -158,6 +172,9 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
     user_transfers = await db.transfers.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
     # User wallet
     wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0})
+    # Local currency display
+    local_currency, fx_rate = await _user_local_currency(target)
+    local_balance = (wallet.get("balance") or 0.0) * fx_rate if wallet else 0.0
     # Wallet transactions
     wallet_tx = await db.wallet_tx.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(20)
     # Support tickets
@@ -171,7 +188,7 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
         target=target, message=message,
         user_transfers=user_transfers, wallet=wallet, wallet_tx=wallet_tx,
         tickets=tickets, linked_accounts=linked_accounts, beneficiaries=beneficiaries,
-        perms=_admin_perms(admin),
+        perms=_admin_perms(admin), local_currency=local_currency, local_balance=local_balance,
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 

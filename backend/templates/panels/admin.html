@@ -350,6 +350,7 @@
       <table>
         <tbody>
           <tr><th style="width:160px">Balance EUR</th><td><b>{{ '{:,.2f}'.format(wallet.balance or 0).replace(',', ' ') }} €</b></td></tr>
+          <tr><th>Solde local ({{ local_currency }})</th><td><b>{{ '{:,.2f}'.format(local_balance or 0).replace(',', ' ') }} {{ local_currency }}</b></td></tr>
           <tr><th>Devises</th><td>{{ (wallet.currencies or ['EUR'])|join(', ') }}</td></tr>
           <tr><th>Dernière activité</th><td>{{ (wallet.updated_at or '')[:16].replace('T', ' ') }}</td></tr>
         </tbody>

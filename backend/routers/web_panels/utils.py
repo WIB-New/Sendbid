@@ -173,28 +173,32 @@ async def _admin_kpis(scope_transfers=None, scope_agents=None, scope_users=None)
     suspended_agents = await db.agents.count_documents({**scope_agents, "status": "suspended"})
 
     # ── Transfers ──
-    total_transfers = await db.transfers.count_documents(scope_transfers)
     completed = await db.transfers.count_documents({**scope_transfers, "status": "COMPLETED"})
     in_progress = await db.transfers.count_documents(
         {**scope_transfers, "status": {"$in": ["BIDDING", "AGENT_ASSIGNED", "PROCESSING"]}}
     )
     failed = await db.transfers.count_documents({**scope_transfers, "status": {"$in": ["FAILED", "CANCELLED", "REFUNDED"]}})
     transfers_7d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_7d}})
-    transfers_1d = await db.transfers.count_documents({**scope_transfers, "created_at": {"$gte": cutoff_1d}})
 
-    # Volume EUR
+    # Volume EUR (converti depuis send_currency pour cohérence)
+    _FX_TO_EUR = {"XOF": 655.957, "XAF": 655.957, "MAD": 10.85, "USD": 1.08,
+                   "GBP": 0.86, "CAD": 1.47, "CHF": 0.94, "NGN": 1750.0, "GHS": 17.5}
     vol = 0.0
     async for x in db.transfers.aggregate([
         {"$match": {**scope_transfers, "status": "COMPLETED"}},
-        {"$group": {"_id": None, "v": {"$sum": "$send_amount"}}},
+        {"$group": {"_id": "$send_currency", "v": {"$sum": "$send_amount"}}},
     ]):
-        vol = float(x.get("v") or 0)
+        cur = (x.get("_id") or "EUR").upper()
+        rate = _FX_TO_EUR.get(cur, 1.0)
+        vol += (float(x.get("v") or 0) / rate) if rate else 0.0
     vol_7d = 0.0
     async for x in db.transfers.aggregate([
         {"$match": {**scope_transfers, "status": "COMPLETED", "created_at": {"$gte": cutoff_7d}}},
-        {"$group": {"_id": None, "v": {"$sum": "$send_amount"}}},
+        {"$group": {"_id": "$send_currency", "v": {"$sum": "$send_amount"}}},
     ]):
-        vol_7d = float(x.get("v") or 0)
+        cur = (x.get("_id") or "EUR").upper()
+        rate = _FX_TO_EUR.get(cur, 1.0)
+        vol_7d += (float(x.get("v") or 0) / rate) if rate else 0.0
 
     # ── Float (converti en EUR pour cohérence) ──
     _FX_TO_EUR = {"XOF": 655.957, "XAF": 655.957, "MAD": 10.85, "USD": 1.08,
