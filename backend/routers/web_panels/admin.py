@@ -386,6 +386,7 @@ async def admin_create_personnel(
     email: str = Form(...),
     phone: str = Form(...),
     password: str = Form(...),
+    pin: str = Form(...),
     role: str = Form("admin"),
 ):
     admin = await _resolve_session("admin", request)
@@ -403,6 +404,11 @@ async def admin_create_personnel(
             url=f"{_url_prefix(request)}/admin/personnel?message=Le mot de passe doit faire au moins 6 caractères",
             status_code=303,
         )
+    if len(pin) != 6 or not pin.isdigit():
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/personnel?message=Le PIN doit être 6 chiffres",
+            status_code=303,
+        )
     if await db.users.find_one({"email": email}):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/personnel?message=Cet email est déjà utilisé",
@@ -415,6 +421,7 @@ async def admin_create_personnel(
         "phone": phone,
         "role": role,
         "password_hash": hash_password(password),
+        "pin_hash": hash_password(pin),
         "kyc_status": "verified",
         "kyc_tier": 2,
         "created_at": iso(now_utc()),
@@ -475,7 +482,10 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
     if not _can(admin, "set_user_pin"):
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1, "email": 1, "full_name": 1})
-    if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
+    # Un admin peut modifier son propre PIN. Sinon, seul le super-admin peut toucher à un compte personnel.
+    if user_id != admin["id"] and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut modifier le PIN d'un compte personnel",
             status_code=303,

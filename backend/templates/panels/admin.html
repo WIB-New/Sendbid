@@ -297,10 +297,10 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h2>🔢 Code PIN</h2></div>
+      <div class="card-header"><h2>Code PIN</h2></div>
       {% if perms.set_user_pin %}
       <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/set-pin" class="filters">
-        <input type="text" name="pin" placeholder="Nouveau PIN (6 chiffres)" required pattern="\d{6}" maxlength="6" style="min-width:200px">
+        <input type="text" name="pin" placeholder="Nouveau PIN (6 chiffres)" required pattern="\d{6}" maxlength="6" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="min-width:200px">
         <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Mettre à jour</button>
       </form>
       {% else %}
@@ -548,6 +548,7 @@
         <input type="email" name="email" placeholder="Email" required>
         <input type="text" name="phone" placeholder="Téléphone" required>
         <input type="password" name="password" placeholder="Mot de passe (min 6 caractères)" required minlength="6">
+        <input type="text" name="pin" placeholder="Code PIN initial (6 chiffres)" required pattern="\d{6}" maxlength="6" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="min-width:200px">
         <select name="role" required>
           <option value="admin">Admin</option>
           <option value="super_admin">Super-Admin</option>
