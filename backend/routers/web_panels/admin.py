@@ -314,7 +314,7 @@ async def admin_wallet_adjust(
     except Exception:
         pass
     try:
-        from services.notify import send_email
+        from services.notify import send_email, send_sms
         subject = f"Opération de {op_label.lower()} sur votre wallet"
         html = (
             f"<p>Bonjour {user_name},</p>"
@@ -416,16 +416,11 @@ async def admin_create_personnel(
             status_code=303,
         )
     await db.users.insert_one({
-        "id": gen_id(),
-        "full_name": full_name,
-        "email": email,
-        "phone": phone,
-        "role": role,
-        "password_hash": hash_password(password),
-        "pin_hash": hash_password(pin),
-        "kyc_status": "verified",
-        "kyc_tier": 2,
-        "created_at": iso(now_utc()),
+        "id": gen_id(), "full_name": full_name,
+        "email": email, "phone": phone,
+        "role": role, "password_hash": hash_password(password),
+        "pin_hash": hash_password(pin), "kyc_status": "verified",
+        "kyc_tier": 2, "created_at": iso(now_utc()),
         "updated_at": iso(now_utc()),
     })
     # Audit log
@@ -579,6 +574,8 @@ async def admin_user_delete(request: Request, user_id: str):
     if user_id == admin.get("id"):
         return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Impossible de supprimer votre propre compte", status_code=303)
     target = await db.users.find_one({"id": user_id}, {"_id": 0, "role": 1})
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users", status_code=303)
     if target and target.get("role") in {"admin", "super_admin"} and not _require_super_admin(admin):
         return RedirectResponse(
             url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Seul le super-admin peut supprimer un compte personnel",
@@ -713,7 +710,9 @@ async def admin_wallets(request: Request):
     for w in raw:
         u = users_map.get(w.get("user_id"), {})
         wallets.append({**w, "user_name": u.get("full_name"), "user_email": u.get("email")})
-    ctx = _panel_base_ctx(request, "admin", user, section="wallets", section_title="Wallets", wallets=wallets)
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="wallets", section_title="Wallets", wallets=wallets
+    )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
@@ -738,9 +737,11 @@ async def admin_audit(request: Request, page: int = 1, limit: int = 50, actor_ro
     ]):
         movements.append({"type": x["_id"]["type"], "currency": x["_id"]["currency"], "total": x["total"], "count": x["count"]})
     pages = max(1, (total_logs + limit - 1) // limit)
-    ctx = _panel_base_ctx(request, "admin", user, section="audit", section_title="Audit logs",
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="audit", section_title="Audit logs",
         audit_logs=audit_logs, total_logs=total_logs, page=page, pages=pages,
-        movements=movements, actor_role=actor_role, target_type=target_type)
+        movements=movements, actor_role=actor_role, target_type=target_type
+    )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
@@ -762,7 +763,9 @@ async def admin_linked_accounts(request: Request):
         if isinstance(ca, _dt.datetime):
             a["created_at"] = ca.isoformat()
         accounts.append({**a, "user_name": u.get("full_name"), "user_email": u.get("email"), "user_country": u.get("country")})
-    ctx = _panel_base_ctx(request, "admin", user, section="linked-accounts", section_title="Comptes liés", accounts=accounts)
+    ctx = _panel_base_ctx(
+        request, "admin", user, section="linked-accounts", section_title="Comptes liés", accounts=accounts
+    )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
 
@@ -874,22 +877,14 @@ async def admin_reconciliation(request: Request):
     async for x in db.agent_float_movements.aggregate([
         {"$group": {
             "_id": {"type": "$type", "currency": "$currency"},
-            "total": {"$sum": "$amount_signed"},
-            "count": {"$sum": 1},
+            "total": {"$sum": "$amount_signed"}, "count": {"$sum": 1},
         }},
-        {"$sort": {"_id.type": 1, "_id.currency": 1}},
     ]):
-        movements.append({
-            "type": x["_id"]["type"],
-            "currency": x["_id"]["currency"],
-            "total": x["total"],
-            "count": x["count"],
-        })
+        movements.append({"type": x["_id"]["type"], "currency": x["_id"]["currency"], "total": x["total"], "count": x["count"]})
     # Solde des caisses par devise
     floats = []
     async for x in db.agent_floats.aggregate([
         {"$group": {"_id": "$currency", "balance": {"$sum": "$balance"}}},
-        {"$sort": {"_id": 1}},
     ]):
         floats.append({"currency": x.get("_id") or "EUR", "balance": x.get("balance") or 0})
     # Derniers mouvements bruts

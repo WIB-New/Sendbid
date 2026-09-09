@@ -59,7 +59,7 @@ async def resend_otp(body: dict):
     logger.info(f"[OTP] resend user={user_id}")
     # Send SMS via Twilio (best-effort)
     try:
-        from services.twilio_service import send_sms_otp
+        from services.sms import send_sms_otp
         user = await db.users.find_one({"id": user_id})
         if user and user.get("phone"):
             await send_sms_otp(user["phone"], phone_code)
@@ -195,7 +195,7 @@ async def resend_phone_otp(user: dict = Depends(get_current_user)):
     )
     logger.info(f"[OTP] resend-phone user={user['id']}")
     try:
-        from services.twilio_service import send_sms_otp
+        from services.sms import send_sms_otp
         if user.get("phone"):
             await send_sms_otp(user["phone"], phone_code)
     except Exception as e:

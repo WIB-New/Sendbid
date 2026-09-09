@@ -1,4 +1,8 @@
-"""Notification service: real SMS (Twilio) + Email (SendGrid) with French templates.
+"""Notification service: real SMS + Email with French templates.
+
+Providers are now pluggable:
+- email: services/email.py (SMTP / SendGrid)
+- sms: services/sms.py (Twilio / Africa's Talking)
 
 In development mode, codes are also logged to console for easier testing.
 Test domains/numbers (e.g. client@sendbid.app, +33000000000) are SKIPPED to avoid
@@ -9,87 +13,11 @@ import logging
 import asyncio
 from typing import Optional
 
-from twilio.rest import Client as TwilioClient
-from twilio.base.exceptions import TwilioRestException
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
-
 from core.config import IS_PROD
+from services.email import send_email
+from services.sms import send_sms
 
 logger = logging.getLogger("sendbid.notify")
-
-# --- Config ---
-TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_FROM = os.getenv("TWILIO_FROM_NUMBER")
-SENDGRID_KEY = os.getenv("SENDGRID_API_KEY")
-SENDGRID_FROM = os.getenv("SENDGRID_FROM_EMAIL", "noreply@sendbid.app")
-SENDGRID_FROM_NAME = os.getenv("SENDGRID_FROM_NAME", "SENDBID")
-
-_twilio = TwilioClient(TWILIO_SID, TWILIO_TOKEN) if TWILIO_SID and TWILIO_TOKEN else None
-_sg = SendGridAPIClient(SENDGRID_KEY) if SENDGRID_KEY else None
-
-# --- Test guards: do NOT spam real services during dev/testing ---
-TEST_EMAIL_DOMAINS = {"sendbid.app", "example.com", "test.com"}
-TEST_PHONE_PREFIXES = ("+33000", "+1555")  # Twilio test/magic numbers
-
-def _is_test_email(addr: str) -> bool:
-    if not addr:
-        return True
-    domain = addr.split("@")[-1].lower() if "@" in addr else ""
-    return domain in TEST_EMAIL_DOMAINS
-
-def _is_test_phone(num: str) -> bool:
-    return not num or any(num.startswith(p) for p in TEST_PHONE_PREFIXES)
-
-
-# ---------------- SMS ----------------
-async def send_sms(to: str, body: str) -> bool:
-    """Send SMS via Twilio. Returns True on success / skip, False on error."""
-    if _is_test_phone(to):
-        logger.info(f"[notify] SMS SKIPPED (test number) to={to}: {body[:60]}")
-        return True
-    if not _twilio or not TWILIO_FROM:
-        logger.warning("[notify] Twilio not configured — SMS not sent")
-        return False
-    try:
-        # Twilio SDK is sync; run in thread pool
-        msg = await asyncio.to_thread(
-            lambda: _twilio.messages.create(to=to, from_=TWILIO_FROM, body=body)
-        )
-        logger.info(f"[notify] SMS sent to={to} sid={msg.sid}")
-        return True
-    except TwilioRestException as e:
-        logger.error(f"[notify] Twilio error to={to}: code={e.code} msg={e.msg}")
-        return False
-    except Exception as e:
-        logger.error(f"[notify] SMS failed to={to}: {e}")
-        return False
-
-
-# ---------------- Email ----------------
-async def send_email(to: str, subject: str, html: str, plain: Optional[str] = None) -> bool:
-    """Send email via SendGrid. Returns True on success / skip, False on error."""
-    if _is_test_email(to):
-        logger.info(f"[notify] EMAIL SKIPPED (test domain) to={to}: {subject}")
-        return True
-    if not _sg:
-        logger.warning("[notify] SendGrid not configured — email not sent")
-        return False
-    try:
-        message = Mail(
-            from_email=Email(SENDGRID_FROM, SENDGRID_FROM_NAME),
-            to_emails=To(to),
-            subject=subject,
-            plain_text_content=Content("text/plain", plain or _strip_html(html)),
-            html_content=Content("text/html", html),
-        )
-        resp = await asyncio.to_thread(lambda: _sg.send(message))
-        logger.info(f"[notify] Email sent to={to} status={resp.status_code}")
-        return resp.status_code in (200, 201, 202)
-    except Exception as e:
-        logger.error(f"[notify] Email failed to={to}: {e}")
-        return False
 
 
 def _strip_html(s: str) -> str:
