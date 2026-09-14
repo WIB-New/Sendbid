@@ -61,6 +61,7 @@ ROLE_PERMISSIONS = {
     "manage_services": {"super_admin", "admin"},
     "view_audit": {"super_admin", "admin"},
     "reply_support": {"super_admin", "admin"},
+    "create_user": {"super_admin", "admin"},
 }
 
 
@@ -275,7 +276,7 @@ async def admin_wallet_adjust(
     new_balance = (new_wallet or {}).get("balance", 0.0)
     await db.wallet_tx.insert_one({
         "id": gen_id(), "user_id": user_id, "type": tx_type,
-        "amount": signed, "amount_signed": signed, "currency": "EUR",
+        "amount": value, "amount_signed": signed, "currency": "EUR",
         "counterparty": admin.get("full_name") or admin.get("email", "Admin"),
         "note": label,
         "status": "completed",
@@ -1547,3 +1548,289 @@ async def admin_payout_action(request: Request, payout_id: str, action: str = Fo
         user_agent=request.headers.get("user-agent", ""),
     )
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/payouts?message={msg}", status_code=303)
+
+
+# ── Admin create user (SendBID / PayBID) ────────────────────────────────────
+@router.post("/web/admin/users/create", response_class=HTMLResponse)
+async def admin_create_user(
+    request: Request,
+    full_name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    password: str = Form(...),
+    pin: str = Form(...),
+    role: str = Form("client"),
+    network: str = Form("sendbid"),
+    country: str = Form(""),
+    city: str = Form(""),
+):
+    """Crée un compte client SendBID ou agent PayBID depuis le panel admin."""
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _can(admin, "create_user"):
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users?message=Action non autorisée",
+            status_code=303,
+        )
+
+    if role not in {"client", "agent", "super_agent", "partner_admin"}:
+        role = "client"
+
+    # Normaliser le réseau
+    is_paybid = (network == "paybid") or email.endswith("@paybid.app")
+    if is_paybid and not email.endswith("@paybid.app"):
+        email = email.split("@")[0] + "@paybid.app"
+
+    if len(password) < 6:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users?message=Le mot de passe doit faire au moins 6 caractères",
+            status_code=303,
+        )
+    if len(pin) != 6 or not pin.isdigit():
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users?message=Le PIN doit être 6 chiffres",
+            status_code=303,
+        )
+    if await db.users.find_one({"email": email}):
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users?message=Cet email est déjà utilisé",
+            status_code=303,
+        )
+
+    user_id = gen_id()
+    user = {
+        "id": user_id,
+        "profile_id": f"SB{gen_id()[:6].upper()}",
+        "email": email,
+        "phone": phone,
+        "full_name": full_name,
+        "password_hash": hash_password(password),
+        "pin_hash": hash_password(pin),
+        "pin_attempts": 0,
+        "pin_locked_until": None,
+        "email_verified": True,
+        "phone_verified": True,
+        "role": role,
+        "kyc_tier": 2,
+        "kyc_status": "verified",
+        "notif_prefs": {"push": True, "email": True, "sms": True},
+        "country": country.upper() if country else None,
+        "city": city or None,
+        "language": "fr",
+        "theme": "light",
+        "created_at": iso(now_utc()),
+        "updated_at": iso(now_utc()),
+    }
+    await db.users.insert_one(user)
+    # Wallet de démarrage
+    await db.wallets.insert_one({
+        "id": gen_id(),
+        "user_id": user_id,
+        "balance": 0.0,
+        "currency": "EUR",
+        "currencies": ["EUR"],
+        "created_at": iso(now_utc()),
+        "updated_at": iso(now_utc()),
+    })
+
+    # Si c'est un agent PayBID, on crée le profil agent approuvé
+    if role == "agent" and is_paybid:
+        agent_id = gen_id()
+        await db.agents.insert_one({
+            "id": agent_id,
+            "user_id": user_id,
+            "full_name": full_name,
+            "email": email,
+            "city": city or None,
+            "country_code": (country or "").upper(),
+            "status": "approved",
+            "tier": "standard",
+            "rating": 0.0,
+            "transfers_count": 0,
+            "available": True,
+            "floo_balance": 0.0,
+            "wallet_balance": 0.0,
+            "cash_capacity": 5000.0,
+            "created_at": iso(now_utc()),
+            "updated_at": iso(now_utc()),
+        })
+
+    # Audit log
+    await log_action(
+        **_actor_info(admin),
+        action="create_user",
+        target_type="user",
+        target_id=user_id,
+        target_name=full_name or email,
+        details={"role": role, "email": email, "network": "paybid" if is_paybid else "sendbid"},
+        ip_address=_client_ip(request),
+        user_agent=request.headers.get("user-agent", ""),
+    )
+    return RedirectResponse(
+        url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Compte créé : {email}",
+        status_code=303,
+    )
+
+
+# ── Admin wallet transfer (double entry) ────────────────────────────────────
+@router.post("/web/admin/wallet-transfer", response_class=HTMLResponse)
+async def admin_wallet_transfer(
+    request: Request,
+    source_user_id: str = Form(...),
+    target_email: str = Form(...),
+    amount: str = Form(...),
+    reason: str = Form(""),
+    admin_pin: str = Form(""),
+):
+    """Transfère des fonds d'un wallet à un autre avec double écriture."""
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _can(admin, "wallet_adjust"):
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Action non autorisée",
+            status_code=303,
+        )
+
+    # Vérifier PIN admin
+    admin_record = await db.users.find_one(
+        {"id": admin["id"]},
+        {"_id": 0, "pin_hash": 1, "full_name": 1, "email": 1},
+    )
+    if not admin_record or not verify_password(admin_pin, admin_record.get("pin_hash", "")):
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Votre code PIN admin est incorrect",
+            status_code=303,
+        )
+
+    try:
+        value = float(amount.replace(",", "."))
+    except ValueError:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Montant invalide",
+            status_code=303,
+        )
+    if value <= 0:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Le montant doit être positif",
+            status_code=303,
+        )
+
+    source = await db.users.find_one({"id": source_user_id}, {"_id": 0, "full_name": 1, "email": 1})
+    target = await db.users.find_one({"email": target_email.lower().strip()}, {"_id": 0, "id": 1, "full_name": 1, "email": 1})
+    if not source or not target:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Compte source ou destination introuvable",
+            status_code=303,
+        )
+    if source_user_id == target["id"]:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Impossible de transférer vers le même compte",
+            status_code=303,
+        )
+
+    # Vérifier solde source
+    source_wallet = await db.wallets.find_one({"user_id": source_user_id}, {"_id": 0, "balance": 1})
+    if not source_wallet or (source_wallet.get("balance") or 0) < value:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Solde insuffisant pour le transfert",
+            status_code=303,
+        )
+
+    # S'assurer qu'un wallet existe pour le destinataire
+    target_wallet = await db.wallets.find_one({"user_id": target["id"]}, {"_id": 0, "balance": 1})
+    if not target_wallet:
+        await db.wallets.insert_one({
+            "id": gen_id(),
+            "user_id": target["id"],
+            "balance": 0.0,
+            "currency": "EUR",
+            "currencies": ["EUR"],
+            "created_at": iso(now_utc()),
+            "updated_at": iso(now_utc()),
+        })
+
+    ref = gen_id()
+    now = iso(now_utc())
+    note = reason or f"Transfert admin {source['email']} → {target['email']}"
+
+    # Débiter source
+    await db.wallets.update_one(
+        {"user_id": source_user_id},
+        {"$inc": {"balance": -value}, "$set": {"updated_at": now}},
+    )
+    # Créditer destination
+    await db.wallets.update_one(
+        {"user_id": target["id"]},
+        {"$inc": {"balance": value}, "$set": {"updated_at": now}},
+    )
+
+    # Double écriture normalisée : amount = valeur absolue, amount_signed = signe
+    await db.wallet_tx.insert_one({
+        "id": gen_id(),
+        "ref": ref,
+        "user_id": source_user_id,
+        "type": "transfer_out",
+        "amount": value,
+        "amount_signed": -value,
+        "currency": "EUR",
+        "counterparty": target.get("full_name") or target.get("email", ""),
+        "note": note,
+        "status": "completed",
+        "created_at": now,
+    })
+    await db.wallet_tx.insert_one({
+        "id": gen_id(),
+        "ref": ref,
+        "user_id": target["id"],
+        "type": "transfer_in",
+        "amount": value,
+        "amount_signed": value,
+        "currency": "EUR",
+        "counterparty": source.get("full_name") or source.get("email", ""),
+        "note": note,
+        "status": "completed",
+        "created_at": now,
+    })
+
+    # Notifications
+    from routers.notifications import create_notification
+    try:
+        await create_notification(
+            source_user_id,
+            "Transfert sortant",
+            f"{value:.2f} EUR transférés vers {target['email']}.",
+            "wallet",
+        )
+        await create_notification(
+            target["id"],
+            "Transfert entrant",
+            f"{value:.2f} EUR reçus de {source['email']}.",
+            "wallet",
+        )
+    except Exception:
+        pass
+
+    # Audit log
+    await log_action(
+        **_actor_info(admin),
+        action="wallet_transfer",
+        target_type="user",
+        target_id=source_user_id,
+        target_name=source.get("full_name") or source.get("email"),
+        details={
+            "amount": value,
+            "source_user_id": source_user_id,
+            "target_user_id": target["id"],
+            "target_email": target["email"],
+            "reason": reason,
+            "ref": ref,
+        },
+        ip_address=_client_ip(request),
+        user_agent=request.headers.get("user-agent", ""),
+    )
+    return RedirectResponse(
+        url=f"{_url_prefix(request)}/admin/users/{source_user_id}?message=Transféré {value:.2f} EUR vers {target['email']}",
+        status_code=303,
+    )
