@@ -145,10 +145,15 @@ async def admin_users(
             u["created_at"] = ca.isoformat()
 
     pages = max(1, (total + limit - 1) // limit)
+    countries = await db.corridors.find(
+        {"active": True},
+        {"_id": 0, "country_code": 1, "country_name": 1, "currency": 1},
+    ).sort("country_name", 1).to_list(500)
     ctx = _panel_base_ctx(
         request, "admin", user, section="users", section_title="Utilisateurs",
         users=users, total=total, page=page, pages=pages, limit=limit,
         search=search, role_filter=role_filter, network=network,
+        countries=countries,
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 
@@ -201,11 +206,12 @@ async def admin_wallet_adjust(
     user_id: str,
     action: str = Form(...),
     amount: str = Form(...),
+    currency: str = Form("EUR"),
     sender: str = Form(""),
     reason: str = Form(""),
     admin_pin: str = Form(""),
 ):
-    """Crédite ou débite le wallet d'un client depuis le dashboard admin."""
+    """Crédite ou débite le wallet d'un client depuis le dashboard admin, en EUR ou en devise locale."""
     admin = await _resolve_session("admin", request)
     if not admin:
         return _login_page(request, "admin")
@@ -244,25 +250,39 @@ async def admin_wallet_adjust(
     if not wallet:
         # Créer un wallet si inexistant
         await db.wallets.insert_one({
-            "user_id": user_id, "balance": 0.0, "currency": "EUR",
+            "id": gen_id(), "user_id": user_id, "balance": 0.0, "currency": "EUR",
             "currencies": ["EUR"], "created_at": iso(now_utc()), "updated_at": iso(now_utc()),
         })
 
+    # Devise locale et conversion
+    local_currency, fx_rate = await _user_local_currency(target)
+    input_currency = currency.upper().strip() or "EUR"
+    if input_currency == local_currency and input_currency != "EUR":
+        # 1 EUR = fx_rate local → local/fx_rate = EUR
+        eur_value = round(value / fx_rate, 4)
+    elif input_currency == "EUR":
+        eur_value = value
+    else:
+        return RedirectResponse(
+            url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Devise {input_currency} non supportée pour ce compte",
+            status_code=303,
+        )
+
+    sign = 1 if action == "credit" else -1
+    eur_signed = sign * eur_value
+    input_signed = sign * value
+
     if action == "debit":
-        # Vérifier solde suffisant
+        # Vérifier solde suffisant (en EUR)
         current = (await db.wallets.find_one({"user_id": user_id}, {"_id": 0, "balance": 1})).get("balance", 0)
-        if current < value:
+        if current < eur_value:
             return RedirectResponse(
                 url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Solde insuffisant pour le débit",
                 status_code=303,
             )
-        inc = -value
-        signed = -value
         tx_type = "admin_debit"
         label = f"Débit admin — {reason or 'Ajustement'}" + (f" (ref: {sender})" if sender else "")
     elif action == "credit":
-        inc = value
-        signed = value
         tx_type = "admin_credit"
         label = f"Crédit admin — {reason or 'Ajustement'}" + (f" (ref: {sender})" if sender else "")
     else:
@@ -271,33 +291,43 @@ async def admin_wallet_adjust(
             status_code=303,
         )
 
-    await db.wallets.update_one({"user_id": user_id}, {"$inc": {"balance": inc}, "$set": {"updated_at": iso(now_utc())}})
+    await db.wallets.update_one({"user_id": user_id}, {"$inc": {"balance": eur_signed}, "$set": {"updated_at": iso(now_utc())}})
     new_wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0, "balance": 1})
     new_balance = (new_wallet or {}).get("balance", 0.0)
     await db.wallet_tx.insert_one({
         "id": gen_id(), "user_id": user_id, "type": tx_type,
-        "amount": value, "amount_signed": signed, "currency": "EUR",
+        "amount": value, "amount_signed": input_signed, "currency": input_currency,
+        "eur_amount": eur_value, "eur_signed": eur_signed,
+        "fx_rate": (fx_rate if input_currency != "EUR" else None),
         "counterparty": admin.get("full_name") or admin.get("email", "Admin"),
         "note": label,
         "status": "completed",
         "created_at": iso(now_utc()),
     })
+    new_local_balance = new_balance * fx_rate
     await log_action(
         actor_id=admin["id"], actor_role=admin.get("role", "admin"), actor_name=admin.get("full_name") or admin.get("email"),
         action=f"wallet_{action}", target_type="user", target_id=user_id,
         target_name=target.get("full_name") or target.get("email"),
-        details={"amount": value, "reason": reason, "sender": sender or "Admin"},
+        details={
+            "input_amount": value, "input_currency": input_currency,
+            "eur_amount": eur_value, "reason": reason,
+            "sender": sender or "Admin", "fx_rate": fx_rate,
+        },
         ip_address=_client_ip(request), user_agent=request.headers.get("user-agent", ""),
     )
     # Notification client (in-app + email)
     user_name = target.get("full_name") or "client"
-    sign = "+" if action == "credit" else "-"
+    op_sign = "+" if action == "credit" else "-"
     op_label = "Crédit" if action == "credit" else "Débit"
-    operation_sentence = f"{op_label} de {sign}{value:.2f} EUR effectué sur votre wallet."
+    if input_currency == "EUR":
+        operation_sentence = f"{op_label} de {op_sign}{value:.2f} EUR effectué sur votre wallet."
+    else:
+        operation_sentence = f"{op_label} de {op_sign}{value:.2f} {input_currency} ({eur_value:.2f} EUR) effectué sur votre wallet."
     plain = (
         f"Bonjour {user_name},\n\n"
         f"{operation_sentence}\n"
-        f"Solde actuel : {new_balance:.2f} EUR\n"
+        f"Solde actuel : {new_balance:.2f} EUR ({new_local_balance:,.2f} {local_currency})\n"
     )
     if reason:
         plain += f"Motif : {reason}\n"
@@ -309,7 +339,7 @@ async def admin_wallet_adjust(
         await create_notification(
             user_id,
             f"{op_label} wallet",
-            f"{operation_sentence} Solde : {new_balance:.2f} EUR.",
+            f"{operation_sentence} Solde : {new_balance:.2f} EUR ({new_local_balance:,.2f} {local_currency}).",
             "wallet",
         )
     except Exception:
@@ -320,7 +350,7 @@ async def admin_wallet_adjust(
         html = (
             f"<p>Bonjour {user_name},</p>"
             f"<p>{operation_sentence}</p>"
-            f"<p><b>Nouveau solde :</b> {new_balance:.2f} EUR</p>"
+            f"<p><b>Nouveau solde :</b> {new_balance:.2f} EUR ({new_local_balance:,.2f} {local_currency})</p>"
         )
         if reason:
             html += f"<p><b>Motif :</b> {reason}</p>"
@@ -330,8 +360,12 @@ async def admin_wallet_adjust(
         await send_email(target.get("email", ""), subject, html, plain=plain)
     except Exception:
         pass
+    if input_currency == "EUR":
+        msg = f"Ajustement effectué : {value:.2f} EUR { 'crédités' if action == 'credit' else 'débités' }"
+    else:
+        msg = f"Ajustement effectué : {op_sign}{value:.2f} {input_currency} ({eur_value:.2f} EUR)"
     return RedirectResponse(
-        url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Ajustement effectué : {value:.2f} EUR { 'crédités' if action == 'credit' else 'débités' }",
+        url=f"{_url_prefix(request)}/admin/users/{user_id}?message={msg}",
         status_code=303,
     )
 
@@ -1599,6 +1633,13 @@ async def admin_create_user(
         )
 
     user_id = gen_id()
+    # Récupérer la devise du pays si un corridor existe
+    corridor = None
+    if country:
+        corridor = await db.corridors.find_one(
+            {"country_code": country.upper()}, {"_id": 0, "currency": 1}
+        )
+    user_currency = (corridor.get("currency") if corridor else None) or "EUR"
     user = {
         "id": user_id,
         "profile_id": f"SB{gen_id()[:6].upper()}",
@@ -1616,6 +1657,7 @@ async def admin_create_user(
         "kyc_status": "verified",
         "notif_prefs": {"push": True, "email": True, "sms": True},
         "country": country.upper() if country else None,
+        "currency": user_currency,
         "city": city or None,
         "language": "fr",
         "theme": "light",
