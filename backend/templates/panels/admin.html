@@ -385,22 +385,21 @@
 
     {% if perms.wallet_adjust %}
     <div class="card">
-      <div class="card-header"><h2>Opération de caisse — crédit / débit</h2></div>
-      <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/wallet-adjust" style="padding:16px; display:flex; flex-direction:column; gap:14px;" autocomplete="off">
-        <!-- Leures anti-autofill pour éviter que le navigateur ne mélange email/mot de passe admin et les champs de cette opération -->
-        <input type="text" name="decoy_username" value="_" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-        <input type="password" name="decoy_password" value="_" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="new-password">
+      <div class="card-header"><h2>Opération de caisse — {{ target.full_name or target.email }}</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/wallet-adjust" style="padding:16px; display:flex; flex-direction:column; gap:18px;" autocomplete="off">
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Montant</h3>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px;">
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Opération</span>
-            <select name="action" required autocomplete="off">
+            <select name="action" required style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
               <option value="credit">Créditer le client (+)</option>
               <option value="debit">Débiter le client (-)</option>
             </select>
           </label>
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Devise</span>
-            <select name="currency" id="wallet-currency" required autocomplete="off" data-fx-rate="{{ fx_rate or 1.0 }}" data-local="{{ local_currency or 'EUR' }}">
+            <select name="currency" id="wallet-currency" required autocomplete="off" data-fx-rate="{{ fx_rate or 1.0 }}" data-local="{{ local_currency or 'EUR' }}" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
               {% if local_currency and local_currency != 'EUR' %}
               <option value="{{ local_currency }}" selected>{{ local_currency }} (devise locale)</option>
               {% endif %}
@@ -409,26 +408,31 @@
           </label>
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Montant</span>
-            <input type="number" step="0.01" name="amount" id="wallet-amount" placeholder="0.00" required autocomplete="off">
+            <input type="number" step="0.01" name="amount" id="wallet-amount" placeholder="0.00" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
             <small id="wallet-preview" style="font-size:12px; color:var(--text-muted);"></small>
           </label>
         </div>
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Détails de l'opération</h3>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Référence opération</span>
-            <input type="text" name="sender" placeholder="Ex: dépôt espèces, virement SEPA, mobile money..." autocomplete="off">
+            <input type="text" name="sender" placeholder="Ex: dépôt espèces, virement SEPA..." autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
           </label>
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Motif / commentaire interne</span>
-            <input type="text" name="reason" placeholder="Pourquoi cette opération" autocomplete="off">
+            <input type="text" name="reason" placeholder="Pourquoi cette opération" autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
           </label>
         </div>
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Validation</h3>
         <label style="display:flex; flex-direction:column; gap:4px; max-width:340px;">
           <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Votre code PIN admin (6 chiffres)</span>
-          <input type="password" name="admin_pin" placeholder="Saisir votre PIN" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="new-password" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+          <input type="password" name="admin_pin" placeholder="Saisir votre PIN" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="new-password" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
         </label>
+
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <button type="submit" class="btn btn-sm btn-success">Valider l'opération</button>
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white">Valider l'opération</button>
           <span style="font-size:12px; color:var(--text-muted);">Le client recevra une notification in-app et un email avec le nouveau solde.</span>
         </div>
       </form>
@@ -465,29 +469,36 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><h2>↔️ Transfert inter-wallet</h2></div>
-      <form method="post" action="{{ url_prefix }}/admin/wallet-transfer" style="padding:16px; display:flex; flex-direction:column; gap:14px;" autocomplete="off">
+      <div class="card-header"><h2>↔️ Transfert inter-wallet — {{ target.full_name or target.email }}</h2></div>
+      <form method="post" action="{{ url_prefix }}/admin/wallet-transfer" style="padding:16px; display:flex; flex-direction:column; gap:18px;" autocomplete="off">
         <input type="hidden" name="source_user_id" value="{{ target.id }}">
-        <input type="text" name="decoy_username" value="_" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-        <input type="password" name="decoy_password" value="_" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="new-password">
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Compte destinataire</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Email du compte destinataire</span>
-            <input type="email" name="target_email" placeholder="client@sendbid.app" required autocomplete="off">
-          </label>
-          <label style="display:flex; flex-direction:column; gap:4px;">
-            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Montant (EUR)</span>
-            <input type="number" step="0.01" name="amount" placeholder="0.00" required autocomplete="off">
+            <input type="email" name="target_email" placeholder="exemple@email.com" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
           </label>
         </div>
-        <label style="display:flex; flex-direction:column; gap:4px; max-width:340px;">
-          <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Motif (optionnel)</span>
-          <input type="text" name="reason" placeholder="Motif du transfert" autocomplete="off">
-        </label>
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Montant</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Montant à transférer (EUR)</span>
+            <input type="number" step="0.01" name="amount" placeholder="0.00" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Motif (optionnel)</span>
+            <input type="text" name="reason" placeholder="Motif du transfert" autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+        </div>
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Validation</h3>
         <label style="display:flex; flex-direction:column; gap:4px; max-width:340px;">
           <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Votre code PIN admin (6 chiffres)</span>
-          <input type="password" name="admin_pin" placeholder="Saisir votre PIN" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="new-password" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+          <input type="password" name="admin_pin" placeholder="Saisir votre PIN" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="new-password" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
         </label>
+
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <button type="submit" class="btn btn-sm" style="background:#0F4C81;color:white">Valider le transfert</button>
           <span style="font-size:12px; color:var(--text-muted);">Le montant sera débité de ce compte et crédité sur le compte destinataire.</span>
