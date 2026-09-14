@@ -195,7 +195,7 @@ async def admin_user_detail(request: Request, user_id: str, message: str = ""):
         target=target, message=message,
         user_transfers=user_transfers, wallet=wallet, wallet_tx=wallet_tx,
         tickets=tickets, linked_accounts=linked_accounts, beneficiaries=beneficiaries,
-        perms=_admin_perms(admin), local_currency=local_currency, local_balance=local_balance,
+        perms=_admin_perms(admin), local_currency=local_currency, local_balance=local_balance, fx_rate=fx_rate,
     )
     return templates.TemplateResponse("panels/admin.html", ctx)
 

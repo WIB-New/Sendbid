@@ -242,34 +242,76 @@
 
     <div class="card">
       <div class="card-header"><h2>➕ Créer un compte SendBID / PayBID</h2></div>
-      <form method="post" action="{{ url_prefix }}/admin/users/create" class="filters" style="flex-wrap:wrap">
-        <input type="text" name="full_name" placeholder="Nom complet" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="text" name="phone" placeholder="Téléphone" required>
-        <input type="password" name="password" placeholder="Mot de passe (min 6)" required minlength="6">
-        <input type="text" name="pin" placeholder="PIN 6 chiffres" required pattern="\d{6}" maxlength="6" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="min-width:180px">
-        <select name="role" required>
-          <option value="client">Client (SendBID)</option>
-          <option value="agent">Agent (PayBID)</option>
-          <option value="super_agent">Super agent</option>
-          <option value="partner_admin">Partenaire</option>
-        </select>
-        <select name="network" required>
-          <option value="sendbid">SendBID</option>
-          <option value="paybid">PayBID</option>
-        </select>
-        <select name="country" required style="min-width:180px">
-          <option value="" disabled selected>Choisir un pays</option>
-          {% for c in countries %}
-          <option value="{{ c.country_code }}">{{ c.country_name }} ({{ c.country_code }})</option>
-          {% endfor %}
-        </select>
-        <input type="text" name="city" placeholder="Ville" style="min-width:150px">
-        <button type="submit" class="btn btn-sm" style="background:#0F4C81;color:white">Créer le compte</button>
+      <form method="post" action="{{ url_prefix }}/admin/users/create" style="padding:16px; display:flex; flex-direction:column; gap:18px;" autocomplete="off">
+        <input type="text" name="decoy_username" value="_" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+        <input type="password" name="decoy_password" value="_" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="new-password">
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Identité</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Nom complet</span>
+            <input type="text" name="full_name" placeholder="Nom complet" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Téléphone</span>
+            <input type="text" name="phone" placeholder="+221 77 000 00 00" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+        </div>
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Connexion</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Email</span>
+            <input type="email" name="email" placeholder="client@sendbid.app" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Mot de passe</span>
+            <input type="password" name="password" placeholder="6 caractères minimum" required minlength="6" autocomplete="new-password" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Code PIN (6 chiffres)</span>
+            <input type="text" name="pin" placeholder="123456" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)" style="padding:10px; border:1.5px solid var(--border); border-radius:8px; min-width:180px;">
+          </label>
+        </div>
+
+        <h3 style="font-size:15px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin:0;">Profil &amp; localisation</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px;">
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Rôle</span>
+            <select name="role" required style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+              <option value="client">Client (SendBID)</option>
+              <option value="agent">Agent (PayBID)</option>
+              <option value="super_agent">Super agent</option>
+              <option value="partner_admin">Partenaire</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Réseau</span>
+            <select name="network" required style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+              <option value="sendbid">SendBID</option>
+              <option value="paybid">PayBID</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Pays</span>
+            <select name="country" required style="padding:10px; border:1.5px solid var(--border); border-radius:8px; min-width:180px;">
+              <option value="" disabled selected>Choisir un pays</option>
+              {% for c in countries %}
+              <option value="{{ c.country_code }}">{{ c.country_name }} ({{ c.country_code }}) — {{ c.currency }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Ville</span>
+            <input type="text" name="city" placeholder="Ville" autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+          </label>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button type="submit" class="btn btn-sm" style="background:#0F4C81;color:white">Créer le compte</button>
+          <span style="font-size:12px; color:var(--text-muted);">PayBID : l'email sera automatiquement ajusté en <code>@paybid.app</code>.</span>
+        </div>
       </form>
-      <p style="padding:0 16px 16px; font-size:12px; color:var(--text-muted);">
-        Pour PayBID, l'email se terminera automatiquement par <code>@paybid.app</code> si le réseau PayBID est sélectionné.
-      </p>
     </div>
 
   {% elif section == 'user-detail' %}
@@ -357,16 +399,17 @@
           </label>
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Devise</span>
-            <select name="currency" required autocomplete="off">
-              <option value="EUR" selected>EUR</option>
+            <select name="currency" id="wallet-currency" required autocomplete="off" data-fx-rate="{{ fx_rate or 1.0 }}" data-local="{{ local_currency or 'EUR' }}">
               {% if local_currency and local_currency != 'EUR' %}
-              <option value="{{ local_currency }}">{{ local_currency }}</option>
+              <option value="{{ local_currency }}" selected>{{ local_currency }} (devise locale)</option>
               {% endif %}
+              <option value="EUR">EUR</option>
             </select>
           </label>
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Montant</span>
-            <input type="number" step="0.01" name="amount" placeholder="0.00" required autocomplete="off">
+            <input type="number" step="0.01" name="amount" id="wallet-amount" placeholder="0.00" required autocomplete="off">
+            <small id="wallet-preview" style="font-size:12px; color:var(--text-muted);"></small>
           </label>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
@@ -388,6 +431,36 @@
           <span style="font-size:12px; color:var(--text-muted);">Le client recevra une notification in-app et un email avec le nouveau solde.</span>
         </div>
       </form>
+      <script>
+        (function() {
+          const currencySel = document.getElementById('wallet-currency');
+          const amountIn = document.getElementById('wallet-amount');
+          const preview = document.getElementById('wallet-preview');
+          const fxRate = parseFloat(currencySel.getAttribute('data-fx-rate')) || 1.0;
+          const localCurrency = currencySel.getAttribute('data-local') || 'EUR';
+
+          function update() {
+            const amount = parseFloat(amountIn.value) || 0;
+            const currency = currencySel.value;
+            if (!amount) {
+              preview.textContent = '';
+              return;
+            }
+            if (currency === 'EUR') {
+              const local = (amount * fxRate).toFixed(2);
+              preview.textContent = `≈ ${local} ${localCurrency}`;
+            } else if (currency === localCurrency) {
+              const eur = (amount / fxRate).toFixed(4);
+              preview.textContent = `≈ ${eur} EUR`;
+            } else {
+              preview.textContent = '';
+            }
+          }
+          amountIn.addEventListener('input', update);
+          currencySel.addEventListener('change', update);
+          update();
+        })();
+      </script>
     </div>
 
     <div class="card">
@@ -429,6 +502,7 @@
         <tbody>
           <tr><th style="width:160px">Balance EUR</th><td><b>{{ '{:,.2f}'.format(wallet.balance or 0).replace(',', ' ') }} €</b></td></tr>
           <tr><th>Solde local ({{ local_currency }})</th><td><b>{{ '{:,.2f}'.format(local_balance or 0).replace(',', ' ') }} {{ local_currency }}</b></td></tr>
+          <tr><th>Taux utilisé</th><td>1 EUR = {{ fx_rate }} {{ local_currency }}</td></tr>
           <tr><th>Devises</th><td>{{ (wallet.currencies or ['EUR'])|join(', ') }}</td></tr>
           <tr><th>Dernière activité</th><td>{{ (wallet.updated_at or '')[:16].replace('T', ' ') }}</td></tr>
         </tbody>
@@ -440,13 +514,19 @@
     <div class="card">
       <div class="card-header"><h2>Transactions wallet ({{ wallet_tx|length }})</h2></div>
       <table>
-        <thead><tr><th>Type</th><th>Montant</th><th>Devise</th><th>Note</th><th>Date</th></tr></thead>
+        <thead><tr><th>Type</th><th>Montant saisi</th><th>Équivalent EUR</th><th>Note</th><th>Date</th></tr></thead>
         <tbody>
           {% for tx in wallet_tx %}
             <tr>
               <td><span class="pill pill-neutral">{{ tx.type or '—' }}</span></td>
-              <td><b>{{ '{:,.2f}'.format(tx.amount or 0).replace(',', ' ') }}</b></td>
-              <td>{{ tx.currency or 'EUR' }}</td>
+              <td><b>{{ '{:,.2f}'.format(tx.amount or 0).replace(',', ' ') }}</b> {{ tx.currency or 'EUR' }}</td>
+              <td>
+                {% if tx.eur_amount is not none and (tx.currency or 'EUR') != 'EUR' %}
+                  {{ '{:,.2f}'.format(tx.eur_amount).replace(',', ' ') }} EUR
+                {% else %}
+                  —
+                {% endif %}
+              </td>
               <td style="font-size:13px;color:var(--text-muted)">{{ tx.note or '—' }}</td>
               <td style="color:var(--text-muted);font-size:13px">{{ (tx.created_at or '')[:16].replace('T', ' ') }}</td>
             </tr>
