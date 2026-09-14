@@ -214,8 +214,8 @@
         <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Réseau</th><th>Rôle</th><th>KYC</th><th>Créé</th><th>Action</th></tr></thead>
         <tbody>
           {% for u in users %}
-            {% set email = (u.email or '') %}
-            {% set is_paybid = email.endswith('@paybid.app') %}
+            {% set user_network = u.network or ('paybid' if (u.email or '').endswith('@paybid.app') else 'sendbid') %}
+            {% set is_paybid = user_network == 'paybid' %}
             <tr>
               <td><a href="{{ url_prefix }}/admin/users/{{ u.id }}" style="color:var(--text); text-decoration:none"><b>{{ u.full_name or '—' }}</b></a></td>
               <td>{{ u.email or '—' }}</td>
@@ -262,7 +262,7 @@
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Email</span>
-            <input type="email" name="email" placeholder="client@sendbid.app" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
+            <input type="email" name="email" placeholder="exemple@email.com" required autocomplete="off" style="padding:10px; border:1.5px solid var(--border); border-radius:8px;">
           </label>
           <label style="display:flex; flex-direction:column; gap:4px;">
             <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.03em;">Mot de passe</span>
@@ -309,7 +309,7 @@
 
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <button type="submit" class="btn btn-sm" style="background:#0F4C81;color:white">Créer le compte</button>
-          <span style="font-size:12px; color:var(--text-muted);">PayBID : l'email sera automatiquement ajusté en <code>@paybid.app</code>.</span>
+          <span style="font-size:12px; color:var(--text-muted);">L'email saisi est conservé tel quel. Choisissez SendBID pour un client ou PayBID pour un agent.</span>
         </div>
       </form>
     </div>
@@ -331,7 +331,8 @@
           <tr><th>Email</th><td>{{ target.email or '—' }}</td></tr>
           <tr><th>Téléphone</th><td>{{ target.phone or '—' }}</td></tr>
           <tr><th>Rôle</th><td><span class="pill pill-neutral">{{ target.role or 'user' }}</span></td></tr>
-          <tr><th>Réseau</th><td><span class="pill pill-{{ 'info' if (target.email or '').endswith('@paybid.app') else 'ok' }}">{{ 'PayBID' if (target.email or '').endswith('@paybid.app') else 'SendBID' }}</span></td></tr>
+          {% set target_network = target.network or ('paybid' if (target.email or '').endswith('@paybid.app') else 'sendbid') %}
+          <tr><th>Réseau</th><td><span class="pill pill-{{ 'info' if target_network == 'paybid' else 'ok' }}">{{ 'PayBID' if target_network == 'paybid' else 'SendBID' }}</span></td></tr>
           <tr><th>KYC</th><td>Tier {{ target.kyc_tier or 0 }} — {{ target.kyc_status or 'none' }}</td></tr>
           <tr><th>Statut</th><td>{% if target.suspended %}<span class="pill pill-err">Suspendu</span>{% else %}<span class="pill pill-ok">Actif</span>{% endif %}</td></tr>
           <tr><th>Inscrit</th><td>{{ (target.created_at or '')[:10] }}</td></tr>
@@ -850,8 +851,8 @@
         <thead><tr><th>Nom</th><th>Email</th><th>Réseau</th><th>Rôle</th><th>KYC actuel</th><th>Statut</th><th>Inscrit</th><th>Actions</th></tr></thead>
         <tbody>
           {% for u in pending_users %}
-            {% set email = (u.email or '') %}
-            {% set is_paybid = email.endswith('@paybid.app') %}
+            {% set user_network = u.network or ('paybid' if (u.email or '').endswith('@paybid.app') else 'sendbid') %}
+            {% set is_paybid = user_network == 'paybid' %}
             <tr>
               <td><b>{{ u.full_name or '—' }}</b></td>
               <td>{{ u.email or '—' }}</td>

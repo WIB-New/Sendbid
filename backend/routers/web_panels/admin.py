@@ -117,20 +117,28 @@ async def admin_users(
         return _login_page(request, "admin")
 
     # Utilisateurs de l'application uniquement (pas le personnel admin)
-    q: dict = {"role": {"$nin": ["admin", "super_admin"]}}
+    conditions = [{"role": {"$nin": ["admin", "super_admin"]}}]
     if search:
-        q["$or"] = [
+        conditions.append({"$or": [
             {"email": {"$regex": search, "$options": "i"}},
             {"full_name": {"$regex": search, "$options": "i"}},
             {"phone": {"$regex": search}},
-        ]
+        ]})
     if role_filter and role_filter not in {"admin", "super_admin"}:
-        q["role"] = role_filter
-    if network:
-        if network == "paybid":
-            q["email"] = {"$regex": r"@paybid\.app$"}
-        elif network == "sendbid":
-            q["email"] = {"$regex": r"@sendbid\.app$"}
+        conditions.append({"role": role_filter})
+    if network == "paybid":
+        conditions.append({"$or": [
+            {"network": "paybid"},
+            {"email": {"$regex": r"@paybid\.app$"}},
+        ]})
+    elif network == "sendbid":
+        conditions.append({"$or": [
+            {"network": "sendbid"},
+            {"network": {"$in": [None, ""]}},
+            {"network": {"$exists": False}},
+            {"email": {"$regex": r"@sendbid\.app$"}},
+        ]})
+    q = {"$and": conditions} if len(conditions) > 1 else conditions[0]
 
     total = await db.users.count_documents(q)
     skip = max(0, (page - 1) * limit)
@@ -1611,10 +1619,14 @@ async def admin_create_user(
     if role not in {"client", "agent", "super_agent", "partner_admin"}:
         role = "client"
 
-    # Normaliser le réseau
-    is_paybid = (network == "paybid") or email.endswith("@paybid.app")
-    if is_paybid and not email.endswith("@paybid.app"):
-        email = email.split("@")[0] + "@paybid.app"
+    # Le réseau est choisi par l'admin, mais un agent est toujours PayBID
+    email = email.lower().strip()
+    if role == "agent":
+        network = "paybid"
+    elif role == "client" and network not in {"sendbid", "paybid"}:
+        network = "sendbid"
+    network = network if network in {"sendbid", "paybid"} else "sendbid"
+    is_paybid = network == "paybid"
 
     if len(password) < 6:
         return RedirectResponse(
@@ -1656,6 +1668,7 @@ async def admin_create_user(
         "kyc_tier": 2,
         "kyc_status": "verified",
         "notif_prefs": {"push": True, "email": True, "sms": True},
+        "network": network,
         "country": country.upper() if country else None,
         "currency": user_currency,
         "city": city or None,
