@@ -96,6 +96,15 @@
   .error-box { padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
   .message-error { background: #FEE2E2; color: #B91C1C; }
   .message-success { background: #D1FAE5; color: #047857; }
+
+  /* Toasts */
+  #toast-container { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; pointer-events: none; }
+  .toast { pointer-events: auto; padding: 14px 18px; border-radius: 10px; font-size: 13px; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; max-width: 320px; display: flex; align-items: center; gap: 10px; }
+  .toast.success { background: #047857; }
+  .toast.error { background: #B91C1C; }
+  .toast.info { background: var(--primary); }
+  @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes slideOut { to { transform: translateX(120%); opacity: 0; } }
   .hint { font-size: 12px; color: var(--text-muted); margin-top: 20px; padding: 12px; background: var(--bg); border-radius: 10px; border: 1px dashed var(--border); }
   .hint b { display: block; margin-bottom: 4px; }
 
@@ -200,6 +209,47 @@
       });
     });
   });
+</script>
+
+<script>
+  (function () {
+    function showToast(text, type) {
+      var container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast ' + (type || 'info');
+      var icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+      toast.innerHTML = '<span style="font-size:16px;line-height:1;">' + icon + '</span><span>' + text + '</span>';
+      container.appendChild(toast);
+      setTimeout(function () {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(function () { toast.remove(); }, 300);
+      }, 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.main .error-box').forEach(function (box) {
+        var text = box.textContent.trim();
+        if (!text) return;
+        var type = 'info';
+        if (box.classList.contains('message-success')) {
+          type = 'success';
+        } else if (box.classList.contains('message-error')) {
+          type = 'error';
+        } else if (box.style.background && (box.style.background.includes('D1FAE5') || box.style.color === 'rgb(4, 120, 87)' || box.style.color === '#047857')) {
+          type = 'success';
+        } else {
+          type = 'error';
+        }
+        showToast(text, type);
+        box.remove();
+      });
+    });
+  })();
 </script>
 
 </body>
