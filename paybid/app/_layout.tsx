@@ -43,9 +43,9 @@ import { colors } from "../src/theme";
 import { useThemeStore } from "../src/hooks/useThemeMode";
 import { ThemeProvider } from "../src/themeContext";
 import { ToastProvider } from "../src/components/Toast";
-// PinBiometryModal et StripeProvider non disponibles dans cette version
+import { StripeProvider } from "@stripe/stripe-react-native";
+// PinBiometryModal non disponible dans cette version
 const PinBiometryModal = (_: any) => null;
-const StripeProvider = ({ children }: any) => children;
 
 SplashScreen.preventAutoHideAsync();
 

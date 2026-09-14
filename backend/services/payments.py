@@ -248,3 +248,136 @@ async def credit_wallet_if_paid(
         "payment_status": status.payment_status,
         "label": tx.get("label"),
     }
+
+
+# ─────────────────────────────────────────────────────────────────────
+# PaymentIntent natif (Stripe PaymentSheet in-app)
+# ─────────────────────────────────────────────────────────────────────
+
+@dataclass
+class PaymentIntentResponse:
+    id: str
+    client_secret: str
+
+
+async def create_payment_intent(
+    user: dict,
+    amount: float,
+    currency: str,
+    display_amount: Optional[float] = None,
+    display_currency: Optional[str] = None,
+) -> PaymentIntentResponse:
+    """Crée un PaymentIntent Stripe pour paiement in-app via PaymentSheet.
+
+    - `amount` est le montant facturé par Stripe (toujours EUR ici).
+    - `display_amount` / `display_currency` sont conservés pour l'affichage client.
+    """
+    _ensure_configured()
+
+    currency_code = (currency or "eur").lower()
+    if currency_code != "eur":
+        raise ValueError("Stripe PaymentSheet requiert le paiement en EUR")
+    if amount <= 0:
+        raise ValueError("Montant invalide")
+
+    amount_cents = int(round(amount * 100))
+    pi = await stripe.PaymentIntent.create_async(
+        amount=amount_cents,
+        currency=currency_code,
+        automatic_payment_methods={"enabled": True},
+        metadata={
+            "user_id": user["id"],
+            "profile_id": user.get("profile_id", ""),
+            "type": "wallet_recharge",
+            "display_amount": str(display_amount or amount),
+            "display_currency": (display_currency or currency_code).upper(),
+        },
+    )
+
+    await db.payment_transactions.insert_one({
+        "id": gen_id(),
+        "payment_intent_id": pi.id,
+        "user_id": user["id"],
+        "amount": amount,
+        "currency": currency_code.upper(),
+        "display_amount": display_amount or amount,
+        "display_currency": (display_currency or currency_code).upper(),
+        "label": f"Recharge carte {amount:.2f} EUR",
+        "metadata": pi.metadata,
+        "status": pi.status or "requires_payment_method",
+        "payment_status": "pending",
+        "credited": False,
+        "provider": "stripe_payment_intent",
+        "created_at": iso(now_utc()),
+        "updated_at": iso(now_utc()),
+    })
+
+    return PaymentIntentResponse(id=pi.id, client_secret=pi.client_secret)
+
+
+async def confirm_payment_intent(
+    user_id: str,
+    payment_intent_id: str,
+) -> dict[str, Any]:
+    """Récupère un PaymentIntent, et si succès, crédite le wallet une seule fois."""
+    tx = await db.payment_transactions.find_one(
+        {"payment_intent_id": payment_intent_id, "user_id": user_id}, {"_id": 0}
+    )
+    if not tx:
+        raise LookupError("Paiement inconnu")
+
+    _ensure_configured()
+    try:
+        pi = await stripe.PaymentIntent.retrieve_async(payment_intent_id)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("[stripe] retrieve PaymentIntent %s failed: %s", payment_intent_id, exc)
+        raise
+
+    paid = pi.status == "succeeded"
+
+    await db.payment_transactions.update_one(
+        {"payment_intent_id": payment_intent_id},
+        {"$set": {
+            "status": pi.status,
+            "payment_status": "paid" if paid else "pending",
+            "updated_at": iso(now_utc()),
+        }},
+    )
+
+    credited_now = False
+    if paid and not tx.get("credited"):
+        marker = await db.payment_transactions.find_one_and_update(
+            {"payment_intent_id": payment_intent_id, "credited": {"$ne": True}},
+            {"$set": {"credited": True, "credited_at": iso(now_utc())}},
+        )
+        if marker:
+            await db.wallets.update_one(
+                {"user_id": user_id},
+                {"$inc": {"balance": tx["amount"]}},
+            )
+            await db.wallet_tx.insert_one({
+                "id": gen_id(),
+                "user_id": user_id,
+                "type": "recharge_card",
+                "amount": tx["amount"],
+                "currency": tx.get("display_currency") or tx["currency"],
+                "counterparty": "Carte bancaire (Stripe PaymentSheet)",
+                "note": tx.get("label"),
+                "payment_intent_id": payment_intent_id,
+                "created_at": iso(now_utc()),
+            })
+            credited_now = True
+            logger.info(
+                "[stripe] credited %s EUR to user=%s payment_intent=%s",
+                tx["amount"], user_id, payment_intent_id,
+            )
+
+    return {
+        "paid": paid,
+        "credited": tx.get("credited") or credited_now,
+        "credited_now": credited_now,
+        "amount": tx.get("display_amount") or tx["amount"],
+        "currency": tx.get("display_currency") or tx["currency"],
+        "status": pi.status,
+        "payment_status": "paid" if paid else "pending",
+    }

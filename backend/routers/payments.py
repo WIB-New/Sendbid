@@ -104,3 +104,66 @@ async def checkout_status(
             f"+{result['amount']:.2f} EUR crédités sur votre wallet Floo Money",
         )
     return result
+
+
+class PaymentIntentIn(BaseModel):
+    amount: float
+    currency: str = "eur"
+    display_amount: Optional[float] = None
+    display_currency: Optional[str] = None
+
+
+class ConfirmPaymentIn(BaseModel):
+    payment_intent_id: str
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+
+
+@router.post("/payment-intent")
+async def create_payment_intent_endpoint(
+    payload: PaymentIntentIn,
+    user: dict = Depends(get_current_user),
+):
+    """Crée un PaymentIntent Stripe pour paiement in-app via PaymentSheet."""
+    if not payments_service.STRIPE_API_KEY:
+        raise HTTPException(status_code=503, detail="Stripe non configuré")
+    try:
+        result = await payments_service.create_payment_intent(
+            user,
+            amount=payload.amount,
+            currency=payload.currency,
+            display_amount=payload.display_amount,
+            display_currency=payload.display_currency,
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("[stripe] PaymentIntent creation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Création du PaymentIntent impossible")
+    return {"client_secret": result.client_secret, "payment_intent_id": result.id}
+
+
+@router.post("/confirm-payment")
+async def confirm_payment_endpoint(
+    payload: ConfirmPaymentIn,
+    user: dict = Depends(get_current_user),
+):
+    """Confirme un PaymentIntent et crédite le wallet si le paiement a réussi."""
+    try:
+        result = await payments_service.confirm_payment_intent(
+            user_id=user["id"],
+            payment_intent_id=payload.payment_intent_id,
+        )
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Paiement inconnu")
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("[stripe] PaymentIntent confirm failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Confirmation du paiement impossible")
+
+    if result.get("credited_now"):
+        await create_notification(
+            user["id"],
+            "Recharge confirmée",
+            f"+{result['amount']:.2f} {result['currency']} crédités sur votre wallet Floo Money",
+        )
+    return result
