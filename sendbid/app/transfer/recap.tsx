@@ -161,7 +161,7 @@ export default function TransferStep3() {
       {/* Disclaimer "Connaissez-vous bien cette personne ?" */}
       <View style={[styles.box, { backgroundColor: "white", borderColor: colors.neutrals.border }]}>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
-          <Ionicons name="alert-circle" size={16} color={colors.status.warning ?? "#D97706"} />
+          <Ionicons name="alert-circle" size={16} color="#D97706" />
           <TText weight="extraBold" color={colors.neutrals.textPrimary} style={{ marginLeft: 6, fontSize: 13 }}>Connaissez-vous bien cette personne ?</TText>
         </View>
         <TText style={{ fontSize: 11, lineHeight: 15 }} color={colors.neutrals.textSecondary}>

@@ -114,9 +114,15 @@ export default function TransferStep1() {
     Promise.all([api.get("/corridors"), api.get("/beneficiaries")])
       .then(([rc, rb]) => {
         // Dédupliquer par country_code (évite les doublons si la DB a plusieurs corridors par pays)
-        const raw: Corridor[] = rc.data?.corridors || [];
+        const raw: Corridor[] = Array.isArray(rc.data?.corridors) ? rc.data.corridors : [];
         const seen = new Set<string>();
-        const list: Corridor[] = raw.filter((c) => { if (seen.has(c.country_code)) return false; seen.add(c.country_code); return true; });
+        const list: Corridor[] = raw
+          .map((c) => ({ ...c, delivery_modes: Array.isArray(c?.delivery_modes) ? c.delivery_modes : ["cash"] }))
+          .filter((c) => {
+            if (!c.country_code || !c.country_name || !c.currency || seen.has(c.country_code)) return false;
+            seen.add(c.country_code);
+            return true;
+          });
         const bens = rb.data || [];
         setCorridors(list);
         setBeneficiaries(bens);
@@ -144,22 +150,28 @@ export default function TransferStep1() {
     loadData(); 
   }, [loadData]));
 
-  useEffect(() => {
-    if (!country) return;
-    // Only auto-set mode if mode is empty and country is selected
-    if (!mode) {
-      setMode(country.delivery_modes[0] || "cash");
-    } else if (!country.delivery_modes.includes(mode)) {
-      // If selected mode isn't supported in this corridor, switch to first available
-      setMode(country.delivery_modes[0] || "cash");
-    }
-    // VIP options only available for cash delivery
-    if (mode !== "cash" && serviceLevel !== "standard") setServiceLevel("standard");
   // Taux EUR -> devise expéditeur pour les frais VIP
   useEffect(() => {
     convertFromEur(1, senderCurrency).then(setEurToSenderRate).catch(() => setEurToSenderRate(1));
   }, [senderCurrency]);
 
+  useEffect(() => {
+    if (!country) return;
+    // Only auto-set mode if mode is empty and country is selected
+    setMode((currentMode) => {
+      if (!currentMode) return country.delivery_modes[0] || "cash";
+      // If selected mode isn't supported in this corridor, switch to first available
+      return country.delivery_modes.includes(currentMode) ? currentMode : country.delivery_modes[0] || "cash";
+    });
+  }, [country]);
+
+  useEffect(() => {
+    // VIP options only available for cash delivery
+    if (mode !== "cash" && serviceLevel !== "standard") setServiceLevel("standard");
+  }, [mode, serviceLevel]);
+
+  useEffect(() => {
+    if (!country) return;
     // Appel API FX : taux réel depuis la base corridors (Phase 2 : votre API externe)
     setFxLoading(true);
     api.get("/transfers/fx-rate", { params: { from_currency: senderCurrency, to_currency: country.currency } })
@@ -173,7 +185,7 @@ export default function TransferStep1() {
         setFeePercent(country.fee_percent_min || 2.0);
       })
       .finally(() => setFxLoading(false));
-  }, [country]);
+  }, [country, senderCurrency]);
 
   const sendAmt = parseFloat(amount || "0");
   // `rate` est maintenant retourné par l'API comme : combien de devise_dest pour 1 senderCurrency

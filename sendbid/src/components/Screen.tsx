@@ -70,6 +70,8 @@ type Props = {
 
   dismissKeyboardOnTap?: boolean;
 
+  scrollRef?: React.RefObject<ScrollView | null>;
+
 };
 
 
@@ -115,6 +117,8 @@ export function Screen({
   bottomInset = true,
 
   dismissKeyboardOnTap = true,
+
+  scrollRef,
 
 }: Props) {
 
@@ -211,6 +215,8 @@ export function Screen({
   const Body = scroll ? (
 
     <ScrollView
+
+      ref={scrollRef}
 
       showsVerticalScrollIndicator={false}
 
