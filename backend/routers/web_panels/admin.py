@@ -1345,13 +1345,18 @@ async def admin_services(request: Request):
         services.append({"name": "Twilio (SMS)", "status": "ok", "detail": f"SID={twilio_sid[:8]}… From={twilio_from}"})
     else:
         services.append({"name": "Twilio (SMS)", "status": "error", "detail": "Variables manquantes"})
-    # SendGrid
-    sg_key = _os.getenv("SENDGRID_API_KEY", "")
-    sg_from = _os.getenv("SENDGRID_FROM_EMAIL", "")
-    if sg_key:
-        services.append({"name": "SendGrid (Email)", "status": "ok", "detail": f"From={sg_from}"})
+    # Email SMTP
+    email_provider = _os.getenv("EMAIL_PROVIDER", "auto").strip().lower()
+    smtp_host = _os.getenv("SMTP_HOST", "").strip()
+    smtp_user = _os.getenv("SMTP_USER", "").strip()
+    smtp_password = _os.getenv("SMTP_PASSWORD", "").strip()
+    smtp_from = _os.getenv("SMTP_FROM", smtp_user).strip()
+    if email_provider == "smtp" and smtp_host and smtp_user and smtp_password:
+        services.append({"name": "SMTP (Email)", "status": "ok", "detail": f"{smtp_host} — From={smtp_from}"})
+    elif email_provider == "smtp":
+        services.append({"name": "SMTP (Email)", "status": "error", "detail": "Variables SMTP manquantes"})
     else:
-        services.append({"name": "SendGrid (Email)", "status": "error", "detail": "SENDGRID_API_KEY manquant"})
+        services.append({"name": "SMTP (Email)", "status": "warning", "detail": f"EMAIL_PROVIDER={email_provider}"})
     # Stripe
     stripe_key = _os.getenv("STRIPE_API_KEY", "")
     if stripe_key:

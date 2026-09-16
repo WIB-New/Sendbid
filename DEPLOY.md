@@ -24,7 +24,7 @@ Les fonctionnalités suivantes nécessitent des clés API :
 | Stripe | Non (recommandé) | `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET` |
 | PayPal | Non (recommandé) | `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET` |
 | Twilio | Non (recommandé) | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` |
-| SendGrid | Non (recommandé) | `SENDGRID_API_KEY` |
+| SMTP Gmail | Non (recommandé) | `EMAIL_PROVIDER`, `SMTP_*` |
 | Firebase | Non (recommandé) | `firebase-service-account.json` |
 
 ---

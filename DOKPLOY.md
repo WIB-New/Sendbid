@@ -87,9 +87,14 @@ TWILIO_AUTH_TOKEN=...
 TWILIO_FROM_NUMBER=+1234567890
 TWILIO_FROM_PHONE=+1234567890
 
-SENDGRID_API_KEY=SG...
-SENDGRID_FROM_EMAIL=noreply@sendbid.app
-SENDGRID_FROM_NAME=SENDBID
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=adresse@gmail.com
+SMTP_PASSWORD=mot_de_passe_application
+SMTP_FROM=adresse@gmail.com
+SMTP_FROM_NAME=SENDBID
+SMTP_USE_TLS=true
 ```
 
 Cliquer sur **Update** pour sauvegarder.

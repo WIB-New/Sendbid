@@ -82,7 +82,14 @@ EMERGENT_LLM_KEY=<si-utilisé>
 STRIPE_API_KEY=<votre-clé-stripe-live>
 PAYPAL_CLIENT_ID=<votre-paypal>
 PAYPAL_CLIENT_SECRET=<votre-paypal-secret>
-SENDGRID_API_KEY=<votre-sendgrid>
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=<votre-adresse-gmail>
+SMTP_PASSWORD=<votre-mot-de-passe-application>
+SMTP_FROM=<votre-adresse-gmail>
+SMTP_FROM_NAME=SENDBID
+SMTP_USE_TLS=true
 TWILIO_ACCOUNT_SID=<twilio>
 TWILIO_AUTH_TOKEN=<twilio>
 EOF

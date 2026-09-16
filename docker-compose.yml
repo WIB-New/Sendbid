@@ -47,10 +47,18 @@ services:
       TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
       TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE:-}
 
-      # ── SendGrid (email transactionnel) ──
+      # ── Email transactionnel: sendgrid ou smtp ──
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-auto}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
       SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@sendbid.app}
       SENDGRID_FROM_NAME: ${SENDGRID_FROM_NAME:-SENDBID}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-SENDBID}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
 
       # ── PayPal (payouts) ──
       # NB : le code utilise PAYPAL_SECRET (pas PAYPAL_CLIENT_SECRET).
