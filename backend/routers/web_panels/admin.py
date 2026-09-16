@@ -51,6 +51,7 @@ ROLE_PERMISSIONS = {
     "toggle_user_status": {"super_admin", "admin"},
     "set_user_password": {"super_admin", "admin"},
     "set_user_pin": {"super_admin", "admin"},
+    "verify_user_contact": {"super_admin", "admin"},
     "delete_user": {"super_admin", "admin"},  # avec restriction supplémentaire sur staff
     "approve_kyc": {"super_admin", "admin"},
     "approve_linked_account": {"super_admin", "admin"},
@@ -550,6 +551,57 @@ async def admin_user_set_pin(request: Request, user_id: str, pin: str = Form(...
     except Exception as e:
         logger.warning(f"[admin set_pin] notify failed: {e}")
     return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=PIN mis à jour", status_code=303)
+
+
+@router.post("/web/admin/users/{user_id}/verify-contact", response_class=HTMLResponse)
+async def admin_user_verify_contact(request: Request, user_id: str, contact_type: str = Form(...)):
+    """Valide manuellement l'email ou le téléphone d'un utilisateur depuis l'admin."""
+    admin = await _resolve_session("admin", request)
+    if not admin:
+        return _login_page(request, "admin")
+    if not _can(admin, "verify_user_contact"):
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Action non autorisée", status_code=303)
+
+    fields = {
+        "email": ("email_verified", "email_verified_at", "email_verified_by", "email"),
+        "phone": ("phone_verified", "phone_verified_at", "phone_verified_by", "phone"),
+    }
+    selected = fields.get(contact_type.strip().lower())
+    if not selected:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Type de contact invalide", status_code=303)
+
+    target = await db.users.find_one(
+        {"id": user_id},
+        {"_id": 0, "email": 1, "phone": 1, "full_name": 1, "role": 1},
+    )
+    if not target:
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users?message=Utilisateur introuvable", status_code=303)
+    if not target.get(selected[3]):
+        label = "email" if contact_type.strip().lower() == "email" else "numéro de téléphone"
+        return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message=Aucun {label} enregistré", status_code=303)
+
+    now = iso(now_utc())
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            selected[0]: True,
+            selected[1]: now,
+            selected[2]: admin.get("id", ""),
+            "updated_at": now,
+        }},
+    )
+    await log_action(
+        **_actor_info(admin),
+        action=f"{contact_type.strip().lower()}_verify_manual",
+        target_type="user",
+        target_id=user_id,
+        target_name=target.get("full_name") or target.get("email", ""),
+        details={"contact": selected[3], "value": target.get(selected[3], "")},
+        ip_address=_client_ip(request),
+        user_agent=request.headers.get("user-agent", ""),
+    )
+    label = "Email" if contact_type.strip().lower() == "email" else "Téléphone"
+    return RedirectResponse(url=f"{_url_prefix(request)}/admin/users/{user_id}?message={label} validé manuellement", status_code=303)
 
 
 @router.post("/web/admin/users/{user_id}/toggle-status", response_class=HTMLResponse)

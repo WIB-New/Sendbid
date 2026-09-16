@@ -328,8 +328,8 @@
         <tbody>
           <tr><th style="width:160px">ID</th><td><code>{{ target.id }}</code></td></tr>
           <tr><th>Nom</th><td>{{ target.full_name or '—' }}</td></tr>
-          <tr><th>Email</th><td>{{ target.email or '—' }}</td></tr>
-          <tr><th>Téléphone</th><td>{{ target.phone or '—' }}</td></tr>
+          <tr><th>Email</th><td>{{ target.email or '—' }} {% if target.email_verified %}<span class="pill pill-ok">Validé</span>{% else %}<span class="pill pill-err">Non validé</span>{% endif %}</td></tr>
+          <tr><th>Téléphone</th><td>{{ target.phone or '—' }} {% if target.phone_verified %}<span class="pill pill-ok">Validé</span>{% else %}<span class="pill pill-err">Non validé</span>{% endif %}</td></tr>
           <tr><th>Rôle</th><td><span class="pill pill-neutral">{{ target.role or 'user' }}</span></td></tr>
           {% set target_network = target.network or ('paybid' if (target.email or '').endswith('@paybid.app') else 'sendbid') %}
           <tr><th>Réseau</th><td><span class="pill pill-{{ 'info' if target_network == 'paybid' else 'ok' }}">{{ 'PayBID' if target_network == 'paybid' else 'SendBID' }}</span></td></tr>
@@ -339,6 +339,24 @@
           <tr><th>Mis à jour</th><td>{{ (target.updated_at or '')[:10] }}</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Validation des contacts</h2></div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+        {% if perms.verify_user_contact %}
+        <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/verify-contact">
+          <input type="hidden" name="contact_type" value="email">
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white" {% if not target.email or target.email_verified %}disabled{% endif %}>Valider l'email</button>
+        </form>
+        <form method="post" action="{{ url_prefix }}/admin/users/{{ target.id }}/verify-contact">
+          <input type="hidden" name="contact_type" value="phone">
+          <button type="submit" class="btn btn-sm" style="background:#047857;color:white" {% if not target.phone or target.phone_verified %}disabled{% endif %}>Valider le téléphone</button>
+        </form>
+        {% else %}
+        <p style="color:var(--text-muted);font-size:13px">Vous n'avez pas l'autorisation de valider les contacts.</p>
+        {% endif %}
+      </div>
     </div>
 
     <div class="card">
